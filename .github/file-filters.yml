@@ -9,17 +9,17 @@ program_common: &program_common
   - ".github/workflows/test-programs.yml"
   - ".github/workflows/main.yml"
 
-system_extras_program: &system_extras_program
+candy_machine_core_program: &candy_machine_core_program
   - *program_common
-  - "programs/system-extras/**"
+  - "programs/candy-machine-core/**"
 
-token_extras_program: &token_extras_program
+candy_guard_program: &candy_guard_program
   - *program_common
-  - "programs/token-extras/**"
+  - "programs/candy-guard/**"
 
 programs: &programs
-  - *system_extras_program
-  - *token_extras_program
+  - *candy_machine_core_program
+  - *candy_guard_program
 
 # Clients.
 

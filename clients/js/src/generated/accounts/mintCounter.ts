@@ -9,6 +9,7 @@
 import {
   Account,
   Context,
+  Pda,
   PublicKey,
   RpcAccount,
   RpcGetAccountOptions,
@@ -99,11 +100,34 @@ export function getMintCounterGpaBuilder(
     .registerFields<{ count: number }>([['count', s.u16()]])
     .deserializeUsing<MintCounter>((account) =>
       deserializeMintCounter(context, account)
-    );
+    )
+    .whereSize(2);
 }
 
-export function getMintCounterSize(
-  context: Pick<Context, 'serializer'>
-): number | null {
-  return getMintCounterAccountDataSerializer(context).fixedSize;
+export function getMintCounterSize(_context = {}): number {
+  return 2;
+}
+
+export function findMintCounterPda(
+  context: Pick<Context, 'eddsa' | 'programs' | 'serializer'>,
+  seeds: {
+    /** A unique identifier in the context of a Candy Machine/Candy Guard combo */
+    id: number;
+    /** The address of the wallet trying to mint */
+    user: PublicKey;
+    /** The address of the Candy Guard account */
+    candyGuard: PublicKey;
+    /** The address of the Candy Machine account */
+    candyMachine: PublicKey;
+  }
+): Pda {
+  const s = context.serializer;
+  const programId: PublicKey = context.programs.get('mplCandyGuard').publicKey;
+  return context.eddsa.findPda(programId, [
+    s.string({ size: 'variable' }).serialize('mint_limit'),
+    s.u8().serialize(seeds.id),
+    s.publicKey().serialize(seeds.user),
+    s.publicKey().serialize(seeds.candyGuard),
+    s.publicKey().serialize(seeds.candyMachine),
+  ]);
 }

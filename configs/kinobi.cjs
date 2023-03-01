@@ -7,6 +7,9 @@ const {
   UpdateInstructionsVisitor,
   UpdateProgramsVisitor,
   SetStructDefaultValuesVisitor,
+  TypeNumberNode,
+  TypePublicKeyNode,
+  TypeBytesNode,
 } = require("@metaplex-foundation/kinobi");
 const {
   TransformDefinedTypesIntoAccountsVisitor,
@@ -38,10 +41,62 @@ kinobi.update(
   ])
 );
 
+// Reusable seeds.
+const candyGuardSeed = {
+  kind: "variable",
+  name: "candyGuard",
+  description: "The address of the Candy Guard account",
+  type: new TypePublicKeyNode(),
+};
+const candyMachineSeed = {
+  kind: "variable",
+  name: "candyMachine",
+  description: "The address of the Candy Machine account",
+  type: new TypePublicKeyNode(),
+};
+const userSeed = {
+  kind: "variable",
+  name: "user",
+  description: "The address of the wallet trying to mint",
+  type: new TypePublicKeyNode(),
+};
+
 // Update accounts.
 kinobi.update(
   new UpdateAccountsVisitor({
-    //
+    mintCounter: {
+      size: 2,
+      discriminator: { kind: "size" },
+      seeds: [
+        { kind: "literal", value: "mint_limit" },
+        {
+          kind: "variable",
+          name: "id",
+          description:
+            "A unique identifier in the context of a Candy Machine/Candy Guard combo",
+          type: new TypeNumberNode("u8"),
+        },
+        userSeed,
+        candyGuardSeed,
+        candyMachineSeed,
+      ],
+    },
+    allowListProof: {
+      size: 4,
+      discriminator: { kind: "size" },
+      seeds: [
+        { kind: "literal", value: "allow_list" },
+        {
+          kind: "variable",
+          name: "merkleRoot",
+          description: "The Merkle Root used when verifying the user",
+          type: new TypeBytesNode({ size: { kind: "fixed", bytes: 32 } }),
+        },
+        userSeed,
+        candyGuardSeed,
+        candyMachineSeed,
+      ],
+    },
   })
 );
 

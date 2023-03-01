@@ -1,22 +1,14 @@
+import { mplEssentials } from '@metaplex-foundation/mpl-essentials';
 import { UmiPlugin } from '@metaplex-foundation/umi';
 import {
-  getMplSystemExtrasProgram,
-  getMplTokenExtrasProgram,
-  getSplAddressLookupTableProgram,
-  getSplAssociatedTokenProgram,
-  getSplMemoProgram,
-  getSplSystemProgram,
-  getSplTokenProgram,
+  getMplCandyGuardProgram,
+  getMplCandyMachineCoreProgram,
 } from './generated';
 
-export const mplEssentials = (): UmiPlugin => ({
+export const mplCandyMachine = (): UmiPlugin => ({
   install(umi) {
-    umi.programs.add(getSplSystemProgram(), false);
-    umi.programs.add(getSplMemoProgram(), false);
-    umi.programs.add(getSplTokenProgram(), false);
-    umi.programs.add(getSplAssociatedTokenProgram(), false);
-    umi.programs.add(getSplAddressLookupTableProgram(), false);
-    umi.programs.add(getMplSystemExtrasProgram(), false);
-    umi.programs.add(getMplTokenExtrasProgram(), false);
+    umi.use(mplEssentials());
+    umi.programs.add(getMplCandyMachineCoreProgram(), false);
+    umi.programs.add(getMplCandyGuardProgram(), false);
   },
 });

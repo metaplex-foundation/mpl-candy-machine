@@ -6,19 +6,19 @@ const binaryInstallDir = path.join(__dirname, "..", ".crates");
 const programDir = path.join(__dirname, "..", "programs");
 
 generateIdl({
-  generator: "shank",
-  programName: "mpl_system_extras",
-  programId: "SysExL2WDyJi9aRZrXorrjHJut3JwHQ7R9bTyctbNNG",
+  generator: "anchor",
+  programName: "mpl_candy_machine_core",
+  programId: "CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR",
   idlDir,
   binaryInstallDir,
-  programDir: path.join(programDir, "system-extras"),
+  programDir: path.join(programDir, "candy-machine-core"),
 });
 
 generateIdl({
-  generator: "shank",
-  programName: "mpl_token_extras",
-  programId: "TokExjvjJmhKaRBShsBAsbSvEWMA1AgUNK7ps4SAc2p",
+  generator: "anchor",
+  programName: "mpl_candy_guard",
+  programId: "Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g",
   idlDir,
   binaryInstallDir,
-  programDir: path.join(programDir, "token-extras"),
+  programDir: path.join(programDir, "candy-guard"),
 });

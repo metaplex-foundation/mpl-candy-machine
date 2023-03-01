@@ -10,6 +10,7 @@ import {
   Account,
   Context,
   Option,
+  Pda,
   PublicKey,
   RpcAccount,
   RpcGetAccountOptions,
@@ -199,4 +200,25 @@ export function getFreezeEscrowSize(
   context: Pick<Context, 'serializer'>
 ): number | null {
   return getFreezeEscrowAccountDataSerializer(context).fixedSize;
+}
+
+export function findFreezeEscrowPda(
+  context: Pick<Context, 'eddsa' | 'programs' | 'serializer'>,
+  seeds: {
+    /** The wallet that will eventually receive the funds */
+    destination: PublicKey;
+    /** The address of the Candy Guard account */
+    candyGuard: PublicKey;
+    /** The address of the Candy Machine account */
+    candyMachine: PublicKey;
+  }
+): Pda {
+  const s = context.serializer;
+  const programId: PublicKey = context.programs.get('mplCandyGuard').publicKey;
+  return context.eddsa.findPda(programId, [
+    s.string({ size: 'variable' }).serialize('freeze_escrow'),
+    s.publicKey().serialize(seeds.destination),
+    s.publicKey().serialize(seeds.candyGuard),
+    s.publicKey().serialize(seeds.candyMachine),
+  ]);
 }

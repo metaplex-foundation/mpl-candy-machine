@@ -97,6 +97,19 @@ kinobi.update(
         candyMachineSeed,
       ],
     },
+    freezeEscrow: {
+      seeds: [
+        { kind: "literal", value: "freeze_escrow" },
+        {
+          kind: "variable",
+          name: "destination",
+          description: "The wallet that will eventually receive the funds",
+          type: new TypePublicKeyNode(),
+        },
+        candyGuardSeed,
+        candyMachineSeed,
+      ],
+    },
   })
 );
 

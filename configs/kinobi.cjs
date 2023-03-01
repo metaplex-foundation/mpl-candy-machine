@@ -64,6 +64,18 @@ const userSeed = {
 // Update accounts.
 kinobi.update(
   new UpdateAccountsVisitor({
+    candyGuard: {
+      seeds: [
+        { kind: "literal", value: "candy_guard" },
+        {
+          kind: "variable",
+          name: "base",
+          description:
+            "The base address which the Candy Guard PDA derives from",
+          type: new TypePublicKeyNode(),
+        },
+      ],
+    },
     mintCounter: {
       size: 2,
       discriminator: { kind: "size" },

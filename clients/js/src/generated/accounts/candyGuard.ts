@@ -9,6 +9,7 @@
 import {
   Account,
   Context,
+  Pda,
   PublicKey,
   RpcAccount,
   RpcGetAccountOptions,
@@ -142,4 +143,19 @@ export function getCandyGuardGpaBuilder(
 
 export function getCandyGuardSize(_context = {}): number {
   return 65;
+}
+
+export function findCandyGuardPda(
+  context: Pick<Context, 'eddsa' | 'programs' | 'serializer'>,
+  seeds: {
+    /** The base address which the Candy Guard PDA derives from */
+    base: PublicKey;
+  }
+): Pda {
+  const s = context.serializer;
+  const programId: PublicKey = context.programs.get('mplCandyGuard').publicKey;
+  return context.eddsa.findPda(programId, [
+    s.string({ size: 'variable' }).serialize('candy_guard'),
+    s.publicKey().serialize(seeds.base),
+  ]);
 }

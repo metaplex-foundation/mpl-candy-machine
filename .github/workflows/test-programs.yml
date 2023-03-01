@@ -1,0 +1,73 @@
+name: Test Programs
+
+on:
+  workflow_call:
+    inputs:
+      rust:
+        default: ${{ vars.RUST_VERSION }}
+        type: string
+      solana:
+        default: ${{ vars.SOLANA_VERSION }}
+        type: string
+      program_matrix:
+        type: string
+  workflow_dispatch:
+    inputs:
+      rust:
+        description: Rust version
+        default: 1.65.0
+        required: true
+        type: string
+      solana:
+        description: Solana version
+        default: 1.13.6
+        required: true
+        type: string
+
+env:
+  CACHE: true
+
+jobs:
+  test_programs:
+    name: Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        program: ${{ fromJson(inputs.program_matrix || vars.PROGRAMS) }}
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: metaplex-foundation/actions/install-rust@v1
+        with:
+          toolchain: ${{ inputs.rust }}
+
+      - name: Install Solana
+        uses: metaplex-foundation/actions/install-solana@v1
+        with:
+          version: ${{ inputs.solana }}
+          cache: ${{ env.CACHE }}
+
+      - name: Cache program dependencies
+        if: env.CACHE == 'true'
+        uses: metaplex-foundation/actions/cache-program@v1
+        with:
+          folder: ./programs/${{ matrix.program }}
+          key: program-${{ matrix.program }}
+
+      - name: Run cargo fmt
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --manifest-path ./programs/${{ matrix.program }}/Cargo.toml -- --check
+
+      - name: Run cargo clippy
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: --all-targets --all-features --no-deps --manifest-path ./programs/${{ matrix.program }}/Cargo.toml
+
+      - name: Run tests
+        working-directory: ./programs/${{ matrix.program }}
+        run: cargo test-bpf

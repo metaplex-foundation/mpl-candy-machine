@@ -8,6 +8,9 @@ const {
   UpdateProgramsVisitor,
   SetStructDefaultValuesVisitor,
 } = require("@metaplex-foundation/kinobi");
+const {
+  TransformDefinedTypesIntoAccountsVisitor,
+} = require("./visitors/TransformDefinedTypesIntoAccountsVisitor.cjs");
 
 // Paths.
 const clientDir = path.join(__dirname, "..", "clients");
@@ -25,6 +28,14 @@ kinobi.update(
     candyGuard: { name: "mplCandyGuard", prefix: "Cg" },
     candyMachineCore: { name: "mplCandyMachineCore", prefix: "Cm" },
   })
+);
+
+// Transform some defined types into accounts.
+kinobi.update(
+  new TransformDefinedTypesIntoAccountsVisitor([
+    "mintCounter",
+    "allowListProof",
+  ])
 );
 
 // Update accounts.

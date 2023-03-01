@@ -9,7 +9,6 @@
 export * from './addressGate';
 export * from './allocation';
 export * from './allowList';
-export * from './allowListProof';
 export * from './botTax';
 export * from './candyGuardData';
 export * from './candyMachineData';
@@ -25,7 +24,6 @@ export * from './group';
 export * from './guardSet';
 export * from './guardType';
 export * from './hiddenSettings';
-export * from './mintCounter';
 export * from './mintLimit';
 export * from './mintTracker';
 export * from './nftBurn';

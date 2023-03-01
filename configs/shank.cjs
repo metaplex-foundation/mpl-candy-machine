@@ -7,11 +7,11 @@ const programDir = path.join(__dirname, "..", "programs");
 
 generateIdl({
   generator: "anchor",
-  programName: "mpl_candy_machine_core",
+  programName: "candy_machine_core",
   programId: "CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR",
   idlDir,
   binaryInstallDir,
-  programDir: path.join(programDir, "candy-machine-core"),
+  programDir: path.join(programDir, "candy-machine-core", "program"),
 });
 
 generateIdl({

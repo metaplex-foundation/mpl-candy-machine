@@ -6,7 +6,6 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-export * from './addressLookupTable';
-export * from './mint';
-export * from './multisig';
-export * from './token';
+export * from './candyGuard';
+export * from './candyMachine';
+export * from './freezeEscrow';

@@ -37,7 +37,16 @@ kinobi.update(
 // Update instructions.
 kinobi.update(
   new UpdateInstructionsVisitor({
-    //
+    "mplCandyMachineCore.initialize": { name: "initializeCandyMachine" },
+    "mplCandyGuard.initialize": { name: "initializeCandyGuard" },
+    "mplCandyMachineCore.mint": { name: "mintFromCandyMachine" },
+    "mplCandyGuard.mint": { name: "mint" },
+    "mplCandyMachineCore.SetAuthority": { name: "SetCandyMachineAuthority" },
+    "mplCandyGuard.SetAuthority": { name: "SetCandyGuardAuthority" },
+    "mplCandyMachineCore.update": { name: "updateCandyMachine" },
+    "mplCandyGuard.update": { name: "updateCandyGuard" },
+    "mplCandyMachineCore.withdraw": { name: "withdrawCandyMachine" },
+    "mplCandyGuard.withdraw": { name: "withdrawCandyGuard" },
   })
 );
 

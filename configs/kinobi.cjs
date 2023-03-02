@@ -10,6 +10,7 @@ const {
   TypeNumberNode,
   TypePublicKeyNode,
   TypeBytesNode,
+  SetInstructionAccountDefaultValuesVisitor,
 } = require("@metaplex-foundation/kinobi");
 const {
   TransformDefinedTypesIntoAccountsVisitor,
@@ -156,6 +157,21 @@ const defaultsToCollectionAuthorityRecordPda = (
     collectionAuthority: { kind: "account", name: collectionAuthority },
   },
 });
+
+// Automatically recognize account default values.
+kinobi.update(
+  new SetInstructionAccountDefaultValuesVisitor([
+    {
+      kind: "program",
+      account: /^tokenMetadataProgram|mplTokenMetadataProgram$/,
+      program: {
+        name: "mplTokenMetadata",
+        publicKey: "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s",
+      },
+      ignoreIfOptional: true,
+    },
+  ])
+);
 
 // Update instructions.
 kinobi.update(

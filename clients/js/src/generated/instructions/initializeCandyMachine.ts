@@ -40,7 +40,7 @@ export type InitializeCandyMachineInstructionAccounts = {
   collectionMasterEdition?: PublicKey;
   collectionUpdateAuthority: Signer;
   collectionAuthorityRecord?: PublicKey;
-  tokenMetadataProgram: PublicKey;
+  tokenMetadataProgram?: PublicKey;
   systemProgram?: PublicKey;
 };
 
@@ -124,7 +124,10 @@ export function initializeCandyMachine(
       mint: publicKey(collectionMintAccount),
       collectionAuthority: publicKey(authorityPdaAccount),
     });
-  const tokenMetadataProgramAccount = input.tokenMetadataProgram;
+  const tokenMetadataProgramAccount = input.tokenMetadataProgram ?? {
+    ...context.programs.get('mplTokenMetadata').publicKey,
+    isWritable: false,
+  };
   const systemProgramAccount = input.systemProgram ?? {
     ...context.programs.get('splSystem').publicKey,
     isWritable: false,

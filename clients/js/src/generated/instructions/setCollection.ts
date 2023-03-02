@@ -31,7 +31,7 @@ export type SetCollectionInstructionAccounts = {
   newCollectionMint: PublicKey;
   newCollectionMasterEdition: PublicKey;
   newCollectionAuthorityRecord: PublicKey;
-  tokenMetadataProgram: PublicKey;
+  tokenMetadataProgram?: PublicKey;
   systemProgram?: PublicKey;
 };
 
@@ -92,7 +92,10 @@ export function setCollection(
   const newCollectionMasterEditionAccount = input.newCollectionMasterEdition;
   const newCollectionAuthorityRecordAccount =
     input.newCollectionAuthorityRecord;
-  const tokenMetadataProgramAccount = input.tokenMetadataProgram;
+  const tokenMetadataProgramAccount = input.tokenMetadataProgram ?? {
+    ...context.programs.get('mplTokenMetadata').publicKey,
+    isWritable: false,
+  };
   const systemProgramAccount = input.systemProgram ?? {
     ...context.programs.get('splSystem').publicKey,
     isWritable: false,

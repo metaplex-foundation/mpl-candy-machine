@@ -32,7 +32,7 @@ export type MintFromCandyMachineInstructionAccounts = {
   collectionMetadata: PublicKey;
   collectionMasterEdition: PublicKey;
   collectionUpdateAuthority: PublicKey;
-  tokenMetadataProgram: PublicKey;
+  tokenMetadataProgram?: PublicKey;
   tokenProgram?: PublicKey;
   systemProgram?: PublicKey;
   recentSlothashes: PublicKey;
@@ -99,7 +99,10 @@ export function mintFromCandyMachine(
   const collectionMetadataAccount = input.collectionMetadata;
   const collectionMasterEditionAccount = input.collectionMasterEdition;
   const collectionUpdateAuthorityAccount = input.collectionUpdateAuthority;
-  const tokenMetadataProgramAccount = input.tokenMetadataProgram;
+  const tokenMetadataProgramAccount = input.tokenMetadataProgram ?? {
+    ...context.programs.get('mplTokenMetadata').publicKey,
+    isWritable: false,
+  };
   const tokenProgramAccount = input.tokenProgram ?? {
     ...context.programs.get('splToken').publicKey,
     isWritable: false,

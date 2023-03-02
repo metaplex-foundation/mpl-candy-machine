@@ -15,6 +15,10 @@ const {
   UnwrapInstructionArgsStructVisitor,
   vScalar,
   vNone,
+  AccountNode,
+  TypeStructNode,
+  TypeStructFieldNode,
+  TypeDefinedLinkNode,
 } = require("@metaplex-foundation/kinobi");
 const {
   TransformDefinedTypesIntoAccountsVisitor,
@@ -128,6 +132,32 @@ kinobi.update(
       ],
     },
   })
+);
+
+// Update CandyMachine account data.
+kinobi.update(
+  new TransformNodesVisitor([
+    {
+      selector: { type: "account", name: "candyMachine" },
+      transformer: (node) => {
+        const newFields = node.type.fields.map((field) => {
+          if (field.name === "tokenStandard") {
+            return new TypeStructFieldNode(
+              field.metadata,
+              new TypeDefinedLinkNode("tokenStandard", {
+                dependency: "mplTokenMetadata",
+              })
+            );
+          }
+          return field;
+        });
+        return new AccountNode(
+          node.metadata,
+          new TypeStructNode(node.type.name, newFields)
+        );
+      },
+    },
+  ])
 );
 
 // Reusable PDA defaults.

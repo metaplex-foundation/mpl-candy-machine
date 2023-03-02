@@ -1,4 +1,5 @@
 import { createAccountWithRent } from '@metaplex-foundation/mpl-essentials';
+import { TokenStandard } from '@metaplex-foundation/mpl-token-metadata';
 import {
   generateSigner,
   none,
@@ -74,7 +75,7 @@ test('it can initialize a new candy machine account', async (t) => {
     mintAuthority: publicKey(umi.identity),
     collectionMint: publicKey(collectionMint),
     version: AccountVersion.V1,
-    tokenStandard: 0,
+    tokenStandard: TokenStandard.NonFungible,
     itemsRedeemed: 0n,
     data: {
       itemsAvailable: 100n,

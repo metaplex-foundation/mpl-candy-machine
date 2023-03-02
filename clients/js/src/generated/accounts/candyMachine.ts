@@ -7,6 +7,11 @@
  */
 
 import {
+  TokenStandard,
+  TokenStandardArgs,
+  getTokenStandardSerializer,
+} from '@metaplex-foundation/mpl-token-metadata';
+import {
   Account,
   Context,
   PublicKey,
@@ -35,7 +40,7 @@ export type CandyMachineAccountData = {
   /** Version of the account. */
   version: AccountVersion;
   /** Token standard to mint NFTs. */
-  tokenStandard: number;
+  tokenStandard: TokenStandard;
   /** Features flags. */
   features: Array<number>;
   /** Authority address. */
@@ -54,7 +59,7 @@ export type CandyMachineAccountDataArgs = {
   /** Version of the account. */
   version: AccountVersionArgs;
   /** Token standard to mint NFTs. */
-  tokenStandard: number;
+  tokenStandard: TokenStandardArgs;
   /** Features flags. */
   features: Array<number>;
   /** Authority address. */
@@ -82,7 +87,7 @@ export function getCandyMachineAccountDataSerializer(
       [
         ['discriminator', s.array(s.u8(), { size: 8 })],
         ['version', getAccountVersionSerializer(context)],
-        ['tokenStandard', s.u8()],
+        ['tokenStandard', getTokenStandardSerializer(context)],
         ['features', s.array(s.u8(), { size: 6 })],
         ['authority', s.publicKey()],
         ['mintAuthority', s.publicKey()],
@@ -165,7 +170,7 @@ export function getCandyMachineGpaBuilder(
     .registerFields<{
       discriminator: Array<number>;
       version: AccountVersionArgs;
-      tokenStandard: number;
+      tokenStandard: TokenStandardArgs;
       features: Array<number>;
       authority: PublicKey;
       mintAuthority: PublicKey;
@@ -175,7 +180,7 @@ export function getCandyMachineGpaBuilder(
     }>([
       ['discriminator', s.array(s.u8(), { size: 8 })],
       ['version', getAccountVersionSerializer(context)],
-      ['tokenStandard', s.u8()],
+      ['tokenStandard', getTokenStandardSerializer(context)],
       ['features', s.array(s.u8(), { size: 6 })],
       ['authority', s.publicKey()],
       ['mintAuthority', s.publicKey()],

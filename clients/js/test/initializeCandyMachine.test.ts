@@ -9,6 +9,7 @@ import {
 } from '@metaplex-foundation/umi';
 import test from 'ava';
 import {
+  AccountVersion,
   CandyMachine,
   Creator,
   fetchCandyMachine,
@@ -72,6 +73,8 @@ test('it can initialize a new candy machine account', async (t) => {
     authority: publicKey(umi.identity),
     mintAuthority: publicKey(umi.identity),
     collectionMint: publicKey(collectionMint),
+    version: AccountVersion.V1,
+    tokenStandard: 0,
     itemsRedeemed: 0n,
     data: {
       itemsAvailable: 100n,

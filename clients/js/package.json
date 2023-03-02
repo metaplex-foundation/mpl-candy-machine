@@ -28,7 +28,8 @@
     "@metaplex-foundation/umi": "^0.5.1"
   },
   "dependencies": {
-    "@metaplex-foundation/mpl-essentials": "^0.3.0"
+    "@metaplex-foundation/mpl-essentials": "^0.3.0",
+    "@metaplex-foundation/mpl-token-metadata": "3.0.0-alpha.2"
   },
   "devDependencies": {
     "@ava/typescript": "^3.0.1",

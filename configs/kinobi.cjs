@@ -132,6 +132,18 @@ const defaultsToCandyMachineAuthorityPda = (candyMachine = "candyMachine") => ({
   dependency: "hooked",
   seeds: { candyMachine: { kind: "account", name: candyMachine } },
 });
+const defaultsToMetadataPda = (mint = "mint") => ({
+  kind: "pda",
+  pdaAccount: "metadata",
+  dependency: "mplTokenMetadata",
+  seeds: { mint: { kind: "account", name: mint } },
+});
+const defaultsToMasterEditionPda = (mint = "mint") => ({
+  kind: "pda",
+  pdaAccount: "masterEdition",
+  dependency: "mplTokenMetadata",
+  seeds: { mint: { kind: "account", name: mint } },
+});
 
 // Update instructions.
 kinobi.update(
@@ -141,6 +153,12 @@ kinobi.update(
       accounts: {
         authorityPda: {
           defaultsTo: defaultsToCandyMachineAuthorityPda(),
+        },
+        collectionMetadata: {
+          defaultsTo: defaultsToMetadataPda("collectionMint"),
+        },
+        collectionMasterEdition: {
+          defaultsTo: defaultsToMasterEditionPda("collectionMint"),
         },
       },
     },
@@ -172,5 +190,11 @@ kinobi.update(
 
 // Render JavaScript.
 const jsDir = path.join(clientDir, "js", "src", "generated");
-const prettier = require(path.join(clientDir, "js", ".prettierrc.json"));
-kinobi.accept(new RenderJavaScriptVisitor(jsDir, { prettier }));
+kinobi.accept(
+  new RenderJavaScriptVisitor(jsDir, {
+    prettier: require(path.join(clientDir, "js", ".prettierrc.json")),
+    dependencyMap: {
+      mplTokenMetadata: "@metaplex-foundation/mpl-token-metadata",
+    },
+  })
+);

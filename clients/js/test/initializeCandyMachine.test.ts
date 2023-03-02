@@ -29,7 +29,7 @@ test('it can initialize a new candy machine account', async (t) => {
       initializeCandyMachine(umi, {
         candyMachine: candyMachine.publicKey,
         data: {},
-      })
+      } as any)
     )
     .sendAndConfirm();
 

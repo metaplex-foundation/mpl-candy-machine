@@ -7,6 +7,10 @@
  */
 
 import {
+  findMasterEditionPda,
+  findMetadataPda,
+} from '@metaplex-foundation/mpl-token-metadata';
+import {
   AccountMeta,
   Context,
   PublicKey,
@@ -30,9 +34,9 @@ export type InitializeCandyMachineInstructionAccounts = {
   authorityPda?: PublicKey;
   authority?: PublicKey;
   payer?: Signer;
-  collectionMetadata: PublicKey;
+  collectionMetadata?: PublicKey;
   collectionMint: PublicKey;
-  collectionMasterEdition: PublicKey;
+  collectionMasterEdition?: PublicKey;
   collectionUpdateAuthority: Signer;
   collectionAuthorityRecord: PublicKey;
   tokenMetadataProgram: PublicKey;
@@ -105,9 +109,13 @@ export function initializeCandyMachine(
     });
   const authorityAccount = input.authority ?? context.identity.publicKey;
   const payerAccount = input.payer ?? context.payer;
-  const collectionMetadataAccount = input.collectionMetadata;
   const collectionMintAccount = input.collectionMint;
-  const collectionMasterEditionAccount = input.collectionMasterEdition;
+  const collectionMetadataAccount =
+    input.collectionMetadata ??
+    findMetadataPda(context, { mint: publicKey(collectionMintAccount) });
+  const collectionMasterEditionAccount =
+    input.collectionMasterEdition ??
+    findMasterEditionPda(context, { mint: publicKey(collectionMintAccount) });
   const collectionUpdateAuthorityAccount = input.collectionUpdateAuthority;
   const collectionAuthorityRecordAccount = input.collectionAuthorityRecord;
   const tokenMetadataProgramAccount = input.tokenMetadataProgram;

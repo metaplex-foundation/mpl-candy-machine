@@ -7,7 +7,9 @@
  */
 
 import {
+  MetadataDelegateRole,
   findMasterEditionPda,
+  findMetadataDelegateRecordPda,
   findMetadataPda,
 } from '@metaplex-foundation/mpl-token-metadata';
 import {
@@ -32,7 +34,7 @@ export type SetCollectionV2InstructionAccounts = {
   collectionUpdateAuthority: PublicKey;
   collectionMint: PublicKey;
   collectionMetadata?: PublicKey;
-  collectionDelegateRecord: PublicKey;
+  collectionDelegateRecord?: PublicKey;
   newCollectionUpdateAuthority: Signer;
   newCollectionMint: PublicKey;
   newCollectionMetadata?: PublicKey;
@@ -107,7 +109,14 @@ export function setCollectionV2(
   const collectionMetadataAccount =
     input.collectionMetadata ??
     findMetadataPda(context, { mint: publicKey(collectionMintAccount) });
-  const collectionDelegateRecordAccount = input.collectionDelegateRecord;
+  const collectionDelegateRecordAccount =
+    input.collectionDelegateRecord ??
+    findMetadataDelegateRecordPda(context, {
+      mint: publicKey(collectionMintAccount),
+      delegateRole: MetadataDelegateRole.Collection,
+      updateAuthority: publicKey(collectionUpdateAuthorityAccount),
+      delegate: publicKey(authorityPdaAccount),
+    });
   const newCollectionUpdateAuthorityAccount =
     input.newCollectionUpdateAuthority;
   const newCollectionMintAccount = input.newCollectionMint;

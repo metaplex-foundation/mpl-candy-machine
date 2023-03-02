@@ -19,6 +19,7 @@ const {
   TypeStructNode,
   TypeStructFieldNode,
   TypeDefinedLinkNode,
+  vEnum,
 } = require("@metaplex-foundation/kinobi");
 const {
   TransformDefinedTypesIntoAccountsVisitor,
@@ -191,6 +192,25 @@ const defaultsToCollectionAuthorityRecordPda = (
     collectionAuthority: { kind: "account", name: collectionAuthority },
   },
 });
+const defaultsToMetadataDelegateRecordPda = (
+  role = "Collection",
+  mint = "mint",
+  updateAuthority = "updateAuthority",
+  delegate = "delegate"
+) => ({
+  kind: "pda",
+  pdaAccount: "metadataDelegateRecord",
+  dependency: "mplTokenMetadata",
+  seeds: {
+    mint: { kind: "account", name: mint },
+    delegateRole: {
+      kind: "value",
+      value: vEnum("metadataDelegateRole", role, null, "mplTokenMetadata"),
+    },
+    updateAuthority: { kind: "account", name: updateAuthority },
+    delegate: { kind: "account", name: delegate },
+  },
+});
 
 // Automatically recognize account default values.
 kinobi.update(
@@ -293,6 +313,16 @@ kinobi.update(
         "authorityPda"
       ),
       account: "newCollectionAuthorityRecord",
+      ignoreIfOptional: true,
+    },
+    {
+      ...defaultsToMetadataDelegateRecordPda(
+        "collection",
+        "collectionMint",
+        "collectionUpdateAuthority",
+        "authorityPda"
+      ),
+      account: "collectionDelegateRecord",
       ignoreIfOptional: true,
     },
   ])

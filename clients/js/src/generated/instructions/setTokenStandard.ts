@@ -6,7 +6,11 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { findMetadataPda } from '@metaplex-foundation/mpl-token-metadata';
+import {
+  MetadataDelegateRole,
+  findMetadataDelegateRecordPda,
+  findMetadataPda,
+} from '@metaplex-foundation/mpl-token-metadata';
 import {
   AccountMeta,
   Context,
@@ -26,7 +30,7 @@ export type SetTokenStandardInstructionAccounts = {
   authority?: Signer;
   authorityPda?: PublicKey;
   payer?: Signer;
-  collectionDelegateRecord: PublicKey;
+  collectionDelegateRecord?: PublicKey;
   collectionMint: PublicKey;
   collectionMetadata?: PublicKey;
   collectionAuthorityRecord?: PublicKey;
@@ -102,13 +106,20 @@ export function setTokenStandard(
       candyMachine: publicKey(candyMachineAccount),
     });
   const payerAccount = input.payer ?? context.payer;
-  const collectionDelegateRecordAccount = input.collectionDelegateRecord;
   const collectionMintAccount = input.collectionMint;
+  const collectionUpdateAuthorityAccount = input.collectionUpdateAuthority;
+  const collectionDelegateRecordAccount =
+    input.collectionDelegateRecord ??
+    findMetadataDelegateRecordPda(context, {
+      mint: publicKey(collectionMintAccount),
+      delegateRole: MetadataDelegateRole.Collection,
+      updateAuthority: publicKey(collectionUpdateAuthorityAccount),
+      delegate: publicKey(authorityPdaAccount),
+    });
   const collectionMetadataAccount =
     input.collectionMetadata ??
     findMetadataPda(context, { mint: publicKey(collectionMintAccount) });
   const collectionAuthorityRecordAccount = input.collectionAuthorityRecord;
-  const collectionUpdateAuthorityAccount = input.collectionUpdateAuthority;
   const tokenMetadataProgramAccount = input.tokenMetadataProgram ?? {
     ...context.programs.get('mplTokenMetadata').publicKey,
     isWritable: false,

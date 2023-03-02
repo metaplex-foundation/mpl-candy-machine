@@ -7,6 +7,7 @@
  */
 
 import {
+  findCollectionAuthorityRecordPda,
   findMasterEditionPda,
   findMetadataPda,
 } from '@metaplex-foundation/mpl-token-metadata';
@@ -22,19 +23,20 @@ import {
   mapSerializer,
   publicKey,
 } from '@metaplex-foundation/umi';
+import { findCandyMachineAuthorityPda } from '../../hooked';
 
 // Accounts.
 export type MintInstructionAccounts = {
   candyGuard: PublicKey;
   candyMachineProgram?: PublicKey;
   candyMachine: PublicKey;
-  candyMachineAuthorityPda: PublicKey;
+  candyMachineAuthorityPda?: PublicKey;
   payer?: Signer;
   nftMetadata?: PublicKey;
   nftMint: PublicKey;
   nftMintAuthority: Signer;
   nftMasterEdition?: PublicKey;
-  collectionAuthorityRecord: PublicKey;
+  collectionAuthorityRecord?: PublicKey;
   collectionMint: PublicKey;
   collectionMetadata?: PublicKey;
   collectionMasterEdition?: PublicKey;
@@ -101,7 +103,11 @@ export function mint(
     isWritable: false,
   };
   const candyMachineAccount = input.candyMachine;
-  const candyMachineAuthorityPdaAccount = input.candyMachineAuthorityPda;
+  const candyMachineAuthorityPdaAccount =
+    input.candyMachineAuthorityPda ??
+    findCandyMachineAuthorityPda(context, {
+      candyMachine: publicKey(candyMachineAccount),
+    });
   const payerAccount = input.payer ?? context.payer;
   const nftMintAccount = input.nftMint;
   const nftMetadataAccount =
@@ -111,8 +117,13 @@ export function mint(
   const nftMasterEditionAccount =
     input.nftMasterEdition ??
     findMasterEditionPda(context, { mint: publicKey(nftMintAccount) });
-  const collectionAuthorityRecordAccount = input.collectionAuthorityRecord;
   const collectionMintAccount = input.collectionMint;
+  const collectionAuthorityRecordAccount =
+    input.collectionAuthorityRecord ??
+    findCollectionAuthorityRecordPda(context, {
+      mint: publicKey(collectionMintAccount),
+      collectionAuthority: publicKey(candyMachineAuthorityPdaAccount),
+    });
   const collectionMetadataAccount =
     input.collectionMetadata ??
     findMetadataPda(context, { mint: publicKey(collectionMintAccount) });

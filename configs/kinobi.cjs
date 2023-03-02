@@ -206,6 +206,11 @@ kinobi.update(
       ignoreIfOptional: true,
     },
     {
+      ...defaultsToCandyMachineAuthorityPda(),
+      account: "candyMachineAuthorityPda",
+      ignoreIfOptional: true,
+    },
+    {
       ...defaultsToMetadataPda("collectionMint"),
       account: "collectionMetadata",
       ignoreIfOptional: true,
@@ -260,7 +265,17 @@ kinobi.update(
     "mplCandyMachineCore.initialize": { name: "initializeCandyMachine" },
     "mplCandyGuard.initialize": { name: "initializeCandyGuard" },
     "mplCandyMachineCore.mint": { name: "mintFromCandyMachine" },
-    "mplCandyGuard.mint": { name: "mint" },
+    "mplCandyGuard.mint": {
+      name: "mint",
+      accounts: {
+        collectionAuthorityRecord: {
+          defaultsTo: defaultsToCollectionAuthorityRecordPda(
+            "collectionMint",
+            "candyMachineAuthorityPda"
+          ),
+        },
+      },
+    },
     "mplCandyMachineCore.SetAuthority": { name: "SetCandyMachineAuthority" },
     "mplCandyGuard.SetAuthority": { name: "SetCandyGuardAuthority" },
     "mplCandyMachineCore.update": { name: "updateCandyMachine" },

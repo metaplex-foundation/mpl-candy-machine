@@ -29,23 +29,23 @@ impl Guard for TokenBurn {
 impl Condition for TokenBurn {
     fn validate<'info>(
         &self,
-        ctx: &Context<'_, '_, '_, 'info, Mint<'info>>,
-        _mint_args: &[u8],
+        ctx: &mut EvaluationContext,
         _guard_set: &GuardSet,
-        evaluation_context: &mut EvaluationContext,
+        _mint_args: &[u8],
     ) -> Result<()> {
         // retrieves the (potential) token gate account
-        let token_gate_index = evaluation_context.account_cursor;
-        let token_gate_account = try_get_account_info(ctx, token_gate_index)?;
+        let token_gate_index = ctx.account_cursor;
+        let token_gate_account = try_get_account_info(ctx.accounts.remaining, token_gate_index)?;
         // consumes the gate token account
-        evaluation_context.account_cursor += 1;
+        ctx.account_cursor += 1;
 
         let account = assert_is_ata(token_gate_account, &ctx.accounts.payer.key(), &self.mint)?;
 
         if account.amount >= self.amount {
-            let token_gate_mint = try_get_account_info(ctx, token_gate_index + 1)?;
+            let token_gate_mint =
+                try_get_account_info(ctx.accounts.remaining, token_gate_index + 1)?;
             // consumes the remaning account
-            evaluation_context.account_cursor += 1;
+            ctx.account_cursor += 1;
 
             // is the mint account the one expected?
             assert_keys_equal(&token_gate_mint.key(), &self.mint)?;
@@ -53,24 +53,21 @@ impl Condition for TokenBurn {
             return err!(CandyGuardError::NotEnoughTokens);
         }
 
-        evaluation_context
-            .indices
-            .insert("token_burn_index", token_gate_index);
+        ctx.indices.insert("token_burn_index", token_gate_index);
 
         Ok(())
     }
 
     fn pre_actions<'info>(
         &self,
-        ctx: &Context<'_, '_, '_, 'info, Mint<'info>>,
-        _mint_args: &[u8],
+        ctx: &mut EvaluationContext,
         _guard_set: &GuardSet,
-        evaluation_context: &mut EvaluationContext,
+        _mint_args: &[u8],
     ) -> Result<()> {
-        let token_gate_index = evaluation_context.indices["token_burn_index"];
+        let token_gate_index = ctx.indices["token_burn_index"];
         // the accounts have already being validated
-        let token_gate_account = try_get_account_info(ctx, token_gate_index)?;
-        let token_gate_mint = try_get_account_info(ctx, token_gate_index + 1)?;
+        let token_gate_account = try_get_account_info(ctx.accounts.remaining, token_gate_index)?;
+        let token_gate_mint = try_get_account_info(ctx.accounts.remaining, token_gate_index + 1)?;
 
         spl_token_burn(TokenBurnParams {
             mint: token_gate_mint.to_account_info(),
@@ -78,7 +75,7 @@ impl Condition for TokenBurn {
             amount: self.amount,
             authority: ctx.accounts.payer.to_account_info(),
             authority_signer_seeds: None,
-            token_program: ctx.accounts.token_program.to_account_info(),
+            token_program: ctx.accounts.spl_token_program.to_account_info(),
         })?;
 
         Ok(())

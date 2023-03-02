@@ -100,7 +100,7 @@ impl Guard for AllowList {
         let candy_guard_key = &ctx.accounts.candy_guard.key();
         let candy_machine_key = &ctx.accounts.candy_machine.key();
 
-        let proof_pda = try_get_account_info(ctx, 0)?;
+        let proof_pda = try_get_account_info(ctx.remaining_accounts, 0)?;
         let seeds = [
             AllowListProof::PREFIX_SEED,
             &merkle_root[..],
@@ -156,13 +156,12 @@ impl Guard for AllowList {
 impl Condition for AllowList {
     fn validate<'info>(
         &self,
-        ctx: &Context<'_, '_, '_, 'info, Mint<'info>>,
-        _mint_args: &[u8],
+        ctx: &mut EvaluationContext,
         _guard_set: &GuardSet,
-        evaluation_context: &mut EvaluationContext,
+        _mint_args: &[u8],
     ) -> Result<()> {
-        let proof_pda = try_get_account_info(ctx, evaluation_context.account_cursor)?;
-        evaluation_context.account_cursor += 1;
+        let proof_pda = try_get_account_info(ctx.accounts.remaining, ctx.account_cursor)?;
+        ctx.account_cursor += 1;
         let user = ctx.accounts.payer.key();
 
         // validates the pda

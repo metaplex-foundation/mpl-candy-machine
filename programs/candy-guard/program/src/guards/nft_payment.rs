@@ -38,19 +38,18 @@ impl Guard for NftPayment {
 impl Condition for NftPayment {
     fn validate<'info>(
         &self,
-        ctx: &Context<'_, '_, '_, 'info, Mint<'info>>,
-        _mint_args: &[u8],
+        ctx: &mut EvaluationContext,
         _guard_set: &GuardSet,
-        evaluation_context: &mut EvaluationContext,
+        _mint_args: &[u8],
     ) -> Result<()> {
-        let index = evaluation_context.account_cursor;
+        let index = ctx.account_cursor;
 
         // validates that we received all required accounts
 
-        let nft_account = try_get_account_info(ctx, index)?;
-        let nft_metadata = try_get_account_info(ctx, index + 1)?;
-        let nft_mint = try_get_account_info(ctx, index + 2)?;
-        evaluation_context.account_cursor += 3;
+        let nft_account = try_get_account_info(ctx.accounts.remaining, index)?;
+        let nft_metadata = try_get_account_info(ctx.accounts.remaining, index + 1)?;
+        let nft_mint = try_get_account_info(ctx.accounts.remaining, index + 2)?;
+        ctx.account_cursor += 3;
 
         NftGate::verify_collection(
             nft_account,
@@ -62,13 +61,13 @@ impl Condition for NftPayment {
         let metadata: Metadata = Metadata::from_account_info(nft_metadata)?;
         assert_keys_equal(&metadata.mint, nft_mint.key)?;
 
-        let destination = try_get_account_info(ctx, index + 3)?;
-        let destination_ata = try_get_account_info(ctx, index + 4)?;
+        let destination = try_get_account_info(ctx.accounts.remaining, index + 3)?;
+        let destination_ata = try_get_account_info(ctx.accounts.remaining, index + 4)?;
 
-        let atoken_program = try_get_account_info(ctx, index + 5)?;
+        let atoken_program = try_get_account_info(ctx.accounts.remaining, index + 5)?;
         assert_keys_equal(atoken_program.key, &spl_associated_token_account::ID)?;
 
-        evaluation_context.account_cursor += 3;
+        ctx.account_cursor += 3;
 
         assert_keys_equal(destination.key, &self.destination)?;
 
@@ -83,25 +82,22 @@ impl Condition for NftPayment {
 
         assert_keys_equal(destination_ata.key, &ata)?;
 
-        evaluation_context
-            .indices
-            .insert("nft_payment_index", index);
+        ctx.indices.insert("nft_payment_index", index);
 
         Ok(())
     }
 
     fn pre_actions<'info>(
         &self,
-        ctx: &Context<'_, '_, '_, 'info, Mint<'info>>,
-        _mint_args: &[u8],
+        ctx: &mut EvaluationContext,
         _guard_set: &GuardSet,
-        evaluation_context: &mut EvaluationContext,
+        _mint_args: &[u8],
     ) -> Result<()> {
-        let index = evaluation_context.indices["nft_payment_index"];
-        let nft_account = try_get_account_info(ctx, index)?;
-        let nft_mint = try_get_account_info(ctx, index + 2)?;
-        let destination = try_get_account_info(ctx, index + 3)?;
-        let destination_ata = try_get_account_info(ctx, index + 4)?;
+        let index = ctx.indices["nft_payment_index"];
+        let nft_account = try_get_account_info(ctx.accounts.remaining, index)?;
+        let nft_mint = try_get_account_info(ctx.accounts.remaining, index + 2)?;
+        let destination = try_get_account_info(ctx.accounts.remaining, index + 3)?;
+        let destination_ata = try_get_account_info(ctx.accounts.remaining, index + 4)?;
 
         // creates the ATA to receive the NFT
 
@@ -128,7 +124,7 @@ impl Condition for NftPayment {
             destination: destination_ata.to_account_info(),
             authority: ctx.accounts.payer.to_account_info(),
             authority_signer_seeds: &[],
-            token_program: ctx.accounts.token_program.to_account_info(),
+            token_program: ctx.accounts.spl_token_program.to_account_info(),
             // fixed to always require 1 NFT
             amount: 1,
         })?;

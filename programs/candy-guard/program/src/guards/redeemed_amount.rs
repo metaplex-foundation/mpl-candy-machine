@@ -22,10 +22,9 @@ impl Guard for RedeemedAmount {
 impl Condition for RedeemedAmount {
     fn validate<'info>(
         &self,
-        ctx: &Context<'_, '_, '_, 'info, Mint<'info>>,
-        _mint_args: &[u8],
+        ctx: &mut EvaluationContext,
         _guard_set: &GuardSet,
-        _evaluation_context: &mut EvaluationContext,
+        _mint_args: &[u8],
     ) -> Result<()> {
         let candy_machine = &ctx.accounts.candy_machine;
 

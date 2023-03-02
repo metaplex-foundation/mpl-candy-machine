@@ -21,10 +21,9 @@ impl Guard for StartDate {
 impl Condition for StartDate {
     fn validate<'info>(
         &self,
-        _ctx: &Context<'_, '_, '_, 'info, Mint<'info>>,
-        _mint_args: &[u8],
+        _ctx: &mut EvaluationContext,
         _guard_set: &GuardSet,
-        _evaluation_context: &mut EvaluationContext,
+        _mint_args: &[u8],
     ) -> Result<()> {
         let clock = Clock::get()?;
 

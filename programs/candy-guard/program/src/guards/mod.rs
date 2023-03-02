@@ -4,7 +4,7 @@ pub use anchor_lang::prelude::*;
 
 pub use crate::{errors::CandyGuardError, instructions::mint::*, state::GuardSet};
 use crate::{
-    instructions::{Route, RouteContext},
+    instructions::{MintAccounts, Route, RouteContext},
     state::CandyGuardData,
 };
 
@@ -60,24 +60,22 @@ pub trait Condition {
     /// Intermediary evaluation data can be stored in the `evaluation_context`,
     /// which will be shared with other guards and reused in the `actions` step
     /// of the process.
-    fn validate<'info>(
+    fn validate(
         &self,
-        ctx: &Context<'_, '_, '_, 'info, Mint<'info>>,
-        mint_args: &[u8],
+        ctx: &mut EvaluationContext,
         guard_set: &GuardSet,
-        evaluation_context: &mut EvaluationContext,
+        mint_args: &[u8],
     ) -> Result<()>;
 
     /// Perform the action associated with the guard before the CPI `mint` instruction.
     ///
     /// This function only gets called when all guards have been successfuly validated.
     /// Any error generated will make the transaction to fail.
-    fn pre_actions<'info>(
+    fn pre_actions(
         &self,
-        _ctx: &Context<'_, '_, '_, 'info, Mint<'info>>,
-        _mint_args: &[u8],
+        _ctx: &mut EvaluationContext,
         _guard_set: &GuardSet,
-        _evaluation_context: &mut EvaluationContext,
+        _mint_args: &[u8],
     ) -> Result<()> {
         Ok(())
     }
@@ -86,12 +84,11 @@ pub trait Condition {
     ///
     /// This function only gets called when all guards have been successfuly validated.
     /// Any error generated will make the transaction to fail.
-    fn post_actions<'info>(
+    fn post_actions(
         &self,
-        _ctx: &Context<'_, '_, '_, 'info, Mint<'info>>,
-        _mint_args: &[u8],
+        _ctx: &mut EvaluationContext,
         _guard_set: &GuardSet,
-        _evaluation_context: &mut EvaluationContext,
+        _mint_args: &[u8],
     ) -> Result<()> {
         Ok(())
     }
@@ -157,7 +154,10 @@ pub trait Guard: Condition + AnchorSerialize + AnchorDeserialize {
         Ok(())
     }
 }
-pub struct EvaluationContext<'a> {
+pub struct EvaluationContext<'b, 'c, 'info> {
+    /// Accounts required to mint an NFT.
+    pub(crate) accounts: MintAccounts<'b, 'c, 'info>,
+
     /// The cursor for the remaining account list. When a guard "consumes" one of the
     /// remaining accounts, it should increment the cursor.
     pub account_cursor: usize,
@@ -167,17 +167,14 @@ pub struct EvaluationContext<'a> {
     pub args_cursor: usize,
 
     /// Convenience mapping of remaining account indices.
-    pub indices: BTreeMap<&'a str, usize>,
+    pub indices: BTreeMap<&'info str, usize>,
 }
 
 /// Utility function to try to get the account from the remaining accounts
 /// array at the specified index.
-pub fn try_get_account_info<'c, 'info, T>(
-    ctx: &Context<'_, '_, 'c, 'info, T>,
-    index: usize,
-) -> Result<&'c AccountInfo<'info>> {
-    if index < ctx.remaining_accounts.len() {
-        Ok(&ctx.remaining_accounts[index])
+pub fn try_get_account_info<T>(remaining_accounts: &[T], index: usize) -> Result<&T> {
+    if index < remaining_accounts.len() {
+        Ok(&remaining_accounts[index])
     } else {
         err!(CandyGuardError::MissingRemainingAccount)
     }

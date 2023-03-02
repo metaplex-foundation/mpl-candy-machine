@@ -21,10 +21,9 @@ impl Guard for AddressGate {
 impl Condition for AddressGate {
     fn validate<'info>(
         &self,
-        ctx: &Context<'_, '_, '_, 'info, Mint<'info>>,
-        _mint_args: &[u8],
+        ctx: &mut EvaluationContext,
         _guard_set: &GuardSet,
-        _evaluation_context: &mut EvaluationContext,
+        _mint_args: &[u8],
     ) -> Result<()> {
         if !cmp_pubkeys(&ctx.accounts.payer.key(), &self.address) {
             return err!(CandyGuardError::AddressNotAuthorized);

@@ -6,6 +6,7 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+export * from './accountVersion';
 export * from './addressGate';
 export * from './allocation';
 export * from './allowList';

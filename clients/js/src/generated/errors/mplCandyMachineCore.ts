@@ -354,6 +354,132 @@ export class CmNotFullyLoadedError extends ProgramError {
 codeToErrorMap.set(0x1784, CmNotFullyLoadedError);
 nameToErrorMap.set('NotFullyLoaded', CmNotFullyLoadedError);
 
+/** InstructionBuilderFailed: 'Instruction could not be created' */
+export class CmInstructionBuilderFailedError extends ProgramError {
+  readonly name: string = 'InstructionBuilderFailed';
+
+  readonly code: number = 0x1785; // 6021
+
+  constructor(program: Program, cause?: Error) {
+    super('Instruction could not be created', program, cause);
+  }
+}
+codeToErrorMap.set(0x1785, CmInstructionBuilderFailedError);
+nameToErrorMap.set('InstructionBuilderFailed', CmInstructionBuilderFailedError);
+
+/** MissingCollectionAuthorityRecord: 'Missing collection authority record' */
+export class CmMissingCollectionAuthorityRecordError extends ProgramError {
+  readonly name: string = 'MissingCollectionAuthorityRecord';
+
+  readonly code: number = 0x1786; // 6022
+
+  constructor(program: Program, cause?: Error) {
+    super('Missing collection authority record', program, cause);
+  }
+}
+codeToErrorMap.set(0x1786, CmMissingCollectionAuthorityRecordError);
+nameToErrorMap.set(
+  'MissingCollectionAuthorityRecord',
+  CmMissingCollectionAuthorityRecordError
+);
+
+/** MissingMetadataDelegateRecord: 'Missing metadata delegate record' */
+export class CmMissingMetadataDelegateRecordError extends ProgramError {
+  readonly name: string = 'MissingMetadataDelegateRecord';
+
+  readonly code: number = 0x1787; // 6023
+
+  constructor(program: Program, cause?: Error) {
+    super('Missing metadata delegate record', program, cause);
+  }
+}
+codeToErrorMap.set(0x1787, CmMissingMetadataDelegateRecordError);
+nameToErrorMap.set(
+  'MissingMetadataDelegateRecord',
+  CmMissingMetadataDelegateRecordError
+);
+
+/** InvalidTokenStandard: 'Invalid token standard' */
+export class CmInvalidTokenStandardError extends ProgramError {
+  readonly name: string = 'InvalidTokenStandard';
+
+  readonly code: number = 0x1788; // 6024
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid token standard', program, cause);
+  }
+}
+codeToErrorMap.set(0x1788, CmInvalidTokenStandardError);
+nameToErrorMap.set('InvalidTokenStandard', CmInvalidTokenStandardError);
+
+/** MissingTokenAccount: 'Missing token account' */
+export class CmMissingTokenAccountError extends ProgramError {
+  readonly name: string = 'MissingTokenAccount';
+
+  readonly code: number = 0x1789; // 6025
+
+  constructor(program: Program, cause?: Error) {
+    super('Missing token account', program, cause);
+  }
+}
+codeToErrorMap.set(0x1789, CmMissingTokenAccountError);
+nameToErrorMap.set('MissingTokenAccount', CmMissingTokenAccountError);
+
+/** MissingTokenRecord: 'Missing token record' */
+export class CmMissingTokenRecordError extends ProgramError {
+  readonly name: string = 'MissingTokenRecord';
+
+  readonly code: number = 0x178a; // 6026
+
+  constructor(program: Program, cause?: Error) {
+    super('Missing token record', program, cause);
+  }
+}
+codeToErrorMap.set(0x178a, CmMissingTokenRecordError);
+nameToErrorMap.set('MissingTokenRecord', CmMissingTokenRecordError);
+
+/** MissingInstructionsSysvar: 'Missing instructions sysvar account' */
+export class CmMissingInstructionsSysvarError extends ProgramError {
+  readonly name: string = 'MissingInstructionsSysvar';
+
+  readonly code: number = 0x178b; // 6027
+
+  constructor(program: Program, cause?: Error) {
+    super('Missing instructions sysvar account', program, cause);
+  }
+}
+codeToErrorMap.set(0x178b, CmMissingInstructionsSysvarError);
+nameToErrorMap.set(
+  'MissingInstructionsSysvar',
+  CmMissingInstructionsSysvarError
+);
+
+/** MissingSplAtaProgram: 'Missing SPL ATA program' */
+export class CmMissingSplAtaProgramError extends ProgramError {
+  readonly name: string = 'MissingSplAtaProgram';
+
+  readonly code: number = 0x178c; // 6028
+
+  constructor(program: Program, cause?: Error) {
+    super('Missing SPL ATA program', program, cause);
+  }
+}
+codeToErrorMap.set(0x178c, CmMissingSplAtaProgramError);
+nameToErrorMap.set('MissingSplAtaProgram', CmMissingSplAtaProgramError);
+
+/** InvalidAccountVersion: 'Invalid account version' */
+export class CmInvalidAccountVersionError extends ProgramError {
+  readonly name: string = 'InvalidAccountVersion';
+
+  readonly code: number = 0x178d; // 6029
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid account version', program, cause);
+  }
+}
+codeToErrorMap.set(0x178d, CmInvalidAccountVersionError);
+nameToErrorMap.set('InvalidAccountVersion', CmInvalidAccountVersionError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

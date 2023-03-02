@@ -273,7 +273,9 @@ kinobi.update(
   new UpdateInstructionsVisitor({
     "mplCandyMachineCore.initialize": { name: "initializeCandyMachine" },
     "mplCandyGuard.initialize": { name: "initializeCandyGuard" },
+    "mplCandyMachineCore.initializeV2": { name: "initializeV2CandyMachine" },
     "mplCandyMachineCore.mint": { name: "mintFromCandyMachine" },
+    "mplCandyMachineCore.mintV2": { name: "mintV2FromCandyMachine" },
     "mplCandyGuard.mint": {
       name: "mint",
       accounts: {
@@ -285,6 +287,7 @@ kinobi.update(
         },
       },
     },
+    "mplCandyGuard.mintV2": { name: "mintV2" },
     "mplCandyMachineCore.SetAuthority": { name: "SetCandyMachineAuthority" },
     "mplCandyGuard.SetAuthority": { name: "SetCandyGuardAuthority" },
     "mplCandyMachineCore.update": { name: "updateCandyMachine" },

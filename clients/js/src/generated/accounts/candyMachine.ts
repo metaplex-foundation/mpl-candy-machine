@@ -20,8 +20,11 @@ import {
   mapSerializer,
 } from '@metaplex-foundation/umi';
 import {
+  AccountVersion,
+  AccountVersionArgs,
   CandyMachineData,
   CandyMachineDataArgs,
+  getAccountVersionSerializer,
   getCandyMachineDataSerializer,
 } from '../types';
 
@@ -29,8 +32,12 @@ export type CandyMachine = Account<CandyMachineAccountData>;
 
 export type CandyMachineAccountData = {
   discriminator: Array<number>;
-  /** Features versioning flags. */
-  features: bigint;
+  /** Version of the account. */
+  version: AccountVersion;
+  /** Token standard to mint NFTs. */
+  tokenStandard: number;
+  /** Features flags. */
+  features: Array<number>;
   /** Authority address. */
   authority: PublicKey;
   /** Authority address allowed to mint from the candy machine. */
@@ -44,8 +51,12 @@ export type CandyMachineAccountData = {
 };
 
 export type CandyMachineAccountDataArgs = {
-  /** Features versioning flags. */
-  features: number | bigint;
+  /** Version of the account. */
+  version: AccountVersionArgs;
+  /** Token standard to mint NFTs. */
+  tokenStandard: number;
+  /** Features flags. */
+  features: Array<number>;
   /** Authority address. */
   authority: PublicKey;
   /** Authority address allowed to mint from the candy machine. */
@@ -70,7 +81,9 @@ export function getCandyMachineAccountDataSerializer(
     s.struct<CandyMachineAccountData>(
       [
         ['discriminator', s.array(s.u8(), { size: 8 })],
-        ['features', s.u64()],
+        ['version', getAccountVersionSerializer(context)],
+        ['tokenStandard', s.u8()],
+        ['features', s.array(s.u8(), { size: 6 })],
         ['authority', s.publicKey()],
         ['mintAuthority', s.publicKey()],
         ['collectionMint', s.publicKey()],
@@ -151,7 +164,9 @@ export function getCandyMachineGpaBuilder(
   return gpaBuilder(context, programId)
     .registerFields<{
       discriminator: Array<number>;
-      features: number | bigint;
+      version: AccountVersionArgs;
+      tokenStandard: number;
+      features: Array<number>;
       authority: PublicKey;
       mintAuthority: PublicKey;
       collectionMint: PublicKey;
@@ -159,7 +174,9 @@ export function getCandyMachineGpaBuilder(
       data: CandyMachineDataArgs;
     }>([
       ['discriminator', s.array(s.u8(), { size: 8 })],
-      ['features', s.u64()],
+      ['version', getAccountVersionSerializer(context)],
+      ['tokenStandard', s.u8()],
+      ['features', s.array(s.u8(), { size: 6 })],
       ['authority', s.publicKey()],
       ['mintAuthority', s.publicKey()],
       ['collectionMint', s.publicKey()],

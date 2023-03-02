@@ -6,8 +6,12 @@ use super::candy_machine_data::CandyMachineData;
 #[account]
 #[derive(Default, Debug)]
 pub struct CandyMachine {
-    /// Features versioning flags.
-    pub features: u64,
+    /// Version of the account.
+    pub version: AccountVersion,
+    /// Token standard to mint NFTs.
+    pub token_standard: u8,
+    /// Features flags.
+    pub features: [u8; 6],
     /// Authority address.
     pub authority: Pubkey,
     /// Authority address allowed to mint from the candy machine.
@@ -35,4 +39,12 @@ pub struct ConfigLine {
     pub name: String,
     /// URI to JSON metadata.
     pub uri: String,
+}
+
+/// Account versioning.
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Default, Debug)]
+pub enum AccountVersion {
+    #[default]
+    V1,
+    V2,
 }

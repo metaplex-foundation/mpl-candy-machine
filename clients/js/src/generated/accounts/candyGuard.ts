@@ -141,7 +141,7 @@ export function getCandyGuardGpaBuilder(
     .whereField('discriminator', [95, 25, 33, 117, 164, 206, 9, 250]);
 }
 
-export function getCandyGuardSize(_context = {}): number {
+export function getCandyGuardSize(): number {
   return 65;
 }
 

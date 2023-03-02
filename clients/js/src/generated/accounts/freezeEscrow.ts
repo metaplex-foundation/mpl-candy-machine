@@ -196,12 +196,6 @@ export function getFreezeEscrowGpaBuilder(
     .whereField('discriminator', [100, 4, 61, 102, 0, 123, 141, 187]);
 }
 
-export function getFreezeEscrowSize(
-  context: Pick<Context, 'serializer'>
-): number | null {
-  return getFreezeEscrowAccountDataSerializer(context).fixedSize;
-}
-
 export function findFreezeEscrowPda(
   context: Pick<Context, 'eddsa' | 'programs' | 'serializer'>,
   seeds: {

@@ -104,7 +104,7 @@ export function getAllowListProofGpaBuilder(
     .whereSize(4);
 }
 
-export function getAllowListProofSize(_context = {}): number {
+export function getAllowListProofSize(): number {
   return 4;
 }
 

@@ -104,7 +104,7 @@ export function getMintCounterGpaBuilder(
     .whereSize(2);
 }
 
-export function getMintCounterSize(_context = {}): number {
+export function getMintCounterSize(): number {
   return 2;
 }
 

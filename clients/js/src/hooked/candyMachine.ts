@@ -1,5 +1,5 @@
 import { isNone, Option } from '@metaplex-foundation/umi';
-import { CANDY_MACHINE_HIDDEN_SECTION } from 'src/constants';
+import { CANDY_MACHINE_HIDDEN_SECTION } from '../constants';
 import { ConfigLineSettingsArgs } from '../generated/types/configLineSettings';
 
 export function getCandyMachineSize(

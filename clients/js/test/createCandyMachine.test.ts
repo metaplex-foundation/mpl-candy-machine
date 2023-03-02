@@ -1,4 +1,3 @@
-import { createAccountWithRent } from '@metaplex-foundation/mpl-essentials';
 import {
   generateSigner,
   none,
@@ -10,40 +9,24 @@ import {
 import test from 'ava';
 import {
   CandyMachine,
+  createCandyMachine,
   Creator,
   fetchCandyMachine,
-  initializeCandyMachine,
 } from '../src';
 import { createCollectionNft, createUmi } from './_setup';
 
-/**
- * Note that most of the tests for the "initializeCandyMachine" instructions are
- * part of the "createCandyMachine" tests as they are more convenient to test.
- */
-
-test('it can initialize a new candy machine account', async (t) => {
-  // Given an empty candy machine account with a big enough size.
+test('with minimum configuration', async (t) => {
+  // Given an existing collection NFT.
   const umi = await createUmi();
-  const candyMachine = generateSigner(umi);
-  await transactionBuilder(umi)
-    .add(
-      createAccountWithRent(umi, {
-        newAccount: candyMachine,
-        space: 5000,
-        programId: umi.programs.get('mplCandyMachineCore').publicKey,
-      })
-    )
-    .sendAndConfirm();
-
-  // And a collection NFT.
   const collectionMint = await createCollectionNft(umi);
 
-  // When we initialize a candy machine at this address.
+  // When we create a new candy machine for that collection.
+  const candyMachine = generateSigner(umi);
   const creator = generateSigner(umi);
   await transactionBuilder(umi)
     .add(
-      initializeCandyMachine(umi, {
-        candyMachine: candyMachine.publicKey,
+      createCandyMachine(umi, {
+        candyMachine,
         collectionMint: collectionMint.publicKey,
         collectionUpdateAuthority: umi.identity,
         itemsAvailable: 100,

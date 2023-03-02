@@ -144,6 +144,18 @@ const defaultsToMasterEditionPda = (mint = "mint") => ({
   dependency: "mplTokenMetadata",
   seeds: { mint: { kind: "account", name: mint } },
 });
+const defaultsToCollectionAuthorityRecordPda = (
+  mint = "mint",
+  collectionAuthority = "collectionAuthority"
+) => ({
+  kind: "pda",
+  pdaAccount: "collectionAuthorityRecord",
+  dependency: "mplTokenMetadata",
+  seeds: {
+    mint: { kind: "account", name: mint },
+    collectionAuthority: { kind: "account", name: collectionAuthority },
+  },
+});
 
 // Update instructions.
 kinobi.update(
@@ -159,6 +171,12 @@ kinobi.update(
         },
         collectionMasterEdition: {
           defaultsTo: defaultsToMasterEditionPda("collectionMint"),
+        },
+        collectionAuthorityRecord: {
+          defaultsTo: defaultsToCollectionAuthorityRecordPda(
+            "collectionMint",
+            "authorityPda"
+          ),
         },
       },
     },

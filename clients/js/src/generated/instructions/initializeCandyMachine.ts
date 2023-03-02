@@ -7,6 +7,7 @@
  */
 
 import {
+  findCollectionAuthorityRecordPda,
   findMasterEditionPda,
   findMetadataPda,
 } from '@metaplex-foundation/mpl-token-metadata';
@@ -38,7 +39,7 @@ export type InitializeCandyMachineInstructionAccounts = {
   collectionMint: PublicKey;
   collectionMasterEdition?: PublicKey;
   collectionUpdateAuthority: Signer;
-  collectionAuthorityRecord: PublicKey;
+  collectionAuthorityRecord?: PublicKey;
   tokenMetadataProgram: PublicKey;
   systemProgram?: PublicKey;
 };
@@ -117,7 +118,12 @@ export function initializeCandyMachine(
     input.collectionMasterEdition ??
     findMasterEditionPda(context, { mint: publicKey(collectionMintAccount) });
   const collectionUpdateAuthorityAccount = input.collectionUpdateAuthority;
-  const collectionAuthorityRecordAccount = input.collectionAuthorityRecord;
+  const collectionAuthorityRecordAccount =
+    input.collectionAuthorityRecord ??
+    findCollectionAuthorityRecordPda(context, {
+      mint: publicKey(collectionMintAccount),
+      collectionAuthority: publicKey(authorityPdaAccount),
+    });
   const tokenMetadataProgramAccount = input.tokenMetadataProgram;
   const systemProgramAccount = input.systemProgram ?? {
     ...context.programs.get('splSystem').publicKey,

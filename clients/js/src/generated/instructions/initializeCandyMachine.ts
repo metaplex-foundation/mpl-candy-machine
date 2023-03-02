@@ -15,7 +15,9 @@ import {
   WrappedInstruction,
   checkForIsWritableOverride as isWritable,
   mapSerializer,
+  publicKey,
 } from '@metaplex-foundation/umi';
+import { findCandyMachineAuthorityPda } from '../../hooked';
 import {
   CandyMachineData,
   CandyMachineDataArgs,
@@ -25,7 +27,7 @@ import {
 // Accounts.
 export type InitializeCandyMachineInstructionAccounts = {
   candyMachine: PublicKey;
-  authorityPda: PublicKey;
+  authorityPda?: PublicKey;
   authority?: PublicKey;
   payer?: Signer;
   collectionMetadata: PublicKey;
@@ -79,7 +81,10 @@ export function getInitializeCandyMachineInstructionDataSerializer(
 
 // Instruction.
 export function initializeCandyMachine(
-  context: Pick<Context, 'serializer' | 'programs' | 'identity' | 'payer'>,
+  context: Pick<
+    Context,
+    'serializer' | 'programs' | 'eddsa' | 'identity' | 'payer'
+  >,
   input: InitializeCandyMachineInstructionAccounts &
     InitializeCandyMachineInstructionDataArgs
 ): WrappedInstruction {
@@ -93,7 +98,11 @@ export function initializeCandyMachine(
 
   // Resolved accounts.
   const candyMachineAccount = input.candyMachine;
-  const authorityPdaAccount = input.authorityPda;
+  const authorityPdaAccount =
+    input.authorityPda ??
+    findCandyMachineAuthorityPda(context, {
+      candyMachine: publicKey(candyMachineAccount),
+    });
   const authorityAccount = input.authority ?? context.identity.publicKey;
   const payerAccount = input.payer ?? context.payer;
   const collectionMetadataAccount = input.collectionMetadata;

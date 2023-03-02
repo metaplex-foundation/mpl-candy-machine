@@ -125,10 +125,25 @@ kinobi.update(
   })
 );
 
+// Reusable PDA defaults.
+const defaultsToCandyMachineAuthorityPda = (candyMachine = "candyMachine") => ({
+  kind: "pda",
+  pdaAccount: "candyMachineAuthority",
+  dependency: "hooked",
+  seeds: { candyMachine: { kind: "account", name: candyMachine } },
+});
+
 // Update instructions.
 kinobi.update(
   new UpdateInstructionsVisitor({
-    "mplCandyMachineCore.initialize": { name: "initializeCandyMachine" },
+    "mplCandyMachineCore.initialize": {
+      name: "initializeCandyMachine",
+      accounts: {
+        authorityPda: {
+          defaultsTo: defaultsToCandyMachineAuthorityPda(),
+        },
+      },
+    },
     "mplCandyGuard.initialize": { name: "initializeCandyGuard" },
     "mplCandyMachineCore.mint": { name: "mintFromCandyMachine" },
     "mplCandyGuard.mint": { name: "mint" },

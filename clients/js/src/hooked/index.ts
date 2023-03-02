@@ -1,1 +1,2 @@
-export * from './AssociatedToken';
+export * from './candyMachine';
+export * from './candyMachineAuthority';

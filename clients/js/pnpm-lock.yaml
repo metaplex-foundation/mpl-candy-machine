@@ -2,6 +2,8 @@ lockfileVersion: 5.4
 
 specifiers:
   '@ava/typescript': ^3.0.1
+  '@metaplex-foundation/mpl-essentials': ^0.3.0
+  '@metaplex-foundation/mpl-token-metadata': 3.0.0-alpha.4
   '@metaplex-foundation/umi': ^0.5.1
   '@metaplex-foundation/umi-bundle-tests': ^0.5.1
   '@solana/web3.js': ^1.73.0
@@ -20,6 +22,10 @@ specifiers:
   typedoc-plugin-missing-exports: ^1.0.0
   typescript: ^4.6.2
   vercel: ^28.16.0
+
+dependencies:
+  '@metaplex-foundation/mpl-essentials': 0.3.0_p2gcgcrzg3umfevrbad7kw33li
+  '@metaplex-foundation/mpl-token-metadata': 3.0.0-alpha.4_p2gcgcrzg3umfevrbad7kw33li
 
 devDependencies:
   '@ava/typescript': 3.0.1
@@ -1596,6 +1602,23 @@ packages:
       - supports-color
     dev: true
 
+  /@metaplex-foundation/mpl-essentials/0.3.0_p2gcgcrzg3umfevrbad7kw33li:
+    resolution: {integrity: sha512-i4WNVX/v1HOQPfqGWNMia8J6HOoKnoppXvxpda2Q/RLempZNMbmsi1/2H24CJ1kryNOzHC4KLYSsXIzwBM/sXw==}
+    peerDependencies:
+      '@metaplex-foundation/umi': ^0.5.1
+    dependencies:
+      '@metaplex-foundation/umi': 0.5.1
+    dev: false
+
+  /@metaplex-foundation/mpl-token-metadata/3.0.0-alpha.4_p2gcgcrzg3umfevrbad7kw33li:
+    resolution: {integrity: sha512-1dIWg9tMSLuYEpEeL3oWWLWUKNKLIUIG4ZaVnzzl2wElyR7/Teb3aveXYhKrj02puW5XfUVfvpWDSpH/c0/fvg==}
+    peerDependencies:
+      '@metaplex-foundation/umi': ^0.5.1
+    dependencies:
+      '@metaplex-foundation/mpl-essentials': 0.3.0_p2gcgcrzg3umfevrbad7kw33li
+      '@metaplex-foundation/umi': 0.5.1
+    dev: false
+
   /@metaplex-foundation/umi-bundle-tests/0.5.1_ct6mfplqzlckizyyv3cggfwptu:
     resolution: {integrity: sha512-Mbat5V5ooISHL8UjRqyHIeAE/5r3bLIn7HJHbG63qp/be3BFB7DpxLPgK2cfvuhZvYlOpyR2gy6s7rP4lh7lKg==}
     peerDependencies:
@@ -1697,7 +1720,6 @@ packages:
 
   /@metaplex-foundation/umi/0.5.1:
     resolution: {integrity: sha512-yFZjC9Y4bJLKUT9YpQXN1ZvMRNPc/oZvblNM8zuU96oymFkNZkYPt6IWG8CtLaoS/QE5dpi5M8ee/DTdJVGmog==}
-    dev: true
 
   /@noble/ed25519/1.7.1:
     resolution: {integrity: sha512-Rk4SkJFaXZiznFyC/t77Q0NKS4FL7TLJJsVG2V2oiEq3kJVeTdxysEe/yRWSpnWMe808XRDJ+VFh5pt/FN5plw==}

@@ -7,6 +7,10 @@
  */
 
 import {
+  findMasterEditionPda,
+  findMetadataPda,
+} from '@metaplex-foundation/mpl-token-metadata';
+import {
   AccountMeta,
   Context,
   PublicKey,
@@ -30,8 +34,8 @@ export type MintFromCandyMachineInstructionAccounts = {
   nftMasterEdition: PublicKey;
   collectionAuthorityRecord: PublicKey;
   collectionMint: PublicKey;
-  collectionMetadata: PublicKey;
-  collectionMasterEdition: PublicKey;
+  collectionMetadata?: PublicKey;
+  collectionMasterEdition?: PublicKey;
   collectionUpdateAuthority: PublicKey;
   tokenMetadataProgram?: PublicKey;
   tokenProgram?: PublicKey;
@@ -75,7 +79,7 @@ export function getMintFromCandyMachineInstructionDataSerializer(
 
 // Instruction.
 export function mintFromCandyMachine(
-  context: Pick<Context, 'serializer' | 'programs' | 'payer'>,
+  context: Pick<Context, 'serializer' | 'programs' | 'eddsa' | 'payer'>,
   input: MintFromCandyMachineInstructionAccounts
 ): WrappedInstruction {
   const signers: Signer[] = [];
@@ -97,8 +101,12 @@ export function mintFromCandyMachine(
   const nftMasterEditionAccount = input.nftMasterEdition;
   const collectionAuthorityRecordAccount = input.collectionAuthorityRecord;
   const collectionMintAccount = input.collectionMint;
-  const collectionMetadataAccount = input.collectionMetadata;
-  const collectionMasterEditionAccount = input.collectionMasterEdition;
+  const collectionMetadataAccount =
+    input.collectionMetadata ??
+    findMetadataPda(context, { mint: publicKey(collectionMintAccount) });
+  const collectionMasterEditionAccount =
+    input.collectionMasterEdition ??
+    findMasterEditionPda(context, { mint: publicKey(collectionMintAccount) });
   const collectionUpdateAuthorityAccount = input.collectionUpdateAuthority;
   const tokenMetadataProgramAccount = input.tokenMetadataProgram ?? {
     ...context.programs.get('mplTokenMetadata').publicKey,

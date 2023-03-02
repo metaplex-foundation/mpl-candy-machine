@@ -200,6 +200,16 @@ kinobi.update(
       publicKey: "SysvarS1otHashes111111111111111111111111111",
       ignoreIfOptional: true,
     },
+    {
+      ...defaultsToMetadataPda("collectionMint"),
+      account: "collectionMetadata",
+      ignoreIfOptional: true,
+    },
+    {
+      ...defaultsToMasterEditionPda("collectionMint"),
+      account: "collectionMasterEdition",
+      ignoreIfOptional: true,
+    },
   ])
 );
 
@@ -211,12 +221,6 @@ kinobi.update(
       accounts: {
         authorityPda: {
           defaultsTo: defaultsToCandyMachineAuthorityPda(),
-        },
-        collectionMetadata: {
-          defaultsTo: defaultsToMetadataPda("collectionMint"),
-        },
-        collectionMasterEdition: {
-          defaultsTo: defaultsToMasterEditionPda("collectionMint"),
         },
         collectionAuthorityRecord: {
           defaultsTo: defaultsToCollectionAuthorityRecordPda(

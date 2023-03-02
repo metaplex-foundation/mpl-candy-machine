@@ -6,6 +6,7 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+import { findMetadataPda } from '@metaplex-foundation/mpl-token-metadata';
 import {
   AccountMeta,
   Context,
@@ -15,6 +16,7 @@ import {
   WrappedInstruction,
   checkForIsWritableOverride as isWritable,
   mapSerializer,
+  publicKey,
 } from '@metaplex-foundation/umi';
 
 // Accounts.
@@ -24,7 +26,7 @@ export type SetCollectionInstructionAccounts = {
   authorityPda: PublicKey;
   payer?: Signer;
   collectionMint: PublicKey;
-  collectionMetadata: PublicKey;
+  collectionMetadata?: PublicKey;
   collectionAuthorityRecord: PublicKey;
   newCollectionUpdateAuthority: Signer;
   newCollectionMetadata: PublicKey;
@@ -66,7 +68,10 @@ export function getSetCollectionInstructionDataSerializer(
 
 // Instruction.
 export function setCollection(
-  context: Pick<Context, 'serializer' | 'programs' | 'identity' | 'payer'>,
+  context: Pick<
+    Context,
+    'serializer' | 'programs' | 'eddsa' | 'identity' | 'payer'
+  >,
   input: SetCollectionInstructionAccounts
 ): WrappedInstruction {
   const signers: Signer[] = [];
@@ -83,7 +88,9 @@ export function setCollection(
   const authorityPdaAccount = input.authorityPda;
   const payerAccount = input.payer ?? context.payer;
   const collectionMintAccount = input.collectionMint;
-  const collectionMetadataAccount = input.collectionMetadata;
+  const collectionMetadataAccount =
+    input.collectionMetadata ??
+    findMetadataPda(context, { mint: publicKey(collectionMintAccount) });
   const collectionAuthorityRecordAccount = input.collectionAuthorityRecord;
   const newCollectionUpdateAuthorityAccount =
     input.newCollectionUpdateAuthority;

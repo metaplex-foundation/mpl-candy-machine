@@ -1,4 +1,4 @@
-import { mplDigitalAsset } from '@metaplex-foundation/mpl-token-metadata';
+import { mplTokenMetadata } from '@metaplex-foundation/mpl-token-metadata';
 import { UmiPlugin } from '@metaplex-foundation/umi';
 import {
   getMplCandyGuardProgram,
@@ -7,7 +7,7 @@ import {
 
 export const mplCandyMachine = (): UmiPlugin => ({
   install(umi) {
-    umi.use(mplDigitalAsset());
+    umi.use(mplTokenMetadata());
     umi.programs.add(getMplCandyMachineCoreProgram(), false);
     umi.programs.add(getMplCandyGuardProgram(), false);
   },

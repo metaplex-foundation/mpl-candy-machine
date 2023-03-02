@@ -23,7 +23,7 @@ export type WrapInstructionAccounts = {
   authority?: Signer;
   candyMachine: PublicKey;
   candyMachineProgram?: PublicKey;
-  candyMachineAuthority: Signer;
+  candyMachineAuthority?: Signer;
 };
 
 // Arguments.
@@ -71,7 +71,8 @@ export function wrap(
     ...context.programs.get('mplCandyMachine').publicKey,
     isWritable: false,
   };
-  const candyMachineAuthorityAccount = input.candyMachineAuthority;
+  const candyMachineAuthorityAccount =
+    input.candyMachineAuthority ?? context.identity;
 
   // Candy Guard.
   keys.push({

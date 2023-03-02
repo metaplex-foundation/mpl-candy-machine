@@ -30,10 +30,10 @@ export type MintInstructionAccounts = {
   candyMachine: PublicKey;
   candyMachineAuthorityPda: PublicKey;
   payer?: Signer;
-  nftMetadata: PublicKey;
+  nftMetadata?: PublicKey;
   nftMint: PublicKey;
   nftMintAuthority: Signer;
-  nftMasterEdition: PublicKey;
+  nftMasterEdition?: PublicKey;
   collectionAuthorityRecord: PublicKey;
   collectionMint: PublicKey;
   collectionMetadata?: PublicKey;
@@ -103,10 +103,14 @@ export function mint(
   const candyMachineAccount = input.candyMachine;
   const candyMachineAuthorityPdaAccount = input.candyMachineAuthorityPda;
   const payerAccount = input.payer ?? context.payer;
-  const nftMetadataAccount = input.nftMetadata;
   const nftMintAccount = input.nftMint;
+  const nftMetadataAccount =
+    input.nftMetadata ??
+    findMetadataPda(context, { mint: publicKey(nftMintAccount) });
   const nftMintAuthorityAccount = input.nftMintAuthority;
-  const nftMasterEditionAccount = input.nftMasterEdition;
+  const nftMasterEditionAccount =
+    input.nftMasterEdition ??
+    findMasterEditionPda(context, { mint: publicKey(nftMintAccount) });
   const collectionAuthorityRecordAccount = input.collectionAuthorityRecord;
   const collectionMintAccount = input.collectionMint;
   const collectionMetadataAccount =

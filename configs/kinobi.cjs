@@ -201,13 +201,54 @@ kinobi.update(
       ignoreIfOptional: true,
     },
     {
+      ...defaultsToCandyMachineAuthorityPda(),
+      account: "authorityPda",
+      ignoreIfOptional: true,
+    },
+    {
       ...defaultsToMetadataPda("collectionMint"),
       account: "collectionMetadata",
       ignoreIfOptional: true,
     },
     {
+      ...defaultsToMetadataPda("newCollectionMint"),
+      account: "newCollectionMetadata",
+      ignoreIfOptional: true,
+    },
+    {
+      ...defaultsToMetadataPda("nftMint"),
+      account: "nftMetadata",
+      ignoreIfOptional: true,
+    },
+    {
       ...defaultsToMasterEditionPda("collectionMint"),
       account: "collectionMasterEdition",
+      ignoreIfOptional: true,
+    },
+    {
+      ...defaultsToMasterEditionPda("newCollectionMint"),
+      account: "newCollectionMasterEdition",
+      ignoreIfOptional: true,
+    },
+    {
+      ...defaultsToMasterEditionPda("nftMint"),
+      account: "nftMasterEdition",
+      ignoreIfOptional: true,
+    },
+    {
+      ...defaultsToCollectionAuthorityRecordPda(
+        "collectionMint",
+        "authorityPda"
+      ),
+      account: "collectionAuthorityRecord",
+      ignoreIfOptional: true,
+    },
+    {
+      ...defaultsToCollectionAuthorityRecordPda(
+        "newCollectionMint",
+        "authorityPda"
+      ),
+      account: "newCollectionAuthorityRecord",
       ignoreIfOptional: true,
     },
   ])
@@ -216,20 +257,7 @@ kinobi.update(
 // Update instructions.
 kinobi.update(
   new UpdateInstructionsVisitor({
-    "mplCandyMachineCore.initialize": {
-      name: "initializeCandyMachine",
-      accounts: {
-        authorityPda: {
-          defaultsTo: defaultsToCandyMachineAuthorityPda(),
-        },
-        collectionAuthorityRecord: {
-          defaultsTo: defaultsToCollectionAuthorityRecordPda(
-            "collectionMint",
-            "authorityPda"
-          ),
-        },
-      },
-    },
+    "mplCandyMachineCore.initialize": { name: "initializeCandyMachine" },
     "mplCandyGuard.initialize": { name: "initializeCandyGuard" },
     "mplCandyMachineCore.mint": { name: "mintFromCandyMachine" },
     "mplCandyGuard.mint": { name: "mint" },

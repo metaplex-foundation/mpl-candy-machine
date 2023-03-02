@@ -6,7 +6,11 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { findMetadataPda } from '@metaplex-foundation/mpl-token-metadata';
+import {
+  findCollectionAuthorityRecordPda,
+  findMasterEditionPda,
+  findMetadataPda,
+} from '@metaplex-foundation/mpl-token-metadata';
 import {
   AccountMeta,
   Context,
@@ -18,21 +22,22 @@ import {
   mapSerializer,
   publicKey,
 } from '@metaplex-foundation/umi';
+import { findCandyMachineAuthorityPda } from '../../hooked';
 
 // Accounts.
 export type SetCollectionInstructionAccounts = {
   candyMachine: PublicKey;
   authority?: Signer;
-  authorityPda: PublicKey;
+  authorityPda?: PublicKey;
   payer?: Signer;
   collectionMint: PublicKey;
   collectionMetadata?: PublicKey;
-  collectionAuthorityRecord: PublicKey;
+  collectionAuthorityRecord?: PublicKey;
   newCollectionUpdateAuthority: Signer;
-  newCollectionMetadata: PublicKey;
+  newCollectionMetadata?: PublicKey;
   newCollectionMint: PublicKey;
-  newCollectionMasterEdition: PublicKey;
-  newCollectionAuthorityRecord: PublicKey;
+  newCollectionMasterEdition?: PublicKey;
+  newCollectionAuthorityRecord?: PublicKey;
   tokenMetadataProgram?: PublicKey;
   systemProgram?: PublicKey;
 };
@@ -85,20 +90,39 @@ export function setCollection(
   // Resolved accounts.
   const candyMachineAccount = input.candyMachine;
   const authorityAccount = input.authority ?? context.identity;
-  const authorityPdaAccount = input.authorityPda;
+  const authorityPdaAccount =
+    input.authorityPda ??
+    findCandyMachineAuthorityPda(context, {
+      candyMachine: publicKey(candyMachineAccount),
+    });
   const payerAccount = input.payer ?? context.payer;
   const collectionMintAccount = input.collectionMint;
   const collectionMetadataAccount =
     input.collectionMetadata ??
     findMetadataPda(context, { mint: publicKey(collectionMintAccount) });
-  const collectionAuthorityRecordAccount = input.collectionAuthorityRecord;
+  const collectionAuthorityRecordAccount =
+    input.collectionAuthorityRecord ??
+    findCollectionAuthorityRecordPda(context, {
+      mint: publicKey(collectionMintAccount),
+      collectionAuthority: publicKey(authorityPdaAccount),
+    });
   const newCollectionUpdateAuthorityAccount =
     input.newCollectionUpdateAuthority;
-  const newCollectionMetadataAccount = input.newCollectionMetadata;
   const newCollectionMintAccount = input.newCollectionMint;
-  const newCollectionMasterEditionAccount = input.newCollectionMasterEdition;
+  const newCollectionMetadataAccount =
+    input.newCollectionMetadata ??
+    findMetadataPda(context, { mint: publicKey(newCollectionMintAccount) });
+  const newCollectionMasterEditionAccount =
+    input.newCollectionMasterEdition ??
+    findMasterEditionPda(context, {
+      mint: publicKey(newCollectionMintAccount),
+    });
   const newCollectionAuthorityRecordAccount =
-    input.newCollectionAuthorityRecord;
+    input.newCollectionAuthorityRecord ??
+    findCollectionAuthorityRecordPda(context, {
+      mint: publicKey(newCollectionMintAccount),
+      collectionAuthority: publicKey(authorityPdaAccount),
+    });
   const tokenMetadataProgramAccount = input.tokenMetadataProgram ?? {
     ...context.programs.get('mplTokenMetadata').publicKey,
     isWritable: false,

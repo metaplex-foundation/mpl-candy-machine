@@ -7,6 +7,7 @@
  */
 
 import {
+  findCollectionAuthorityRecordPda,
   findMasterEditionPda,
   findMetadataPda,
 } from '@metaplex-foundation/mpl-token-metadata';
@@ -21,18 +22,19 @@ import {
   mapSerializer,
   publicKey,
 } from '@metaplex-foundation/umi';
+import { findCandyMachineAuthorityPda } from '../../hooked';
 
 // Accounts.
 export type MintFromCandyMachineInstructionAccounts = {
   candyMachine: PublicKey;
-  authorityPda: PublicKey;
+  authorityPda?: PublicKey;
   mintAuthority: Signer;
   payer?: Signer;
   nftMint: PublicKey;
   nftMintAuthority: Signer;
-  nftMetadata: PublicKey;
-  nftMasterEdition: PublicKey;
-  collectionAuthorityRecord: PublicKey;
+  nftMetadata?: PublicKey;
+  nftMasterEdition?: PublicKey;
+  collectionAuthorityRecord?: PublicKey;
   collectionMint: PublicKey;
   collectionMetadata?: PublicKey;
   collectionMasterEdition?: PublicKey;
@@ -92,15 +94,28 @@ export function mintFromCandyMachine(
 
   // Resolved accounts.
   const candyMachineAccount = input.candyMachine;
-  const authorityPdaAccount = input.authorityPda;
+  const authorityPdaAccount =
+    input.authorityPda ??
+    findCandyMachineAuthorityPda(context, {
+      candyMachine: publicKey(candyMachineAccount),
+    });
   const mintAuthorityAccount = input.mintAuthority;
   const payerAccount = input.payer ?? context.payer;
   const nftMintAccount = input.nftMint;
   const nftMintAuthorityAccount = input.nftMintAuthority;
-  const nftMetadataAccount = input.nftMetadata;
-  const nftMasterEditionAccount = input.nftMasterEdition;
-  const collectionAuthorityRecordAccount = input.collectionAuthorityRecord;
+  const nftMetadataAccount =
+    input.nftMetadata ??
+    findMetadataPda(context, { mint: publicKey(nftMintAccount) });
+  const nftMasterEditionAccount =
+    input.nftMasterEdition ??
+    findMasterEditionPda(context, { mint: publicKey(nftMintAccount) });
   const collectionMintAccount = input.collectionMint;
+  const collectionAuthorityRecordAccount =
+    input.collectionAuthorityRecord ??
+    findCollectionAuthorityRecordPda(context, {
+      mint: publicKey(collectionMintAccount),
+      collectionAuthority: publicKey(authorityPdaAccount),
+    });
   const collectionMetadataAccount =
     input.collectionMetadata ??
     findMetadataPda(context, { mint: publicKey(collectionMintAccount) });

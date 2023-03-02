@@ -13,6 +13,8 @@ const {
   SetInstructionAccountDefaultValuesVisitor,
   TransformNodesVisitor,
   UnwrapInstructionArgsStructVisitor,
+  vScalar,
+  vNone,
 } = require("@metaplex-foundation/kinobi");
 const {
   TransformDefinedTypesIntoAccountsVisitor,
@@ -312,7 +314,13 @@ kinobi.update(new UnwrapInstructionArgsStructVisitor());
 
 kinobi.update(
   new SetStructDefaultValuesVisitor({
-    //
+    initializeCandyMachineInstructionData: {
+      symbol: vScalar(""),
+      maxSupply: vScalar(0),
+      isMutable: vScalar(true),
+      configLineSettings: vNone(),
+      hiddenSettings: vNone(),
+    },
   })
 );
 

@@ -21,6 +21,7 @@ import {
   WrappedInstruction,
   checkForIsWritableOverride as isWritable,
   mapSerializer,
+  none,
   publicKey,
 } from '@metaplex-foundation/umi';
 import { findCandyMachineAuthorityPda } from '../../hooked';
@@ -76,19 +77,19 @@ export type InitializeCandyMachineInstructionDataArgs = {
   /** Number of assets available */
   itemsAvailable: number | bigint;
   /** Symbol for the asset */
-  symbol: string;
+  symbol?: string;
   /** Secondary sales royalty basis points (0-10000) */
   sellerFeeBasisPoints: number;
   /** Max supply of each individual asset (default 0) */
-  maxSupply: number | bigint;
+  maxSupply?: number | bigint;
   /** Indicates if the asset is mutable or not (default yes) */
-  isMutable: boolean;
+  isMutable?: boolean;
   /** List of creators */
   creators: Array<CreatorArgs>;
   /** Config line settings */
-  configLineSettings: Option<ConfigLineSettingsArgs>;
+  configLineSettings?: Option<ConfigLineSettingsArgs>;
   /** Hidden setttings */
-  hiddenSettings: Option<HiddenSettingsArgs>;
+  hiddenSettings?: Option<HiddenSettingsArgs>;
 };
 
 export function getInitializeCandyMachineInstructionDataSerializer(
@@ -124,6 +125,11 @@ export function getInitializeCandyMachineInstructionDataSerializer(
       ({
         ...value,
         discriminator: [175, 175, 109, 31, 13, 152, 155, 237],
+        symbol: value.symbol ?? '',
+        maxSupply: value.maxSupply ?? 0,
+        isMutable: value.isMutable ?? true,
+        configLineSettings: value.configLineSettings ?? none(),
+        hiddenSettings: value.hiddenSettings ?? none(),
       } as InitializeCandyMachineInstructionData)
   ) as Serializer<
     InitializeCandyMachineInstructionDataArgs,

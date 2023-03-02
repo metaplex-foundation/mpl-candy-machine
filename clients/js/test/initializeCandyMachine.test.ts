@@ -59,7 +59,7 @@ test('it can initialize a new candy machine account', async (t) => {
         collectionMint: collectionMint.publicKey,
         collectionUpdateAuthority: umi.identity,
         itemsAvailable: 100,
-        sellerFeeBasisPoints: 500,
+        sellerFeeBasisPoints: percentAmount(1.23),
         creators: [
           { address: creator.publicKey, verified: false, percentageShare: 100 },
         ],
@@ -88,7 +88,7 @@ test('it can initialize a new candy machine account', async (t) => {
     data: {
       itemsAvailable: 100n,
       symbol: '',
-      sellerFeeBasisPoints: 500,
+      sellerFeeBasisPoints: percentAmount(1.23),
       maxSupply: 0n,
       isMutable: true,
       creators: [

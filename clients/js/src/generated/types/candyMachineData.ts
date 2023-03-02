@@ -6,7 +6,13 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Context, Option, Serializer } from '@metaplex-foundation/umi';
+import {
+  Amount,
+  Context,
+  Option,
+  Serializer,
+  mapAmountSerializer,
+} from '@metaplex-foundation/umi';
 import {
   ConfigLineSettings,
   ConfigLineSettingsArgs,
@@ -26,7 +32,7 @@ export type CandyMachineData = {
   /** Symbol for the asset */
   symbol: string;
   /** Secondary sales royalty basis points (0-10000) */
-  sellerFeeBasisPoints: number;
+  sellerFeeBasisPoints: Amount<'%', 2>;
   /** Max supply of each individual asset (default 0) */
   maxSupply: bigint;
   /** Indicates if the asset is mutable or not (default yes) */
@@ -45,7 +51,7 @@ export type CandyMachineDataArgs = {
   /** Symbol for the asset */
   symbol: string;
   /** Secondary sales royalty basis points (0-10000) */
-  sellerFeeBasisPoints: number;
+  sellerFeeBasisPoints: Amount<'%', 2>;
   /** Max supply of each individual asset (default 0) */
   maxSupply: number | bigint;
   /** Indicates if the asset is mutable or not (default yes) */
@@ -66,7 +72,7 @@ export function getCandyMachineDataSerializer(
     [
       ['itemsAvailable', s.u64()],
       ['symbol', s.string()],
-      ['sellerFeeBasisPoints', s.u16()],
+      ['sellerFeeBasisPoints', mapAmountSerializer(s.u16(), '%', 2)],
       ['maxSupply', s.u64()],
       ['isMutable', s.bool()],
       ['creators', s.array(getCreatorSerializer(context))],

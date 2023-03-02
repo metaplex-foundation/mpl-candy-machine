@@ -325,10 +325,11 @@ kinobi.update(
 );
 
 // Wrap numbers.
+const percentAmount = { kind: "Amount", identifier: "%", decimals: 2 };
 kinobi.update(
   new SetNumberWrappersVisitor({
-    // "splSystem.CreateAccount.lamports": { kind: "SolAmount" },
-    // "splSystem.TransferSol.amount": { kind: "SolAmount" },
+    "candyMachineData.sellerFeeBasisPoints": percentAmount,
+    "initializeCandyMachineInstructionData.sellerFeeBasisPoints": percentAmount,
   })
 );
 

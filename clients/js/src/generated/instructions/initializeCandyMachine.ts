@@ -13,6 +13,7 @@ import {
 } from '@metaplex-foundation/mpl-token-metadata';
 import {
   AccountMeta,
+  Amount,
   Context,
   Option,
   PublicKey,
@@ -20,6 +21,7 @@ import {
   Signer,
   WrappedInstruction,
   checkForIsWritableOverride as isWritable,
+  mapAmountSerializer,
   mapSerializer,
   none,
   publicKey,
@@ -60,7 +62,7 @@ export type InitializeCandyMachineInstructionData = {
   /** Symbol for the asset */
   symbol: string;
   /** Secondary sales royalty basis points (0-10000) */
-  sellerFeeBasisPoints: number;
+  sellerFeeBasisPoints: Amount<'%', 2>;
   /** Max supply of each individual asset (default 0) */
   maxSupply: bigint;
   /** Indicates if the asset is mutable or not (default yes) */
@@ -79,7 +81,7 @@ export type InitializeCandyMachineInstructionDataArgs = {
   /** Symbol for the asset */
   symbol?: string;
   /** Secondary sales royalty basis points (0-10000) */
-  sellerFeeBasisPoints: number;
+  sellerFeeBasisPoints: Amount<'%', 2>;
   /** Max supply of each individual asset (default 0) */
   maxSupply?: number | bigint;
   /** Indicates if the asset is mutable or not (default yes) */
@@ -109,7 +111,7 @@ export function getInitializeCandyMachineInstructionDataSerializer(
         ['discriminator', s.array(s.u8(), { size: 8 })],
         ['itemsAvailable', s.u64()],
         ['symbol', s.string()],
-        ['sellerFeeBasisPoints', s.u16()],
+        ['sellerFeeBasisPoints', mapAmountSerializer(s.u16(), '%', 2)],
         ['maxSupply', s.u64()],
         ['isMutable', s.bool()],
         ['creators', s.array(getCreatorSerializer(context))],

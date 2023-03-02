@@ -171,6 +171,24 @@ kinobi.update(
       ignoreIfOptional: true,
     },
     {
+      kind: "program",
+      account: /^candyMachineProgram|mplCandyMachineProgram$/,
+      program: {
+        name: "mplCandyMachine",
+        publicKey: "CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR",
+      },
+      ignoreIfOptional: true,
+    },
+    {
+      kind: "program",
+      account: /^candyGuardProgram|mplCandyGuardProgram$/,
+      program: {
+        name: "mplCandyGuard",
+        publicKey: "Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g",
+      },
+      ignoreIfOptional: true,
+    },
+    {
       kind: "publicKey",
       account: /^instructionSysvarAccount$/,
       publicKey: "Sysvar1nstructions1111111111111111111111111",

@@ -23,7 +23,7 @@ export type UnwrapInstructionAccounts = {
   authority?: Signer;
   candyMachine: PublicKey;
   candyMachineAuthority: Signer;
-  candyMachineProgram: PublicKey;
+  candyMachineProgram?: PublicKey;
 };
 
 // Arguments.
@@ -68,7 +68,10 @@ export function unwrap(
   const authorityAccount = input.authority ?? context.identity;
   const candyMachineAccount = input.candyMachine;
   const candyMachineAuthorityAccount = input.candyMachineAuthority;
-  const candyMachineProgramAccount = input.candyMachineProgram;
+  const candyMachineProgramAccount = input.candyMachineProgram ?? {
+    ...context.programs.get('mplCandyMachine').publicKey,
+    isWritable: false,
+  };
 
   // Candy Guard.
   keys.push({

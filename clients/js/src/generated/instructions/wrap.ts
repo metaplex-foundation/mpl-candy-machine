@@ -22,7 +22,7 @@ export type WrapInstructionAccounts = {
   candyGuard: PublicKey;
   authority?: Signer;
   candyMachine: PublicKey;
-  candyMachineProgram: PublicKey;
+  candyMachineProgram?: PublicKey;
   candyMachineAuthority: Signer;
 };
 
@@ -67,7 +67,10 @@ export function wrap(
   const candyGuardAccount = input.candyGuard;
   const authorityAccount = input.authority ?? context.identity;
   const candyMachineAccount = input.candyMachine;
-  const candyMachineProgramAccount = input.candyMachineProgram;
+  const candyMachineProgramAccount = input.candyMachineProgram ?? {
+    ...context.programs.get('mplCandyMachine').publicKey,
+    isWritable: false,
+  };
   const candyMachineAuthorityAccount = input.candyMachineAuthority;
 
   // Candy Guard.

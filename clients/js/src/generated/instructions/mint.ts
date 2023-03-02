@@ -22,7 +22,7 @@ import {
 // Accounts.
 export type MintInstructionAccounts = {
   candyGuard: PublicKey;
-  candyMachineProgram: PublicKey;
+  candyMachineProgram?: PublicKey;
   candyMachine: PublicKey;
   candyMachineAuthorityPda: PublicKey;
   payer?: Signer;
@@ -92,7 +92,10 @@ export function mint(
 
   // Resolved accounts.
   const candyGuardAccount = input.candyGuard;
-  const candyMachineProgramAccount = input.candyMachineProgram;
+  const candyMachineProgramAccount = input.candyMachineProgram ?? {
+    ...context.programs.get('mplCandyMachine').publicKey,
+    isWritable: false,
+  };
   const candyMachineAccount = input.candyMachine;
   const candyMachineAuthorityPdaAccount = input.candyMachineAuthorityPda;
   const payerAccount = input.payer ?? context.payer;

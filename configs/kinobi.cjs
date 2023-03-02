@@ -11,6 +11,8 @@ const {
   TypePublicKeyNode,
   TypeBytesNode,
   SetInstructionAccountDefaultValuesVisitor,
+  TransformNodesVisitor,
+  UnwrapInstructionArgsStructVisitor,
 } = require("@metaplex-foundation/kinobi");
 const {
   TransformDefinedTypesIntoAccountsVisitor,
@@ -289,6 +291,24 @@ kinobi.update(
     "mplCandyGuard.withdraw": { name: "withdrawCandyGuard" },
   })
 );
+
+// Unwrap candyMachineData defined type but only for initializeCandyMachine.
+const candyMachineDataNode = kinobi.rootNode.allDefinedTypes.find(
+  (type) => type.name === "candyMachineData"
+);
+kinobi.update(
+  new TransformNodesVisitor([
+    {
+      selector: {
+        type: "typeDefinedLink",
+        name: "candyMachineData",
+        stack: ["initializeCandyMachine"],
+      },
+      transformer: () => candyMachineDataNode.type,
+    },
+  ])
+);
+kinobi.update(new UnwrapInstructionArgsStructVisitor());
 
 kinobi.update(
   new SetStructDefaultValuesVisitor({

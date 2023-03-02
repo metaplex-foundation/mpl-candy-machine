@@ -170,6 +170,18 @@ kinobi.update(
       },
       ignoreIfOptional: true,
     },
+    {
+      kind: "publicKey",
+      account: /^instructionSysvarAccount$/,
+      publicKey: "Sysvar1nstructions1111111111111111111111111",
+      ignoreIfOptional: true,
+    },
+    {
+      kind: "publicKey",
+      account: /^recentSlothashes$/,
+      publicKey: "SysvarS1otHashes111111111111111111111111111",
+      ignoreIfOptional: true,
+    },
   ])
 );
 

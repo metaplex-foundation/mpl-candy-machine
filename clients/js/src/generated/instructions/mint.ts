@@ -16,6 +16,7 @@ import {
   WrappedInstruction,
   checkForIsWritableOverride as isWritable,
   mapSerializer,
+  publicKey,
 } from '@metaplex-foundation/umi';
 
 // Accounts.
@@ -37,8 +38,8 @@ export type MintInstructionAccounts = {
   tokenMetadataProgram?: PublicKey;
   tokenProgram?: PublicKey;
   systemProgram?: PublicKey;
-  recentSlothashes: PublicKey;
-  instructionSysvarAccount: PublicKey;
+  recentSlothashes?: PublicKey;
+  instructionSysvarAccount?: PublicKey;
 };
 
 // Arguments.
@@ -116,8 +117,12 @@ export function mint(
     ...context.programs.get('splSystem').publicKey,
     isWritable: false,
   };
-  const recentSlothashesAccount = input.recentSlothashes;
-  const instructionSysvarAccountAccount = input.instructionSysvarAccount;
+  const recentSlothashesAccount =
+    input.recentSlothashes ??
+    publicKey('SysvarS1otHashes111111111111111111111111111');
+  const instructionSysvarAccountAccount =
+    input.instructionSysvarAccount ??
+    publicKey('Sysvar1nstructions1111111111111111111111111');
 
   // Candy Guard.
   keys.push({

@@ -15,6 +15,7 @@ import {
   WrappedInstruction,
   checkForIsWritableOverride as isWritable,
   mapSerializer,
+  publicKey,
 } from '@metaplex-foundation/umi';
 
 // Accounts.
@@ -35,7 +36,7 @@ export type MintFromCandyMachineInstructionAccounts = {
   tokenMetadataProgram?: PublicKey;
   tokenProgram?: PublicKey;
   systemProgram?: PublicKey;
-  recentSlothashes: PublicKey;
+  recentSlothashes?: PublicKey;
 };
 
 // Arguments.
@@ -111,7 +112,9 @@ export function mintFromCandyMachine(
     ...context.programs.get('splSystem').publicKey,
     isWritable: false,
   };
-  const recentSlothashesAccount = input.recentSlothashes;
+  const recentSlothashesAccount =
+    input.recentSlothashes ??
+    publicKey('SysvarS1otHashes111111111111111111111111111');
 
   // Candy Machine.
   keys.push({

@@ -327,7 +327,7 @@ kinobi.update(
   })
 );
 
-// Unwrap candyMachineData defined type but only for initializeCandyMachine.
+// Unwrap candyMachineData defined type but only for initialize instructions.
 const candyMachineDataNode = kinobi.rootNode.allDefinedTypes.find(
   (type) => type.name === "candyMachineData"
 );
@@ -341,19 +341,29 @@ kinobi.update(
       },
       transformer: () => candyMachineDataNode.type,
     },
+    {
+      selector: {
+        type: "typeDefinedLink",
+        name: "candyMachineData",
+        stack: ["initializeV2CandyMachine"],
+      },
+      transformer: () => candyMachineDataNode.type,
+    },
   ])
 );
 kinobi.update(new UnwrapInstructionArgsStructVisitor());
 
+const defaultInitialCandyMachineData = {
+  symbol: vScalar(""),
+  maxSupply: vScalar(0),
+  isMutable: vScalar(true),
+  configLineSettings: vNone(),
+  hiddenSettings: vNone(),
+};
 kinobi.update(
   new SetStructDefaultValuesVisitor({
-    initializeCandyMachineInstructionData: {
-      symbol: vScalar(""),
-      maxSupply: vScalar(0),
-      isMutable: vScalar(true),
-      configLineSettings: vNone(),
-      hiddenSettings: vNone(),
-    },
+    initializeCandyMachineInstructionData: defaultInitialCandyMachineData,
+    initializeV2CandyMachineInstructionData: defaultInitialCandyMachineData,
   })
 );
 

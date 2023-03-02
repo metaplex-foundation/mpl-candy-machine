@@ -13,19 +13,27 @@ import {
 import {
   AccountMeta,
   Context,
+  Option,
   PublicKey,
   Serializer,
   Signer,
   WrappedInstruction,
   checkForIsWritableOverride as isWritable,
   mapSerializer,
+  none,
   publicKey,
 } from '@metaplex-foundation/umi';
 import { findCandyMachineAuthorityPda } from '../../hooked';
 import {
-  CandyMachineData,
-  CandyMachineDataArgs,
-  getCandyMachineDataSerializer,
+  ConfigLineSettings,
+  ConfigLineSettingsArgs,
+  Creator,
+  CreatorArgs,
+  HiddenSettings,
+  HiddenSettingsArgs,
+  getConfigLineSettingsSerializer,
+  getCreatorSerializer,
+  getHiddenSettingsSerializer,
 } from '../types';
 
 // Accounts.
@@ -49,12 +57,42 @@ export type InitializeV2CandyMachineInstructionAccounts = {
 // Arguments.
 export type InitializeV2CandyMachineInstructionData = {
   discriminator: Array<number>;
-  data: CandyMachineData;
+  /** Number of assets available */
+  itemsAvailable: bigint;
+  /** Symbol for the asset */
+  symbol: string;
+  /** Secondary sales royalty basis points (0-10000) */
+  sellerFeeBasisPoints: number;
+  /** Max supply of each individual asset (default 0) */
+  maxSupply: bigint;
+  /** Indicates if the asset is mutable or not (default yes) */
+  isMutable: boolean;
+  /** List of creators */
+  creators: Array<Creator>;
+  /** Config line settings */
+  configLineSettings: Option<ConfigLineSettings>;
+  /** Hidden setttings */
+  hiddenSettings: Option<HiddenSettings>;
   tokenStandard: number;
 };
 
 export type InitializeV2CandyMachineInstructionDataArgs = {
-  data: CandyMachineDataArgs;
+  /** Number of assets available */
+  itemsAvailable: number | bigint;
+  /** Symbol for the asset */
+  symbol?: string;
+  /** Secondary sales royalty basis points (0-10000) */
+  sellerFeeBasisPoints: number;
+  /** Max supply of each individual asset (default 0) */
+  maxSupply?: number | bigint;
+  /** Indicates if the asset is mutable or not (default yes) */
+  isMutable?: boolean;
+  /** List of creators */
+  creators: Array<CreatorArgs>;
+  /** Config line settings */
+  configLineSettings?: Option<ConfigLineSettingsArgs>;
+  /** Hidden setttings */
+  hiddenSettings?: Option<HiddenSettingsArgs>;
   tokenStandard: number;
 };
 
@@ -73,7 +111,17 @@ export function getInitializeV2CandyMachineInstructionDataSerializer(
     s.struct<InitializeV2CandyMachineInstructionData>(
       [
         ['discriminator', s.array(s.u8(), { size: 8 })],
-        ['data', getCandyMachineDataSerializer(context)],
+        ['itemsAvailable', s.u64()],
+        ['symbol', s.string()],
+        ['sellerFeeBasisPoints', s.u16()],
+        ['maxSupply', s.u64()],
+        ['isMutable', s.bool()],
+        ['creators', s.array(getCreatorSerializer(context))],
+        [
+          'configLineSettings',
+          s.option(getConfigLineSettingsSerializer(context)),
+        ],
+        ['hiddenSettings', s.option(getHiddenSettingsSerializer(context))],
         ['tokenStandard', s.u8()],
       ],
       { description: 'InitializeV2CandyMachineInstructionData' }
@@ -82,6 +130,11 @@ export function getInitializeV2CandyMachineInstructionDataSerializer(
       ({
         ...value,
         discriminator: [67, 153, 175, 39, 218, 16, 38, 32],
+        symbol: value.symbol ?? '',
+        maxSupply: value.maxSupply ?? 0,
+        isMutable: value.isMutable ?? true,
+        configLineSettings: value.configLineSettings ?? none(),
+        hiddenSettings: value.hiddenSettings ?? none(),
       } as InitializeV2CandyMachineInstructionData)
   ) as Serializer<
     InitializeV2CandyMachineInstructionDataArgs,

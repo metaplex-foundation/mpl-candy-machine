@@ -33,7 +33,7 @@ jobs:
       - name: Git checkout
         uses: actions/checkout@v3
 
-      - name: Install Rust
+      - name: Install Rust (WHAT)
         uses: metaplex-foundation/actions/install-rust@v1
         with:
           toolchain: ${{ inputs.rust }}

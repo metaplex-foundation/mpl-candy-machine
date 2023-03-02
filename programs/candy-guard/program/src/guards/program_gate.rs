@@ -58,12 +58,11 @@ impl Guard for ProgramGate {
 impl Condition for ProgramGate {
     fn validate<'info>(
         &self,
-        ctx: &Context<'_, '_, '_, 'info, Mint<'info>>,
-        _mint_args: &[u8],
+        ctx: &mut EvaluationContext,
         _guard_set: &GuardSet,
-        _evaluation_context: &mut EvaluationContext,
+        _mint_args: &[u8],
     ) -> Result<()> {
-        let ix_sysvar_account = &ctx.accounts.instruction_sysvar_account;
+        let ix_sysvar_account = &ctx.accounts.sysvar_instructions;
         let ix_sysvar_account_info = ix_sysvar_account.to_account_info();
 
         let mut programs: Vec<Pubkey> =
@@ -71,11 +70,11 @@ impl Condition for ProgramGate {
         programs.extend(DEFAULT_PROGRAMS);
         programs.extend(&self.additional);
 
-        verify_programs(ix_sysvar_account_info, &programs)
+        verify_programs(&ix_sysvar_account_info, &programs)
     }
 }
 
-pub fn verify_programs(sysvar: AccountInfo, programs: &[Pubkey]) -> Result<()> {
+pub fn verify_programs(sysvar: &AccountInfo, programs: &[Pubkey]) -> Result<()> {
     let sysvar_data = sysvar.data.borrow();
 
     let mut index = 0;

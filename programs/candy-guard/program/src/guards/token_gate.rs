@@ -27,16 +27,15 @@ impl Guard for TokenGate {
 impl Condition for TokenGate {
     fn validate<'info>(
         &self,
-        ctx: &Context<'_, '_, '_, 'info, Mint<'info>>,
-        _mint_args: &[u8],
+        ctx: &mut EvaluationContext,
         _guard_set: &GuardSet,
-        evaluation_context: &mut EvaluationContext,
+        _mint_args: &[u8],
     ) -> Result<()> {
         // retrieves the (potential) token gate account
-        let token_gate_index = evaluation_context.account_cursor;
-        let token_gate_account = try_get_account_info(ctx, token_gate_index)?;
+        let token_gate_index = ctx.account_cursor;
+        let token_gate_account = try_get_account_info(ctx.accounts.remaining, token_gate_index)?;
         // consumes the gate token account
-        evaluation_context.account_cursor += 1;
+        ctx.account_cursor += 1;
 
         let account = assert_is_ata(token_gate_account, &ctx.accounts.payer.key(), &self.mint)?;
 

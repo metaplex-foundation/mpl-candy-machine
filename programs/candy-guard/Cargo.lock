@@ -1011,11 +1011,10 @@ dependencies = [
 [[package]]
 name = "mpl-candy-machine-core"
 version = "0.1.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "979975275820465e1ae68742c2ca86af143d07097a0b174ed6f7687be697d8f3"
 dependencies = [
  "anchor-lang",
  "arrayref",
+ "mpl-token-auth-rules",
  "mpl-token-metadata",
  "solana-program",
  "spl-associated-token-account",

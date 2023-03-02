@@ -29,21 +29,18 @@ impl Guard for SolPayment {
 impl Condition for SolPayment {
     fn validate<'info>(
         &self,
-        ctx: &Context<'_, '_, '_, 'info, Mint<'info>>,
-        _mint_args: &[u8],
+        ctx: &mut EvaluationContext,
         _guard_set: &GuardSet,
-        evaluation_context: &mut EvaluationContext,
+        _mint_args: &[u8],
     ) -> Result<()> {
-        let index = evaluation_context.account_cursor;
+        let index = ctx.account_cursor;
         // validates that we received all required accounts
-        let destination = try_get_account_info(ctx, index)?;
-        evaluation_context.account_cursor += 1;
+        let destination = try_get_account_info(ctx.accounts.remaining, index)?;
+        ctx.account_cursor += 1;
         // validates the account information
         assert_keys_equal(destination.key, &self.destination)?;
 
-        evaluation_context
-            .indices
-            .insert("lamports_destination", index);
+        ctx.indices.insert("lamports_destination", index);
 
         if ctx.accounts.payer.lamports() < self.lamports {
             msg!(
@@ -59,13 +56,12 @@ impl Condition for SolPayment {
 
     fn pre_actions<'info>(
         &self,
-        ctx: &Context<'_, '_, '_, 'info, Mint<'info>>,
-        _mint_args: &[u8],
+        ctx: &mut EvaluationContext,
         _guard_set: &GuardSet,
-        evaluation_context: &mut EvaluationContext,
+        _mint_args: &[u8],
     ) -> Result<()> {
         let destination =
-            try_get_account_info(ctx, evaluation_context.indices["lamports_destination"])?;
+            try_get_account_info(ctx.accounts.remaining, ctx.indices["lamports_destination"])?;
 
         invoke(
             &system_instruction::transfer(

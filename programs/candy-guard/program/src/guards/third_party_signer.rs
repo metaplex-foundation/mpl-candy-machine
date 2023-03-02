@@ -24,14 +24,13 @@ impl Guard for ThirdPartySigner {
 impl Condition for ThirdPartySigner {
     fn validate<'info>(
         &self,
-        ctx: &Context<'_, '_, '_, 'info, Mint<'info>>,
-        _mint_args: &[u8],
+        ctx: &mut EvaluationContext,
         _guard_set: &GuardSet,
-        evaluation_context: &mut EvaluationContext,
+        _mint_args: &[u8],
     ) -> Result<()> {
-        let signer_index = evaluation_context.account_cursor;
-        evaluation_context.account_cursor += 1;
-        let signer_account = try_get_account_info(ctx, signer_index)?;
+        let signer_index = ctx.account_cursor;
+        ctx.account_cursor += 1;
+        let signer_account = try_get_account_info(ctx.accounts.remaining, signer_index)?;
 
         if !(cmp_pubkeys(signer_account.key, &self.signer_key) && signer_account.is_signer) {
             return err!(CandyGuardError::MissingRequiredSignature);

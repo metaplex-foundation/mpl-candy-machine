@@ -1,23 +1,27 @@
-use anchor_lang::{prelude::*, Discriminator};
-use mpl_token_metadata::state::{TokenStandard, MAX_SYMBOL_LENGTH};
+use anchor_lang::{prelude::*, solana_program::sysvar, Discriminator};
+use mpl_token_metadata::state::MAX_SYMBOL_LENGTH;
 
 use crate::{
-    approve_collection_authority_helper,
+    approve_metadata_delegate, assert_token_standard,
     constants::{AUTHORITY_SEED, HIDDEN_SECTION},
     state::{CandyMachine, CandyMachineData},
     utils::fixed_length_string,
-    AccountVersion, ApproveCollectionAuthorityHelperAccounts,
+    AccountVersion, ApproveMetadataDelegateHelperAccounts,
 };
 
-pub fn initialize(ctx: Context<Initialize>, data: CandyMachineData) -> Result<()> {
-    msg!("(Deprecated as of 0.2.0) Use InitializeV2 instead");
-
+pub fn initialize_v2(
+    ctx: Context<InitializeV2>,
+    data: CandyMachineData,
+    token_standard: u8,
+) -> Result<()> {
     let candy_machine_account = &mut ctx.accounts.candy_machine;
+
+    assert_token_standard(token_standard)?;
 
     let mut candy_machine = CandyMachine {
         data,
-        version: AccountVersion::V1,
-        token_standard: TokenStandard::NonFungible as u8,
+        version: AccountVersion::V2,
+        token_standard,
         features: [0u8; 6],
         authority: ctx.accounts.authority.key(),
         mint_authority: ctx.accounts.authority.key(),
@@ -40,26 +44,35 @@ pub fn initialize(ctx: Context<Initialize>, data: CandyMachineData) -> Result<()
         account_data[HIDDEN_SECTION..HIDDEN_SECTION + 4].copy_from_slice(&u32::MIN.to_le_bytes());
     }
 
-    let approve_accounts = ApproveCollectionAuthorityHelperAccounts {
-        payer: ctx.accounts.payer.to_account_info(),
+    // approves the metadata delegate so the candy machine can verify minted NFTs
+    let delegate_accounts = ApproveMetadataDelegateHelperAccounts {
         authority_pda: ctx.accounts.authority_pda.to_account_info(),
-        collection_mint: ctx.accounts.collection_mint.to_account_info(),
         collection_metadata: ctx.accounts.collection_metadata.to_account_info(),
-        collection_authority_record: ctx.accounts.collection_authority_record.to_account_info(),
-        token_metadata_program: ctx.accounts.token_metadata_program.to_account_info(),
-        system_program: ctx.accounts.system_program.to_account_info(),
+        collection_mint: ctx.accounts.collection_mint.to_account_info(),
         collection_update_authority: ctx.accounts.collection_update_authority.to_account_info(),
+        delegate_record: ctx.accounts.collection_delegate_record.to_account_info(),
+        payer: ctx.accounts.payer.to_account_info(),
+        system_program: ctx.accounts.system_program.to_account_info(),
+        sysvar_instructions: ctx.accounts.sysvar_instructions.to_account_info(),
+        authorization_rules_program: ctx
+            .accounts
+            .authorization_rules_program
+            .as_ref()
+            .map(|authorization_rules_program| authorization_rules_program.to_account_info()),
+        authorization_rules: ctx
+            .accounts
+            .authorization_rules
+            .as_ref()
+            .map(|authorization_rules| authorization_rules.to_account_info()),
     };
 
-    approve_collection_authority_helper(approve_accounts)?;
-
-    Ok(())
+    approve_metadata_delegate(delegate_accounts)
 }
 
 /// Initializes a new candy machine.
 #[derive(Accounts)]
-#[instruction(data: CandyMachineData)]
-pub struct Initialize<'info> {
+#[instruction(data: CandyMachineData, token_standard: u8)]
+pub struct InitializeV2<'info> {
     /// Candy Machine account. The account space must be allocated to allow accounts larger
     /// than 10kb.
     ///
@@ -92,6 +105,7 @@ pub struct Initialize<'info> {
     /// Metadata account of the collection.
     ///
     /// CHECK: account checked in CPI
+    #[account(mut)]
     collection_metadata: UncheckedAccount<'info>,
 
     /// Mint account of the collection.
@@ -109,11 +123,11 @@ pub struct Initialize<'info> {
     #[account(mut)]
     collection_update_authority: Signer<'info>,
 
-    /// Collection authority record. The delegate is used to verify NFTs.
+    /// Metadata delegate record. The delegate is used to verify NFTs.
     ///
     /// CHECK: account checked in CPI
     #[account(mut)]
-    collection_authority_record: UncheckedAccount<'info>,
+    collection_delegate_record: UncheckedAccount<'info>,
 
     /// Token Metadata program.
     ///
@@ -123,4 +137,22 @@ pub struct Initialize<'info> {
 
     /// System program.
     system_program: Program<'info, System>,
+
+    /// Instructions sysvar account.
+    ///
+    /// CHECK: account constraint checked in account trait
+    #[account(address = sysvar::instructions::id())]
+    sysvar_instructions: UncheckedAccount<'info>,
+
+    /// Token Authorization Rules program.
+    ///
+    /// CHECK: account constraint checked in account trait
+    #[account(address = mpl_token_auth_rules::id())]
+    authorization_rules_program: Option<UncheckedAccount<'info>>,
+
+    /// Token Authorization rules account for the collection metadata (if any).
+    ///
+    /// CHECK: account checked in CPI
+    #[account(owner = mpl_token_auth_rules::id())]
+    authorization_rules: Option<UncheckedAccount<'info>>,
 }

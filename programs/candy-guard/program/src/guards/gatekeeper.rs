@@ -40,20 +40,17 @@ impl Guard for Gatekeeper {
 impl Condition for Gatekeeper {
     fn validate<'info>(
         &self,
-        ctx: &Context<'_, '_, '_, 'info, Mint<'info>>,
-        _mint_args: &[u8],
+        ctx: &mut EvaluationContext,
         _guard_set: &GuardSet,
-        evaluation_context: &mut EvaluationContext,
+        _mint_args: &[u8],
     ) -> Result<()> {
         // retrieves the (potential) gateway token
-        let gateway_index = evaluation_context.account_cursor;
-        let gateway_token_account = try_get_account_info(ctx, gateway_index)?;
+        let gateway_index = ctx.account_cursor;
+        let gateway_token_account = try_get_account_info(ctx.accounts.remaining, gateway_index)?;
         // consumes the gatekeeper token account
-        evaluation_context.account_cursor += 1;
+        ctx.account_cursor += 1;
 
-        evaluation_context
-            .indices
-            .insert("gateway_index", gateway_index);
+        ctx.indices.insert("gateway_index", gateway_index);
 
         // splits up verify and burn: we verify everything regardless of whether
         // it should be burned or not
@@ -68,11 +65,12 @@ impl Condition for Gatekeeper {
         if self.expire_on_use {
             // if expire on use is true, two more accounts are needed.
             // Ensure they are present and correct
-            let gateway_program_key = try_get_account_info(ctx, gateway_index + 1)?.key;
+            let gateway_program_key =
+                try_get_account_info(ctx.accounts.remaining, gateway_index + 1)?.key;
             assert_keys_equal(gateway_program_key, &GATEWAY_PROGRAM_ID)?;
-            let expiry_key = try_get_account_info(ctx, gateway_index + 2)?.key;
+            let expiry_key = try_get_account_info(ctx.accounts.remaining, gateway_index + 2)?.key;
             // increment counter for next guard
-            evaluation_context.account_cursor += 2;
+            ctx.account_cursor += 2;
             let expected_expiry_key = get_expire_address_with_seed(&self.gatekeeper_network).0;
             assert_keys_equal(expiry_key, &expected_expiry_key)?;
         }
@@ -82,17 +80,17 @@ impl Condition for Gatekeeper {
 
     fn pre_actions<'info>(
         &self,
-        ctx: &Context<'_, '_, '_, 'info, Mint<'info>>,
-        _mint_args: &[u8],
+        ctx: &mut EvaluationContext,
         _guard_set: &GuardSet,
-        evaluation_context: &mut EvaluationContext,
+        _mint_args: &[u8],
     ) -> Result<()> {
         if self.expire_on_use {
-            let gateway_index = evaluation_context.indices["gateway_index"];
+            let gateway_index = ctx.indices["gateway_index"];
             // the accounts have already been validated
-            let gateway_token_info = try_get_account_info(ctx, gateway_index)?;
-            let gateway_program_info = try_get_account_info(ctx, gateway_index + 1)?;
-            let expiry_info = try_get_account_info(ctx, gateway_index + 2)?;
+            let gateway_token_info = try_get_account_info(ctx.accounts.remaining, gateway_index)?;
+            let gateway_program_info =
+                try_get_account_info(ctx.accounts.remaining, gateway_index + 1)?;
+            let expiry_info = try_get_account_info(ctx.accounts.remaining, gateway_index + 2)?;
 
             invoke(
                 &expire_token(

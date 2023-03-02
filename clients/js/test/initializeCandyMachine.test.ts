@@ -1,5 +1,10 @@
 import { createAccountWithRent } from '@metaplex-foundation/mpl-essentials';
-import { generateSigner, transactionBuilder } from '@metaplex-foundation/umi';
+import { createNft } from '@metaplex-foundation/mpl-token-metadata';
+import {
+  generateSigner,
+  percentAmount,
+  transactionBuilder,
+} from '@metaplex-foundation/umi';
 import test from 'ava';
 import { initializeCandyMachine } from '../src';
 import { createUmi } from './_setup';
@@ -23,13 +28,34 @@ test('it can initialize a new candy machine account', async (t) => {
     )
     .sendAndConfirm();
 
+  // And a collection NFT.
+  const collectionMint = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(
+      createNft(umi, {
+        mint: collectionMint,
+        name: 'My collection NFT',
+        sellerFeeBasisPoints: percentAmount(5.5),
+        uri: 'https://example.com/my-collection-nft.json',
+        isCollection: true,
+      })
+    )
+    .sendAndConfirm();
+
   // When
+  const creator = generateSigner(umi);
   await transactionBuilder(umi)
     .add(
       initializeCandyMachine(umi, {
         candyMachine: candyMachine.publicKey,
-        data: {},
-      } as any)
+        collectionMint: collectionMint.publicKey,
+        collectionUpdateAuthority: umi.identity,
+        itemsAvailable: 100,
+        sellerFeeBasisPoints: 500,
+        creators: [
+          { address: creator.publicKey, verified: false, percentageShare: 100 },
+        ],
+      })
     )
     .sendAndConfirm();
 

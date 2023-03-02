@@ -10,14 +10,17 @@ module.exports = {
     commitment: "processed",
     programs: [
       {
-        label: "System Extras",
-        programId: "SysExL2WDyJi9aRZrXorrjHJut3JwHQ7R9bTyctbNNG",
-        deployPath: getProgram("system-extras", "mpl_system_extras.so"),
+        label: "Candy Machine Core",
+        programId: "CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR",
+        deployPath: getProgram(
+          "candy-machine-core",
+          "mpl_candy_machine_core.so"
+        ),
       },
       {
-        label: "Token Extras",
-        programId: "TokExjvjJmhKaRBShsBAsbSvEWMA1AgUNK7ps4SAc2p",
-        deployPath: getProgram("token-extras", "mpl_token_extras.so"),
+        label: "Candy Guard",
+        programId: "Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g",
+        deployPath: getProgram("candy-guard", "mpl_candy_guard.so"),
       },
     ],
   },

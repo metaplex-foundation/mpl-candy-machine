@@ -15,6 +15,7 @@ const {
   TransformDefinedTypesIntoAccountsVisitor,
   AutoSetAccountGpaFieldsVisitor,
   UnwrapInstructionArgsStructVisitor,
+  UnwrapTypeDefinedLinksVisitor,
   vScalar,
   vNone,
   AccountNode,
@@ -357,31 +358,15 @@ kinobi.update(
 );
 
 // Unwrap candyMachineData defined type but only for initialize instructions.
-const candyMachineDataNode = kinobi.rootNode.allDefinedTypes.find(
-  (type) => type.name === "candyMachineData"
-);
 kinobi.update(
-  new TransformNodesVisitor([
-    {
-      selector: {
-        type: "TypeDefinedLinkNode",
-        name: "candyMachineData",
-        stack: ["initializeCandyMachine"],
-      },
-      transformer: () => candyMachineDataNode.type,
-    },
-    {
-      selector: {
-        type: "TypeDefinedLinkNode",
-        name: "candyMachineData",
-        stack: ["initializeV2CandyMachine"],
-      },
-      transformer: () => candyMachineDataNode.type,
-    },
+  new UnwrapTypeDefinedLinksVisitor([
+    "initializeCandyMachine.candyMachineData",
+    "initializeV2CandyMachine.candyMachineData",
   ])
 );
 kinobi.update(new UnwrapInstructionArgsStructVisitor());
 
+// Set struct default values.
 const defaultInitialCandyMachineData = {
   symbol: vScalar(""),
   maxSupply: vScalar(0),

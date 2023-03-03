@@ -23,6 +23,7 @@ const {
   TypeStructFieldNode,
   TypeDefinedLinkNode,
   vEnum,
+  UseCustomAccountSerializerVisitor,
 } = require("@metaplex-foundation/kinobi");
 
 // Paths.
@@ -392,6 +393,11 @@ kinobi.update(
 
 // Custom serializers.
 kinobi.update(new AutoSetAccountGpaFieldsVisitor({ override: true }));
+kinobi.update(
+  new UseCustomAccountSerializerVisitor({
+    candyMachine: { extract: true },
+  })
+);
 
 // Render JavaScript.
 const jsDir = path.join(clientDir, "js", "src", "generated");

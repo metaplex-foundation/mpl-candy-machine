@@ -14,7 +14,7 @@ const {
   TransformNodesVisitor,
   TransformDefinedTypesIntoAccountsVisitor,
   AutoSetAccountGpaFieldsVisitor,
-  UnwrapInstructionArgsStructVisitor,
+  FlattenInstructionArgsStructVisitor,
   UnwrapTypeDefinedLinksVisitor,
   vScalar,
   vNone,
@@ -365,7 +365,7 @@ kinobi.update(
     "initializeV2CandyMachine.candyMachineData",
   ])
 );
-kinobi.update(new UnwrapInstructionArgsStructVisitor());
+kinobi.update(new FlattenInstructionArgsStructVisitor());
 
 // Set struct default values.
 const defaultInitialCandyMachineData = {

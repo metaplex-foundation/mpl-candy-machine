@@ -155,7 +155,7 @@ function featureFlagSerializer(
         );
       }
 
-      for (let byte of bytes) {
+      for (let byte of slice) {
         for (let i = 0; i < 8; i += 1) {
           if (backward) {
             booleans.push(Boolean(byte & 1));

@@ -177,17 +177,17 @@ export function getCandyMachineGpaBuilder(
       collectionMint: PublicKey;
       itemsRedeemed: number | bigint;
       data: CandyMachineDataArgs;
-    }>([
-      ['discriminator', s.array(s.u8(), { size: 8 })],
-      ['version', getAccountVersionSerializer(context)],
-      ['tokenStandard', getTokenStandardSerializer(context)],
-      ['features', s.array(s.u8(), { size: 6 })],
-      ['authority', s.publicKey()],
-      ['mintAuthority', s.publicKey()],
-      ['collectionMint', s.publicKey()],
-      ['itemsRedeemed', s.u64()],
-      ['data', getCandyMachineDataSerializer(context)],
-    ])
+    }>({
+      discriminator: [0, s.array(s.u8(), { size: 8 })],
+      version: [8, getAccountVersionSerializer(context)],
+      tokenStandard: [9, getTokenStandardSerializer(context)],
+      features: [null, s.array(s.u8(), { size: 6 })],
+      authority: [null, s.publicKey()],
+      mintAuthority: [null, s.publicKey()],
+      collectionMint: [null, s.publicKey()],
+      itemsRedeemed: [null, s.u64()],
+      data: [null, getCandyMachineDataSerializer(context)],
+    })
     .deserializeUsing<CandyMachine>((account) =>
       deserializeCandyMachine(context, account)
     )

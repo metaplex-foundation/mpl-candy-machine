@@ -129,12 +129,12 @@ export function getCandyGuardGpaBuilder(
       base: PublicKey;
       bump: number;
       authority: PublicKey;
-    }>([
-      ['discriminator', s.array(s.u8(), { size: 8 })],
-      ['base', s.publicKey()],
-      ['bump', s.u8()],
-      ['authority', s.publicKey()],
-    ])
+    }>({
+      discriminator: [0, s.array(s.u8(), { size: 8 })],
+      base: [8, s.publicKey()],
+      bump: [40, s.u8()],
+      authority: [41, s.publicKey()],
+    })
     .deserializeUsing<CandyGuard>((account) =>
       deserializeCandyGuard(context, account)
     )
@@ -142,7 +142,7 @@ export function getCandyGuardGpaBuilder(
 }
 
 export function getCandyGuardSize(): number {
-  return 65;
+  return 73;
 }
 
 export function findCandyGuardPda(

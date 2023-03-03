@@ -180,16 +180,16 @@ export function getFreezeEscrowGpaBuilder(
       freezePeriod: number | bigint;
       destination: PublicKey;
       authority: PublicKey;
-    }>([
-      ['discriminator', s.array(s.u8(), { size: 8 })],
-      ['candyGuard', s.publicKey()],
-      ['candyMachine', s.publicKey()],
-      ['frozenCount', s.u64()],
-      ['firstMintTime', s.option(s.i64())],
-      ['freezePeriod', s.i64()],
-      ['destination', s.publicKey()],
-      ['authority', s.publicKey()],
-    ])
+    }>({
+      discriminator: [0, s.array(s.u8(), { size: 8 })],
+      candyGuard: [8, s.publicKey()],
+      candyMachine: [40, s.publicKey()],
+      frozenCount: [72, s.u64()],
+      firstMintTime: [80, s.option(s.i64())],
+      freezePeriod: [null, s.i64()],
+      destination: [null, s.publicKey()],
+      authority: [null, s.publicKey()],
+    })
     .deserializeUsing<FreezeEscrow>((account) =>
       deserializeFreezeEscrow(context, account)
     )

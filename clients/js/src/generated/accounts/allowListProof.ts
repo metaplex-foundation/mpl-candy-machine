@@ -97,7 +97,7 @@ export function getAllowListProofGpaBuilder(
   const s = context.serializer;
   const programId = context.programs.get('mplCandyGuard').publicKey;
   return gpaBuilder(context, programId)
-    .registerFields<{ timestamp: number | bigint }>([['timestamp', s.i64()]])
+    .registerFields<{ timestamp: number | bigint }>({ timestamp: [0, s.i64()] })
     .deserializeUsing<AllowListProof>((account) =>
       deserializeAllowListProof(context, account)
     )

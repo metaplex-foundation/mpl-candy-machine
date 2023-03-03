@@ -12,6 +12,8 @@ const {
   TypeBytesNode,
   SetInstructionAccountDefaultValuesVisitor,
   TransformNodesVisitor,
+  TransformDefinedTypesIntoAccountsVisitor,
+  AutoSetAccountGpaFieldsVisitor,
   UnwrapInstructionArgsStructVisitor,
   vScalar,
   vNone,
@@ -21,9 +23,6 @@ const {
   TypeDefinedLinkNode,
   vEnum,
 } = require("@metaplex-foundation/kinobi");
-const {
-  TransformDefinedTypesIntoAccountsVisitor,
-} = require("./visitors/TransformDefinedTypesIntoAccountsVisitor.cjs");
 
 // Paths.
 const clientDir = path.join(__dirname, "..", "clients");
@@ -139,7 +138,7 @@ kinobi.update(
 kinobi.update(
   new TransformNodesVisitor([
     {
-      selector: { type: "account", name: "candyMachine" },
+      selector: { type: "AccountNode", name: "candyMachine" },
       transformer: (node) => {
         const newFields = node.type.fields.map((field) => {
           if (field.name === "tokenStandard") {
@@ -365,7 +364,7 @@ kinobi.update(
   new TransformNodesVisitor([
     {
       selector: {
-        type: "typeDefinedLink",
+        type: "TypeDefinedLinkNode",
         name: "candyMachineData",
         stack: ["initializeCandyMachine"],
       },
@@ -373,7 +372,7 @@ kinobi.update(
     },
     {
       selector: {
-        type: "typeDefinedLink",
+        type: "TypeDefinedLinkNode",
         name: "candyMachineData",
         stack: ["initializeV2CandyMachine"],
       },
@@ -405,6 +404,9 @@ kinobi.update(
     "initializeCandyMachineInstructionData.sellerFeeBasisPoints": percentAmount,
   })
 );
+
+// Custom serializers.
+kinobi.update(new AutoSetAccountGpaFieldsVisitor({ override: true }));
 
 // Render JavaScript.
 const jsDir = path.join(clientDir, "js", "src", "generated");

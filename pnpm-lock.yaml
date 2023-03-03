@@ -5,12 +5,12 @@ importers:
   .:
     specifiers:
       '@metaplex-foundation/amman': ^0.12.1
-      '@metaplex-foundation/kinobi': ^0.3.3
+      '@metaplex-foundation/kinobi': ^0.4.0
       '@metaplex-foundation/shank-js': ^0.1.0
       typescript: ^4.9.4
     devDependencies:
       '@metaplex-foundation/amman': 0.12.1_typescript@4.9.4
-      '@metaplex-foundation/kinobi': 0.3.3
+      '@metaplex-foundation/kinobi': 0.4.0
       '@metaplex-foundation/shank-js': 0.1.0
       typescript: 4.9.4
 
@@ -183,8 +183,8 @@ packages:
     resolution: {integrity: sha512-S9RulC2fFCFOQraz61bij+5YCHhSO9llJegK8c8Y6731fSi6snUSQJdCUqYS8AIgR0TKbQvdvgSyIIdbDFZbBA==}
     dev: true
 
-  /@metaplex-foundation/kinobi/0.3.3:
-    resolution: {integrity: sha512-58VE8xrr/hod40rVvmX/acZdgNHu9uaVciYnlx11/1RftTR3Sx1Rw74OrC9YkKoEs4d/kUvpLV+9xm/pbp18HA==}
+  /@metaplex-foundation/kinobi/0.4.0:
+    resolution: {integrity: sha512-XOQ/Zj6drbyVcS7cAAQ51Bsoq0IYoRf6oprcJxYQDEulyf9jgPVk99U5I5/3JFC5gb7/8QbnKb/HUqhHmpHO8Q==}
     dependencies:
       '@noble/hashes': 1.1.5
       chalk: 4.1.2

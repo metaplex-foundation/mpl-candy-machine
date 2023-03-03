@@ -97,7 +97,7 @@ export function getMintCounterGpaBuilder(
   const s = context.serializer;
   const programId = context.programs.get('mplCandyGuard').publicKey;
   return gpaBuilder(context, programId)
-    .registerFields<{ count: number }>([['count', s.u16()]])
+    .registerFields<{ count: number }>({ count: [0, s.u16()] })
     .deserializeUsing<MintCounter>((account) =>
       deserializeMintCounter(context, account)
     )

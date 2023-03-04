@@ -7,7 +7,6 @@
  */
 
 import {
-  TokenStandard,
   TokenStandardArgs,
   getTokenStandardSerializer,
 } from '@metaplex-foundation/mpl-token-metadata';
@@ -18,92 +17,22 @@ import {
   RpcAccount,
   RpcGetAccountOptions,
   RpcGetAccountsOptions,
-  Serializer,
   assertAccountExists,
   deserializeAccount,
   gpaBuilder,
-  mapSerializer,
 } from '@metaplex-foundation/umi';
 import {
-  AccountVersion,
+  CandyMachineAccountData,
+  getCandyMachineAccountDataSerializer,
+} from '../../hooked';
+import {
   AccountVersionArgs,
-  CandyMachineData,
   CandyMachineDataArgs,
   getAccountVersionSerializer,
   getCandyMachineDataSerializer,
 } from '../types';
 
 export type CandyMachine = Account<CandyMachineAccountData>;
-
-export type CandyMachineAccountData = {
-  discriminator: Array<number>;
-  /** Version of the account. */
-  version: AccountVersion;
-  /** Token standard to mint NFTs. */
-  tokenStandard: TokenStandard;
-  /** Features flags. */
-  features: Array<number>;
-  /** Authority address. */
-  authority: PublicKey;
-  /** Authority address allowed to mint from the candy machine. */
-  mintAuthority: PublicKey;
-  /** The collection mint for the candy machine. */
-  collectionMint: PublicKey;
-  /** Number of assets redeemed. */
-  itemsRedeemed: bigint;
-  /** Candy machine configuration data. */
-  data: CandyMachineData;
-};
-
-export type CandyMachineAccountDataArgs = {
-  /** Version of the account. */
-  version: AccountVersionArgs;
-  /** Token standard to mint NFTs. */
-  tokenStandard: TokenStandardArgs;
-  /** Features flags. */
-  features: Array<number>;
-  /** Authority address. */
-  authority: PublicKey;
-  /** Authority address allowed to mint from the candy machine. */
-  mintAuthority: PublicKey;
-  /** The collection mint for the candy machine. */
-  collectionMint: PublicKey;
-  /** Number of assets redeemed. */
-  itemsRedeemed: number | bigint;
-  /** Candy machine configuration data. */
-  data: CandyMachineDataArgs;
-};
-
-export function getCandyMachineAccountDataSerializer(
-  context: Pick<Context, 'serializer'>
-): Serializer<CandyMachineAccountDataArgs, CandyMachineAccountData> {
-  const s = context.serializer;
-  return mapSerializer<
-    CandyMachineAccountDataArgs,
-    CandyMachineAccountData,
-    CandyMachineAccountData
-  >(
-    s.struct<CandyMachineAccountData>(
-      [
-        ['discriminator', s.array(s.u8(), { size: 8 })],
-        ['version', getAccountVersionSerializer(context)],
-        ['tokenStandard', getTokenStandardSerializer(context)],
-        ['features', s.array(s.u8(), { size: 6 })],
-        ['authority', s.publicKey()],
-        ['mintAuthority', s.publicKey()],
-        ['collectionMint', s.publicKey()],
-        ['itemsRedeemed', s.u64()],
-        ['data', getCandyMachineDataSerializer(context)],
-      ],
-      { description: 'CandyMachine' }
-    ),
-    (value) =>
-      ({
-        ...value,
-        discriminator: [115, 157, 18, 166, 35, 44, 221, 13],
-      } as CandyMachineAccountData)
-  ) as Serializer<CandyMachineAccountDataArgs, CandyMachineAccountData>;
-}
 
 export function deserializeCandyMachine(
   context: Pick<Context, 'serializer'>,
@@ -165,7 +94,10 @@ export function getCandyMachineGpaBuilder(
   context: Pick<Context, 'rpc' | 'serializer' | 'programs'>
 ) {
   const s = context.serializer;
-  const programId = context.programs.get('mplCandyMachineCore').publicKey;
+  const programId = context.programs.getPublicKey(
+    'mplCandyMachineCore',
+    'CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR'
+  );
   return gpaBuilder(context, programId)
     .registerFields<{
       discriminator: Array<number>;
@@ -177,17 +109,17 @@ export function getCandyMachineGpaBuilder(
       collectionMint: PublicKey;
       itemsRedeemed: number | bigint;
       data: CandyMachineDataArgs;
-    }>([
-      ['discriminator', s.array(s.u8(), { size: 8 })],
-      ['version', getAccountVersionSerializer(context)],
-      ['tokenStandard', getTokenStandardSerializer(context)],
-      ['features', s.array(s.u8(), { size: 6 })],
-      ['authority', s.publicKey()],
-      ['mintAuthority', s.publicKey()],
-      ['collectionMint', s.publicKey()],
-      ['itemsRedeemed', s.u64()],
-      ['data', getCandyMachineDataSerializer(context)],
-    ])
+    }>({
+      discriminator: [0, s.array(s.u8(), { size: 8 })],
+      version: [8, getAccountVersionSerializer(context)],
+      tokenStandard: [9, getTokenStandardSerializer(context)],
+      features: [null, s.array(s.u8(), { size: 6 })],
+      authority: [null, s.publicKey()],
+      mintAuthority: [null, s.publicKey()],
+      collectionMint: [null, s.publicKey()],
+      itemsRedeemed: [null, s.u64()],
+      data: [null, getCandyMachineDataSerializer(context)],
+    })
     .deserializeUsing<CandyMachine>((account) =>
       deserializeCandyMachine(context, account)
     )

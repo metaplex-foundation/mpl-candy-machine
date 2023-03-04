@@ -12,18 +12,17 @@ const {
   TypeBytesNode,
   SetInstructionAccountDefaultValuesVisitor,
   TransformNodesVisitor,
-  UnwrapInstructionArgsStructVisitor,
+  TransformDefinedTypesIntoAccountsVisitor,
+  AutoSetAccountGpaFieldsVisitor,
+  FlattenInstructionArgsStructVisitor,
+  UnwrapTypeDefinedLinksVisitor,
   vScalar,
   vNone,
-  AccountNode,
-  TypeStructNode,
   TypeStructFieldNode,
   TypeDefinedLinkNode,
   vEnum,
+  UseCustomAccountSerializerVisitor,
 } = require("@metaplex-foundation/kinobi");
-const {
-  TransformDefinedTypesIntoAccountsVisitor,
-} = require("./visitors/TransformDefinedTypesIntoAccountsVisitor.cjs");
 
 // Paths.
 const clientDir = path.join(__dirname, "..", "clients");
@@ -135,26 +134,17 @@ kinobi.update(
   })
 );
 
-// Update CandyMachine account data.
+// Update tokenStandard fields.
 kinobi.update(
   new TransformNodesVisitor([
     {
-      selector: { type: "account", name: "candyMachine" },
+      selector: { type: "TypeStructFieldNode", name: "tokenStandard" },
       transformer: (node) => {
-        const newFields = node.type.fields.map((field) => {
-          if (field.name === "tokenStandard") {
-            return new TypeStructFieldNode(
-              field.metadata,
-              new TypeDefinedLinkNode("tokenStandard", {
-                dependency: "mplTokenMetadata",
-              })
-            );
-          }
-          return field;
-        });
-        return new AccountNode(
+        return new TypeStructFieldNode(
           node.metadata,
-          new TypeStructNode(node.type.name, newFields)
+          new TypeDefinedLinkNode("tokenStandard", {
+            dependency: "mplTokenMetadata",
+          })
         );
       },
     },
@@ -215,39 +205,6 @@ const defaultsToMetadataDelegateRecordPda = (
 // Automatically recognize account default values.
 kinobi.update(
   new SetInstructionAccountDefaultValuesVisitor([
-    {
-      kind: "program",
-      account: /^tokenMetadataProgram|mplTokenMetadataProgram$/,
-      program: {
-        name: "mplTokenMetadata",
-        publicKey: "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s",
-      },
-      ignoreIfOptional: true,
-    },
-    {
-      kind: "program",
-      account: /^candyMachineProgram|mplCandyMachineProgram$/,
-      program: {
-        name: "mplCandyMachine",
-        publicKey: "CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR",
-      },
-      ignoreIfOptional: true,
-    },
-    {
-      kind: "program",
-      account: /^candyGuardProgram|mplCandyGuardProgram$/,
-      program: {
-        name: "mplCandyGuard",
-        publicKey: "Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g",
-      },
-      ignoreIfOptional: true,
-    },
-    {
-      kind: "publicKey",
-      account: /^instructionSysvarAccount$/,
-      publicKey: "Sysvar1nstructions1111111111111111111111111",
-      ignoreIfOptional: true,
-    },
     {
       kind: "publicKey",
       account: /^recentSlothashes$/,
@@ -333,7 +290,21 @@ kinobi.update(
   new UpdateInstructionsVisitor({
     "mplCandyMachineCore.initialize": { name: "initializeCandyMachine" },
     "mplCandyGuard.initialize": { name: "initializeCandyGuard" },
-    "mplCandyMachineCore.initializeV2": { name: "initializeV2CandyMachine" },
+    "mplCandyMachineCore.initializeV2": {
+      name: "initializeV2CandyMachine",
+      accounts: {
+        authorizationRulesProgram: {
+          isOptional: false,
+          defaultsTo: {
+            kind: "program",
+            program: {
+              name: "mplTokenAuthRules",
+              publicKey: "auth9SigNpDKz4sJJ1DfCTuZrZNSAgh9sFD3rboVmgg",
+            },
+          },
+        },
+      },
+    },
     "mplCandyMachineCore.mint": { name: "mintFromCandyMachine" },
     "mplCandyMachineCore.mintV2": { name: "mintV2FromCandyMachine" },
     "mplCandyGuard.mint": {
@@ -358,31 +329,15 @@ kinobi.update(
 );
 
 // Unwrap candyMachineData defined type but only for initialize instructions.
-const candyMachineDataNode = kinobi.rootNode.allDefinedTypes.find(
-  (type) => type.name === "candyMachineData"
-);
 kinobi.update(
-  new TransformNodesVisitor([
-    {
-      selector: {
-        type: "typeDefinedLink",
-        name: "candyMachineData",
-        stack: ["initializeCandyMachine"],
-      },
-      transformer: () => candyMachineDataNode.type,
-    },
-    {
-      selector: {
-        type: "typeDefinedLink",
-        name: "candyMachineData",
-        stack: ["initializeV2CandyMachine"],
-      },
-      transformer: () => candyMachineDataNode.type,
-    },
+  new UnwrapTypeDefinedLinksVisitor([
+    "initializeCandyMachine.candyMachineData",
+    "initializeV2CandyMachine.candyMachineData",
   ])
 );
-kinobi.update(new UnwrapInstructionArgsStructVisitor());
+kinobi.update(new FlattenInstructionArgsStructVisitor());
 
+// Set struct default values.
 const defaultInitialCandyMachineData = {
   symbol: vScalar(""),
   maxSupply: vScalar(0),
@@ -403,6 +358,16 @@ kinobi.update(
   new SetNumberWrappersVisitor({
     "candyMachineData.sellerFeeBasisPoints": percentAmount,
     "initializeCandyMachineInstructionData.sellerFeeBasisPoints": percentAmount,
+    "initializeV2CandyMachineInstructionData.sellerFeeBasisPoints":
+      percentAmount,
+  })
+);
+
+// Custom serializers.
+kinobi.update(new AutoSetAccountGpaFieldsVisitor({ override: true }));
+kinobi.update(
+  new UseCustomAccountSerializerVisitor({
+    candyMachine: { extract: true },
   })
 );
 

@@ -66,7 +66,10 @@ export function withdrawCandyGuard(
   const keys: AccountMeta[] = [];
 
   // Program ID.
-  const programId: PublicKey = context.programs.get('mplCandyGuard').publicKey;
+  const programId = context.programs.getPublicKey(
+    'mplCandyGuard',
+    'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
+  );
 
   // Resolved accounts.
   const candyGuardAccount = input.candyGuard;

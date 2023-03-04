@@ -61,14 +61,20 @@ export function wrap(
   const keys: AccountMeta[] = [];
 
   // Program ID.
-  const programId: PublicKey = context.programs.get('mplCandyGuard').publicKey;
+  const programId = context.programs.getPublicKey(
+    'mplCandyGuard',
+    'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
+  );
 
   // Resolved accounts.
   const candyGuardAccount = input.candyGuard;
   const authorityAccount = input.authority ?? context.identity;
   const candyMachineAccount = input.candyMachine;
   const candyMachineProgramAccount = input.candyMachineProgram ?? {
-    ...context.programs.get('mplCandyMachine').publicKey,
+    ...context.programs.getPublicKey(
+      'mplCandyMachine',
+      'CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR'
+    ),
     isWritable: false,
   };
   const candyMachineAuthorityAccount =

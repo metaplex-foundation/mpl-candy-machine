@@ -1,5 +1,10 @@
-import { createAccountWithRent } from '@metaplex-foundation/mpl-essentials';
-import { none, Signer, WrappedInstruction } from '@metaplex-foundation/umi';
+import { createAccount } from '@metaplex-foundation/mpl-essentials';
+import {
+  Context,
+  none,
+  Signer,
+  WrappedInstruction,
+} from '@metaplex-foundation/umi';
 import { initializeCandyMachine } from './generated';
 import { getCandyMachineSize } from './hooked';
 
@@ -10,21 +15,25 @@ export type CreateCandyMachineInput = Omit<
   candyMachine: Signer;
 };
 
-export const createCandyMachine = (
-  context: Parameters<typeof initializeCandyMachine>[0],
+export const createCandyMachine = async (
+  context: Parameters<typeof initializeCandyMachine>[0] & Pick<Context, 'rpc'>,
   input: CreateCandyMachineInput
-): WrappedInstruction[] => [
-  createAccountWithRent(context, {
-    newAccount: input.candyMachine,
-    space: getCandyMachineSize(
-      input.itemsAvailable,
-      input.configLineSettings ?? none()
-    ),
-    programId: context.programs.get('mplCandyMachineCore').publicKey,
-    systemProgram: input.systemProgram,
-  }),
-  initializeCandyMachine(context, {
-    ...input,
-    candyMachine: input.candyMachine.publicKey,
-  }),
-];
+): Promise<WrappedInstruction[]> => {
+  const space = getCandyMachineSize(
+    input.itemsAvailable,
+    input.configLineSettings ?? none()
+  );
+  const lamports = await context.rpc.getRent(space);
+  return [
+    createAccount(context, {
+      newAccount: input.candyMachine,
+      lamports,
+      space,
+      programId: context.programs.get('mplCandyMachineCore').publicKey,
+    }),
+    initializeCandyMachine(context, {
+      ...input,
+      candyMachine: input.candyMachine.publicKey,
+    }),
+  ];
+};

@@ -95,9 +95,12 @@ export function getAllowListProofGpaBuilder(
   context: Pick<Context, 'rpc' | 'serializer' | 'programs'>
 ) {
   const s = context.serializer;
-  const programId = context.programs.get('mplCandyGuard').publicKey;
+  const programId = context.programs.getPublicKey(
+    'mplCandyGuard',
+    'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
+  );
   return gpaBuilder(context, programId)
-    .registerFields<{ timestamp: number | bigint }>([['timestamp', s.i64()]])
+    .registerFields<{ timestamp: number | bigint }>({ timestamp: [0, s.i64()] })
     .deserializeUsing<AllowListProof>((account) =>
       deserializeAllowListProof(context, account)
     )
@@ -122,7 +125,10 @@ export function findAllowListProofPda(
   }
 ): Pda {
   const s = context.serializer;
-  const programId: PublicKey = context.programs.get('mplCandyGuard').publicKey;
+  const programId = context.programs.getPublicKey(
+    'mplCandyGuard',
+    'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
+  );
   return context.eddsa.findPda(programId, [
     s.string({ size: 'variable' }).serialize('allow_list'),
     s.bytes({ size: 32 }).serialize(seeds.merkleRoot),

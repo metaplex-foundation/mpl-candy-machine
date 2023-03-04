@@ -169,7 +169,10 @@ export function getFreezeEscrowGpaBuilder(
   context: Pick<Context, 'rpc' | 'serializer' | 'programs'>
 ) {
   const s = context.serializer;
-  const programId = context.programs.get('mplCandyGuard').publicKey;
+  const programId = context.programs.getPublicKey(
+    'mplCandyGuard',
+    'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
+  );
   return gpaBuilder(context, programId)
     .registerFields<{
       discriminator: Array<number>;
@@ -180,16 +183,16 @@ export function getFreezeEscrowGpaBuilder(
       freezePeriod: number | bigint;
       destination: PublicKey;
       authority: PublicKey;
-    }>([
-      ['discriminator', s.array(s.u8(), { size: 8 })],
-      ['candyGuard', s.publicKey()],
-      ['candyMachine', s.publicKey()],
-      ['frozenCount', s.u64()],
-      ['firstMintTime', s.option(s.i64())],
-      ['freezePeriod', s.i64()],
-      ['destination', s.publicKey()],
-      ['authority', s.publicKey()],
-    ])
+    }>({
+      discriminator: [0, s.array(s.u8(), { size: 8 })],
+      candyGuard: [8, s.publicKey()],
+      candyMachine: [40, s.publicKey()],
+      frozenCount: [72, s.u64()],
+      firstMintTime: [80, s.option(s.i64())],
+      freezePeriod: [null, s.i64()],
+      destination: [null, s.publicKey()],
+      authority: [null, s.publicKey()],
+    })
     .deserializeUsing<FreezeEscrow>((account) =>
       deserializeFreezeEscrow(context, account)
     )
@@ -208,7 +211,10 @@ export function findFreezeEscrowPda(
   }
 ): Pda {
   const s = context.serializer;
-  const programId: PublicKey = context.programs.get('mplCandyGuard').publicKey;
+  const programId = context.programs.getPublicKey(
+    'mplCandyGuard',
+    'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
+  );
   return context.eddsa.findPda(programId, [
     s.string({ size: 'variable' }).serialize('freeze_escrow'),
     s.publicKey().serialize(seeds.destination),

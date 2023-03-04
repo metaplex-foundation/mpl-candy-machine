@@ -1,10 +1,10 @@
 /* eslint-disable no-bitwise */
 /* eslint-disable no-restricted-syntax */
 import {
+  bitArray,
   Context,
   isNone,
   mapSerializer,
-  SdkError,
   Serializer,
 } from '@metaplex-foundation/umi';
 import { CANDY_MACHINE_HIDDEN_SECTION } from '../constants';
@@ -87,10 +87,7 @@ export function getCandyMachineAccountDataSerializer(
               { size: itemsAvailable }
             ),
           ],
-          [
-            'itemsLoadedMap',
-            featureFlagSerializer(Math.floor(itemsAvailable / 8) + 1),
-          ],
+          ['itemsLoadedMap', bitArray(Math.floor(itemsAvailable / 8) + 1)],
           ['itemsLeftToMint', s.array(s.u32(), { size: itemsRemaining })],
         ]);
 
@@ -117,57 +114,4 @@ export function getCandyMachineAccountDataSerializer(
 
 function replaceItemPattern(value: string, index: number): string {
   return value.replace('$ID+1$', `${index + 1}`).replace('$ID$', `${index}`);
-}
-
-function featureFlagSerializer(
-  size: number,
-  backward = false
-): Serializer<boolean[]> {
-  return {
-    description: `featureFlags(${size})`,
-    fixedSize: size,
-    maxSize: size,
-    serialize: (value) => {
-      const bytes: number[] = [];
-
-      for (let i = 0; i < size; i += 1) {
-        let byte = 0;
-        for (let j = 0; j < 8; j += 1) {
-          const feature = Number(value[i * 8 + j] ?? 0);
-          byte |= feature << (backward ? j : 7 - j);
-        }
-        if (backward) {
-          bytes.unshift(byte);
-        } else {
-          bytes.push(byte);
-        }
-      }
-
-      return new Uint8Array(bytes);
-    },
-    deserialize: (bytes, offset = 0) => {
-      const booleans: boolean[] = [];
-      let slice = bytes.slice(offset, offset + size);
-      slice = backward ? slice.reverse() : slice;
-      if (slice.length !== size) {
-        throw new SdkError(
-          `Serializer [featureFlag] expected ${size} bytes, got ${slice.length}.`
-        );
-      }
-
-      for (let byte of slice) {
-        for (let i = 0; i < 8; i += 1) {
-          if (backward) {
-            booleans.push(Boolean(byte & 1));
-            byte >>= 1;
-          } else {
-            booleans.push(Boolean(byte & 0b1000_0000));
-            byte <<= 1;
-          }
-        }
-      }
-
-      return [booleans, offset + size];
-    },
-  };
 }

@@ -18,8 +18,6 @@ const {
   UnwrapTypeDefinedLinksVisitor,
   vScalar,
   vNone,
-  AccountNode,
-  TypeStructNode,
   TypeStructFieldNode,
   TypeDefinedLinkNode,
   vEnum,
@@ -136,26 +134,17 @@ kinobi.update(
   })
 );
 
-// Update CandyMachine account data.
+// Update tokenStandard fields.
 kinobi.update(
   new TransformNodesVisitor([
     {
-      selector: { type: "AccountNode", name: "candyMachine" },
+      selector: { type: "TypeStructFieldNode", name: "tokenStandard" },
       transformer: (node) => {
-        const newFields = node.type.fields.map((field) => {
-          if (field.name === "tokenStandard") {
-            return new TypeStructFieldNode(
-              field.metadata,
-              new TypeDefinedLinkNode("tokenStandard", {
-                dependency: "mplTokenMetadata",
-              })
-            );
-          }
-          return field;
-        });
-        return new AccountNode(
+        return new TypeStructFieldNode(
           node.metadata,
-          new TypeStructNode(node.type.name, newFields)
+          new TypeDefinedLinkNode("tokenStandard", {
+            dependency: "mplTokenMetadata",
+          })
         );
       },
     },
@@ -388,6 +377,8 @@ kinobi.update(
   new SetNumberWrappersVisitor({
     "candyMachineData.sellerFeeBasisPoints": percentAmount,
     "initializeCandyMachineInstructionData.sellerFeeBasisPoints": percentAmount,
+    "initializeV2CandyMachineInstructionData.sellerFeeBasisPoints":
+      percentAmount,
   })
 );
 

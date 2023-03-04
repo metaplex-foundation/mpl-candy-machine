@@ -8,12 +8,16 @@
 
 import {
   MetadataDelegateRole,
+  TokenStandard,
+  TokenStandardArgs,
   findMasterEditionPda,
   findMetadataDelegateRecordPda,
   findMetadataPda,
+  getTokenStandardSerializer,
 } from '@metaplex-foundation/mpl-token-metadata';
 import {
   AccountMeta,
+  Amount,
   Context,
   Option,
   PublicKey,
@@ -21,6 +25,7 @@ import {
   Signer,
   WrappedInstruction,
   checkForIsWritableOverride as isWritable,
+  mapAmountSerializer,
   mapSerializer,
   none,
   publicKey,
@@ -64,7 +69,7 @@ export type InitializeV2CandyMachineInstructionData = {
   /** Symbol for the asset */
   symbol: string;
   /** Secondary sales royalty basis points (0-10000) */
-  sellerFeeBasisPoints: number;
+  sellerFeeBasisPoints: Amount<'%', 2>;
   /** Max supply of each individual asset (default 0) */
   maxSupply: bigint;
   /** Indicates if the asset is mutable or not (default yes) */
@@ -75,7 +80,7 @@ export type InitializeV2CandyMachineInstructionData = {
   configLineSettings: Option<ConfigLineSettings>;
   /** Hidden setttings */
   hiddenSettings: Option<HiddenSettings>;
-  tokenStandard: number;
+  tokenStandard: TokenStandard;
 };
 
 export type InitializeV2CandyMachineInstructionDataArgs = {
@@ -84,7 +89,7 @@ export type InitializeV2CandyMachineInstructionDataArgs = {
   /** Symbol for the asset */
   symbol?: string;
   /** Secondary sales royalty basis points (0-10000) */
-  sellerFeeBasisPoints: number;
+  sellerFeeBasisPoints: Amount<'%', 2>;
   /** Max supply of each individual asset (default 0) */
   maxSupply?: number | bigint;
   /** Indicates if the asset is mutable or not (default yes) */
@@ -95,7 +100,7 @@ export type InitializeV2CandyMachineInstructionDataArgs = {
   configLineSettings?: Option<ConfigLineSettingsArgs>;
   /** Hidden setttings */
   hiddenSettings?: Option<HiddenSettingsArgs>;
-  tokenStandard: number;
+  tokenStandard: TokenStandardArgs;
 };
 
 export function getInitializeV2CandyMachineInstructionDataSerializer(
@@ -115,7 +120,7 @@ export function getInitializeV2CandyMachineInstructionDataSerializer(
         ['discriminator', s.array(s.u8(), { size: 8 })],
         ['itemsAvailable', s.u64()],
         ['symbol', s.string()],
-        ['sellerFeeBasisPoints', s.u16()],
+        ['sellerFeeBasisPoints', mapAmountSerializer(s.u16(), '%', 2)],
         ['maxSupply', s.u64()],
         ['isMutable', s.bool()],
         ['creators', s.array(getCreatorSerializer(context))],
@@ -124,7 +129,7 @@ export function getInitializeV2CandyMachineInstructionDataSerializer(
           s.option(getConfigLineSettingsSerializer(context)),
         ],
         ['hiddenSettings', s.option(getHiddenSettingsSerializer(context))],
-        ['tokenStandard', s.u8()],
+        ['tokenStandard', getTokenStandardSerializer(context)],
       ],
       { description: 'InitializeV2CandyMachineInstructionData' }
     ),

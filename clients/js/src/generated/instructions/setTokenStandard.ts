@@ -8,8 +8,11 @@
 
 import {
   MetadataDelegateRole,
+  TokenStandard,
+  TokenStandardArgs,
   findMetadataDelegateRecordPda,
   findMetadataPda,
+  getTokenStandardSerializer,
 } from '@metaplex-foundation/mpl-token-metadata';
 import {
   AccountMeta,
@@ -45,10 +48,12 @@ export type SetTokenStandardInstructionAccounts = {
 // Arguments.
 export type SetTokenStandardInstructionData = {
   discriminator: Array<number>;
-  tokenStandard: number;
+  tokenStandard: TokenStandard;
 };
 
-export type SetTokenStandardInstructionDataArgs = { tokenStandard: number };
+export type SetTokenStandardInstructionDataArgs = {
+  tokenStandard: TokenStandardArgs;
+};
 
 export function getSetTokenStandardInstructionDataSerializer(
   context: Pick<Context, 'serializer'>
@@ -65,7 +70,7 @@ export function getSetTokenStandardInstructionDataSerializer(
     s.struct<SetTokenStandardInstructionData>(
       [
         ['discriminator', s.array(s.u8(), { size: 8 })],
-        ['tokenStandard', s.u8()],
+        ['tokenStandard', getTokenStandardSerializer(context)],
       ],
       { description: 'SetTokenStandardInstructionData' }
     ),

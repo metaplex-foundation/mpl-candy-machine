@@ -290,7 +290,21 @@ kinobi.update(
   new UpdateInstructionsVisitor({
     "mplCandyMachineCore.initialize": { name: "initializeCandyMachine" },
     "mplCandyGuard.initialize": { name: "initializeCandyGuard" },
-    "mplCandyMachineCore.initializeV2": { name: "initializeV2CandyMachine" },
+    "mplCandyMachineCore.initializeV2": {
+      name: "initializeV2CandyMachine",
+      accounts: {
+        authorizationRulesProgram: {
+          isOptional: false,
+          defaultsTo: {
+            kind: "program",
+            program: {
+              name: "mplTokenAuthRules",
+              publicKey: "auth9SigNpDKz4sJJ1DfCTuZrZNSAgh9sFD3rboVmgg",
+            },
+          },
+        },
+      },
+    },
     "mplCandyMachineCore.mint": { name: "mintFromCandyMachine" },
     "mplCandyMachineCore.mintV2": { name: "mintV2FromCandyMachine" },
     "mplCandyGuard.mint": {

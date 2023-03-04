@@ -209,7 +209,13 @@ export function initializeV2CandyMachine(
   const sysvarInstructionsAccount =
     input.sysvarInstructions ??
     publicKey('Sysvar1nstructions1111111111111111111111111');
-  const authorizationRulesProgramAccount = input.authorizationRulesProgram;
+  const authorizationRulesProgramAccount = input.authorizationRulesProgram ?? {
+    ...context.programs.getPublicKey(
+      'mplTokenAuthRules',
+      'auth9SigNpDKz4sJJ1DfCTuZrZNSAgh9sFD3rboVmgg'
+    ),
+    isWritable: false,
+  };
   const authorizationRulesAccount = input.authorizationRules;
 
   // Candy Machine.
@@ -298,14 +304,12 @@ export function initializeV2CandyMachine(
     isWritable: isWritable(sysvarInstructionsAccount, false),
   });
 
-  // Authorization Rules Program (optional).
-  if (authorizationRulesProgramAccount) {
-    keys.push({
-      pubkey: authorizationRulesProgramAccount,
-      isSigner: false,
-      isWritable: isWritable(authorizationRulesProgramAccount, false),
-    });
-  }
+  // Authorization Rules Program.
+  keys.push({
+    pubkey: authorizationRulesProgramAccount,
+    isSigner: false,
+    isWritable: isWritable(authorizationRulesProgramAccount, false),
+  });
 
   // Authorization Rules (optional).
   if (authorizationRulesAccount) {

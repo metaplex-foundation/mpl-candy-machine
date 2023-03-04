@@ -47,7 +47,7 @@ export const createCandyMachine = async (
     input.collectionMint ?? (await createCollectionNft(umi)).publicKey;
   await transactionBuilder(umi)
     .add(
-      baseCreateCandyMachine(umi, {
+      await baseCreateCandyMachine(umi, {
         collectionUpdateAuthority: umi.identity,
         itemsAvailable: 100,
         sellerFeeBasisPoints: percentAmount(10),

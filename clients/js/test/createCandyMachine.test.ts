@@ -17,7 +17,7 @@ import {
 } from '../src';
 import { createCollectionNft, createUmi } from './_setup';
 
-test('with minimum configuration', async (t) => {
+test('it can create a candy machine for regular NFTs', async (t) => {
   // Given an existing collection NFT.
   const umi = await createUmi();
   const collectionMint = await createCollectionNft(umi);
@@ -27,7 +27,7 @@ test('with minimum configuration', async (t) => {
   const creator = generateSigner(umi);
   await transactionBuilder(umi)
     .add(
-      createCandyMachine(umi, {
+      await createCandyMachine(umi, {
         candyMachine,
         collectionMint: collectionMint.publicKey,
         collectionUpdateAuthority: umi.identity,
@@ -82,5 +82,44 @@ test('with minimum configuration', async (t) => {
       }),
       hiddenSettings: none(),
     },
+  });
+});
+
+test("it can create a candy machine that's bigger than 10Kb", async (t) => {
+  // Given an existing collection NFT.
+  const umi = await createUmi();
+  const collectionMint = await createCollectionNft(umi);
+
+  // When we create a new candy machine with a large amount of items.
+  const candyMachine = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(
+      await createCandyMachine(umi, {
+        candyMachine,
+        collectionMint: collectionMint.publicKey,
+        collectionUpdateAuthority: umi.identity,
+        itemsAvailable: 20000,
+        sellerFeeBasisPoints: percentAmount(1.23),
+        creators: [],
+        configLineSettings: some({
+          prefixName: '',
+          nameLength: 32,
+          prefixUri: '',
+          uriLength: 200,
+          isSequential: false,
+        }),
+      })
+    )
+    .sendAndConfirm();
+
+  // Then we expect the candy machine account to have been created.
+  const candyMachineAccount = await fetchCandyMachine(
+    umi,
+    candyMachine.publicKey
+  );
+  t.like(candyMachineAccount, <CandyMachine>{
+    publicKey: publicKey(candyMachine),
+    itemsRedeemed: 0n,
+    data: { itemsAvailable: 20000n },
   });
 });

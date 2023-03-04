@@ -83,9 +83,10 @@ export function setCollection(
   const keys: AccountMeta[] = [];
 
   // Program ID.
-  const programId: PublicKey = context.programs.get(
-    'mplCandyMachineCore'
-  ).publicKey;
+  const programId = context.programs.getPublicKey(
+    'mplCandyMachineCore',
+    'CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR'
+  );
 
   // Resolved accounts.
   const candyMachineAccount = input.candyMachine;
@@ -124,11 +125,17 @@ export function setCollection(
       collectionAuthority: publicKey(authorityPdaAccount),
     });
   const tokenMetadataProgramAccount = input.tokenMetadataProgram ?? {
-    ...context.programs.get('mplTokenMetadata').publicKey,
+    ...context.programs.getPublicKey(
+      'mplTokenMetadata',
+      'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'
+    ),
     isWritable: false,
   };
   const systemProgramAccount = input.systemProgram ?? {
-    ...context.programs.get('splSystem').publicKey,
+    ...context.programs.getPublicKey(
+      'splSystem',
+      '11111111111111111111111111111111'
+    ),
     isWritable: false,
   };
 

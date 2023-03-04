@@ -122,7 +122,10 @@ export function getCandyGuardGpaBuilder(
   context: Pick<Context, 'rpc' | 'serializer' | 'programs'>
 ) {
   const s = context.serializer;
-  const programId = context.programs.get('mplCandyGuard').publicKey;
+  const programId = context.programs.getPublicKey(
+    'mplCandyGuard',
+    'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
+  );
   return gpaBuilder(context, programId)
     .registerFields<{
       discriminator: Array<number>;
@@ -153,7 +156,10 @@ export function findCandyGuardPda(
   }
 ): Pda {
   const s = context.serializer;
-  const programId: PublicKey = context.programs.get('mplCandyGuard').publicKey;
+  const programId = context.programs.getPublicKey(
+    'mplCandyGuard',
+    'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
+  );
   return context.eddsa.findPda(programId, [
     s.string({ size: 'variable' }).serialize('candy_guard'),
     s.publicKey().serialize(seeds.base),

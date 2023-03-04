@@ -244,3 +244,119 @@ test('it cannot add items if either of them have a name or URI that is too long'
     message: /ExceededLengthError/,
   });
 });
+
+test('it can add items to a custom offset and override existing items', async (t) => {
+  // Given an existing Candy Machine with 2 items loaded and capacity of 3 items.
+  const umi = await createUmi();
+  const candyMachine = await createCandyMachine(umi, { itemsAvailable: 3 });
+  await transactionBuilder(umi)
+    .add(
+      addConfigLines(umi, {
+        candyMachine: candyMachine.publicKey,
+        index: 0,
+        configLines: [
+          { name: 'Degen #1', uri: 'https://example.com/degen/1' },
+          { name: 'Degen #2', uri: 'https://example.com/degen/2' },
+        ],
+      })
+    )
+    .sendAndConfirm();
+
+  // When we add 2 items to the Candy Machine at index 1.
+  await transactionBuilder(umi)
+    .add(
+      addConfigLines(umi, {
+        candyMachine: candyMachine.publicKey,
+        index: 1,
+        configLines: [
+          { name: 'Degen #3', uri: 'https://example.com/degen/3' },
+          { name: 'Degen #4', uri: 'https://example.com/degen/4' },
+        ],
+      })
+    )
+    .sendAndConfirm();
+
+  // Then the Candy Machine has been updated properly.
+  const candyMachineAccount = await fetchCandyMachine(
+    umi,
+    candyMachine.publicKey
+  );
+  t.like(candyMachineAccount, <CandyMachine>{
+    itemsLoaded: 3,
+    items: [
+      {
+        index: 0,
+        minted: false,
+        name: 'Degen #1',
+        uri: 'https://example.com/degen/1',
+      },
+      {
+        index: 1,
+        minted: false,
+        name: 'Degen #3',
+        uri: 'https://example.com/degen/3',
+      },
+      {
+        index: 2,
+        minted: false,
+        name: 'Degen #4',
+        uri: 'https://example.com/degen/4',
+      },
+    ],
+  });
+});
+
+test('it can override all items of a candy machine', async (t) => {
+  // Given an fully loaded Candy Machine with 2 items.
+  const umi = await createUmi();
+  const candyMachine = await createCandyMachine(umi, { itemsAvailable: 2 });
+  await transactionBuilder(umi)
+    .add(
+      addConfigLines(umi, {
+        candyMachine: candyMachine.publicKey,
+        index: 0,
+        configLines: [
+          { name: 'Degen #1', uri: 'https://example.com/degen/1' },
+          { name: 'Degen #2', uri: 'https://example.com/degen/2' },
+        ],
+      })
+    )
+    .sendAndConfirm();
+
+  // When we add 2 new items to the Candy Machine at index 0.
+  await transactionBuilder(umi)
+    .add(
+      addConfigLines(umi, {
+        candyMachine: candyMachine.publicKey,
+        index: 0,
+        configLines: [
+          { name: 'Degen #3', uri: 'https://example.com/degen/3' },
+          { name: 'Degen #4', uri: 'https://example.com/degen/4' },
+        ],
+      })
+    )
+    .sendAndConfirm();
+
+  // Then all items have been overriden.
+  const candyMachineAccount = await fetchCandyMachine(
+    umi,
+    candyMachine.publicKey
+  );
+  t.like(candyMachineAccount, <CandyMachine>{
+    itemsLoaded: 2,
+    items: [
+      {
+        index: 0,
+        minted: false,
+        name: 'Degen #3',
+        uri: 'https://example.com/degen/3',
+      },
+      {
+        index: 1,
+        minted: false,
+        name: 'Degen #4',
+        uri: 'https://example.com/degen/4',
+      },
+    ],
+  });
+});

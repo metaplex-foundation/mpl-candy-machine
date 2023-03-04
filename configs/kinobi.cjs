@@ -206,39 +206,6 @@ const defaultsToMetadataDelegateRecordPda = (
 kinobi.update(
   new SetInstructionAccountDefaultValuesVisitor([
     {
-      kind: "program",
-      account: /^tokenMetadataProgram|mplTokenMetadataProgram$/,
-      program: {
-        name: "mplTokenMetadata",
-        publicKey: "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s",
-      },
-      ignoreIfOptional: true,
-    },
-    {
-      kind: "program",
-      account: /^candyMachineProgram|mplCandyMachineProgram$/,
-      program: {
-        name: "mplCandyMachine",
-        publicKey: "CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR",
-      },
-      ignoreIfOptional: true,
-    },
-    {
-      kind: "program",
-      account: /^candyGuardProgram|mplCandyGuardProgram$/,
-      program: {
-        name: "mplCandyGuard",
-        publicKey: "Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g",
-      },
-      ignoreIfOptional: true,
-    },
-    {
-      kind: "publicKey",
-      account: /^instructionSysvarAccount$/,
-      publicKey: "Sysvar1nstructions1111111111111111111111111",
-      ignoreIfOptional: true,
-    },
-    {
       kind: "publicKey",
       account: /^recentSlothashes$/,
       publicKey: "SysvarS1otHashes111111111111111111111111111",

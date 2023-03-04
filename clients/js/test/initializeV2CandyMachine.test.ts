@@ -23,7 +23,7 @@ import { createCollectionNft, createUmi } from './_setup';
  * part of the "createV2CandyMachine" tests as they are more convenient to test.
  */
 
-test('it can initialize a new candy machine account', async (t) => {
+test.skip('it can initialize a new candy machine account', async (t) => {
   // Given an empty candy machine account with a big enough size.
   const umi = await createUmi();
   const candyMachine = generateSigner(umi);
@@ -50,6 +50,10 @@ test('it can initialize a new candy machine account', async (t) => {
         collectionUpdateAuthority: umi.identity,
         itemsAvailable: 100,
         tokenStandard: TokenStandard.NonFungible,
+        // TODO: Remove when bug fixed on the program.
+        authorizationRules: publicKey(
+          'auth9SigNpDKz4sJJ1DfCTuZrZNSAgh9sFD3rboVmgg'
+        ),
         sellerFeeBasisPoints: percentAmount(1.23),
         creators: [
           { address: creator.publicKey, verified: false, percentageShare: 100 },

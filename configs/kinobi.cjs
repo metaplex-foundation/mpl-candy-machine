@@ -134,7 +134,7 @@ kinobi.update(
   })
 );
 
-// Update tokenStandard and maxSupply fields.
+// Update tokenStandard, maxSupply and hidden settings hash.
 kinobi.update(
   new TransformNodesVisitor([
     {
@@ -154,6 +154,15 @@ kinobi.update(
         return new TypeStructFieldNode(
           { ...node.metadata, name: "maxEditionSupply" },
           node.type
+        );
+      },
+    },
+    {
+      selector: { type: "TypeStructFieldNode", name: "hash" },
+      transformer: (node) => {
+        return new TypeStructFieldNode(
+          node.metadata,
+          new TypeBytesNode({ size: { kind: "fixed", bytes: 32 } })
         );
       },
     },

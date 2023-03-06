@@ -200,3 +200,85 @@ test('it can update the hidden settings of a candy machine', async (t) => {
     },
   });
 });
+
+test('it cannot go from hidden settings to config line settings', async (t) => {
+  // Given a Candy Machine using the following hidden settings.
+  const umi = await createUmi();
+  const candyMachine = await createCandyMachine(umi, {
+    itemsAvailable: 1000,
+    configLineSettings: none(),
+    hiddenSettings: some({
+      name: 'My NFT #$ID+1$',
+      uri: 'https://my.app.com/nfts/$ID+1$.json',
+      hash: new Uint8Array(32),
+    }),
+  });
+  const { data: originalData } = await fetchCandyMachine(
+    umi,
+    candyMachine.publicKey
+  );
+
+  // When we try to update it so it uses config line settings instead.
+  const promise = transactionBuilder(umi)
+    .add(
+      updateCandyMachine(umi, {
+        candyMachine: candyMachine.publicKey,
+        data: {
+          ...originalData,
+          hiddenSettings: none(),
+          configLineSettings: some({
+            prefixName: 'My NFT #',
+            nameLength: 4,
+            prefixUri: 'https://arweave.net/',
+            uriLength: 50,
+            isSequential: true,
+          }),
+        },
+      })
+    )
+    .sendAndConfirm();
+
+  // Then we expect a program error.
+  await t.throwsAsync(promise, { message: /CannotSwitchFromHiddenSettings/ });
+});
+
+test('it cannot go from config line settings to hidden settings', async (t) => {
+  // Given a Candy Machine using the following config line settings.
+  const umi = await createUmi();
+  const candyMachine = await createCandyMachine(umi, {
+    itemsAvailable: 1000,
+    hiddenSettings: none(),
+    configLineSettings: some({
+      prefixName: 'My NFT #',
+      nameLength: 4,
+      prefixUri: 'https://arweave.net/',
+      uriLength: 50,
+      isSequential: true,
+    }),
+  });
+  const { data: originalData } = await fetchCandyMachine(
+    umi,
+    candyMachine.publicKey
+  );
+
+  // When we try to update it so it uses hidden settings instead.
+  const promise = transactionBuilder(umi)
+    .add(
+      updateCandyMachine(umi, {
+        candyMachine: candyMachine.publicKey,
+        data: {
+          ...originalData,
+          configLineSettings: none(),
+          hiddenSettings: some({
+            name: 'My NFT #$ID+1$',
+            uri: 'https://my.app.com/nfts/$ID+1$.json',
+            hash: new Uint8Array(32),
+          }),
+        },
+      })
+    )
+    .sendAndConfirm();
+
+  // Then we expect a program error.
+  await t.throwsAsync(promise, { message: /CannotSwitchToHiddenSettings/ });
+});

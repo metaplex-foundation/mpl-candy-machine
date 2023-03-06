@@ -13,9 +13,7 @@ export type GuardManifest<
   RA extends object = {}
 > = {
   name: string;
-  serializer: (
-    context: Pick<Context, 'eddsa' | 'programs' | 'serializer'>
-  ) => Serializer<DA, D>;
+  serializer: (context: Pick<Context, 'serializer'>) => Serializer<DA, D>;
   mintParser: MintParser<MA>;
   routeParser: RouteParser<RA>;
 };

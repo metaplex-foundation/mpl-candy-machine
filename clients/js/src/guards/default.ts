@@ -6,6 +6,8 @@ import {
   BotTaxArgs,
   EndDate,
   EndDateArgs,
+  SolPayment,
+  SolPaymentArgs,
   StartDate,
   StartDateArgs,
 } from '../generated';
@@ -15,13 +17,14 @@ import {
   GuardSetMintArgs,
   GuardSetRouteArgs,
 } from './core';
+import { SolPaymentMintArgs } from './solPayment';
 
 /**
  * The arguments for all default Candy Machine guards.
  */
 export type DefaultGuardSetDataArgs = GuardSetDataArgs & {
   botTax: Option<BotTaxArgs>;
-  // solPayment: Option<SolPaymentGuardSettings>;
+  solPayment: Option<SolPaymentArgs>;
   // tokenPayment: Option<TokenPaymentGuardSettings>;
   startDate: Option<StartDateArgs>;
   // thirdPartySigner: Option<ThirdPartySignerGuardSettings>;
@@ -46,7 +49,7 @@ export type DefaultGuardSetDataArgs = GuardSetDataArgs & {
  */
 export type DefaultGuardSetData = GuardSetData & {
   botTax: Option<BotTax>;
-  // solPayment: Option<SolPaymentGuardSettings>;
+  solPayment: Option<SolPayment>;
   // tokenPayment: Option<TokenPaymentGuardSettings>;
   startDate: Option<StartDate>;
   // thirdPartySigner: Option<ThirdPartySignerGuardSettings>;
@@ -71,7 +74,7 @@ export type DefaultGuardSetData = GuardSetData & {
  */
 export type DefaultGuardSetMintArgs = GuardSetMintArgs & {
   // botTax: no mint settings
-  // solPayment: no mint settings
+  solPayment: Option<SolPaymentMintArgs>;
   // tokenPayment: no mint settings
   // startDate: no mint settings
   // thirdPartySigner: Option<ThirdPartySignerGuardMintSettings>;

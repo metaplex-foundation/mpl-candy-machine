@@ -13,7 +13,6 @@ test('it can update the collection of a candy machine', async (t) => {
   const collectionUpdateAuthorityA = generateSigner(umi);
   const collectionA = await createCollectionNft(umi, {
     authority: collectionUpdateAuthorityA,
-    updateAuthority: collectionUpdateAuthorityA,
   });
   const candyMachine = await createCandyMachine(umi, {
     collectionMint: collectionA.publicKey,
@@ -24,7 +23,6 @@ test('it can update the collection of a candy machine', async (t) => {
   const collectionUpdateAuthorityB = generateSigner(umi);
   const collectionB = await createCollectionNft(umi, {
     authority: collectionUpdateAuthorityB,
-    updateAuthority: collectionUpdateAuthorityB,
   });
   await transactionBuilder(umi)
     .add(

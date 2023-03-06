@@ -1,5 +1,12 @@
 import { none, None, Option } from '@metaplex-foundation/umi';
-import { EndDate, EndDateArgs, StartDate, StartDateArgs } from '../generated';
+import {
+  AddressGate,
+  AddressGateArgs,
+  EndDate,
+  EndDateArgs,
+  StartDate,
+  StartDateArgs,
+} from '../generated';
 import {
   GuardSetData,
   GuardSetDataArgs,
@@ -23,7 +30,7 @@ export type DefaultGuardSetDataArgs = GuardSetDataArgs & {
   // mintLimit: Option<MintLimitGuardSettings>;
   // nftPayment: Option<NftPaymentGuardSettings>;
   // redeemedAmount: Option<RedeemedAmountGuardSettings>;
-  // addressGate: Option<AddressGateGuardSettings>;
+  addressGate: Option<AddressGateArgs>;
   // nftGate: Option<NftGateGuardSettings>;
   // nftBurn: Option<NftBurnGuardSettings>;
   // tokenBurn: Option<TokenBurnGuardSettings>;
@@ -48,7 +55,7 @@ export type DefaultGuardSetData = GuardSetData & {
   // mintLimit: Option<MintLimitGuardSettings>;
   // nftPayment: Option<NftPaymentGuardSettings>;
   // redeemedAmount: Option<RedeemedAmountGuardSettings>;
-  // addressGate: Option<AddressGateGuardSettings>;
+  addressGate: Option<AddressGate>;
   // nftGate: Option<NftGateGuardSettings>;
   // nftBurn: Option<NftBurnGuardSettings>;
   // tokenBurn: Option<TokenBurnGuardSettings>;

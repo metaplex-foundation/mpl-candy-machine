@@ -20,16 +20,16 @@ export type GuardManifest<
   routeParser: RouteParser<RA>;
 };
 
-export type CandyGuardsDataArgs = {
+export type GuardSetDataArgs = {
   [name: string]: Option<object>;
 };
-export type CandyGuardsData = {
+export type GuardSetData = {
   [name: string]: Option<object>;
 };
-export type CandyGuardsMintArgs = {
+export type GuardSetMintArgs = {
   [name: string]: Option<object>;
 };
-export type CandyGuardsRouteArgs = {
+export type GuardSetRouteArgs = {
   [name: string]: Option<object>;
 };
 

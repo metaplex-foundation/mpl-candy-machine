@@ -381,6 +381,8 @@ kinobi.update(
     "startDate.date": { kind: "DateTime" },
     "endDate.date": { kind: "DateTime" },
     "botTax.lamports": { kind: "SolAmount" },
+    "solPayment.lamports": { kind: "SolAmount" },
+    "freezeSolPayment.lamports": { kind: "SolAmount" },
   })
 );
 

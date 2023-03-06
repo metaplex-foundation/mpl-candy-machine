@@ -7,37 +7,39 @@ import {
 } from '@metaplex-foundation/umi';
 
 export type GuardManifest<
-  DA extends GuardDataArgs = {},
-  D extends GuardData<DA> = DA,
-  MA extends GuardMintArgs = {},
-  RA extends GuardRouteArgs = {}
+  DA extends object = {},
+  D extends DA = DA,
+  MA extends object = {},
+  RA extends object = {}
 > = {
   name: string;
-  serializer: Serializer<DA, D>;
+  serializer: (
+    context: Pick<Context, 'eddsa' | 'programs' | 'serializer'>
+  ) => Serializer<DA, D>;
   mintParser: MintParser<MA>;
   routeParser: RouteParser<RA>;
 };
 
-export type GuardDataArgs = {
+export type CandyGuardsDataArgs = {
   [name: string]: Option<object>;
 };
-export type GuardData<DA extends GuardDataArgs> = DA & {
+export type CandyGuardsData = {
   [name: string]: Option<object>;
 };
-export type GuardMintArgs = {
+export type CandyGuardsMintArgs = {
   [name: string]: Option<object>;
 };
-export type GuardRouteArgs = {
+export type CandyGuardsRouteArgs = {
   [name: string]: Option<object>;
 };
 
-export type MintParser<MA extends GuardMintArgs> = (
+export type MintParser<MA extends object> = (
   context: Pick<Context, 'eddsa' | 'programs' | 'serializer'>,
   mintContext: MintContext,
   args: MA
 ) => GuardInstructionExtras;
 
-export type RouteParser<RA extends GuardRouteArgs> = (
+export type RouteParser<RA extends object> = (
   context: Pick<Context, 'eddsa' | 'programs' | 'serializer'>,
   routeContext: RouteContext,
   args: RA

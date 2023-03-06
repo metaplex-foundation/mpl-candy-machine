@@ -378,6 +378,8 @@ kinobi.update(
     "initializeCandyMachineInstructionData.sellerFeeBasisPoints": percentAmount,
     "initializeV2CandyMachineInstructionData.sellerFeeBasisPoints":
       percentAmount,
+    "startDate.date": { kind: "DateTime" },
+    "endDate.date": { kind: "DateTime" },
   })
 );
 

@@ -6,18 +6,24 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Context, Serializer } from '@metaplex-foundation/umi';
+import {
+  Context,
+  DateTime,
+  DateTimeInput,
+  Serializer,
+  mapDateTimeSerializer,
+} from '@metaplex-foundation/umi';
 
 /** Guard that sets a specific date for the mint to stop. */
-export type EndDate = { date: bigint };
+export type EndDate = { date: DateTime };
 
-export type EndDateArgs = { date: number | bigint };
+export type EndDateArgs = { date: DateTimeInput };
 
 export function getEndDateSerializer(
   context: Pick<Context, 'serializer'>
 ): Serializer<EndDateArgs, EndDate> {
   const s = context.serializer;
-  return s.struct<EndDate>([['date', s.i64()]], {
+  return s.struct<EndDate>([['date', mapDateTimeSerializer(s.i64())]], {
     description: 'EndDate',
   }) as Serializer<EndDateArgs, EndDate>;
 }

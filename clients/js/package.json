@@ -25,11 +25,11 @@
   "author": "Metaplex Maintainers <contact@metaplex.com>",
   "license": "Apache-2.0",
   "peerDependencies": {
-    "@metaplex-foundation/umi": "^0.5.1"
+    "@metaplex-foundation/umi": "^0.5.3"
   },
   "dependencies": {
-    "@metaplex-foundation/mpl-essentials": "^0.3.0",
-    "@metaplex-foundation/mpl-token-metadata": "3.0.0-alpha.4"
+    "@metaplex-foundation/mpl-essentials": "^0.3.1",
+    "@metaplex-foundation/mpl-token-metadata": "3.0.0-alpha.5"
   },
   "devDependencies": {
     "@ava/typescript": "^3.0.1",

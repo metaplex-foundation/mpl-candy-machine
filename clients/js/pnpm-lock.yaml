@@ -2,8 +2,8 @@ lockfileVersion: 5.4
 
 specifiers:
   '@ava/typescript': ^3.0.1
-  '@metaplex-foundation/mpl-essentials': ^0.3.0
-  '@metaplex-foundation/mpl-token-metadata': 3.0.0-alpha.4
+  '@metaplex-foundation/mpl-essentials': ^0.3.1
+  '@metaplex-foundation/mpl-token-metadata': 3.0.0-alpha.5
   '@metaplex-foundation/umi': ^0.5.3
   '@metaplex-foundation/umi-bundle-tests': ^0.5.3
   '@solana/web3.js': ^1.73.0
@@ -24,8 +24,8 @@ specifiers:
   vercel: ^28.16.0
 
 dependencies:
-  '@metaplex-foundation/mpl-essentials': 0.3.0_stwtg3s2aq4sffjj7ffoh7p76q
-  '@metaplex-foundation/mpl-token-metadata': 3.0.0-alpha.4_stwtg3s2aq4sffjj7ffoh7p76q
+  '@metaplex-foundation/mpl-essentials': 0.3.1_stwtg3s2aq4sffjj7ffoh7p76q
+  '@metaplex-foundation/mpl-token-metadata': 3.0.0-alpha.5_stwtg3s2aq4sffjj7ffoh7p76q
 
 devDependencies:
   '@ava/typescript': 3.0.1
@@ -1602,20 +1602,20 @@ packages:
       - supports-color
     dev: true
 
-  /@metaplex-foundation/mpl-essentials/0.3.0_stwtg3s2aq4sffjj7ffoh7p76q:
-    resolution: {integrity: sha512-i4WNVX/v1HOQPfqGWNMia8J6HOoKnoppXvxpda2Q/RLempZNMbmsi1/2H24CJ1kryNOzHC4KLYSsXIzwBM/sXw==}
+  /@metaplex-foundation/mpl-essentials/0.3.1_stwtg3s2aq4sffjj7ffoh7p76q:
+    resolution: {integrity: sha512-2ZUFPE6YjYu/v1UtKGUgzYuFRG5MfQLG1/vnO6J5ZeFelR7ZIzdqXkONr/XcD31yjS6dHwX6VAUvnvT0pd8XBA==}
     peerDependencies:
-      '@metaplex-foundation/umi': ^0.5.1
+      '@metaplex-foundation/umi': ^0.5.3
     dependencies:
       '@metaplex-foundation/umi': 0.5.3
     dev: false
 
-  /@metaplex-foundation/mpl-token-metadata/3.0.0-alpha.4_stwtg3s2aq4sffjj7ffoh7p76q:
-    resolution: {integrity: sha512-1dIWg9tMSLuYEpEeL3oWWLWUKNKLIUIG4ZaVnzzl2wElyR7/Teb3aveXYhKrj02puW5XfUVfvpWDSpH/c0/fvg==}
+  /@metaplex-foundation/mpl-token-metadata/3.0.0-alpha.5_stwtg3s2aq4sffjj7ffoh7p76q:
+    resolution: {integrity: sha512-EIF9qxrCRh2dDxyvdbzEkrdcwxY5XGAM5SI7iilns4m4qUedigGwEW2MG1vVyfLJjIQI80SzVJ5g0efp5rC2Qw==}
     peerDependencies:
-      '@metaplex-foundation/umi': ^0.5.1
+      '@metaplex-foundation/umi': ^0.5.3
     dependencies:
-      '@metaplex-foundation/mpl-essentials': 0.3.0_stwtg3s2aq4sffjj7ffoh7p76q
+      '@metaplex-foundation/mpl-essentials': 0.3.1_stwtg3s2aq4sffjj7ffoh7p76q
       '@metaplex-foundation/umi': 0.5.3
     dev: false
 

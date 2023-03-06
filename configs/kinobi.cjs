@@ -380,6 +380,7 @@ kinobi.update(
       percentAmount,
     "startDate.date": { kind: "DateTime" },
     "endDate.date": { kind: "DateTime" },
+    "botTax.lamports": { kind: "SolAmount" },
   })
 );
 

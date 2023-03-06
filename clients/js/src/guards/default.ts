@@ -2,6 +2,8 @@ import { none, None, Option } from '@metaplex-foundation/umi';
 import {
   AddressGate,
   AddressGateArgs,
+  BotTax,
+  BotTaxArgs,
   EndDate,
   EndDateArgs,
   StartDate,
@@ -18,7 +20,7 @@ import {
  * The arguments for all default Candy Machine guards.
  */
 export type DefaultGuardSetDataArgs = GuardSetDataArgs & {
-  // botTax: Option<BotTaxGuardSettings>;
+  botTax: Option<BotTaxArgs>;
   // solPayment: Option<SolPaymentGuardSettings>;
   // tokenPayment: Option<TokenPaymentGuardSettings>;
   startDate: Option<StartDateArgs>;
@@ -43,7 +45,7 @@ export type DefaultGuardSetDataArgs = GuardSetDataArgs & {
  * The data for all default Candy Machine guards.
  */
 export type DefaultGuardSetData = GuardSetData & {
-  // botTax: Option<BotTaxGuardSettings>;
+  botTax: Option<BotTax>;
   // solPayment: Option<SolPaymentGuardSettings>;
   // tokenPayment: Option<TokenPaymentGuardSettings>;
   startDate: Option<StartDate>;
@@ -116,7 +118,7 @@ export type DefaultGuardSetRouteArgs = GuardSetRouteArgs & {
 
 /** @internal */
 export const defaultCandyGuardNames: string[] = [
-  // 'botTax',
+  'botTax',
   // 'solPayment',
   // 'tokenPayment',
   'startDate',
@@ -128,7 +130,7 @@ export const defaultCandyGuardNames: string[] = [
   // 'mintLimit',
   // 'nftPayment',
   // 'redeemedAmount',
-  // 'addressGate',
+  'addressGate',
   // 'nftGate',
   // 'nftBurn',
   // 'tokenBurn',

@@ -134,7 +134,7 @@ kinobi.update(
   })
 );
 
-// Update tokenStandard fields.
+// Update tokenStandard and maxSupply fields.
 kinobi.update(
   new TransformNodesVisitor([
     {
@@ -145,6 +145,15 @@ kinobi.update(
           new TypeDefinedLinkNode("tokenStandard", {
             dependency: "mplTokenMetadata",
           })
+        );
+      },
+    },
+    {
+      selector: { type: "TypeStructFieldNode", name: "maxSupply" },
+      transformer: (node) => {
+        return new TypeStructFieldNode(
+          { ...node.metadata, name: "maxEditionSupply" },
+          node.type
         );
       },
     },
@@ -340,7 +349,7 @@ kinobi.update(new FlattenInstructionArgsStructVisitor());
 // Set struct default values.
 const defaultInitialCandyMachineData = {
   symbol: vScalar(""),
-  maxSupply: vScalar(0),
+  maxEditionSupply: vScalar(0),
   isMutable: vScalar(true),
   configLineSettings: vNone(),
   hiddenSettings: vNone(),

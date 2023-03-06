@@ -64,7 +64,7 @@ test('it can create a candy machine for regular NFTs', async (t) => {
       itemsAvailable: 100n,
       symbol: '',
       sellerFeeBasisPoints: percentAmount(1.23),
-      maxSupply: 0n,
+      maxEditionSupply: 0n,
       isMutable: true,
       creators: [
         {

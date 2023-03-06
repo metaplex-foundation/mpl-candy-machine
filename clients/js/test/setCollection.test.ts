@@ -1,8 +1,10 @@
+import { updateV1 } from '@metaplex-foundation/mpl-token-metadata';
 import {
   generateSigner,
-  none,
   publicKey,
+  some,
   transactionBuilder,
+  Umi,
 } from '@metaplex-foundation/umi';
 import test from 'ava';
 import { CandyMachine, fetchCandyMachine, setCollection } from '../src';
@@ -12,9 +14,10 @@ test('it can update the collection of a candy machine', async (t) => {
   // Given a Candy Machine associated with Collection A.
   const umi = await createUmi();
   const collectionUpdateAuthorityA = generateSigner(umi);
-  const collectionA = await createCollectionNft(umi, {
-    updateAuthority: collectionUpdateAuthorityA.publicKey,
-    creators: none(),
+  const collectionA = await createCollectionNft(umi);
+  await updateNft(umi, {
+    mint: collectionA.publicKey,
+    newUpdateAuthority: some(collectionUpdateAuthorityA.publicKey),
   });
   const candyMachine = await createCandyMachine(umi, {
     collectionMint: collectionA.publicKey,
@@ -23,9 +26,10 @@ test('it can update the collection of a candy machine', async (t) => {
 
   // When we update its collection to Collection B.
   const collectionUpdateAuthorityB = generateSigner(umi);
-  const collectionB = await createCollectionNft(umi, {
-    updateAuthority: collectionUpdateAuthorityB.publicKey,
-    creators: none(),
+  const collectionB = await createCollectionNft(umi);
+  await updateNft(umi, {
+    mint: collectionB.publicKey,
+    newUpdateAuthority: some(collectionUpdateAuthorityB.publicKey),
   });
   await transactionBuilder(umi)
     .add(
@@ -47,3 +51,7 @@ test('it can update the collection of a candy machine', async (t) => {
     collectionMint: publicKey(collectionB.publicKey),
   });
 });
+
+async function updateNft(umi: Umi, input: Parameters<typeof updateV1>[1]) {
+  await transactionBuilder(umi).add(updateV1(umi, input)).sendAndConfirm();
+}

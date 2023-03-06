@@ -1,4 +1,4 @@
-import { none, None, Option } from '@metaplex-foundation/umi';
+import { none, Option } from '@metaplex-foundation/umi';
 import {
   AddressGate,
   AddressGateArgs,
@@ -10,6 +10,8 @@ import {
   SolPaymentArgs,
   StartDate,
   StartDateArgs,
+  TokenPayment,
+  TokenPaymentArgs,
 } from '../generated';
 import {
   GuardSetData,
@@ -18,6 +20,7 @@ import {
   GuardSetRouteArgs,
 } from './core';
 import { SolPaymentMintArgs } from './solPayment';
+import { TokenPaymentMintArgs } from './tokenPayment';
 
 /**
  * The arguments for all default Candy Machine guards.
@@ -25,7 +28,7 @@ import { SolPaymentMintArgs } from './solPayment';
 export type DefaultGuardSetDataArgs = GuardSetDataArgs & {
   botTax: Option<BotTaxArgs>;
   solPayment: Option<SolPaymentArgs>;
-  // tokenPayment: Option<TokenPaymentGuardSettings>;
+  tokenPayment: Option<TokenPaymentArgs>;
   startDate: Option<StartDateArgs>;
   // thirdPartySigner: Option<ThirdPartySignerGuardSettings>;
   // tokenGate: Option<TokenGateGuardSettings>;
@@ -50,7 +53,7 @@ export type DefaultGuardSetDataArgs = GuardSetDataArgs & {
 export type DefaultGuardSetData = GuardSetData & {
   botTax: Option<BotTax>;
   solPayment: Option<SolPayment>;
-  // tokenPayment: Option<TokenPaymentGuardSettings>;
+  tokenPayment: Option<TokenPayment>;
   startDate: Option<StartDate>;
   // thirdPartySigner: Option<ThirdPartySignerGuardSettings>;
   // tokenGate: Option<TokenGateGuardSettings>;
@@ -75,7 +78,7 @@ export type DefaultGuardSetData = GuardSetData & {
 export type DefaultGuardSetMintArgs = GuardSetMintArgs & {
   // botTax: no mint settings
   solPayment: Option<SolPaymentMintArgs>;
-  // tokenPayment: no mint settings
+  tokenPayment: Option<TokenPaymentMintArgs>;
   // startDate: no mint settings
   // thirdPartySigner: Option<ThirdPartySignerGuardMintSettings>;
   // tokenGate: no mint settings
@@ -122,8 +125,8 @@ export type DefaultGuardSetRouteArgs = GuardSetRouteArgs & {
 /** @internal */
 export const defaultCandyGuardNames: string[] = [
   'botTax',
-  // 'solPayment',
-  // 'tokenPayment',
+  'solPayment',
+  'tokenPayment',
   'startDate',
   // 'thirdPartySigner',
   // 'tokenGate',
@@ -143,9 +146,8 @@ export const defaultCandyGuardNames: string[] = [
 ];
 
 /** @internal */
-export const emptyDefaultCandyGuardSettings: {
-  [key in keyof DefaultGuardSetDataArgs]: None;
-} = defaultCandyGuardNames.reduce((acc, name) => {
-  acc[name] = none() as None;
-  return acc;
-}, {} as { [key in keyof DefaultGuardSetDataArgs]: None });
+export const emptyDefaultCandyGuardSettings: DefaultGuardSetDataArgs =
+  defaultCandyGuardNames.reduce((acc, name) => {
+    acc[name] = none();
+    return acc;
+  }, {} as DefaultGuardSetDataArgs);

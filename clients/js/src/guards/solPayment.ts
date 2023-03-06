@@ -17,7 +17,7 @@ export const solPaymentGuardManifest: GuardManifest<
 > = {
   name: 'solPayment',
   serializer: getSolPaymentSerializer,
-  mintParser: (context, mintContext, args: SolPaymentMintArgs) => ({
+  mintParser: (context, mintContext, args) => ({
     data: new Uint8Array(),
     remainingAccounts: [{ publicKey: args.destination, isWritable: true }],
   }),

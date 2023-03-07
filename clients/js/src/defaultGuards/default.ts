@@ -155,7 +155,7 @@ export const defaultCandyGuardNames: string[] = [
 ];
 
 /** @internal */
-export const emptyDefaultCandyGuardSettings: DefaultGuardSetArgs =
+export const emptyDefaultGuardSetArgs: DefaultGuardSetArgs =
   defaultCandyGuardNames.reduce((acc, name) => {
     acc[name] = none();
     return acc;

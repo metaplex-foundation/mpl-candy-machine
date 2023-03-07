@@ -9,6 +9,9 @@ import {
   createCandyGuard,
   fetchCandyGuard,
   findCandyGuardPda,
+  emptyDefaultGuardSetArgs,
+  GuardGroup,
+  GuardSet,
 } from '../src';
 import { createUmi } from './_setup';
 
@@ -28,5 +31,7 @@ test('it can create a candy guard without guards', async (t) => {
   console.log(candyGuardAccount);
   t.like(candyGuardAccount, <CandyGuard>{
     publicKey: publicKey(candyGuard),
+    guards: emptyDefaultGuardSetArgs,
+    groups: [] as GuardGroup<GuardSet>[],
   });
 });

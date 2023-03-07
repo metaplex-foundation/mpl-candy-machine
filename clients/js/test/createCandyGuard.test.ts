@@ -1,4 +1,5 @@
 import {
+  dateTime,
   generateSigner,
   publicKey,
   sol,
@@ -45,25 +46,25 @@ test('it can create a candy guard with guards', async (t) => {
   const base = generateSigner(umi);
 
   // When we create a new candy guard with guards.
-  // const solDestination = generateSigner(umi).publicKey;
-  // const gatekeeperNetwork = generateSigner(umi).publicKey;
-  // const tokenMint = generateSigner(umi).publicKey;
-  // const tokenDestination = generateSigner(umi).publicKey;
+  const solDestination = generateSigner(umi).publicKey;
+  const gatekeeperNetwork = generateSigner(umi).publicKey;
+  const tokenMint = generateSigner(umi).publicKey;
+  const tokenDestination = generateSigner(umi).publicKey;
   await transactionBuilder(umi)
     .add(
       createCandyGuard(umi, {
         base,
         guards: {
           botTax: some({ lamports: sol(0.001), lastInstruction: true }),
-          // solPayment: some({ lamports: sol(1.5), destination: solDestination }),
-          // startDate: some({ date: '2023-03-07T16:13:00.000Z' }),
-          // endDate: some({ date: '2023-03-08T16:13:00.000Z' }),
-          // gatekeeper: some({ gatekeeperNetwork, expireOnUse: true }),
-          // tokenPayment: some({
-          //   amount: 42,
-          //   mint: tokenMint,
-          //   destinationAta: tokenDestination,
-          // }),
+          solPayment: some({ lamports: sol(1.5), destination: solDestination }),
+          startDate: some({ date: '2023-03-07T16:13:00.000Z' }),
+          endDate: some({ date: '2023-03-08T16:13:00.000Z' }),
+          gatekeeper: some({ gatekeeperNetwork, expireOnUse: true }),
+          tokenPayment: some({
+            amount: 42,
+            mint: tokenMint,
+            destinationAta: tokenDestination,
+          }),
         },
       })
     )
@@ -79,6 +80,15 @@ test('it can create a candy guard with guards', async (t) => {
     guards: {
       ...emptyDefaultGuardSetArgs,
       botTax: some({ lamports: sol(0.001), lastInstruction: true }),
+      solPayment: some({ lamports: sol(1.5), destination: solDestination }),
+      startDate: some({ date: dateTime('2023-03-07T16:13:00.000Z') }),
+      endDate: some({ date: dateTime('2023-03-08T16:13:00.000Z') }),
+      gatekeeper: some({ gatekeeperNetwork, expireOnUse: true }),
+      tokenPayment: some({
+        amount: 42n,
+        mint: tokenMint,
+        destinationAta: tokenDestination,
+      }),
     },
     groups: [] as GuardGroup<GuardSet>[],
   });

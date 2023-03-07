@@ -7,4 +7,5 @@ export * from './constants';
 export * from './createCandyGuard';
 export * from './createCandyMachine';
 export * from './errors';
+export * from './merkle';
 export * from './plugin';

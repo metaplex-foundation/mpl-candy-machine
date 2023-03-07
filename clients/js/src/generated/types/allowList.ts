@@ -28,7 +28,7 @@ export function getAllowListSerializer(
   context: Pick<Context, 'serializer'>
 ): Serializer<AllowListArgs, AllowList> {
   const s = context.serializer;
-  return s.struct<AllowList>([['merkleRoot', s.bytes()]], {
+  return s.struct<AllowList>([['merkleRoot', s.bytes({ size: 32 })]], {
     description: 'AllowList',
   }) as Serializer<AllowListArgs, AllowList>;
 }

@@ -6,6 +6,8 @@ import {
   BotTaxArgs,
   EndDate,
   EndDateArgs,
+  Gatekeeper,
+  GatekeeperArgs,
   SolPayment,
   SolPaymentArgs,
   StartDate,
@@ -23,6 +25,7 @@ import {
   GuardSetMintArgs,
   GuardSetRouteArgs,
 } from './core';
+import { GatekeeperMintArgs } from './gatekeeper';
 import { SolPaymentMintArgs } from './solPayment';
 import { ThirdPartySignerMintArgs } from './thirdPartySigner';
 import { TokenGateMintArgs } from './tokenGate';
@@ -38,7 +41,7 @@ export type DefaultGuardSetDataArgs = GuardSetDataArgs & {
   startDate: Option<StartDateArgs>;
   thirdPartySigner: Option<ThirdPartySignerArgs>;
   tokenGate: Option<TokenGateArgs>;
-  // gatekeeper: Option<GatekeeperGuardSettings>;
+  gatekeeper: Option<GatekeeperArgs>;
   endDate: Option<EndDateArgs>;
   // allowList: Option<AllowListGuardSettings>;
   // mintLimit: Option<MintLimitGuardSettings>;
@@ -63,7 +66,7 @@ export type DefaultGuardSetData = GuardSetData & {
   startDate: Option<StartDate>;
   thirdPartySigner: Option<ThirdPartySigner>;
   tokenGate: Option<TokenGate>;
-  // gatekeeper: Option<GatekeeperGuardSettings>;
+  gatekeeper: Option<Gatekeeper>;
   endDate: Option<EndDate>;
   // allowList: Option<AllowListGuardSettings>;
   // mintLimit: Option<MintLimitGuardSettings>;
@@ -88,7 +91,7 @@ export type DefaultGuardSetMintArgs = GuardSetMintArgs & {
   // startDate: no mint settings
   thirdPartySigner: Option<ThirdPartySignerMintArgs>;
   tokenGate: Option<TokenGateMintArgs>;
-  // gatekeeper: Option<GatekeeperGuardMintSettings>;
+  gatekeeper: Option<GatekeeperMintArgs>;
   // endDate: no mint settings
   // allowList: no mint settings
   // mintLimit: no mint settings

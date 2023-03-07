@@ -3,6 +3,7 @@ export * from './default';
 
 export * from './addressGate';
 export * from './endDate';
+export * from './gatekeeper';
 export * from './solPayment';
 export * from './startDate';
 export * from './thirdPartySigner';

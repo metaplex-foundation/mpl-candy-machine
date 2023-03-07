@@ -4,7 +4,7 @@ import {
   SolPayment,
   SolPaymentArgs,
 } from '../generated';
-import { GuardManifest, noopParser } from './core';
+import { GuardManifest, noopParser } from '../guards';
 
 /**
  * The solPayment guard is used to charge an

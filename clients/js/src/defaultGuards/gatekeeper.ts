@@ -4,7 +4,7 @@ import {
   GatekeeperArgs,
   getGatekeeperSerializer,
 } from '../generated';
-import { GuardManifest, GuardRemainingAccount, noopParser } from './core';
+import { GuardManifest, GuardRemainingAccount, noopParser } from '../guards';
 
 /**
  * The gatekeeper guard checks whether the minting wallet

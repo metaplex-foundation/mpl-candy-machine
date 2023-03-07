@@ -1,5 +1,5 @@
 import { getStartDateSerializer, StartDate, StartDateArgs } from '../generated';
-import { GuardManifest, noopParser } from './core';
+import { GuardManifest, noopParser } from '../guards';
 
 /**
  * The startDate guard determines the start date of the mint.

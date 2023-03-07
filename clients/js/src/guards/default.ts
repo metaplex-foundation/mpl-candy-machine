@@ -25,11 +25,13 @@ import {
   GuardSetMintArgs,
   GuardSetRouteArgs,
 } from './core';
-import { GatekeeperMintArgs } from './gatekeeper';
-import { SolPaymentMintArgs } from './solPayment';
-import { ThirdPartySignerMintArgs } from './thirdPartySigner';
-import { TokenGateMintArgs } from './tokenGate';
-import { TokenPaymentMintArgs } from './tokenPayment';
+import {
+  GatekeeperMintArgs,
+  SolPaymentMintArgs,
+  ThirdPartySignerMintArgs,
+  TokenGateMintArgs,
+  TokenPaymentMintArgs,
+} from '../defaultGuards';
 
 /**
  * The arguments for all default Candy Machine guards.

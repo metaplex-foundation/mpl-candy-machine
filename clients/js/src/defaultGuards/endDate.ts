@@ -1,5 +1,5 @@
 import { getEndDateSerializer, EndDate, EndDateArgs } from '../generated';
-import { GuardManifest, noopParser } from './core';
+import { GuardManifest, noopParser } from '../guards';
 
 /**
  * The endDate guard is used to specify a date to end the mint.

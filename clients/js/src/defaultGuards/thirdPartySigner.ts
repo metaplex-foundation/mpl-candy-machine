@@ -4,7 +4,7 @@ import {
   ThirdPartySigner,
   ThirdPartySignerArgs,
 } from '../generated';
-import { GuardManifest, noopParser } from './core';
+import { GuardManifest, noopParser } from '../guards';
 
 /**
  * The thirdPartySigner guard requires a predefined

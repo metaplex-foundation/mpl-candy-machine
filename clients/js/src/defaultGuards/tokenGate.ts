@@ -1,7 +1,7 @@
 import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-essentials';
 import { PublicKey } from '@metaplex-foundation/umi';
 import { getTokenGateSerializer, TokenGate, TokenGateArgs } from '../generated';
-import { GuardManifest, noopParser } from './core';
+import { GuardManifest, noopParser } from '../guards';
 
 /**
  * The tokenGate guard restricts minting to token holders

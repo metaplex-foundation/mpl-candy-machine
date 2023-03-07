@@ -6,7 +6,8 @@ import {
   none,
   Serializer,
 } from '@metaplex-foundation/umi';
-import { GuardManifest, GuardSetData, GuardSetDataArgs } from '../guards/core';
+import { GuardSetData, GuardSetDataArgs } from '../guards/core';
+import { CandyGuardProgram, GuardRepository } from '../guards/repository';
 
 export type GuardSet = GuardSetData;
 
@@ -15,8 +16,15 @@ export type GuardSetArgs = GuardSetDataArgs;
 export function getGuardSetSerializer<
   DA extends GuardSetDataArgs,
   D extends DA & GuardSetData = DA
->(context: Pick<Context, 'serializer'>): Serializer<Partial<DA>, D> {
-  const manifests = [] as GuardManifest<any, any, any, any>[];
+>(
+  context: Pick<Context, 'serializer' | 'programs'> & {
+    guards: GuardRepository;
+  },
+  program?: CandyGuardProgram
+): Serializer<Partial<DA>, D> {
+  const manifests = context.guards.forProgram(
+    program ?? context.programs.get<CandyGuardProgram>('mplCandyGuard')
+  );
   return {
     description: 'guardSet',
     fixedSize: null,

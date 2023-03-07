@@ -5,7 +5,7 @@ import {
   TokenPayment,
   TokenPaymentArgs,
 } from '../generated';
-import { GuardManifest, noopParser } from './core';
+import { GuardManifest, noopParser } from '../guards';
 
 /**
  * The tokenPayment guard allows minting by charging the

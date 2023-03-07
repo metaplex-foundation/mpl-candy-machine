@@ -3,7 +3,7 @@ import {
   AddressGateArgs,
   getAddressGateSerializer,
 } from '../generated';
-import { GuardManifest, noopParser } from './core';
+import { GuardManifest, noopParser } from '../guards';
 
 /**
  * The addressGate guard restricts the mint to a single

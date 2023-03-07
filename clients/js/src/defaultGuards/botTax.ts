@@ -1,5 +1,5 @@
 import { BotTax, BotTaxArgs, getBotTaxSerializer } from '../generated';
-import { GuardManifest, noopParser } from './core';
+import { GuardManifest, noopParser } from '../guards';
 
 /**
  * The botTax guard charges a penalty for invalid transactions

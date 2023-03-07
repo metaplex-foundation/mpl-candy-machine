@@ -1,6 +1,16 @@
 import { mplTokenMetadata } from '@metaplex-foundation/mpl-token-metadata';
 import { UmiPlugin } from '@metaplex-foundation/umi';
 import {
+  botTaxGuardManifest,
+  endDateGuardManifest,
+  gatekeeperGuardManifest,
+  solPaymentGuardManifest,
+  startDateGuardManifest,
+  thirdPartySignerGuardManifest,
+  tokenGateGuardManifest,
+  tokenPaymentGuardManifest,
+} from './defaultGuards';
+import {
   getMplCandyGuardProgram,
   getMplCandyMachineCoreProgram,
 } from './generated';
@@ -8,16 +18,8 @@ import {
   CandyGuardProgram,
   defaultCandyGuardNames,
   DefaultGuardRepository,
-  endDateGuardManifest,
-  gatekeeperGuardManifest,
   GuardRepository,
-  solPaymentGuardManifest,
-  startDateGuardManifest,
-  thirdPartySignerGuardManifest,
-  tokenGateGuardManifest,
-  tokenPaymentGuardManifest,
 } from './guards';
-import { botTaxGuardManifest } from './guards/botTax';
 
 export const mplCandyMachine = (): UmiPlugin => ({
   install(umi) {

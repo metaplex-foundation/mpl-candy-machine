@@ -22,6 +22,7 @@ const {
   TypeDefinedLinkNode,
   vEnum,
   UseCustomAccountSerializerVisitor,
+  UpdateDefinedTypesVisitor,
 } = require("@metaplex-foundation/kinobi");
 
 // Paths.
@@ -131,6 +132,15 @@ kinobi.update(
         candyMachineSeed,
       ],
     },
+  })
+);
+
+// Update defined types.
+kinobi.update(
+  new UpdateDefinedTypesVisitor({
+    candyGuardData: { delete: true },
+    guardSet: { delete: true },
+    group: { delete: true },
   })
 );
 
@@ -307,7 +317,7 @@ kinobi.update(
 kinobi.update(
   new UpdateInstructionsVisitor({
     "mplCandyMachineCore.initialize": { name: "initializeCandyMachine" },
-    "mplCandyGuard.initialize": { name: "initializeCandyGuard" },
+    "mplCandyGuard.initialize": { name: "createCandyGuard" },
     "mplCandyMachineCore.initializeV2": {
       name: "initializeV2CandyMachine",
       accounts: {

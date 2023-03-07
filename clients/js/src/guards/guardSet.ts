@@ -29,14 +29,10 @@ export function getGuardSetSerializer<
   DA extends GuardSetArgs,
   D extends DA & GuardSet = DA
 >(
-  context: Pick<Context, 'serializer' | 'programs'> & {
-    guards: GuardRepository;
-  },
-  program?: CandyGuardProgram
+  context: Pick<Context, 'serializer'> & { guards: GuardRepository },
+  program: CandyGuardProgram
 ): Serializer<Partial<DA>, D> {
-  const manifests = context.guards.forProgram(
-    program ?? context.programs.get<CandyGuardProgram>('mplCandyGuard')
-  );
+  const manifests = context.guards.forProgram(program);
   return {
     description: 'guardSet',
     fixedSize: null,

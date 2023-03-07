@@ -18,7 +18,7 @@ import {
 } from '@metaplex-foundation/umi';
 
 // Accounts.
-export type InitializeCandyGuardInstructionAccounts = {
+export type CreateCandyGuardInstructionAccounts = {
   candyGuard: PublicKey;
   base: Signer;
   authority?: PublicKey;
@@ -27,48 +27,48 @@ export type InitializeCandyGuardInstructionAccounts = {
 };
 
 // Arguments.
-export type InitializeCandyGuardInstructionData = {
+export type CreateCandyGuardInstructionData = {
   discriminator: Array<number>;
   data: Uint8Array;
 };
 
-export type InitializeCandyGuardInstructionDataArgs = { data: Uint8Array };
+export type CreateCandyGuardInstructionDataArgs = { data: Uint8Array };
 
-export function getInitializeCandyGuardInstructionDataSerializer(
+export function getCreateCandyGuardInstructionDataSerializer(
   context: Pick<Context, 'serializer'>
 ): Serializer<
-  InitializeCandyGuardInstructionDataArgs,
-  InitializeCandyGuardInstructionData
+  CreateCandyGuardInstructionDataArgs,
+  CreateCandyGuardInstructionData
 > {
   const s = context.serializer;
   return mapSerializer<
-    InitializeCandyGuardInstructionDataArgs,
-    InitializeCandyGuardInstructionData,
-    InitializeCandyGuardInstructionData
+    CreateCandyGuardInstructionDataArgs,
+    CreateCandyGuardInstructionData,
+    CreateCandyGuardInstructionData
   >(
-    s.struct<InitializeCandyGuardInstructionData>(
+    s.struct<CreateCandyGuardInstructionData>(
       [
         ['discriminator', s.array(s.u8(), { size: 8 })],
         ['data', s.bytes()],
       ],
-      { description: 'InitializeCandyGuardInstructionData' }
+      { description: 'CreateCandyGuardInstructionData' }
     ),
     (value) =>
       ({
         ...value,
         discriminator: [175, 175, 109, 31, 13, 152, 155, 237],
-      } as InitializeCandyGuardInstructionData)
+      } as CreateCandyGuardInstructionData)
   ) as Serializer<
-    InitializeCandyGuardInstructionDataArgs,
-    InitializeCandyGuardInstructionData
+    CreateCandyGuardInstructionDataArgs,
+    CreateCandyGuardInstructionData
   >;
 }
 
 // Instruction.
-export function initializeCandyGuard(
+export function createCandyGuard(
   context: Pick<Context, 'serializer' | 'programs' | 'identity' | 'payer'>,
-  input: InitializeCandyGuardInstructionAccounts &
-    InitializeCandyGuardInstructionDataArgs
+  input: CreateCandyGuardInstructionAccounts &
+    CreateCandyGuardInstructionDataArgs
 ): WrappedInstruction {
   const signers: Signer[] = [];
   const keys: AccountMeta[] = [];
@@ -131,7 +131,7 @@ export function initializeCandyGuard(
 
   // Data.
   const data =
-    getInitializeCandyGuardInstructionDataSerializer(context).serialize(input);
+    getCreateCandyGuardInstructionDataSerializer(context).serialize(input);
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

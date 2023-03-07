@@ -75,6 +75,7 @@ const userSeed = {
 kinobi.update(
   new UpdateAccountsVisitor({
     candyGuard: {
+      internal: true,
       seeds: [
         { kind: "literal", value: "candy_guard" },
         {

@@ -34,7 +34,7 @@ import { TokenPaymentMintArgs } from './tokenPayment';
 /**
  * The arguments for all default Candy Machine guards.
  */
-export type DefaultGuardSetDataArgs = GuardSetArgs & {
+export type DefaultGuardSetArgs = GuardSetArgs & {
   botTax: Option<BotTaxArgs>;
   solPayment: Option<SolPaymentArgs>;
   tokenPayment: Option<TokenPaymentArgs>;
@@ -59,7 +59,7 @@ export type DefaultGuardSetDataArgs = GuardSetArgs & {
 /**
  * The data for all default Candy Machine guards.
  */
-export type DefaultGuardSetData = GuardSet & {
+export type DefaultGuardSet = GuardSet & {
   botTax: Option<BotTax>;
   solPayment: Option<SolPayment>;
   tokenPayment: Option<TokenPayment>;
@@ -155,8 +155,8 @@ export const defaultCandyGuardNames: string[] = [
 ];
 
 /** @internal */
-export const emptyDefaultCandyGuardSettings: DefaultGuardSetDataArgs =
+export const emptyDefaultCandyGuardSettings: DefaultGuardSetArgs =
   defaultCandyGuardNames.reduce((acc, name) => {
     acc[name] = none();
     return acc;
-  }, {} as DefaultGuardSetDataArgs);
+  }, {} as DefaultGuardSetArgs);

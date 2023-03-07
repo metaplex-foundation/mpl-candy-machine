@@ -1,4 +1,5 @@
 import { Context, Serializer } from '@metaplex-foundation/umi';
+import { CANDY_GUARD_LABEL_SIZE } from '../constants';
 import { CandyGuardProgram, GuardRepository } from './guardRepository';
 import { getGuardSetSerializer, GuardSet, GuardSetArgs } from './guardSet';
 
@@ -26,7 +27,7 @@ export function getGuardGroupSerializer<
   const s = context.serializer;
   return s.struct(
     [
-      ['label', s.string()],
+      ['label', s.string({ size: CANDY_GUARD_LABEL_SIZE })],
       ['guards', getGuardSetSerializer<DA, D>(context, program)],
     ],
     { description: 'GuardGroup' }

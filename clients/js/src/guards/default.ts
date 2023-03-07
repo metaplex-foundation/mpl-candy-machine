@@ -12,6 +12,8 @@ import {
   StartDateArgs,
   ThirdPartySigner,
   ThirdPartySignerArgs,
+  TokenGate,
+  TokenGateArgs,
   TokenPayment,
   TokenPaymentArgs,
 } from '../generated';
@@ -23,6 +25,7 @@ import {
 } from './core';
 import { SolPaymentMintArgs } from './solPayment';
 import { ThirdPartySignerMintArgs } from './thirdPartySigner';
+import { TokenGateMintArgs } from './tokenGate';
 import { TokenPaymentMintArgs } from './tokenPayment';
 
 /**
@@ -34,7 +37,7 @@ export type DefaultGuardSetDataArgs = GuardSetDataArgs & {
   tokenPayment: Option<TokenPaymentArgs>;
   startDate: Option<StartDateArgs>;
   thirdPartySigner: Option<ThirdPartySignerArgs>;
-  // tokenGate: Option<TokenGateGuardSettings>;
+  tokenGate: Option<TokenGateArgs>;
   // gatekeeper: Option<GatekeeperGuardSettings>;
   endDate: Option<EndDateArgs>;
   // allowList: Option<AllowListGuardSettings>;
@@ -59,7 +62,7 @@ export type DefaultGuardSetData = GuardSetData & {
   tokenPayment: Option<TokenPayment>;
   startDate: Option<StartDate>;
   thirdPartySigner: Option<ThirdPartySigner>;
-  // tokenGate: Option<TokenGateGuardSettings>;
+  tokenGate: Option<TokenGate>;
   // gatekeeper: Option<GatekeeperGuardSettings>;
   endDate: Option<EndDate>;
   // allowList: Option<AllowListGuardSettings>;
@@ -84,7 +87,7 @@ export type DefaultGuardSetMintArgs = GuardSetMintArgs & {
   tokenPayment: Option<TokenPaymentMintArgs>;
   // startDate: no mint settings
   thirdPartySigner: Option<ThirdPartySignerMintArgs>;
-  // tokenGate: no mint settings
+  tokenGate: Option<TokenGateMintArgs>;
   // gatekeeper: Option<GatekeeperGuardMintSettings>;
   // endDate: no mint settings
   // allowList: no mint settings
@@ -112,7 +115,7 @@ export type DefaultGuardSetRouteArgs = GuardSetRouteArgs & {
   // tokenGate: no route settings
   // gatekeeper: no route settings
   // endDate: no route settings
-  // allowList: AllowListGuardRouteSettings;
+  //* allowList: AllowListGuardRouteSettings;
   // mintLimit: no route settings
   // nftPayment: no route settings
   // redeemedAmount: no route settings
@@ -120,8 +123,8 @@ export type DefaultGuardSetRouteArgs = GuardSetRouteArgs & {
   // nftGate: no route settings
   // nftBurn: no route settings
   // tokenBurn: no route settings
-  // freezeSolPayment: FreezeSolPaymentGuardRouteSettings;
-  // freezeTokenPayment: FreezeTokenPaymentGuardRouteSettings;
+  //* freezeSolPayment: FreezeSolPaymentGuardRouteSettings;
+  //* freezeTokenPayment: FreezeTokenPaymentGuardRouteSettings;
   // programGate: no route settings
 };
 
@@ -131,8 +134,8 @@ export const defaultCandyGuardNames: string[] = [
   'solPayment',
   'tokenPayment',
   'startDate',
-  // 'thirdPartySigner',
-  // 'tokenGate',
+  'thirdPartySigner',
+  'tokenGate',
   // 'gatekeeper',
   'endDate',
   // 'allowList',

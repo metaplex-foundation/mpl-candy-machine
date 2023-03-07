@@ -22,6 +22,7 @@ const {
   TypeDefinedLinkNode,
   vEnum,
   UseCustomAccountSerializerVisitor,
+  UpdateDefinedTypesVisitor,
 } = require("@metaplex-foundation/kinobi");
 
 // Paths.
@@ -74,6 +75,7 @@ const userSeed = {
 kinobi.update(
   new UpdateAccountsVisitor({
     candyGuard: {
+      internal: true,
       seeds: [
         { kind: "literal", value: "candy_guard" },
         {
@@ -134,7 +136,16 @@ kinobi.update(
   })
 );
 
-// Update tokenStandard fields.
+// Update defined types.
+kinobi.update(
+  new UpdateDefinedTypesVisitor({
+    candyGuardData: { delete: true },
+    guardSet: { delete: true },
+    group: { delete: true },
+  })
+);
+
+// Update tokenStandard, maxSupply and hidden settings hash.
 kinobi.update(
   new TransformNodesVisitor([
     {
@@ -145,6 +156,24 @@ kinobi.update(
           new TypeDefinedLinkNode("tokenStandard", {
             dependency: "mplTokenMetadata",
           })
+        );
+      },
+    },
+    {
+      selector: { type: "TypeStructFieldNode", name: "maxSupply" },
+      transformer: (node) => {
+        return new TypeStructFieldNode(
+          { ...node.metadata, name: "maxEditionSupply" },
+          node.type
+        );
+      },
+    },
+    {
+      selector: { type: "TypeStructFieldNode", name: "hash" },
+      transformer: (node) => {
+        return new TypeStructFieldNode(
+          node.metadata,
+          new TypeBytesNode({ size: { kind: "fixed", bytes: 32 } })
         );
       },
     },
@@ -288,8 +317,16 @@ kinobi.update(
 // Update instructions.
 kinobi.update(
   new UpdateInstructionsVisitor({
-    "mplCandyMachineCore.initialize": { name: "initializeCandyMachine" },
-    "mplCandyGuard.initialize": { name: "initializeCandyGuard" },
+    "mplCandyMachineCore.initialize": {
+      name: "initializeCandyMachine",
+    },
+    "mplCandyGuard.initialize": {
+      name: "createCandyGuard",
+      internal: true,
+      accounts: {
+        candyGuard: { defaultsTo: { kind: "pda", dependency: "hooked" } },
+      },
+    },
     "mplCandyMachineCore.initializeV2": {
       name: "initializeV2CandyMachine",
       accounts: {
@@ -340,7 +377,7 @@ kinobi.update(new FlattenInstructionArgsStructVisitor());
 // Set struct default values.
 const defaultInitialCandyMachineData = {
   symbol: vScalar(""),
-  maxSupply: vScalar(0),
+  maxEditionSupply: vScalar(0),
   isMutable: vScalar(true),
   configLineSettings: vNone(),
   hiddenSettings: vNone(),
@@ -360,6 +397,11 @@ kinobi.update(
     "initializeCandyMachineInstructionData.sellerFeeBasisPoints": percentAmount,
     "initializeV2CandyMachineInstructionData.sellerFeeBasisPoints":
       percentAmount,
+    "startDate.date": { kind: "DateTime" },
+    "endDate.date": { kind: "DateTime" },
+    "botTax.lamports": { kind: "SolAmount" },
+    "solPayment.lamports": { kind: "SolAmount" },
+    "freezeSolPayment.lamports": { kind: "SolAmount" },
   })
 );
 

@@ -6,7 +6,13 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Context, PublicKey, Serializer } from '@metaplex-foundation/umi';
+import {
+  Context,
+  PublicKey,
+  Serializer,
+  SolAmount,
+  mapAmountSerializer,
+} from '@metaplex-foundation/umi';
 
 /**
  * Guard that charges an amount in SOL (lamports) for the mint with a freeze period.
@@ -19,12 +25,9 @@ import { Context, PublicKey, Serializer } from '@metaplex-foundation/umi';
  * program pubkey, nft mint pubkey]`).
  */
 
-export type FreezeSolPayment = { lamports: bigint; destination: PublicKey };
+export type FreezeSolPayment = { lamports: SolAmount; destination: PublicKey };
 
-export type FreezeSolPaymentArgs = {
-  lamports: number | bigint;
-  destination: PublicKey;
-};
+export type FreezeSolPaymentArgs = FreezeSolPayment;
 
 export function getFreezeSolPaymentSerializer(
   context: Pick<Context, 'serializer'>
@@ -32,7 +35,7 @@ export function getFreezeSolPaymentSerializer(
   const s = context.serializer;
   return s.struct<FreezeSolPayment>(
     [
-      ['lamports', s.u64()],
+      ['lamports', mapAmountSerializer(s.u64(), 'SOL', 9)],
       ['destination', s.publicKey()],
     ],
     { description: 'FreezeSolPayment' }

@@ -15,11 +15,13 @@ import {
   WrappedInstruction,
   checkForIsWritableOverride as isWritable,
   mapSerializer,
+  publicKey,
 } from '@metaplex-foundation/umi';
+import { findCandyGuardPda } from '../../hooked';
 
 // Accounts.
-export type InitializeCandyGuardInstructionAccounts = {
-  candyGuard: PublicKey;
+export type CreateCandyGuardInstructionAccounts = {
+  candyGuard?: PublicKey;
   base: Signer;
   authority?: PublicKey;
   payer?: Signer;
@@ -27,48 +29,51 @@ export type InitializeCandyGuardInstructionAccounts = {
 };
 
 // Arguments.
-export type InitializeCandyGuardInstructionData = {
+export type CreateCandyGuardInstructionData = {
   discriminator: Array<number>;
   data: Uint8Array;
 };
 
-export type InitializeCandyGuardInstructionDataArgs = { data: Uint8Array };
+export type CreateCandyGuardInstructionDataArgs = { data: Uint8Array };
 
-export function getInitializeCandyGuardInstructionDataSerializer(
+export function getCreateCandyGuardInstructionDataSerializer(
   context: Pick<Context, 'serializer'>
 ): Serializer<
-  InitializeCandyGuardInstructionDataArgs,
-  InitializeCandyGuardInstructionData
+  CreateCandyGuardInstructionDataArgs,
+  CreateCandyGuardInstructionData
 > {
   const s = context.serializer;
   return mapSerializer<
-    InitializeCandyGuardInstructionDataArgs,
-    InitializeCandyGuardInstructionData,
-    InitializeCandyGuardInstructionData
+    CreateCandyGuardInstructionDataArgs,
+    CreateCandyGuardInstructionData,
+    CreateCandyGuardInstructionData
   >(
-    s.struct<InitializeCandyGuardInstructionData>(
+    s.struct<CreateCandyGuardInstructionData>(
       [
         ['discriminator', s.array(s.u8(), { size: 8 })],
         ['data', s.bytes()],
       ],
-      { description: 'InitializeCandyGuardInstructionData' }
+      { description: 'CreateCandyGuardInstructionData' }
     ),
     (value) =>
       ({
         ...value,
         discriminator: [175, 175, 109, 31, 13, 152, 155, 237],
-      } as InitializeCandyGuardInstructionData)
+      } as CreateCandyGuardInstructionData)
   ) as Serializer<
-    InitializeCandyGuardInstructionDataArgs,
-    InitializeCandyGuardInstructionData
+    CreateCandyGuardInstructionDataArgs,
+    CreateCandyGuardInstructionData
   >;
 }
 
 // Instruction.
-export function initializeCandyGuard(
-  context: Pick<Context, 'serializer' | 'programs' | 'identity' | 'payer'>,
-  input: InitializeCandyGuardInstructionAccounts &
-    InitializeCandyGuardInstructionDataArgs
+export function createCandyGuard(
+  context: Pick<
+    Context,
+    'serializer' | 'programs' | 'eddsa' | 'identity' | 'payer'
+  >,
+  input: CreateCandyGuardInstructionAccounts &
+    CreateCandyGuardInstructionDataArgs
 ): WrappedInstruction {
   const signers: Signer[] = [];
   const keys: AccountMeta[] = [];
@@ -80,8 +85,10 @@ export function initializeCandyGuard(
   );
 
   // Resolved accounts.
-  const candyGuardAccount = input.candyGuard;
   const baseAccount = input.base;
+  const candyGuardAccount =
+    input.candyGuard ??
+    findCandyGuardPda(context, { base: publicKey(baseAccount) });
   const authorityAccount = input.authority ?? context.identity.publicKey;
   const payerAccount = input.payer ?? context.payer;
   const systemProgramAccount = input.systemProgram ?? {
@@ -131,7 +138,7 @@ export function initializeCandyGuard(
 
   // Data.
   const data =
-    getInitializeCandyGuardInstructionDataSerializer(context).serialize(input);
+    getCreateCandyGuardInstructionDataSerializer(context).serialize(input);
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

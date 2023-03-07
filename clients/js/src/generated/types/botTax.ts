@@ -6,7 +6,12 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Context, Serializer } from '@metaplex-foundation/umi';
+import {
+  Context,
+  Serializer,
+  SolAmount,
+  mapAmountSerializer,
+} from '@metaplex-foundation/umi';
 
 /**
  * Guard is used to:
@@ -18,12 +23,9 @@ import { Context, Serializer } from '@metaplex-foundation/umi';
  * validation of the guards.
  */
 
-export type BotTax = { lamports: bigint; lastInstruction: boolean };
+export type BotTax = { lamports: SolAmount; lastInstruction: boolean };
 
-export type BotTaxArgs = {
-  lamports: number | bigint;
-  lastInstruction: boolean;
-};
+export type BotTaxArgs = BotTax;
 
 export function getBotTaxSerializer(
   context: Pick<Context, 'serializer'>
@@ -31,7 +33,7 @@ export function getBotTaxSerializer(
   const s = context.serializer;
   return s.struct<BotTax>(
     [
-      ['lamports', s.u64()],
+      ['lamports', mapAmountSerializer(s.u64(), 'SOL', 9)],
       ['lastInstruction', s.bool()],
     ],
     { description: 'BotTax' }

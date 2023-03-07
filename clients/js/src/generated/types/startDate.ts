@@ -6,18 +6,24 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Context, Serializer } from '@metaplex-foundation/umi';
+import {
+  Context,
+  DateTime,
+  DateTimeInput,
+  Serializer,
+  mapDateTimeSerializer,
+} from '@metaplex-foundation/umi';
 
 /** Guard that sets a specific start date for the mint. */
-export type StartDate = { date: bigint };
+export type StartDate = { date: DateTime };
 
-export type StartDateArgs = { date: number | bigint };
+export type StartDateArgs = { date: DateTimeInput };
 
 export function getStartDateSerializer(
   context: Pick<Context, 'serializer'>
 ): Serializer<StartDateArgs, StartDate> {
   const s = context.serializer;
-  return s.struct<StartDate>([['date', s.i64()]], {
+  return s.struct<StartDate>([['date', mapDateTimeSerializer(s.i64())]], {
     description: 'StartDate',
   }) as Serializer<StartDateArgs, StartDate>;
 }

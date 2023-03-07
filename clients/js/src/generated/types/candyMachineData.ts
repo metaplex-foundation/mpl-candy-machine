@@ -34,7 +34,7 @@ export type CandyMachineData = {
   /** Secondary sales royalty basis points (0-10000) */
   sellerFeeBasisPoints: Amount<'%', 2>;
   /** Max supply of each individual asset (default 0) */
-  maxSupply: bigint;
+  maxEditionSupply: bigint;
   /** Indicates if the asset is mutable or not (default yes) */
   isMutable: boolean;
   /** List of creators */
@@ -53,7 +53,7 @@ export type CandyMachineDataArgs = {
   /** Secondary sales royalty basis points (0-10000) */
   sellerFeeBasisPoints: Amount<'%', 2>;
   /** Max supply of each individual asset (default 0) */
-  maxSupply: number | bigint;
+  maxEditionSupply: number | bigint;
   /** Indicates if the asset is mutable or not (default yes) */
   isMutable: boolean;
   /** List of creators */
@@ -73,7 +73,7 @@ export function getCandyMachineDataSerializer(
       ['itemsAvailable', s.u64()],
       ['symbol', s.string()],
       ['sellerFeeBasisPoints', mapAmountSerializer(s.u16(), '%', 2)],
-      ['maxSupply', s.u64()],
+      ['maxEditionSupply', s.u64()],
       ['isMutable', s.bool()],
       ['creators', s.array(getCreatorSerializer(context))],
       [

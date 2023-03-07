@@ -71,7 +71,7 @@ export type InitializeV2CandyMachineInstructionData = {
   /** Secondary sales royalty basis points (0-10000) */
   sellerFeeBasisPoints: Amount<'%', 2>;
   /** Max supply of each individual asset (default 0) */
-  maxSupply: bigint;
+  maxEditionSupply: bigint;
   /** Indicates if the asset is mutable or not (default yes) */
   isMutable: boolean;
   /** List of creators */
@@ -91,7 +91,7 @@ export type InitializeV2CandyMachineInstructionDataArgs = {
   /** Secondary sales royalty basis points (0-10000) */
   sellerFeeBasisPoints: Amount<'%', 2>;
   /** Max supply of each individual asset (default 0) */
-  maxSupply?: number | bigint;
+  maxEditionSupply?: number | bigint;
   /** Indicates if the asset is mutable or not (default yes) */
   isMutable?: boolean;
   /** List of creators */
@@ -121,7 +121,7 @@ export function getInitializeV2CandyMachineInstructionDataSerializer(
         ['itemsAvailable', s.u64()],
         ['symbol', s.string()],
         ['sellerFeeBasisPoints', mapAmountSerializer(s.u16(), '%', 2)],
-        ['maxSupply', s.u64()],
+        ['maxEditionSupply', s.u64()],
         ['isMutable', s.bool()],
         ['creators', s.array(getCreatorSerializer(context))],
         [
@@ -138,7 +138,7 @@ export function getInitializeV2CandyMachineInstructionDataSerializer(
         ...value,
         discriminator: [67, 153, 175, 39, 218, 16, 38, 32],
         symbol: value.symbol ?? '',
-        maxSupply: value.maxSupply ?? 0,
+        maxEditionSupply: value.maxEditionSupply ?? 0,
         isMutable: value.isMutable ?? true,
         configLineSettings: value.configLineSettings ?? none(),
         hiddenSettings: value.hiddenSettings ?? none(),

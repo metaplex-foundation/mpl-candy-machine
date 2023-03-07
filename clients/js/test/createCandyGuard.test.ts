@@ -4,13 +4,9 @@ import {
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import test from 'ava';
-import {
-  CandyGuard,
-  createCandyGuard,
-  fetchCandyGuard,
-  findCandyGuardPda,
-} from '../src';
+import { CandyGuard, fetchCandyGuard, findCandyGuardPda } from '../src';
 import { createUmi } from './_setup';
+import { createCandyGuard as baseCreateCandyGuard } from '../src/generated/instructions/createCandyGuard';
 
 test('it can create a candy guard without guards', async (t) => {
   // Given ...
@@ -19,8 +15,13 @@ test('it can create a candy guard without guards', async (t) => {
 
   // When
   await transactionBuilder(umi)
-    .add(createCandyGuard(umi, { base }))
+    .add(baseCreateCandyGuard(umi, { base, data: new Uint8Array(12) }))
     .sendAndConfirm();
+
+  // When
+  // await transactionBuilder(umi)
+  //   .add(createCandyGuard(umi, { base }))
+  //   .sendAndConfirm();
 
   // Then
   const candyGuard = findCandyGuardPda(umi, { base: base.publicKey });

@@ -36,6 +36,7 @@ export function createCandyGuard<DA extends GuardSetArgs>(
   const serializer = getCandyGuardDataSerializer<DA>(context, program);
   const { guards, groups, ...rest } = input;
   const data = serializer.serialize({ guards, groups });
+  console.log(data);
   const ix = baseCreateCandyGuard(context, { ...rest, data });
   return { ...ix, bytesCreatedOnChain: CANDY_GUARD_DATA + data.length };
 }

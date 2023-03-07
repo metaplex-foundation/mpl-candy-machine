@@ -15,11 +15,13 @@ import {
   WrappedInstruction,
   checkForIsWritableOverride as isWritable,
   mapSerializer,
+  publicKey,
 } from '@metaplex-foundation/umi';
+import { findCandyGuardPda } from '../../hooked';
 
 // Accounts.
 export type CreateCandyGuardInstructionAccounts = {
-  candyGuard: PublicKey;
+  candyGuard?: PublicKey;
   base: Signer;
   authority?: PublicKey;
   payer?: Signer;
@@ -66,7 +68,10 @@ export function getCreateCandyGuardInstructionDataSerializer(
 
 // Instruction.
 export function createCandyGuard(
-  context: Pick<Context, 'serializer' | 'programs' | 'identity' | 'payer'>,
+  context: Pick<
+    Context,
+    'serializer' | 'programs' | 'eddsa' | 'identity' | 'payer'
+  >,
   input: CreateCandyGuardInstructionAccounts &
     CreateCandyGuardInstructionDataArgs
 ): WrappedInstruction {
@@ -80,8 +85,10 @@ export function createCandyGuard(
   );
 
   // Resolved accounts.
-  const candyGuardAccount = input.candyGuard;
   const baseAccount = input.base;
+  const candyGuardAccount =
+    input.candyGuard ??
+    findCandyGuardPda(context, { base: publicKey(baseAccount) });
   const authorityAccount = input.authority ?? context.identity.publicKey;
   const payerAccount = input.payer ?? context.payer;
   const systemProgramAccount = input.systemProgram ?? {

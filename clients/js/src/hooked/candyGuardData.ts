@@ -1,4 +1,10 @@
-import { Context, Option, Serializer } from '@metaplex-foundation/umi';
+import {
+  Context,
+  mapSerializer,
+  none,
+  Option,
+  Serializer,
+} from '@metaplex-foundation/umi';
 import {
   CandyGuardProgram,
   getGuardGroupSerializer,
@@ -16,8 +22,8 @@ export type CandyGuardData<D extends GuardSet> = {
 };
 
 export type CandyGuardDataArgs<DA extends GuardSetArgs> = {
-  guards: Partial<DA>;
-  groups: Option<Array<GuardGroupArgs<DA>>>;
+  guards?: Partial<DA>;
+  groups?: Option<Array<GuardGroupArgs<DA>>>;
 };
 
 export function getCandyGuardDataSerializer<
@@ -28,14 +34,17 @@ export function getCandyGuardDataSerializer<
   program: CandyGuardProgram
 ): Serializer<CandyGuardDataArgs<DA>, CandyGuardData<D>> {
   const s = context.serializer;
-  return s.struct(
-    [
-      ['guards', getGuardSetSerializer<DA, D>(context, program)],
+  return mapSerializer(
+    s.struct<Required<CandyGuardDataArgs<DA>>, CandyGuardData<D>>(
       [
-        'groups',
-        s.option(s.array(getGuardGroupSerializer<DA, D>(context, program))),
+        ['guards', getGuardSetSerializer<DA, D>(context, program)],
+        [
+          'groups',
+          s.option(s.array(getGuardGroupSerializer<DA, D>(context, program))),
+        ],
       ],
-    ],
-    { description: 'CandyGuardData' }
+      { description: 'CandyGuardData' }
+    ),
+    (args) => ({ guards: args.guards ?? {}, groups: args.groups ?? none() })
   ) as Serializer<CandyGuardDataArgs<DA>, CandyGuardData<D>>;
 }

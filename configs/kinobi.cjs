@@ -323,6 +323,9 @@ kinobi.update(
     "mplCandyGuard.initialize": {
       name: "createCandyGuard",
       internal: true,
+      accounts: {
+        candyGuard: { defaultsTo: { kind: "pda", dependency: "hooked" } },
+      },
     },
     "mplCandyMachineCore.initializeV2": {
       name: "initializeV2CandyMachine",

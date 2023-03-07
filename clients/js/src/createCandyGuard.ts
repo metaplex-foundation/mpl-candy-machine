@@ -1,4 +1,4 @@
-import { Context, WrappedInstruction } from '@metaplex-foundation/umi';
+import { WrappedInstruction } from '@metaplex-foundation/umi';
 import { CANDY_GUARD_DATA } from './constants';
 import {
   createCandyGuard as baseCreateCandyGuard,
@@ -26,7 +26,7 @@ export type CreateCandyGuardInstructionDataArgs<DA extends GuardSetArgs> =
   CandyGuardDataArgs<DA>;
 
 export function createCandyGuard<DA extends GuardSetArgs>(
-  context: Pick<Context, 'serializer' | 'programs' | 'identity' | 'payer'> & {
+  context: Parameters<typeof baseCreateCandyGuard>[0] & {
     guards: GuardRepository;
   },
   input: CreateCandyGuardInstructionAccounts &

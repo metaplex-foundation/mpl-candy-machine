@@ -16,21 +16,22 @@ import {
 import { createUmi } from './_setup';
 
 test('it can create a candy guard without guards', async (t) => {
-  // Given ...
+  // Given a base address.
   const umi = await createUmi();
   const base = generateSigner(umi);
 
-  // When
+  // When we create a new candy guard without guards.
   await transactionBuilder(umi)
     .add(createCandyGuard(umi, { base }))
     .sendAndConfirm();
 
-  // Then
+  // Then a new candy guard account was created with the expected data.
   const candyGuard = findCandyGuardPda(umi, { base: base.publicKey });
   const candyGuardAccount = await fetchCandyGuard(umi, candyGuard);
-  console.log(candyGuardAccount);
   t.like(candyGuardAccount, <CandyGuard>{
     publicKey: publicKey(candyGuard),
+    base: publicKey(base),
+    authority: publicKey(umi.identity),
     guards: emptyDefaultGuardSetArgs,
     groups: [] as GuardGroup<GuardSet>[],
   });

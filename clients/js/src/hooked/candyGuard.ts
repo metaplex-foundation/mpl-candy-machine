@@ -65,10 +65,7 @@ export function getCandyGuardAccountDataSerializer<
         ['bump', s.u8()],
         ['authority', s.publicKey()],
         ['guards', getGuardSetSerializer<DA, D>(context, program)],
-        [
-          'groups',
-          s.option(s.array(getGuardGroupSerializer<DA, D>(context, program))),
-        ],
+        ['groups', s.array(getGuardGroupSerializer<DA, D>(context, program))],
       ],
       { description: 'CandyGuard' }
     ),

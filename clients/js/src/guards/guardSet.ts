@@ -7,7 +7,7 @@ import {
   Option,
   Serializer,
 } from '@metaplex-foundation/umi';
-import { CandyGuardProgram, GuardRepository } from './repository';
+import { CandyGuardProgram, GuardRepository } from './guardRepository';
 
 export type GuardSetArgs = {
   [name: string]: Option<object>;

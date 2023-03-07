@@ -1,4 +1,8 @@
-import { mergeBytes, WrappedInstruction } from '@metaplex-foundation/umi';
+import {
+  ACCOUNT_HEADER_SIZE,
+  mergeBytes,
+  WrappedInstruction,
+} from '@metaplex-foundation/umi';
 import { CANDY_GUARD_DATA } from './constants';
 import { DefaultGuardSetArgs } from './defaultGuards';
 import {
@@ -43,6 +47,9 @@ export function createCandyGuard<DA extends GuardSetArgs = DefaultGuardSetArgs>(
   const data = serializer.serialize({ guards, groups });
   const prefix = context.serializer.u32().serialize(data.length);
   const dataWithPrefix = mergeBytes([prefix, data]);
-  const ix = baseCreateCandyGuard(context, { ...rest, data: dataWithPrefix });
-  return { ...ix, bytesCreatedOnChain: CANDY_GUARD_DATA + data.length };
+
+  return {
+    ...baseCreateCandyGuard(context, { ...rest, data: dataWithPrefix }),
+    bytesCreatedOnChain: ACCOUNT_HEADER_SIZE + CANDY_GUARD_DATA + data.length,
+  };
 }

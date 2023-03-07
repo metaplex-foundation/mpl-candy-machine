@@ -4,8 +4,10 @@ import {
   publicKey,
   sol,
   some,
+  subtractAmounts,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
+import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
 import test from 'ava';
 import {
   CandyGuard,
@@ -223,4 +225,48 @@ test('it fails to create a group with a label that is too long', async (t) => {
   t.throws(createInstruction, {
     message: /The provided group label \[IAMALABELTHATISTOOLONG\] is too long/,
   });
+});
+
+test('it can create a candy guard with an explicit authority', async (t) => {
+  // Given a base address and an explicit authority.
+  const umi = await createUmi();
+  const base = generateSigner(umi);
+  const authority = generateSigner(umi).publicKey;
+
+  // When we create a new Candy Guard using that authority.
+  await transactionBuilder(umi)
+    .add(createCandyGuard(umi, { base, authority }))
+    .sendAndConfirm();
+
+  // Then we expect the Candy Guard's authority to be the given authority.
+  const candyGuard = findCandyGuardPda(umi, { base: base.publicKey });
+  const candyGuardAccount = await fetchCandyGuard(umi, candyGuard);
+  t.like(candyGuardAccount, <CandyGuard>{
+    publicKey: publicKey(candyGuard),
+    base: publicKey(base),
+    authority: publicKey(authority),
+  });
+});
+
+test('it can create a candy guard with an explicit payer', async (t) => {
+  // Given a base address and an explicit payer with SOLs.
+  const umi = await createUmi();
+  const base = generateSigner(umi);
+  const payer = await generateSignerWithSol(umi);
+  const payerBalance = await umi.rpc.getBalance(payer.publicKey);
+
+  // When we create a new Candy Guard using that authority.
+  const builder = transactionBuilder(umi).add(
+    createCandyGuard(umi, { base, payer })
+  );
+  await builder.sendAndConfirm();
+
+  // Then the Candy Guard was created successfully.
+  const candyGuard = findCandyGuardPda(umi, { base: base.publicKey });
+  t.true(await umi.rpc.accountExists(candyGuard));
+
+  // And the payer paid for the rent.
+  const newPayerBalance = await umi.rpc.getBalance(payer.publicKey);
+  const expectedRent = await builder.getRentCreatedOnChain();
+  t.deepEqual(newPayerBalance, subtractAmounts(payerBalance, expectedRent));
 });

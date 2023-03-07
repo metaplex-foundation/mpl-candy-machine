@@ -1,4 +1,8 @@
-import { mergeBytes, WrappedInstruction } from '@metaplex-foundation/umi';
+import {
+  base16,
+  mergeBytes,
+  WrappedInstruction,
+} from '@metaplex-foundation/umi';
 import { CANDY_GUARD_DATA } from './constants';
 import { DefaultGuardSetArgs } from './defaultGuards';
 import {

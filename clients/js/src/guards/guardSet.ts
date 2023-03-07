@@ -5,7 +5,9 @@ import {
   mergeBytes,
   none,
   Option,
+  reverseSerializer,
   Serializer,
+  some,
 } from '@metaplex-foundation/umi';
 import { CandyGuardProgram, GuardRepository } from './guardRepository';
 
@@ -33,6 +35,7 @@ export function getGuardSetSerializer<
   program: CandyGuardProgram
 ): Serializer<Partial<DA>, D> {
   const manifests = context.guards.forProgram(program);
+  const featuresSerializer = reverseSerializer(bitArray(8, true));
   return {
     description: 'guardSet',
     fixedSize: null,
@@ -49,10 +52,13 @@ export function getGuardSetSerializer<
             : new Uint8Array()
         );
       });
-      return mergeBytes([bitArray(8).serialize(features), ...bytes]);
+      return mergeBytes([featuresSerializer.serialize(features), ...bytes]);
     },
     deserialize: (bytes: Uint8Array, offset = 0): [D, number] => {
-      const [features, featuresOffset] = bitArray(8).deserialize(bytes, offset);
+      const [features, featuresOffset] = featuresSerializer.deserialize(
+        bytes,
+        offset
+      );
       offset = featuresOffset;
       const guardSet = manifests.reduce((acc, manifest, index) => {
         acc[manifest.name] = none();
@@ -60,7 +66,7 @@ export function getGuardSetSerializer<
         const serializer = manifest.serializer(context);
         const [value, newOffset] = serializer.deserialize(bytes, offset);
         offset = newOffset;
-        acc[manifest.name] = value;
+        acc[manifest.name] = some(value);
         return acc;
       }, {} as GuardSet);
       return [guardSet as D, offset];

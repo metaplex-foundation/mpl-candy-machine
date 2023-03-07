@@ -78,6 +78,7 @@ test('it can create a candy guard with guards', async (t) => {
     authority: publicKey(umi.identity),
     guards: {
       ...emptyDefaultGuardSetArgs,
+      botTax: some({ lamports: sol(0.001), lastInstruction: true }),
     },
     groups: [] as GuardGroup<GuardSet>[],
   });

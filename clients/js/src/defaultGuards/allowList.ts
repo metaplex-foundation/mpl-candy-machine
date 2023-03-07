@@ -1,5 +1,9 @@
-import { PublicKey } from '@metaplex-foundation/umi';
-import { getAllowListSerializer, AllowList, AllowListArgs } from '../generated';
+import {
+  AllowList,
+  AllowListArgs,
+  findAllowListProofPda,
+  getAllowListSerializer,
+} from '../generated';
 import { GuardManifest } from '../guards';
 
 /**
@@ -37,22 +41,51 @@ import { GuardManifest } from '../guards';
 export const allowListGuardManifest: GuardManifest<
   AllowListArgs,
   AllowList,
-  AllowListMintArgs
+  AllowListMintArgs,
+  AllowListRouteArgs
 > = {
   name: 'allowList',
   serializer: getAllowListSerializer,
   mintParser: (context, mintContext, args) => ({
     data: new Uint8Array(),
-    remainingAccounts: [{ publicKey: args.destination, isWritable: true }],
+    remainingAccounts: [
+      {
+        isWritable: false,
+        publicKey: findAllowListProofPda(context, {
+          merkleRoot: args.merkleRoot,
+          user: mintContext.minter.publicKey,
+          candyMachine: mintContext.candyMachine,
+          candyGuard: mintContext.candyGuard,
+        }),
+      },
+    ],
   }),
   routeParser: (context, routeContext, args) => ({
-    data: new Uint8Array(),
-    remainingAccounts: [],
+    data: new Uint8Array(), // TODO
+    remainingAccounts: [
+      {
+        isWritable: false,
+        publicKey: findAllowListProofPda(context, {
+          merkleRoot: args.merkleRoot,
+          user: routeContext.payer.publicKey, // TODO: extra arg and fallback to payer.
+          candyMachine: routeContext.candyMachine,
+          candyGuard: routeContext.candyGuard,
+        }),
+      },
+      {
+        isWritable: false,
+        publicKey: context.programs.getPublicKey(
+          'splSystem',
+          '11111111111111111111111111111111'
+        ),
+      },
+    ],
   }),
 };
 
 export type AllowListMintArgs = {
-  destination: PublicKey;
+  /** Merkle root of the addresses allowed to mint. */
+  merkleRoot: Uint8Array;
 };
 
 /**
@@ -81,6 +114,9 @@ export type AllowListMintArgs = {
 export type AllowListRouteArgs = {
   /** Selects the path to execute in the route instruction. */
   path: 'proof';
+
+  /** Merkle root of the addresses allowed to mint. */
+  merkleRoot: Uint8Array;
 
   /**
    * The Proof that the minting wallet is part of the

@@ -1,4 +1,8 @@
-import { WrappedInstruction } from '@metaplex-foundation/umi';
+import {
+  base16,
+  mergeBytes,
+  WrappedInstruction,
+} from '@metaplex-foundation/umi';
 import { CANDY_GUARD_DATA } from './constants';
 import {
   createCandyGuard as baseCreateCandyGuard,
@@ -33,10 +37,16 @@ export function createCandyGuard<DA extends GuardSetArgs>(
     CreateCandyGuardInstructionDataArgs<DA>
 ): WrappedInstruction {
   const program = context.programs.get<CandyGuardProgram>('mplCandyGuard');
-  const serializer = getCandyGuardDataSerializer<DA>(context, program);
   const { guards, groups, ...rest } = input;
+  const serializer = getCandyGuardDataSerializer<DA>(context, program);
   const data = serializer.serialize({ guards, groups });
-  console.log(data);
-  const ix = baseCreateCandyGuard(context, { ...rest, data });
+  const prefix = context.serializer.u32().serialize(data.length);
+  const dataWithPrefix = mergeBytes([prefix, data]);
+  console.log({
+    prefix: base16.deserialize(prefix),
+    data: base16.deserialize(data),
+    dataWithPrefix: base16.deserialize(dataWithPrefix),
+  });
+  const ix = baseCreateCandyGuard(context, { ...rest, data: dataWithPrefix });
   return { ...ix, bytesCreatedOnChain: CANDY_GUARD_DATA + data.length };
 }

@@ -1,5 +1,6 @@
 export * from './core';
 export * from './default';
+export * from './repository';
 
 export * from './addressGate';
 export * from './endDate';

@@ -317,8 +317,13 @@ kinobi.update(
 // Update instructions.
 kinobi.update(
   new UpdateInstructionsVisitor({
-    "mplCandyMachineCore.initialize": { name: "initializeCandyMachine" },
-    "mplCandyGuard.initialize": { name: "createCandyGuard" },
+    "mplCandyMachineCore.initialize": {
+      name: "initializeCandyMachine",
+    },
+    "mplCandyGuard.initialize": {
+      name: "createCandyGuard",
+      internal: true,
+    },
     "mplCandyMachineCore.initializeV2": {
       name: "initializeV2CandyMachine",
       accounts: {

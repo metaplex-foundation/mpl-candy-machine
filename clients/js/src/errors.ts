@@ -1,4 +1,5 @@
 import { UmiError } from '@metaplex-foundation/umi';
+import { CANDY_GUARD_LABEL_SIZE } from './constants';
 
 export class CandyMachineError extends UmiError {
   readonly name: string = 'CandyMachineError';
@@ -119,10 +120,10 @@ export class GuardNotEnabledError extends CandyMachineError {
 export class GuardGroupLabelTooLongError extends CandyMachineError {
   readonly name: string = 'GuardGroupLabelTooLongError';
 
-  constructor(label: string, maxLength: number) {
+  constructor(label: string) {
     const message =
       `The provided group label [${label}] is too long. ` +
-      `Group labels cannot be longer than ${maxLength} characters. ` +
+      `Group labels cannot be longer than ${CANDY_GUARD_LABEL_SIZE} characters. ` +
       'Please provide a shorter group label.';
     super(message);
   }

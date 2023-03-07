@@ -205,3 +205,22 @@ test('it can create a candy guard with guard groups', async (t) => {
     ] as GuardGroup<GuardSet>[],
   });
 });
+
+test('it fails to create a group with a label that is too long', async (t) => {
+  // Given a base address.
+  const umi = await createUmi();
+  const base = generateSigner(umi);
+
+  // When we try to create a new Candy Guard with a group label that is too long.
+  const createInstruction = () =>
+    createCandyGuard(umi, {
+      base,
+      guards: {},
+      groups: [{ label: 'IAMALABELTHATISTOOLONG', guards: {} }],
+    });
+
+  // Then we expect a program error.
+  t.throws(createInstruction, {
+    message: /The provided group label \[IAMALABELTHATISTOOLONG\] is too long/,
+  });
+});

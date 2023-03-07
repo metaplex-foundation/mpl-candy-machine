@@ -4,18 +4,30 @@ import {
   isSome,
   mergeBytes,
   none,
+  Option,
   Serializer,
 } from '@metaplex-foundation/umi';
-import { GuardSetData, GuardSetDataArgs } from '../guards/core';
-import { CandyGuardProgram, GuardRepository } from '../guards/repository';
+import { CandyGuardProgram, GuardRepository } from './repository';
 
-export type GuardSet = GuardSetData;
+export type GuardSetArgs = {
+  [name: string]: Option<object>;
+};
 
-export type GuardSetArgs = GuardSetDataArgs;
+export type GuardSet = {
+  [name: string]: Option<object>;
+};
+
+export type GuardSetMintArgs = {
+  [name: string]: Option<object>;
+};
+
+export type GuardSetRouteArgs = {
+  [name: string]: object;
+};
 
 export function getGuardSetSerializer<
-  DA extends GuardSetDataArgs,
-  D extends DA & GuardSetData = DA
+  DA extends GuardSetArgs,
+  D extends DA & GuardSet = DA
 >(
   context: Pick<Context, 'serializer' | 'programs'> & {
     guards: GuardRepository;
@@ -54,7 +66,7 @@ export function getGuardSetSerializer<
         offset = newOffset;
         acc[manifest.name] = value;
         return acc;
-      }, {} as GuardSetData);
+      }, {} as GuardSet);
       return [guardSet as D, offset];
     },
   };

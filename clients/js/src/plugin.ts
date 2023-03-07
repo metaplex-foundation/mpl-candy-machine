@@ -2,6 +2,7 @@ import { mplTokenMetadata } from '@metaplex-foundation/mpl-token-metadata';
 import { UmiPlugin } from '@metaplex-foundation/umi';
 import {
   botTaxGuardManifest,
+  defaultCandyGuardNames,
   endDateGuardManifest,
   gatekeeperGuardManifest,
   solPaymentGuardManifest,
@@ -16,7 +17,6 @@ import {
 } from './generated';
 import {
   CandyGuardProgram,
-  defaultCandyGuardNames,
   DefaultGuardRepository,
   GuardRepository,
 } from './guards';

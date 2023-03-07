@@ -1,6 +1,6 @@
 import { Context, Program } from '@metaplex-foundation/umi';
 import { UnregisteredCandyGuardError, VariableSizeGuardError } from '../errors';
-import { GuardManifest } from './core';
+import { GuardManifest } from './guardManifest';
 
 export type AnyGuardManifest = GuardManifest<any, any, any, any>;
 

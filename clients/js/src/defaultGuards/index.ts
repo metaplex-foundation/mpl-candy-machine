@@ -1,5 +1,6 @@
 export * from './addressGate';
 export * from './botTax';
+export * from './default';
 export * from './endDate';
 export * from './gatekeeper';
 export * from './solPayment';

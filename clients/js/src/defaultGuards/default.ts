@@ -20,23 +20,21 @@ import {
   TokenPaymentArgs,
 } from '../generated';
 import {
-  GuardSetData,
-  GuardSetDataArgs,
+  GuardSet,
+  GuardSetArgs,
   GuardSetMintArgs,
   GuardSetRouteArgs,
-} from './core';
-import {
-  GatekeeperMintArgs,
-  SolPaymentMintArgs,
-  ThirdPartySignerMintArgs,
-  TokenGateMintArgs,
-  TokenPaymentMintArgs,
-} from '../defaultGuards';
+} from '../guards/guardSet';
+import { GatekeeperMintArgs } from './gatekeeper';
+import { SolPaymentMintArgs } from './solPayment';
+import { ThirdPartySignerMintArgs } from './thirdPartySigner';
+import { TokenGateMintArgs } from './tokenGate';
+import { TokenPaymentMintArgs } from './tokenPayment';
 
 /**
  * The arguments for all default Candy Machine guards.
  */
-export type DefaultGuardSetDataArgs = GuardSetDataArgs & {
+export type DefaultGuardSetDataArgs = GuardSetArgs & {
   botTax: Option<BotTaxArgs>;
   solPayment: Option<SolPaymentArgs>;
   tokenPayment: Option<TokenPaymentArgs>;
@@ -61,7 +59,7 @@ export type DefaultGuardSetDataArgs = GuardSetDataArgs & {
 /**
  * The data for all default Candy Machine guards.
  */
-export type DefaultGuardSetData = GuardSetData & {
+export type DefaultGuardSetData = GuardSet & {
   botTax: Option<BotTax>;
   solPayment: Option<SolPayment>;
   tokenPayment: Option<TokenPayment>;

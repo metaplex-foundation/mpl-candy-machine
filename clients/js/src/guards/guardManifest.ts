@@ -1,6 +1,5 @@
 import {
   Context,
-  Option,
   PublicKey,
   Serializer,
   Signer,
@@ -16,19 +15,6 @@ export type GuardManifest<
   serializer: (context: Pick<Context, 'serializer'>) => Serializer<DA, D>;
   mintParser: MintParser<MA>;
   routeParser: RouteParser<RA>;
-};
-
-export type GuardSetDataArgs = {
-  [name: string]: Option<object>;
-};
-export type GuardSetData = {
-  [name: string]: Option<object>;
-};
-export type GuardSetMintArgs = {
-  [name: string]: Option<object>;
-};
-export type GuardSetRouteArgs = {
-  [name: string]: object;
 };
 
 export type MintParser<MA extends object> = (

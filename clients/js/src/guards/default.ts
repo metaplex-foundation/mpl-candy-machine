@@ -10,6 +10,8 @@ import {
   SolPaymentArgs,
   StartDate,
   StartDateArgs,
+  ThirdPartySigner,
+  ThirdPartySignerArgs,
   TokenPayment,
   TokenPaymentArgs,
 } from '../generated';
@@ -20,6 +22,7 @@ import {
   GuardSetRouteArgs,
 } from './core';
 import { SolPaymentMintArgs } from './solPayment';
+import { ThirdPartySignerMintArgs } from './thirdPartySigner';
 import { TokenPaymentMintArgs } from './tokenPayment';
 
 /**
@@ -30,7 +33,7 @@ export type DefaultGuardSetDataArgs = GuardSetDataArgs & {
   solPayment: Option<SolPaymentArgs>;
   tokenPayment: Option<TokenPaymentArgs>;
   startDate: Option<StartDateArgs>;
-  // thirdPartySigner: Option<ThirdPartySignerGuardSettings>;
+  thirdPartySigner: Option<ThirdPartySignerArgs>;
   // tokenGate: Option<TokenGateGuardSettings>;
   // gatekeeper: Option<GatekeeperGuardSettings>;
   endDate: Option<EndDateArgs>;
@@ -55,7 +58,7 @@ export type DefaultGuardSetData = GuardSetData & {
   solPayment: Option<SolPayment>;
   tokenPayment: Option<TokenPayment>;
   startDate: Option<StartDate>;
-  // thirdPartySigner: Option<ThirdPartySignerGuardSettings>;
+  thirdPartySigner: Option<ThirdPartySigner>;
   // tokenGate: Option<TokenGateGuardSettings>;
   // gatekeeper: Option<GatekeeperGuardSettings>;
   endDate: Option<EndDate>;
@@ -80,7 +83,7 @@ export type DefaultGuardSetMintArgs = GuardSetMintArgs & {
   solPayment: Option<SolPaymentMintArgs>;
   tokenPayment: Option<TokenPaymentMintArgs>;
   // startDate: no mint settings
-  // thirdPartySigner: Option<ThirdPartySignerGuardMintSettings>;
+  thirdPartySigner: Option<ThirdPartySignerMintArgs>;
   // tokenGate: no mint settings
   // gatekeeper: Option<GatekeeperGuardMintSettings>;
   // endDate: no mint settings

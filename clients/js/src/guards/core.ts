@@ -28,7 +28,7 @@ export type GuardSetMintArgs = {
   [name: string]: Option<object>;
 };
 export type GuardSetRouteArgs = {
-  [name: string]: Option<object>;
+  [name: string]: object;
 };
 
 export type MintParser<MA extends object> = (

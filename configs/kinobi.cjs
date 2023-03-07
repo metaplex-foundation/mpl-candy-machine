@@ -360,8 +360,8 @@ kinobi.update(
     "mplCandyGuard.SetAuthority": { name: "SetCandyGuardAuthority" },
     "mplCandyMachineCore.update": { name: "updateCandyMachine" },
     "mplCandyGuard.update": { name: "updateCandyGuard" },
-    "mplCandyMachineCore.withdraw": { name: "withdrawCandyMachine" },
-    "mplCandyGuard.withdraw": { name: "withdrawCandyGuard" },
+    "mplCandyMachineCore.withdraw": { name: "deleteCandyMachine" },
+    "mplCandyGuard.withdraw": { name: "deleteCandyGuard" },
   })
 );
 

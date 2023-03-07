@@ -7,6 +7,8 @@
  */
 
 export * from './addConfigLines';
+export * from './deleteCandyGuard';
+export * from './deleteCandyMachine';
 export * from './initializeCandyMachine';
 export * from './initializeV2CandyMachine';
 export * from './mint';
@@ -23,6 +25,4 @@ export * from './setTokenStandard';
 export * from './unwrap';
 export * from './updateCandyGuard';
 export * from './updateCandyMachine';
-export * from './withdrawCandyGuard';
-export * from './withdrawCandyMachine';
 export * from './wrap';

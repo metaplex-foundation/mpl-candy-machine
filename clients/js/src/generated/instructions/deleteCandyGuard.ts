@@ -18,49 +18,47 @@ import {
 } from '@metaplex-foundation/umi';
 
 // Accounts.
-export type WithdrawCandyGuardInstructionAccounts = {
+export type DeleteCandyGuardInstructionAccounts = {
   candyGuard: PublicKey;
   authority?: Signer;
 };
 
 // Arguments.
-export type WithdrawCandyGuardInstructionData = {
-  discriminator: Array<number>;
-};
+export type DeleteCandyGuardInstructionData = { discriminator: Array<number> };
 
-export type WithdrawCandyGuardInstructionDataArgs = {};
+export type DeleteCandyGuardInstructionDataArgs = {};
 
-export function getWithdrawCandyGuardInstructionDataSerializer(
+export function getDeleteCandyGuardInstructionDataSerializer(
   context: Pick<Context, 'serializer'>
 ): Serializer<
-  WithdrawCandyGuardInstructionDataArgs,
-  WithdrawCandyGuardInstructionData
+  DeleteCandyGuardInstructionDataArgs,
+  DeleteCandyGuardInstructionData
 > {
   const s = context.serializer;
   return mapSerializer<
-    WithdrawCandyGuardInstructionDataArgs,
-    WithdrawCandyGuardInstructionData,
-    WithdrawCandyGuardInstructionData
+    DeleteCandyGuardInstructionDataArgs,
+    DeleteCandyGuardInstructionData,
+    DeleteCandyGuardInstructionData
   >(
-    s.struct<WithdrawCandyGuardInstructionData>(
+    s.struct<DeleteCandyGuardInstructionData>(
       [['discriminator', s.array(s.u8(), { size: 8 })]],
-      { description: 'WithdrawCandyGuardInstructionData' }
+      { description: 'DeleteCandyGuardInstructionData' }
     ),
     (value) =>
       ({
         ...value,
         discriminator: [183, 18, 70, 156, 148, 109, 161, 34],
-      } as WithdrawCandyGuardInstructionData)
+      } as DeleteCandyGuardInstructionData)
   ) as Serializer<
-    WithdrawCandyGuardInstructionDataArgs,
-    WithdrawCandyGuardInstructionData
+    DeleteCandyGuardInstructionDataArgs,
+    DeleteCandyGuardInstructionData
   >;
 }
 
 // Instruction.
-export function withdrawCandyGuard(
+export function deleteCandyGuard(
   context: Pick<Context, 'serializer' | 'programs' | 'identity'>,
-  input: WithdrawCandyGuardInstructionAccounts
+  input: DeleteCandyGuardInstructionAccounts
 ): WrappedInstruction {
   const signers: Signer[] = [];
   const keys: AccountMeta[] = [];
@@ -91,9 +89,9 @@ export function withdrawCandyGuard(
   });
 
   // Data.
-  const data = getWithdrawCandyGuardInstructionDataSerializer(
-    context
-  ).serialize({});
+  const data = getDeleteCandyGuardInstructionDataSerializer(context).serialize(
+    {}
+  );
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

@@ -17,7 +17,6 @@ import {
   CreateCandyGuardInstructionAccounts,
   CreateCandyGuardInstructionDataArgs,
   createCandyMachine as baseCreateCandyMachine,
-  Creator,
   DefaultGuardSetArgs,
   findCandyGuardPda,
   GuardSetArgs,
@@ -107,7 +106,13 @@ export const defaultCandyMachineData = (
   collectionUpdateAuthority: context.identity,
   itemsAvailable: 100,
   sellerFeeBasisPoints: percentAmount(10, 2),
-  creators: [] as Creator[],
+  creators: [
+    {
+      address: context.identity.publicKey,
+      verified: true,
+      percentageShare: 100,
+    },
+  ],
   configLineSettings: some({
     prefixName: '',
     nameLength: 32,

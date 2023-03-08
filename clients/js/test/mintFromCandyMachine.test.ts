@@ -1,6 +1,8 @@
 import {
   createAssociatedToken,
   createMint,
+  findAssociatedTokenPda,
+  mintTokensTo,
 } from '@metaplex-foundation/mpl-essentials';
 import {
   generateSigner,
@@ -15,7 +17,7 @@ import {
   createUmi,
 } from './_setup';
 
-test.skip('it can mint directly from a candy machine as the mint authority', async (t) => {
+test('it can mint directly from a candy machine as the mint authority', async (t) => {
   // Given a loaded candy machine.
   const umi = await createUmi();
   const collectionMint = (await createCollectionNft(umi)).publicKey;
@@ -37,6 +39,16 @@ test.skip('it can mint directly from a candy machine as the mint authority', asy
       createAssociatedToken(umi, {
         mint: nftMint.publicKey,
         owner: nftOwner,
+      })
+    )
+    .add(
+      mintTokensTo(umi, {
+        amount: 1,
+        mint: nftMint.publicKey,
+        token: findAssociatedTokenPda(umi, {
+          mint: nftMint.publicKey,
+          owner: nftOwner,
+        }),
       })
     )
     .add(

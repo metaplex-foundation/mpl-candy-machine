@@ -3,6 +3,7 @@ export * from './allowList';
 export * from './botTax';
 export * from './default';
 export * from './endDate';
+export * from './freezeSolPayment';
 export * from './gatekeeper';
 export * from './mintLimit';
 export * from './nftBurn';

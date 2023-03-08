@@ -8,6 +8,8 @@ import {
   BotTaxArgs,
   EndDate,
   EndDateArgs,
+  FreezeSolPayment,
+  FreezeSolPaymentArgs,
   Gatekeeper,
   GatekeeperArgs,
   MintLimit,
@@ -40,6 +42,10 @@ import {
   GuardSetRouteArgs,
 } from '../guards/guardSet';
 import { AllowListMintArgs, AllowListRouteArgs } from './allowList';
+import {
+  FreezeSolPaymentMintArgs,
+  FreezeSolPaymentRouteArgs,
+} from './freezeSolPayment';
 import { GatekeeperMintArgs } from './gatekeeper';
 import { MintLimitMintArgs } from './mintLimit';
 import { NftBurnMintArgs } from './nftBurn';
@@ -70,8 +76,8 @@ export type DefaultGuardSetArgs = GuardSetArgs & {
   addressGate: Option<AddressGateArgs>;
   nftGate: Option<NftGateArgs>;
   nftBurn: Option<NftBurnArgs>;
-  tokenBurn: Option<TokenBurn>;
-  // freezeSolPayment: Option<FreezeSolPaymentGuardSettings>;
+  tokenBurn: Option<TokenBurnArgs>;
+  freezeSolPayment: Option<FreezeSolPaymentArgs>;
   // freezeTokenPayment: Option<FreezeTokenPaymentGuardSettings>;
   // programGate: Option<ProgramGateGuardSettings>;
 };
@@ -95,7 +101,8 @@ export type DefaultGuardSet = GuardSet & {
   addressGate: Option<AddressGate>;
   nftGate: Option<NftGate>;
   nftBurn: Option<NftBurn>;
-  tokenBurn: Option<TokenBurnArgs>;
+  tokenBurn: Option<TokenBurn>;
+  freezeSolPayment: Option<FreezeSolPayment>;
   // freezeSolPayment: Option<FreezeSolPaymentGuardSettings>;
   // freezeTokenPayment: Option<FreezeTokenPaymentGuardSettings>;
   // programGate: Option<ProgramGateGuardSettings>;
@@ -121,7 +128,7 @@ export type DefaultGuardSetMintArgs = GuardSetMintArgs & {
   nftGate: Option<NftGateMintArgs>;
   nftBurn: Option<NftBurnMintArgs>;
   tokenBurn: Option<TokenBurnMintArgs>;
-  // freezeSolPayment: no mint settings
+  freezeSolPayment: Option<FreezeSolPaymentMintArgs>;
   // freezeTokenPayment: no mint settings
   // programGate: no mint settings
 };
@@ -146,7 +153,7 @@ export type DefaultGuardSetRouteArgs = GuardSetRouteArgs & {
   // nftGate: no route settings
   // nftBurn: no route settings
   // tokenBurn: no route settings
-  //* freezeSolPayment: FreezeSolPaymentGuardRouteSettings;
+  freezeSolPayment: FreezeSolPaymentRouteArgs;
   //* freezeTokenPayment: FreezeTokenPaymentGuardRouteSettings;
   // programGate: no route settings
 };

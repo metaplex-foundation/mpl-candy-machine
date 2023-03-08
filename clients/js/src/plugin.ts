@@ -6,6 +6,7 @@ import {
   botTaxGuardManifest,
   defaultCandyGuardNames,
   endDateGuardManifest,
+  freezeSolPaymentGuardManifest,
   gatekeeperGuardManifest,
   mintLimitGuardManifest,
   nftBurnGuardManifest,
@@ -61,7 +62,8 @@ export const mplCandyMachine = (): UmiPlugin => ({
       addressGateGuardManifest,
       nftGateGuardManifest,
       nftBurnGuardManifest,
-      tokenBurnGuardManifest
+      tokenBurnGuardManifest,
+      freezeSolPaymentGuardManifest
     );
   },
 });

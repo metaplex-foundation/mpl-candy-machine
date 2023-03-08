@@ -132,7 +132,7 @@ export class GuardGroupLabelTooLongError extends CandyMachineError {
 export class UnrecognizePathForRouteInstructionError extends CandyMachineError {
   readonly name: string = 'UnrecognizePathForRouteInstructionError';
 
-  constructor(guard: string, path: string) {
+  constructor(guard: string, path: never) {
     const message =
       `The provided path [${path}] does not exist on the route instruction of the [${guard}] guard. ` +
       'Please provide a recognized path.';

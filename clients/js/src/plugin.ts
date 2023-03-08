@@ -8,6 +8,7 @@ import {
   endDateGuardManifest,
   gatekeeperGuardManifest,
   mintLimitGuardManifest,
+  nftBurnGuardManifest,
   nftGateGuardManifest,
   nftPaymentGuardManifest,
   redeemedAmountGuardManifest,
@@ -57,7 +58,8 @@ export const mplCandyMachine = (): UmiPlugin => ({
       nftPaymentGuardManifest,
       redeemedAmountGuardManifest,
       addressGateGuardManifest,
-      nftGateGuardManifest
+      nftGateGuardManifest,
+      nftBurnGuardManifest
     );
   },
 });

@@ -12,6 +12,8 @@ import {
   GatekeeperArgs,
   MintLimit,
   MintLimitArgs,
+  NftBurn,
+  NftBurnArgs,
   NftGate,
   NftGateArgs,
   NftPayment,
@@ -38,6 +40,7 @@ import {
 import { AllowListMintArgs, AllowListRouteArgs } from './allowList';
 import { GatekeeperMintArgs } from './gatekeeper';
 import { MintLimitMintArgs } from './mintLimit';
+import { NftBurnMintArgs } from './nftBurn';
 import { NftGateMintArgs } from './nftGate';
 import { NftPaymentMintArgs } from './nftPayment';
 import { SolPaymentMintArgs } from './solPayment';
@@ -63,7 +66,7 @@ export type DefaultGuardSetArgs = GuardSetArgs & {
   redeemedAmount: Option<RedeemedAmountArgs>;
   addressGate: Option<AddressGateArgs>;
   nftGate: Option<NftGateArgs>;
-  // nftBurn: Option<NftBurnGuardSettings>;
+  nftBurn: Option<NftBurnArgs>;
   // tokenBurn: Option<TokenBurnGuardSettings>;
   // freezeSolPayment: Option<FreezeSolPaymentGuardSettings>;
   // freezeTokenPayment: Option<FreezeTokenPaymentGuardSettings>;
@@ -88,7 +91,7 @@ export type DefaultGuardSet = GuardSet & {
   redeemedAmount: Option<RedeemedAmount>;
   addressGate: Option<AddressGate>;
   nftGate: Option<NftGate>;
-  // nftBurn: Option<NftBurnGuardSettings>;
+  nftBurn: Option<NftBurn>;
   // tokenBurn: Option<TokenBurnGuardSettings>;
   // freezeSolPayment: Option<FreezeSolPaymentGuardSettings>;
   // freezeTokenPayment: Option<FreezeTokenPaymentGuardSettings>;
@@ -113,7 +116,7 @@ export type DefaultGuardSetMintArgs = GuardSetMintArgs & {
   // redeemedAmount: no mint settings
   // addressGate: no mint settings
   nftGate: Option<NftGateMintArgs>;
-  // nftBurn: Option<NftBurnGuardMintSettings>;
+  nftBurn: Option<NftBurnMintArgs>;
   // tokenBurn: no mint settings
   // freezeSolPayment: no mint settings
   // freezeTokenPayment: no mint settings

@@ -5,6 +5,7 @@ export * from './default';
 export * from './endDate';
 export * from './gatekeeper';
 export * from './mintLimit';
+export * from './nftGate';
 export * from './nftPayment';
 export * from './redeemedAmount';
 export * from './solPayment';

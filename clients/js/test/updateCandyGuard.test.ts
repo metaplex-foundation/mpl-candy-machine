@@ -8,7 +8,9 @@ import {
 import test from 'ava';
 import {
   CandyGuard,
+  CandyGuardDataArgs,
   DefaultGuardSet,
+  DefaultGuardSetArgs,
   emptyDefaultGuardSetArgs,
   fetchCandyGuard,
   GuardGroup,
@@ -137,5 +139,71 @@ test('it can remove all guards from a candy guard', async (t) => {
   t.like(candyGuardAccount, <CandyGuard>{
     guards: emptyDefaultGuardSetArgs,
     groups: [] as GuardGroup<DefaultGuardSet>[],
+  });
+});
+
+test('it can update a single guard by passing the current data', async (t) => {
+  // Given an existing candy guard with defaults guards and groups.
+  const umi = await createUmi();
+  const destination = generateSigner(umi).publicKey;
+  const candyGuard = await createCandyGuard(umi, {
+    guards: {
+      botTax: some({ lamports: sol(0.01), lastInstruction: true }),
+    },
+    groups: [
+      {
+        label: 'GROUP1',
+        guards: {
+          startDate: some({ date: '2022-09-13T10:00:00.000Z' }),
+          solPayment: some({ lamports: sol(2), destination }),
+        },
+      },
+      {
+        label: 'GROUP2',
+        guards: {
+          startDate: some({ date: '2022-09-13T12:00:00.000Z' }),
+          solPayment: some({ lamports: sol(4), destination }),
+        },
+      },
+    ],
+  });
+
+  // And we have access to the data of that candy guard.
+  const { guards, groups } = (await fetchCandyGuard(
+    umi,
+    candyGuard
+  )) as CandyGuardDataArgs<DefaultGuardSetArgs>;
+
+  // When we update one guard from one group and pass in the rest of the data.
+  groups[1].guards.startDate = some({ date: '2022-09-13T14:00:00.000Z' });
+  await transactionBuilder(umi)
+    .add(updateCandyGuard(umi, { candyGuard, guards, groups }))
+    .sendAndConfirm();
+
+  // Then only that guard was updated.
+  const candyGuardAccount = await fetchCandyGuard(umi, candyGuard);
+  t.like(candyGuardAccount, <CandyGuard>{
+    guards: {
+      ...emptyDefaultGuardSetArgs,
+      botTax: some({ lamports: sol(0.01), lastInstruction: true }),
+    },
+    groups: [
+      {
+        label: 'GROUP1',
+        guards: {
+          ...emptyDefaultGuardSetArgs,
+          startDate: some({ date: dateTime('2022-09-13T10:00:00.000Z') }),
+          solPayment: some({ lamports: sol(2), destination }),
+        },
+      },
+      {
+        label: 'GROUP2',
+        guards: {
+          ...emptyDefaultGuardSetArgs,
+          startDate: some({ date: dateTime('2022-09-13T14:00:00.000Z') }), // <-- This was updated.
+          solPayment: some({ lamports: sol(4), destination }),
+        },
+      },
+    ],
   });
 });

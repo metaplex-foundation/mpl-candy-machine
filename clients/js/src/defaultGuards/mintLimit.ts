@@ -40,6 +40,4 @@ export const mintLimitGuardManifest: GuardManifest<
   routeParser: noopParser,
 };
 
-export type MintLimitMintArgs = {
-  id: number;
-};
+export type MintLimitMintArgs = Omit<MintLimitArgs, 'limit'>;

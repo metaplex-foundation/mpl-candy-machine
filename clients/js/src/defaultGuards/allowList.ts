@@ -85,10 +85,7 @@ export const allowListGuardManifest: GuardManifest<
   }),
 };
 
-export type AllowListMintArgs = {
-  /** Merkle root of the addresses allowed to mint. */
-  merkleRoot: Uint8Array;
-};
+export type AllowListMintArgs = AllowListArgs;
 
 /**
  * The settings for the allowList guard that should be provided
@@ -113,12 +110,9 @@ export type AllowListMintArgs = {
  * // You are now allows to mint with this wallet.
  * ```
  */
-export type AllowListRouteArgs = {
+export type AllowListRouteArgs = AllowListArgs & {
   /** Selects the path to execute in the route instruction. */
   path: 'proof';
-
-  /** Merkle root of the addresses allowed to mint. */
-  merkleRoot: Uint8Array;
 
   /**
    * The Proof that the minting wallet is part of the

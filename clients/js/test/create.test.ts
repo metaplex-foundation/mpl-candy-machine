@@ -1,8 +1,5 @@
 import {
-  Context,
   generateSigner,
-  percentAmount,
-  PublicKey,
   publicKey,
   sol,
   some,
@@ -13,7 +10,6 @@ import {
   CandyGuard,
   CandyMachine,
   create,
-  Creator,
   emptyDefaultGuardSetArgs,
   fetchCandyGuard,
   fetchCandyMachine,
@@ -21,7 +17,11 @@ import {
   GuardGroup,
   GuardSet,
 } from '../src';
-import { createCollectionNft, createUmi } from './_setup';
+import {
+  createCollectionNft,
+  createUmi,
+  defaultCandyMachineData,
+} from './_setup';
 
 test('it can create a candy machine with an associated candy guard', async (t) => {
   // Given an existing collection NFT.
@@ -33,11 +33,12 @@ test('it can create a candy machine with an associated candy guard', async (t) =
   const destination = generateSigner(umi).publicKey;
   const createInstructions = await create(umi, {
     candyMachine,
+    collectionMint,
     guards: {
       botTax: some({ lamports: sol(0.01), lastInstruction: true }),
       solPayment: some({ lamports: sol(2), destination }),
     },
-    ...defaultCandyMachineData(umi, collectionMint),
+    ...defaultCandyMachineData(umi),
   });
   await transactionBuilder(umi).add(createInstructions).sendAndConfirm();
 
@@ -67,23 +68,3 @@ test('it can create a candy machine with an associated candy guard', async (t) =
     mintAuthority: publicKey(candyGuard),
   });
 });
-
-function defaultCandyMachineData(
-  context: Pick<Context, 'identity'>,
-  collectionMint: PublicKey
-) {
-  return {
-    collectionMint,
-    collectionUpdateAuthority: context.identity,
-    itemsAvailable: 100,
-    sellerFeeBasisPoints: percentAmount(1.23, 2),
-    creators: [] as Creator[],
-    configLineSettings: some({
-      prefixName: 'My NFT #',
-      nameLength: 8,
-      prefixUri: 'https://example.com/',
-      uriLength: 20,
-      isSequential: false,
-    }),
-  };
-}

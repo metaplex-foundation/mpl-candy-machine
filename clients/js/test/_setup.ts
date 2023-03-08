@@ -12,6 +12,8 @@ import { createUmi as basecreateUmi } from '@metaplex-foundation/umi-bundle-test
 import {
   mplCandyMachine,
   createCandyMachine as baseCreateCandyMachine,
+  createCandyGuard as baseCreateCandyGuard,
+  findCandyGuardPda,
 } from '../src';
 
 export const createUmi = async () =>
@@ -67,4 +69,16 @@ export const createCandyMachine = async (
     .sendAndConfirm();
 
   return candyMachine;
+};
+
+export const createCandyGuard = async (
+  umi: Umi,
+  input: Partial<Parameters<typeof baseCreateCandyGuard>[1]> = {}
+) => {
+  const base = input.base ?? generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(baseCreateCandyGuard(umi, { ...input, base }))
+    .sendAndConfirm();
+
+  return findCandyGuardPda(umi, { base: base.publicKey });
 };

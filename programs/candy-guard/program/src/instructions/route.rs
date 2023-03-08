@@ -1,10 +1,7 @@
 use anchor_lang::prelude::*;
 use mpl_candy_machine_core::CandyMachine;
 
-use crate::{
-    state::{CandyGuard, CandyGuardData, GuardSet, GuardType, DATA_OFFSET, SEED},
-    utils::assert_keys_equal,
-};
+use crate::state::{CandyGuard, CandyGuardData, GuardSet, GuardType, DATA_OFFSET};
 
 /// Route the transaction to the specified guard. This instruction allows the use of
 /// empty candy guard and candy machine accounts and it is up to individual guard
@@ -21,11 +18,6 @@ pub fn route<'info>(
         None
     } else {
         let account: Account<CandyGuard> = Account::try_from(&candy_guard.to_account_info())?;
-        // validate the account address
-        let seeds = [SEED, account.base.as_ref()];
-        let (pda, _) = Pubkey::find_program_address(&seeds, &crate::ID);
-        assert_keys_equal(&candy_guard.key(), &pda)?;
-
         Some(account)
     };
 
@@ -36,9 +28,6 @@ pub fn route<'info>(
         None
     } else {
         let account: Account<CandyMachine> = Account::try_from(&candy_machine.to_account_info())?;
-        // validates the mint authority
-        assert_keys_equal(&account.mint_authority, &candy_guard.key())?;
-
         Some(Box::new(account))
     };
 

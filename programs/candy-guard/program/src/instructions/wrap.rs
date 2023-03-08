@@ -29,7 +29,7 @@ pub fn wrap(ctx: Context<Wrap>) -> Result<()> {
 pub struct Wrap<'info> {
     #[account(has_one = authority)]
     pub candy_guard: Account<'info, CandyGuard>,
-    // candy machine authority
+    // candy guard authority
     pub authority: Signer<'info>,
     #[account(
         mut,

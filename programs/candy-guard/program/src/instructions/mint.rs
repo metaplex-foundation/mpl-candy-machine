@@ -16,11 +16,13 @@ pub fn mint<'info>(
     mint_args: Vec<u8>,
     label: Option<String>,
 ) -> Result<()> {
+    msg!("(Deprecated as of 0.4.0) Use MintV2 instead");
+
     let accounts = MintAccounts {
         candy_guard: &ctx.accounts.candy_guard,
         candy_machine: &ctx.accounts.candy_machine,
         candy_machine_authority_pda: ctx.accounts.candy_machine_authority_pda.to_account_info(),
-        candy_machine_program: ctx.accounts.candy_machine_program.to_account_info(),
+        _candy_machine_program: ctx.accounts.candy_machine_program.to_account_info(),
         collection_delegate_record: ctx.accounts.collection_authority_record.to_account_info(),
         collection_master_edition: ctx.accounts.collection_master_edition.to_account_info(),
         collection_metadata: ctx.accounts.collection_metadata.to_account_info(),
@@ -39,6 +41,7 @@ pub fn mint<'info>(
         token: None,
         token_metadata_program: ctx.accounts.token_metadata_program.to_account_info(),
         token_record: None,
+        minter: ctx.accounts.payer.to_account_info(),
         remaining: ctx.remaining_accounts,
     };
 

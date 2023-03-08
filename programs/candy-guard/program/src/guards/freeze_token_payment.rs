@@ -221,7 +221,7 @@ impl Condition for FreezeTokenPayment {
 
         let nft_ata = try_get_account_info(ctx.accounts.remaining, index + 1)?;
         ctx.account_cursor += 1;
-        assert_is_ata(nft_ata, ctx.accounts.payer.key, ctx.accounts.nft_mint.key)?;
+        assert_is_ata(nft_ata, ctx.accounts.minter.key, ctx.accounts.nft_mint.key)?;
 
         let token_account_info = try_get_account_info(ctx.accounts.remaining, index + 2)?;
         // validate freeze_pda ata
@@ -231,7 +231,7 @@ impl Condition for FreezeTokenPayment {
         ctx.account_cursor += 2;
 
         let token_account =
-            assert_is_ata(token_account_info, &ctx.accounts.payer.key(), &self.mint)?;
+            assert_is_ata(token_account_info, &ctx.accounts.minter.key(), &self.mint)?;
 
         if token_account.amount < self.amount {
             return err!(CandyGuardError::NotEnoughTokens);
@@ -266,7 +266,7 @@ impl Condition for FreezeTokenPayment {
         spl_token_transfer(TokenTransferParams {
             source: token_account_info.to_account_info(),
             destination: destination_ata.to_account_info(),
-            authority: ctx.accounts.payer.to_account_info(),
+            authority: ctx.accounts.minter.to_account_info(),
             authority_signer_seeds: &[],
             token_program: ctx.accounts.spl_token_program.to_account_info(),
             amount: self.amount,

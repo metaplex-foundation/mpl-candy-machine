@@ -1,9 +1,10 @@
+use anchor_lang::system_program;
 use solana_program::{program::invoke_signed, system_instruction};
 
 use crate::{
     instructions::Route,
     state::GuardType,
-    utils::{assert_keys_equal, assert_owned_by},
+    utils::{assert_keys_equal, assert_owned_by, cmp_pubkeys},
 };
 
 use super::*;
@@ -57,6 +58,7 @@ impl Guard for AllowList {
     ///   0. `[writable]` Pda to represent the merkle proof (seeds `["allow_list", merke tree root,
     ///                   payer key, candy guard pubkey, candy machine pubkey]`).
     ///   1. `[]` System program account.
+    ///   2. `[optional, signer]` Minter account.
     fn instruction<'info>(
         ctx: &Context<'_, '_, '_, 'info, Route<'info>>,
         route_context: RouteContext<'info>,
@@ -64,9 +66,35 @@ impl Guard for AllowList {
     ) -> Result<()> {
         msg!("AllowList: validate proof instruction");
 
-        if route_context.candy_guard.is_none() || route_context.candy_machine.is_none() {
-            return err!(CandyGuardError::Uninitialized);
+        let candy_guard = route_context
+            .candy_guard
+            .as_ref()
+            .ok_or(CandyGuardError::Uninitialized)?;
+
+        let candy_machine = route_context
+            .candy_machine
+            .as_ref()
+            .ok_or(CandyGuardError::Uninitialized)?;
+
+        // and the candy guard and candy machine must be linked
+        if !cmp_pubkeys(&candy_machine.mint_authority, &candy_guard.key()) {
+            return err!(CandyGuardError::InvalidMintAuthority);
         }
+
+        let proof_pda = try_get_account_info(ctx.remaining_accounts, 0)?;
+        let system_program_info = try_get_account_info(ctx.remaining_accounts, 1)?;
+        assert_keys_equal(system_program_info.key, &system_program::ID)?;
+
+        let minter = if let Some(minter) = get_account_info(ctx.remaining_accounts, 2) {
+            if !minter.is_signer {
+                msg!("Minter is not a signer");
+                return err!(CandyGuardError::MissingRequiredSignature);
+            }
+
+            minter.key()
+        } else {
+            ctx.accounts.payer.key()
+        };
 
         // validates the proof
 
@@ -76,8 +104,7 @@ impl Guard for AllowList {
             return err!(CandyGuardError::MissingAllowedListProof);
         };
 
-        let user = ctx.accounts.payer.key();
-        let leaf = solana_program::keccak::hashv(&[user.to_string().as_bytes()]);
+        let leaf = solana_program::keccak::hashv(&[minter.to_string().as_bytes()]);
 
         let guard_set = if let Some(guard_set) = route_context.guard_set {
             guard_set
@@ -100,11 +127,10 @@ impl Guard for AllowList {
         let candy_guard_key = &ctx.accounts.candy_guard.key();
         let candy_machine_key = &ctx.accounts.candy_machine.key();
 
-        let proof_pda = try_get_account_info(ctx.remaining_accounts, 0)?;
         let seeds = [
             AllowListProof::PREFIX_SEED,
             &merkle_root[..],
-            user.as_ref(),
+            minter.as_ref(),
             candy_guard_key.as_ref(),
             candy_machine_key.as_ref(),
         ];
@@ -116,7 +142,7 @@ impl Guard for AllowList {
             let signer = [
                 AllowListProof::PREFIX_SEED,
                 &merkle_root[..],
-                user.as_ref(),
+                minter.as_ref(),
                 candy_guard_key.as_ref(),
                 candy_machine_key.as_ref(),
                 &[bump],
@@ -162,7 +188,7 @@ impl Condition for AllowList {
     ) -> Result<()> {
         let proof_pda = try_get_account_info(ctx.accounts.remaining, ctx.account_cursor)?;
         ctx.account_cursor += 1;
-        let user = ctx.accounts.payer.key();
+        let minter = ctx.accounts.minter.key();
 
         // validates the pda
 
@@ -172,7 +198,7 @@ impl Condition for AllowList {
         let seeds = [
             AllowListProof::PREFIX_SEED,
             &self.merkle_root[..],
-            user.as_ref(),
+            minter.as_ref(),
             candy_guard_key.as_ref(),
             candy_machine_key.as_ref(),
         ];

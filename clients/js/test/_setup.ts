@@ -61,7 +61,7 @@ export const createCandyMachine = async <
   const candyMachine = input.candyMachine ?? generateSigner(umi);
   const collectionMint =
     input.collectionMint ?? (await createCollectionNft(umi)).publicKey;
-  const builder = transactionBuilder(umi).add(
+  let builder = transactionBuilder(umi).add(
     await baseCreateCandyMachine(umi, {
       ...defaultCandyMachineData(umi),
       ...input,
@@ -72,7 +72,7 @@ export const createCandyMachine = async <
   );
 
   if (input.configLines !== undefined) {
-    builder.add(
+    builder = builder.add(
       addConfigLines(umi, {
         authority: input.collectionUpdateAuthority ?? umi.identity,
         candyMachine: candyMachine.publicKey,
@@ -84,7 +84,7 @@ export const createCandyMachine = async <
 
   if (input.guards !== undefined || input.groups !== undefined) {
     const candyGuard = findCandyGuardPda(umi, { base: candyMachine.publicKey });
-    builder
+    builder = builder
       .add(baseCreateCandyGuard<DA>(umi, { ...input, base: candyMachine }))
       .add(wrap(umi, { candyMachine: candyMachine.publicKey, candyGuard }));
   }

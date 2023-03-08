@@ -61,7 +61,9 @@ export const allowListGuardManifest: GuardManifest<
     ],
   }),
   routeParser: (context, routeContext, args) => ({
-    data: new Uint8Array(), // TODO
+    data: context.serializer
+      .array(context.serializer.bytes({ size: 32 }))
+      .serialize(args.merkleProof),
     remainingAccounts: [
       {
         isWritable: false,

@@ -2,6 +2,8 @@ import { none, Option } from '@metaplex-foundation/umi';
 import {
   AddressGate,
   AddressGateArgs,
+  AllowList,
+  AllowListArgs,
   BotTax,
   BotTaxArgs,
   EndDate,
@@ -25,6 +27,7 @@ import {
   GuardSetMintArgs,
   GuardSetRouteArgs,
 } from '../guards/guardSet';
+import { AllowListMintArgs, AllowListRouteArgs } from './allowList';
 import { GatekeeperMintArgs } from './gatekeeper';
 import { SolPaymentMintArgs } from './solPayment';
 import { ThirdPartySignerMintArgs } from './thirdPartySigner';
@@ -43,7 +46,7 @@ export type DefaultGuardSetArgs = GuardSetArgs & {
   tokenGate: Option<TokenGateArgs>;
   gatekeeper: Option<GatekeeperArgs>;
   endDate: Option<EndDateArgs>;
-  // allowList: Option<AllowListGuardSettings>;
+  allowList: Option<AllowListArgs>;
   // mintLimit: Option<MintLimitGuardSettings>;
   // nftPayment: Option<NftPaymentGuardSettings>;
   // redeemedAmount: Option<RedeemedAmountGuardSettings>;
@@ -68,7 +71,7 @@ export type DefaultGuardSet = GuardSet & {
   tokenGate: Option<TokenGate>;
   gatekeeper: Option<Gatekeeper>;
   endDate: Option<EndDate>;
-  // allowList: Option<AllowListGuardSettings>;
+  allowList: Option<AllowList>;
   // mintLimit: Option<MintLimitGuardSettings>;
   // nftPayment: Option<NftPaymentGuardSettings>;
   // redeemedAmount: Option<RedeemedAmountGuardSettings>;
@@ -93,7 +96,7 @@ export type DefaultGuardSetMintArgs = GuardSetMintArgs & {
   tokenGate: Option<TokenGateMintArgs>;
   gatekeeper: Option<GatekeeperMintArgs>;
   // endDate: no mint settings
-  // allowList: no mint settings
+  allowList: Option<AllowListMintArgs>;
   // mintLimit: no mint settings
   // nftPayment: Option<NftPaymentGuardMintSettings>;
   // redeemedAmount: no mint settings
@@ -118,7 +121,7 @@ export type DefaultGuardSetRouteArgs = GuardSetRouteArgs & {
   // tokenGate: no route settings
   // gatekeeper: no route settings
   // endDate: no route settings
-  //* allowList: AllowListGuardRouteSettings;
+  allowList: Option<AllowListRouteArgs>;
   // mintLimit: no route settings
   // nftPayment: no route settings
   // redeemedAmount: no route settings
@@ -141,7 +144,7 @@ export const defaultCandyGuardNames: string[] = [
   'tokenGate',
   'gatekeeper',
   'endDate',
-  // 'allowList',
+  'allowList',
   // 'mintLimit',
   // 'nftPayment',
   // 'redeemedAmount',

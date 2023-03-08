@@ -1,14 +1,19 @@
-import { WrappedInstruction } from '@metaplex-foundation/umi';
+import { mergeBytes, WrappedInstruction } from '@metaplex-foundation/umi';
 import { DefaultGuardSetArgs } from './defaultGuards';
 import {
   updateCandyGuard as baseUpdateCandyGuard,
   UpdateCandyGuardInstructionAccounts,
 } from './generated/instructions/updateCandyGuard';
-import { GuardRepository, GuardSet, GuardSetArgs } from './guards';
+import {
+  CandyGuardProgram,
+  GuardRepository,
+  GuardSet,
+  GuardSetArgs,
+} from './guards';
 import {
   CandyGuardData,
   CandyGuardDataArgs,
-  serializeCandyGuardDataWithLength,
+  getCandyGuardDataSerializer,
 } from './hooked';
 
 export { UpdateCandyGuardInstructionAccounts };
@@ -30,9 +35,13 @@ export function updateCandyGuard<DA extends GuardSetArgs = DefaultGuardSetArgs>(
     >
 ): WrappedInstruction {
   const { guards, groups, ...rest } = input;
-  const data = serializeCandyGuardDataWithLength<
+  const program = context.programs.get<CandyGuardProgram>('mplCandyGuard');
+  const serializer = getCandyGuardDataSerializer<
     DA extends undefined ? DefaultGuardSetArgs : DA
-  >(context, { guards, groups });
+  >(context, program);
+  const data = serializer.serialize({ guards, groups });
+  const prefix = context.serializer.u32().serialize(data.length);
+  const dataWithPrefix = mergeBytes([prefix, data]);
 
-  return baseUpdateCandyGuard(context, { ...rest, data });
+  return baseUpdateCandyGuard(context, { ...rest, data: dataWithPrefix });
 }

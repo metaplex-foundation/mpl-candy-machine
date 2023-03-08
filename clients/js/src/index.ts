@@ -4,6 +4,7 @@ export * from './guards';
 export * from './hooked';
 
 export * from './constants';
+export * from './create';
 export * from './createCandyGuard';
 export * from './createCandyMachine';
 export * from './errors';

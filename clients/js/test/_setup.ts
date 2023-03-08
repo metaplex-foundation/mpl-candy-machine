@@ -90,6 +90,7 @@ export const createCandyMachineWithItems = async (
     )
     .add(
       addConfigLines(umi, {
+        authority: input.collectionUpdateAuthority ?? umi.identity,
         candyMachine: candyMachine.publicKey,
         index: input.index ?? 0,
         configLines: input.items,

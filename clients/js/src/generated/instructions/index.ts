@@ -23,6 +23,5 @@ export * from './setCollectionV2';
 export * from './setMintAuthority';
 export * from './setTokenStandard';
 export * from './unwrap';
-export * from './updateCandyGuard';
 export * from './updateCandyMachine';
 export * from './wrap';

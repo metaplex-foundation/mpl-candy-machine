@@ -9,3 +9,4 @@ export * from './createCandyMachine';
 export * from './errors';
 export * from './merkle';
 export * from './plugin';
+export * from './updateCandyGuard';

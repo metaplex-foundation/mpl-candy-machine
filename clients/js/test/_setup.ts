@@ -14,6 +14,10 @@ import {
   createCandyMachine as baseCreateCandyMachine,
   createCandyGuard as baseCreateCandyGuard,
   findCandyGuardPda,
+  DefaultGuardSetArgs,
+  GuardSetArgs,
+  CreateCandyGuardInstructionAccounts,
+  CreateCandyGuardInstructionDataArgs,
 } from '../src';
 
 export const createUmi = async () =>
@@ -71,13 +75,20 @@ export const createCandyMachine = async (
   return candyMachine;
 };
 
-export const createCandyGuard = async (
+export const createCandyGuard = async <
+  DA extends GuardSetArgs = DefaultGuardSetArgs
+>(
   umi: Umi,
-  input: Partial<Parameters<typeof baseCreateCandyGuard>[1]> = {}
+  input: Partial<
+    CreateCandyGuardInstructionAccounts &
+      CreateCandyGuardInstructionDataArgs<
+        DA extends undefined ? DefaultGuardSetArgs : DA
+      >
+  > = {}
 ) => {
   const base = input.base ?? generateSigner(umi);
   await transactionBuilder(umi)
-    .add(baseCreateCandyGuard(umi, { ...input, base }))
+    .add(baseCreateCandyGuard<DA>(umi, { ...input, base }))
     .sendAndConfirm();
 
   return findCandyGuardPda(umi, { base: base.publicKey });

@@ -12,6 +12,7 @@ import {
 import { createUmi as basecreateUmi } from '@metaplex-foundation/umi-bundle-tests';
 import {
   addConfigLines,
+  CandyGuardDataArgs,
   ConfigLine,
   createCandyGuard as baseCreateCandyGuard,
   CreateCandyGuardInstructionAccounts,
@@ -21,6 +22,7 @@ import {
   findCandyGuardPda,
   GuardSetArgs,
   mplCandyMachine,
+  wrap,
 } from '../src';
 
 export const createUmi = async () =>
@@ -47,57 +49,47 @@ export const createCollectionNft = async (
   return collectionMint;
 };
 
-export const createCandyMachine = async (
+export const createCandyMachine = async <
+  DA extends GuardSetArgs = DefaultGuardSetArgs
+>(
   umi: Umi,
-  input: Partial<Parameters<typeof baseCreateCandyMachine>[1]> = {}
+  input: Partial<Parameters<typeof baseCreateCandyMachine>[1]> &
+    Partial<
+      CandyGuardDataArgs<DA extends undefined ? DefaultGuardSetArgs : DA>
+    > & { configLineIndex?: number; configLines?: ConfigLine[] } = {}
 ) => {
   const candyMachine = input.candyMachine ?? generateSigner(umi);
   const collectionMint =
     input.collectionMint ?? (await createCollectionNft(umi)).publicKey;
-  await transactionBuilder(umi)
-    .add(
-      await baseCreateCandyMachine(umi, {
-        ...defaultCandyMachineData(umi),
-        ...input,
-        candyMachine,
-        collectionMint,
-      })
-    )
-    .sendAndConfirm();
+  const builder = transactionBuilder(umi).add(
+    await baseCreateCandyMachine(umi, {
+      ...defaultCandyMachineData(umi),
+      ...input,
+      itemsAvailable: input.itemsAvailable ?? input.configLines?.length ?? 100,
+      candyMachine,
+      collectionMint,
+    })
+  );
 
-  return candyMachine;
-};
-
-export const createCandyMachineWithItems = async (
-  umi: Umi,
-  input: Partial<Parameters<typeof baseCreateCandyMachine>[1]> & {
-    index?: number;
-    items: ConfigLine[];
-  }
-) => {
-  const candyMachine = input.candyMachine ?? generateSigner(umi);
-  const collectionMint =
-    input.collectionMint ?? (await createCollectionNft(umi)).publicKey;
-  await transactionBuilder(umi)
-    .add(
-      await baseCreateCandyMachine(umi, {
-        ...defaultCandyMachineData(umi),
-        ...input,
-        itemsAvailable: input.itemsAvailable ?? input.items.length,
-        candyMachine,
-        collectionMint,
-      })
-    )
-    .add(
+  if (input.configLines !== undefined) {
+    builder.add(
       addConfigLines(umi, {
         authority: input.collectionUpdateAuthority ?? umi.identity,
         candyMachine: candyMachine.publicKey,
-        index: input.index ?? 0,
-        configLines: input.items,
+        index: input.configLineIndex ?? 0,
+        configLines: input.configLines,
       })
-    )
-    .sendAndConfirm();
+    );
+  }
 
+  if (input.guards !== undefined || input.groups !== undefined) {
+    const candyGuard = findCandyGuardPda(umi, { base: candyMachine.publicKey });
+    builder
+      .add(baseCreateCandyGuard<DA>(umi, { ...input, base: candyMachine }))
+      .add(wrap(umi, { candyMachine: candyMachine.publicKey, candyGuard }));
+  }
+
+  await builder.sendAndConfirm();
   return candyMachine;
 };
 

@@ -26,6 +26,8 @@ import {
   StartDateArgs,
   ThirdPartySigner,
   ThirdPartySignerArgs,
+  TokenBurn,
+  TokenBurnArgs,
   TokenGate,
   TokenGateArgs,
   TokenPayment,
@@ -45,6 +47,7 @@ import { NftGateMintArgs } from './nftGate';
 import { NftPaymentMintArgs } from './nftPayment';
 import { SolPaymentMintArgs } from './solPayment';
 import { ThirdPartySignerMintArgs } from './thirdPartySigner';
+import { TokenBurnMintArgs } from './tokenBurn';
 import { TokenGateMintArgs } from './tokenGate';
 import { TokenPaymentMintArgs } from './tokenPayment';
 
@@ -67,7 +70,7 @@ export type DefaultGuardSetArgs = GuardSetArgs & {
   addressGate: Option<AddressGateArgs>;
   nftGate: Option<NftGateArgs>;
   nftBurn: Option<NftBurnArgs>;
-  // tokenBurn: Option<TokenBurnGuardSettings>;
+  tokenBurn: Option<TokenBurn>;
   // freezeSolPayment: Option<FreezeSolPaymentGuardSettings>;
   // freezeTokenPayment: Option<FreezeTokenPaymentGuardSettings>;
   // programGate: Option<ProgramGateGuardSettings>;
@@ -92,7 +95,7 @@ export type DefaultGuardSet = GuardSet & {
   addressGate: Option<AddressGate>;
   nftGate: Option<NftGate>;
   nftBurn: Option<NftBurn>;
-  // tokenBurn: Option<TokenBurnGuardSettings>;
+  tokenBurn: Option<TokenBurnArgs>;
   // freezeSolPayment: Option<FreezeSolPaymentGuardSettings>;
   // freezeTokenPayment: Option<FreezeTokenPaymentGuardSettings>;
   // programGate: Option<ProgramGateGuardSettings>;
@@ -117,7 +120,7 @@ export type DefaultGuardSetMintArgs = GuardSetMintArgs & {
   // addressGate: no mint settings
   nftGate: Option<NftGateMintArgs>;
   nftBurn: Option<NftBurnMintArgs>;
-  // tokenBurn: no mint settings
+  tokenBurn: Option<TokenBurnMintArgs>;
   // freezeSolPayment: no mint settings
   // freezeTokenPayment: no mint settings
   // programGate: no mint settings

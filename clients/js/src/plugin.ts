@@ -15,6 +15,7 @@ import {
   solPaymentGuardManifest,
   startDateGuardManifest,
   thirdPartySignerGuardManifest,
+  tokenBurnGuardManifest,
   tokenGateGuardManifest,
   tokenPaymentGuardManifest,
 } from './defaultGuards';
@@ -59,7 +60,8 @@ export const mplCandyMachine = (): UmiPlugin => ({
       redeemedAmountGuardManifest,
       addressGateGuardManifest,
       nftGateGuardManifest,
-      nftBurnGuardManifest
+      nftBurnGuardManifest,
+      tokenBurnGuardManifest
     );
   },
 });

@@ -12,5 +12,6 @@ export * from './redeemedAmount';
 export * from './solPayment';
 export * from './startDate';
 export * from './thirdPartySigner';
+export * from './tokenBurn';
 export * from './tokenGate';
 export * from './tokenPayment';

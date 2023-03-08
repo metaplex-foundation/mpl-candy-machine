@@ -1,9 +1,4 @@
-import {
-  createAssociatedToken,
-  createMint,
-  findAssociatedTokenPda,
-  mintTokensTo,
-} from '@metaplex-foundation/mpl-essentials';
+import { createMintWithSingleToken } from '@metaplex-foundation/mpl-essentials';
 import {
   DigitalAssetWithToken,
   fetchDigitalAssetWithAssociatedToken,
@@ -37,31 +32,15 @@ test('it can mint directly from a candy machine as the mint authority', async (t
   const candyMachine = candyMachineSigner.publicKey;
 
   // When we mint a new NFT directly from the candy machine as the mint authority.
-  const nftMint = generateSigner(umi);
-  const nftOwner = generateSigner(umi).publicKey;
+  const mint = generateSigner(umi);
+  const owner = generateSigner(umi).publicKey;
   await transactionBuilder(umi)
-    .add(createMint(umi, { mint: nftMint }))
-    .add(
-      createAssociatedToken(umi, {
-        mint: nftMint.publicKey,
-        owner: nftOwner,
-      })
-    )
-    .add(
-      mintTokensTo(umi, {
-        amount: 1,
-        mint: nftMint.publicKey,
-        token: findAssociatedTokenPda(umi, {
-          mint: nftMint.publicKey,
-          owner: nftOwner,
-        }),
-      })
-    )
+    .add(createMintWithSingleToken(umi, { mint, owner }))
     .add(
       mintFromCandyMachine(umi, {
         candyMachine,
         mintAuthority: umi.identity,
-        nftMint: nftMint.publicKey,
+        nftMint: mint.publicKey,
         nftMintAuthority: umi.identity,
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
@@ -72,18 +51,18 @@ test('it can mint directly from a candy machine as the mint authority', async (t
   // Then the mint was successful.
   const nft = await fetchDigitalAssetWithAssociatedToken(
     umi,
-    nftMint.publicKey,
-    nftOwner
+    mint.publicKey,
+    owner
   );
   t.like(nft, <DigitalAssetWithToken>{
-    publicKey: publicKey(nftMint),
+    publicKey: publicKey(mint),
     mint: {
-      publicKey: publicKey(nftMint),
+      publicKey: publicKey(mint),
       supply: 1n,
     },
     token: {
-      mint: publicKey(nftMint),
-      owner: publicKey(nftOwner),
+      mint: publicKey(mint),
+      owner: publicKey(owner),
     },
     edition: { isOriginal: true },
     metadata: { tokenStandard: some(TokenStandard.NonFungible) },
@@ -114,31 +93,15 @@ test('it cannot mint directly from a candy machine if we are not the mint author
 
   // When we try to mint directly from the candy machine as mint authority B.
   const mintAuthorityB = generateSigner(umi);
-  const nftMint = generateSigner(umi);
-  const nftOwner = generateSigner(umi).publicKey;
+  const mint = generateSigner(umi);
+  const owner = generateSigner(umi).publicKey;
   const promise = transactionBuilder(umi)
-    .add(createMint(umi, { mint: nftMint }))
-    .add(
-      createAssociatedToken(umi, {
-        mint: nftMint.publicKey,
-        owner: nftOwner,
-      })
-    )
-    .add(
-      mintTokensTo(umi, {
-        amount: 1,
-        mint: nftMint.publicKey,
-        token: findAssociatedTokenPda(umi, {
-          mint: nftMint.publicKey,
-          owner: nftOwner,
-        }),
-      })
-    )
+    .add(createMintWithSingleToken(umi, { mint, owner }))
     .add(
       mintFromCandyMachine(umi, {
         candyMachine,
         mintAuthority: mintAuthorityB,
-        nftMint: nftMint.publicKey,
+        nftMint: mint.publicKey,
         nftMintAuthority: umi.identity,
         collectionMint: collectionMint.publicKey,
         collectionUpdateAuthority: umi.identity.publicKey,

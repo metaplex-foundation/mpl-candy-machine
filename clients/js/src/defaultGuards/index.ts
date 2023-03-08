@@ -10,6 +10,7 @@ export * from './mintLimit';
 export * from './nftBurn';
 export * from './nftGate';
 export * from './nftPayment';
+export * from './programGate';
 export * from './redeemedAmount';
 export * from './solPayment';
 export * from './startDate';

@@ -22,6 +22,8 @@ import {
   NftGateArgs,
   NftPayment,
   NftPaymentArgs,
+  ProgramGate,
+  ProgramGateArgs,
   RedeemedAmount,
   RedeemedAmountArgs,
   SolPayment,
@@ -85,7 +87,7 @@ export type DefaultGuardSetArgs = GuardSetArgs & {
   tokenBurn: Option<TokenBurnArgs>;
   freezeSolPayment: Option<FreezeSolPaymentArgs>;
   freezeTokenPayment: Option<FreezeTokenPaymentArgs>;
-  // programGate: Option<ProgramGateGuardSettings>;
+  programGate: Option<ProgramGateArgs>;
 };
 
 /**
@@ -110,7 +112,7 @@ export type DefaultGuardSet = GuardSet & {
   tokenBurn: Option<TokenBurn>;
   freezeSolPayment: Option<FreezeSolPayment>;
   freezeTokenPayment: Option<FreezeTokenPayment>;
-  // programGate: Option<ProgramGateGuardSettings>;
+  programGate: Option<ProgramGate>;
 };
 
 /**
@@ -183,7 +185,7 @@ export const defaultCandyGuardNames: string[] = [
   'tokenBurn',
   'freezeSolPayment',
   'freezeTokenPayment',
-  // 'programGate',
+  'programGate',
 ];
 
 /** @internal */

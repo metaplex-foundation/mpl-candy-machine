@@ -12,6 +12,8 @@ import {
   GatekeeperArgs,
   MintLimit,
   MintLimitArgs,
+  NftPayment,
+  NftPaymentArgs,
   SolPayment,
   SolPaymentArgs,
   StartDate,
@@ -32,6 +34,7 @@ import {
 import { AllowListMintArgs, AllowListRouteArgs } from './allowList';
 import { GatekeeperMintArgs } from './gatekeeper';
 import { MintLimitMintArgs } from './mintLimit';
+import { NftPaymentMintArgs } from './nftPayment';
 import { SolPaymentMintArgs } from './solPayment';
 import { ThirdPartySignerMintArgs } from './thirdPartySigner';
 import { TokenGateMintArgs } from './tokenGate';
@@ -51,7 +54,7 @@ export type DefaultGuardSetArgs = GuardSetArgs & {
   endDate: Option<EndDateArgs>;
   allowList: Option<AllowListArgs>;
   mintLimit: Option<MintLimitArgs>;
-  // nftPayment: Option<NftPaymentGuardSettings>;
+  nftPayment: Option<NftPaymentArgs>;
   // redeemedAmount: Option<RedeemedAmountGuardSettings>;
   addressGate: Option<AddressGateArgs>;
   // nftGate: Option<NftGateGuardSettings>;
@@ -76,7 +79,7 @@ export type DefaultGuardSet = GuardSet & {
   endDate: Option<EndDate>;
   allowList: Option<AllowList>;
   mintLimit: Option<MintLimit>;
-  // nftPayment: Option<NftPaymentGuardSettings>;
+  nftPayment: Option<NftPayment>;
   // redeemedAmount: Option<RedeemedAmountGuardSettings>;
   addressGate: Option<AddressGate>;
   // nftGate: Option<NftGateGuardSettings>;
@@ -101,7 +104,7 @@ export type DefaultGuardSetMintArgs = GuardSetMintArgs & {
   // endDate: no mint settings
   allowList: Option<AllowListMintArgs>;
   mintLimit: Option<MintLimitMintArgs>;
-  // nftPayment: Option<NftPaymentGuardMintSettings>;
+  nftPayment: Option<NftPaymentMintArgs>;
   // redeemedAmount: no mint settings
   // addressGate: no mint settings
   // nftGate: Option<NftGateGuardMintSettings>;
@@ -149,7 +152,7 @@ export const defaultCandyGuardNames: string[] = [
   'endDate',
   'allowList',
   'mintLimit',
-  // 'nftPayment',
+  'nftPayment',
   // 'redeemedAmount',
   // 'addressGate',
   // 'nftGate',

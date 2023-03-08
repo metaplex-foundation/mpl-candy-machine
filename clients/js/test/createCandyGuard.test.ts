@@ -105,6 +105,7 @@ test('it can create a candy guard with guard groups', async (t) => {
   const solDestination = generateSigner(umi).publicKey;
   const gatekeeperNetwork = generateSigner(umi).publicKey;
   const tokenGateMint = generateSigner(umi).publicKey;
+  const merkleRoot = new Uint8Array(Array(32).fill(42));
   await transactionBuilder(umi)
     .add(
       createCandyGuard(umi, {
@@ -121,7 +122,7 @@ test('it can create a candy guard with guard groups', async (t) => {
             label: 'VIP',
             guards: {
               startDate: some({ date: '2022-09-05T16:00:00.000Z' }),
-              // allowList: { merkleRoot }, // TODO
+              allowList: some({ merkleRoot }),
               solPayment: some({
                 lamports: sol(1),
                 destination: solDestination,
@@ -173,7 +174,7 @@ test('it can create a candy guard with guard groups', async (t) => {
         guards: {
           ...emptyDefaultGuardSetArgs,
           startDate: some({ date: dateTime('2022-09-05T16:00:00.000Z') }),
-          // allowList: { merkleRoot }, // TODO
+          allowList: some({ merkleRoot }),
           solPayment: some({
             lamports: sol(1),
             destination: publicKey(solDestination),

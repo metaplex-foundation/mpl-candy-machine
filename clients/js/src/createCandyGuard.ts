@@ -1,6 +1,5 @@
 import {
   ACCOUNT_HEADER_SIZE,
-  mergeBytes,
   WrappedInstruction,
 } from '@metaplex-foundation/umi';
 import { CANDY_GUARD_DATA } from './constants';
@@ -9,16 +8,11 @@ import {
   createCandyGuard as baseCreateCandyGuard,
   CreateCandyGuardInstructionAccounts,
 } from './generated/instructions/createCandyGuard';
-import {
-  CandyGuardProgram,
-  GuardRepository,
-  GuardSet,
-  GuardSetArgs,
-} from './guards';
+import { GuardRepository, GuardSet, GuardSetArgs } from './guards';
 import {
   CandyGuardData,
   CandyGuardDataArgs,
-  getCandyGuardDataSerializer,
+  serializeCandyGuardDataWithLength,
 } from './hooked';
 
 export { CreateCandyGuardInstructionAccounts };
@@ -39,17 +33,14 @@ export function createCandyGuard<DA extends GuardSetArgs = DefaultGuardSetArgs>(
       DA extends undefined ? DefaultGuardSetArgs : DA
     >
 ): WrappedInstruction {
-  const program = context.programs.get<CandyGuardProgram>('mplCandyGuard');
   const { guards, groups, ...rest } = input;
-  const serializer = getCandyGuardDataSerializer<
+  const data = serializeCandyGuardDataWithLength<
     DA extends undefined ? DefaultGuardSetArgs : DA
-  >(context, program);
-  const data = serializer.serialize({ guards, groups });
-  const prefix = context.serializer.u32().serialize(data.length);
-  const dataWithPrefix = mergeBytes([prefix, data]);
+  >(context, { guards, groups });
 
   return {
-    ...baseCreateCandyGuard(context, { ...rest, data: dataWithPrefix }),
-    bytesCreatedOnChain: ACCOUNT_HEADER_SIZE + CANDY_GUARD_DATA + data.length,
+    ...baseCreateCandyGuard(context, { ...rest, data }),
+    bytesCreatedOnChain:
+      ACCOUNT_HEADER_SIZE + CANDY_GUARD_DATA + data.length - 4,
   };
 }

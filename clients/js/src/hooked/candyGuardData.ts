@@ -1,4 +1,9 @@
-import { Context, mapSerializer, Serializer } from '@metaplex-foundation/umi';
+import {
+  Context,
+  mapSerializer,
+  mergeBytes,
+  Serializer,
+} from '@metaplex-foundation/umi';
 import {
   CandyGuardProgram,
   getGuardGroupSerializer,
@@ -38,4 +43,17 @@ export function getCandyGuardDataSerializer<
     ),
     (args) => ({ guards: args.guards ?? {}, groups: args.groups ?? [] })
   ) as Serializer<CandyGuardDataArgs<DA>, CandyGuardData<D>>;
+}
+
+export function serializeCandyGuardDataWithLength<DA extends GuardSetArgs>(
+  context: Pick<Context, 'serializer' | 'programs'> & {
+    guards: GuardRepository;
+  },
+  args: CandyGuardDataArgs<DA>
+) {
+  const program = context.programs.get<CandyGuardProgram>('mplCandyGuard');
+  const serializer = getCandyGuardDataSerializer<DA>(context, program);
+  const data = serializer.serialize(args);
+  const prefix = context.serializer.u32().serialize(data.length);
+  return mergeBytes([prefix, data]);
 }

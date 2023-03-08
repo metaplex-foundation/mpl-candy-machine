@@ -4,37 +4,37 @@ import { PublicKey, Signer } from '@metaplex-foundation/umi';
 import { UnrecognizePathForRouteInstructionError } from '../errors';
 import {
   findFreezeEscrowPda,
-  FreezeSolPayment,
-  FreezeSolPaymentArgs,
+  FreezeTokenPayment,
+  FreezeTokenPaymentArgs,
   getFreezeInstructionSerializer,
-  getFreezeSolPaymentSerializer,
+  getFreezeTokenPaymentSerializer,
   FreezeInstruction,
 } from '../generated';
 import { GuardManifest, RouteParser } from '../guards';
 
 /**
- * The freezeSolPayment guard allows minting frozen NFTs by charging
- * the payer an amount in SOL. Frozen NFTs cannot be transferred
- * or listed on any marketplaces until thawed.
+ * The freezeTokenPayment guard allows minting frozen NFTs by charging
+ * the payer a specific amount of tokens from a certain mint acount.
+ * Frozen NFTs cannot be transferred or listed on any marketplaces until thawed.
  *
  * The funds are transferred to a freeze escrow until all NFTs are thaw,
  * at which point, they can be transferred (unlocked) to the configured
  * destination account.
  *
- * @see {@link FreezeSolPaymentRouteArgs} to learn more about
+ * @see {@link FreezeTokenPaymentRouteArgs} to learn more about
  * the instructions that can be executed against this guard.
  */
-export const freezeSolPaymentGuardManifest: GuardManifest<
-  FreezeSolPaymentArgs,
-  FreezeSolPayment,
-  FreezeSolPaymentMintArgs,
-  FreezeSolPaymentRouteArgs
+export const freezeTokenPaymentGuardManifest: GuardManifest<
+  FreezeTokenPaymentArgs,
+  FreezeTokenPayment,
+  FreezeTokenPaymentMintArgs,
+  FreezeTokenPaymentRouteArgs
 > = {
-  name: 'freezeSolPayment',
-  serializer: getFreezeSolPaymentSerializer,
+  name: 'freezeTokenPayment',
+  serializer: getFreezeTokenPaymentSerializer,
   mintParser: (context, mintContext, args) => {
     const freezeEscrow = findFreezeEscrowPda(context, {
-      destination: args.destination,
+      destination: args.destinationAta,
       candyMachine: mintContext.candyMachine,
       candyGuard: mintContext.candyGuard,
     });
@@ -42,11 +42,21 @@ export const freezeSolPaymentGuardManifest: GuardManifest<
       mint: mintContext.mint.publicKey,
       owner: mintContext.minter.publicKey,
     });
+    const tokenAddress = findAssociatedTokenPda(context, {
+      mint: args.mint,
+      owner: mintContext.minter.publicKey,
+    });
+    const freezeAta = findAssociatedTokenPda(context, {
+      mint: args.mint,
+      owner: freezeEscrow,
+    });
     return {
       data: new Uint8Array(),
       remainingAccounts: [
         { publicKey: freezeEscrow, isWritable: true },
         { publicKey: nftAta, isWritable: false },
+        { publicKey: tokenAddress, isWritable: true },
+        { publicKey: freezeAta, isWritable: true },
       ],
     };
   },
@@ -61,23 +71,23 @@ export const freezeSolPaymentGuardManifest: GuardManifest<
         return unlockFundsRouteInstruction(context, routeContext, args);
       default:
         throw new UnrecognizePathForRouteInstructionError(
-          'freezeSolPayment',
+          'freezeTokenPayment',
           path
         );
     }
   },
 };
 
-export type FreezeSolPaymentMintArgs = Omit<FreezeSolPaymentArgs, 'lamports'>;
+export type FreezeTokenPaymentMintArgs = Omit<FreezeTokenPaymentArgs, 'amount'>;
 
 /**
- * The settings for the freezeSolPayment guard that should be provided
+ * The settings for the freezeTokenPayment guard that should be provided
  * when accessing the guard's special "route" instruction.
  */
-export type FreezeSolPaymentRouteArgs =
-  | FreezeSolPaymentRouteArgsInitialize
-  | FreezeSolPaymentRouteArgsThaw
-  | FreezeSolPaymentRouteArgsUnlockFunds;
+export type FreezeTokenPaymentRouteArgs =
+  | FreezeTokenPaymentRouteArgsInitialize
+  | FreezeTokenPaymentRouteArgsThaw
+  | FreezeTokenPaymentRouteArgsUnlockFunds;
 
 /**
  * The `initialize` path creates the freeze escrow account that will
@@ -88,7 +98,7 @@ export type FreezeSolPaymentRouteArgs =
  * route(umi, {
  *   candyMachine,
  *   candyGuard,
- *   guard: 'freezeSolPayment',
+ *   guard: 'freezeTokenPayment',
  *   args: {
  *     path: 'initialize',
  *     period: 15 * 24 * 60 * 60, // 15 days.
@@ -97,9 +107,9 @@ export type FreezeSolPaymentRouteArgs =
  * });
  * ```
  */
-export type FreezeSolPaymentRouteArgsInitialize = Omit<
-  FreezeSolPaymentArgs,
-  'lamports'
+export type FreezeTokenPaymentRouteArgsInitialize = Omit<
+  FreezeTokenPaymentArgs,
+  'amount'
 > & {
   /** Selects the path to execute in the route instruction. */
   path: 'initialize';
@@ -125,7 +135,7 @@ export type FreezeSolPaymentRouteArgsInitialize = Omit<
  * route(umi, {
  *   candyMachine,
  *   candyGuard,
- *   guard: 'freezeSolPayment',
+ *   guard: 'freezeTokenPayment',
  *   args: {
  *     path: 'thaw',
  *     nftMint: nftToThaw.address,
@@ -134,9 +144,9 @@ export type FreezeSolPaymentRouteArgsInitialize = Omit<
  * });
  * ```
  */
-export type FreezeSolPaymentRouteArgsThaw = Omit<
-  FreezeSolPaymentArgs,
-  'lamports'
+export type FreezeTokenPaymentRouteArgsThaw = Omit<
+  FreezeTokenPaymentArgs,
+  'amount'
 > & {
   /** Selects the path to execute in the route instruction. */
   path: 'thaw';
@@ -150,13 +160,13 @@ export type FreezeSolPaymentRouteArgsThaw = Omit<
 
 /**
  * The `unlockFunds` path transfers all of the escrow funds to the
- * configured destination address once all NFTs have been thawed.
+ * configured destination token address once all NFTs have been thawed.
  *
  * ```ts
  * route(umi, {
  *   candyMachine,
  *   candyGuard,
- *   guard: 'freezeSolPayment',
+ *   guard: 'freezeTokenPayment',
  *   args: {
  *     path: 'unlockFunds',
  *     candyGuardAuthority,
@@ -164,9 +174,9 @@ export type FreezeSolPaymentRouteArgsThaw = Omit<
  * });
  * ```
  */
-export type FreezeSolPaymentRouteArgsUnlockFunds = Omit<
-  FreezeSolPaymentArgs,
-  'lamports'
+export type FreezeTokenPaymentRouteArgsUnlockFunds = Omit<
+  FreezeTokenPaymentArgs,
+  'amount'
 > & {
   /** Selects the path to execute in the route instruction. */
   path: 'unlockFunds';
@@ -176,16 +186,28 @@ export type FreezeSolPaymentRouteArgsUnlockFunds = Omit<
 };
 
 const initializeRouteInstruction: RouteParser<
-  FreezeSolPaymentRouteArgsInitialize
+  FreezeTokenPaymentRouteArgsInitialize
 > = (context, routeContext, args) => {
   const freezeEscrow = findFreezeEscrowPda(context, {
-    destination: args.destination,
+    destination: args.destinationAta,
     candyMachine: routeContext.candyMachine,
     candyGuard: routeContext.candyGuard,
+  });
+  const freezeAta = findAssociatedTokenPda(context, {
+    mint: args.mint,
+    owner: freezeEscrow,
   });
   const systemProgram = context.programs.getPublicKey(
     'splSystem',
     '11111111111111111111111111111111'
+  );
+  const tokenProgram = context.programs.getPublicKey(
+    'splToken',
+    'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
+  );
+  const associatedTokenProgram = context.programs.getPublicKey(
+    'splAssociatedToken',
+    'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'
   );
   const s = context.serializer;
   const serializer = s.tuple([
@@ -198,17 +220,22 @@ const initializeRouteInstruction: RouteParser<
       { publicKey: freezeEscrow, isWritable: true },
       { signer: args.candyGuardAuthority, isWritable: false },
       { publicKey: systemProgram, isWritable: false },
+      { publicKey: freezeAta, isWritable: true },
+      { publicKey: args.mint, isWritable: false },
+      { publicKey: tokenProgram, isWritable: false },
+      { publicKey: associatedTokenProgram, isWritable: false },
+      { publicKey: args.destinationAta, isWritable: true },
     ],
   };
 };
 
-const thawRouteInstruction: RouteParser<FreezeSolPaymentRouteArgsThaw> = (
+const thawRouteInstruction: RouteParser<FreezeTokenPaymentRouteArgsThaw> = (
   context,
   routeContext,
   args
 ) => {
   const freezeEscrow = findFreezeEscrowPda(context, {
-    destination: args.destination,
+    destination: args.destinationAta,
     candyMachine: routeContext.candyMachine,
     candyGuard: routeContext.candyGuard,
   });
@@ -242,13 +269,21 @@ const thawRouteInstruction: RouteParser<FreezeSolPaymentRouteArgsThaw> = (
 };
 
 const unlockFundsRouteInstruction: RouteParser<
-  FreezeSolPaymentRouteArgsUnlockFunds
+  FreezeTokenPaymentRouteArgsUnlockFunds
 > = (context, routeContext, args) => {
   const freezeEscrow = findFreezeEscrowPda(context, {
-    destination: args.destination,
+    destination: args.destinationAta,
     candyMachine: routeContext.candyMachine,
     candyGuard: routeContext.candyGuard,
   });
+  const freezeAta = findAssociatedTokenPda(context, {
+    mint: args.mint,
+    owner: freezeEscrow,
+  });
+  const tokenProgram = context.programs.getPublicKey(
+    'splToken',
+    'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
+  );
   const systemProgram = context.programs.getPublicKey(
     'splSystem',
     '11111111111111111111111111111111'
@@ -260,7 +295,9 @@ const unlockFundsRouteInstruction: RouteParser<
     remainingAccounts: [
       { publicKey: freezeEscrow, isWritable: true },
       { signer: args.candyGuardAuthority, isWritable: false },
-      { publicKey: args.destination, isWritable: true },
+      { publicKey: freezeAta, isWritable: true },
+      { publicKey: args.destinationAta, isWritable: true },
+      { publicKey: tokenProgram, isWritable: false },
       { publicKey: systemProgram, isWritable: false },
     ],
   };

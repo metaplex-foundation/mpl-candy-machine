@@ -10,6 +10,8 @@ import {
   EndDateArgs,
   FreezeSolPayment,
   FreezeSolPaymentArgs,
+  FreezeTokenPayment,
+  FreezeTokenPaymentArgs,
   Gatekeeper,
   GatekeeperArgs,
   MintLimit,
@@ -46,6 +48,10 @@ import {
   FreezeSolPaymentMintArgs,
   FreezeSolPaymentRouteArgs,
 } from './freezeSolPayment';
+import {
+  FreezeTokenPaymentMintArgs,
+  FreezeTokenPaymentRouteArgs,
+} from './freezeTokenPayment';
 import { GatekeeperMintArgs } from './gatekeeper';
 import { MintLimitMintArgs } from './mintLimit';
 import { NftBurnMintArgs } from './nftBurn';
@@ -78,7 +84,7 @@ export type DefaultGuardSetArgs = GuardSetArgs & {
   nftBurn: Option<NftBurnArgs>;
   tokenBurn: Option<TokenBurnArgs>;
   freezeSolPayment: Option<FreezeSolPaymentArgs>;
-  // freezeTokenPayment: Option<FreezeTokenPaymentGuardSettings>;
+  freezeTokenPayment: Option<FreezeTokenPaymentArgs>;
   // programGate: Option<ProgramGateGuardSettings>;
 };
 
@@ -103,8 +109,7 @@ export type DefaultGuardSet = GuardSet & {
   nftBurn: Option<NftBurn>;
   tokenBurn: Option<TokenBurn>;
   freezeSolPayment: Option<FreezeSolPayment>;
-  // freezeSolPayment: Option<FreezeSolPaymentGuardSettings>;
-  // freezeTokenPayment: Option<FreezeTokenPaymentGuardSettings>;
+  freezeTokenPayment: Option<FreezeTokenPayment>;
   // programGate: Option<ProgramGateGuardSettings>;
 };
 
@@ -129,7 +134,7 @@ export type DefaultGuardSetMintArgs = GuardSetMintArgs & {
   nftBurn: Option<NftBurnMintArgs>;
   tokenBurn: Option<TokenBurnMintArgs>;
   freezeSolPayment: Option<FreezeSolPaymentMintArgs>;
-  // freezeTokenPayment: no mint settings
+  freezeTokenPayment: Option<FreezeTokenPaymentMintArgs>;
   // programGate: no mint settings
 };
 
@@ -154,7 +159,7 @@ export type DefaultGuardSetRouteArgs = GuardSetRouteArgs & {
   // nftBurn: no route settings
   // tokenBurn: no route settings
   freezeSolPayment: FreezeSolPaymentRouteArgs;
-  //* freezeTokenPayment: FreezeTokenPaymentGuardRouteSettings;
+  freezeTokenPayment: FreezeTokenPaymentRouteArgs;
   // programGate: no route settings
 };
 
@@ -174,10 +179,10 @@ export const defaultCandyGuardNames: string[] = [
   'redeemedAmount',
   'addressGate',
   'nftGate',
-  // 'nftBurn',
-  // 'tokenBurn',
-  // 'freezeSolPayment',
-  // 'freezeTokenPayment',
+  'nftBurn',
+  'tokenBurn',
+  'freezeSolPayment',
+  'freezeTokenPayment',
   // 'programGate',
 ];
 

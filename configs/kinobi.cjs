@@ -347,6 +347,15 @@ kinobi.update(
             publicKey: "Sysvar1nstructions1111111111111111111111111",
           },
         },
+        splAtaProgram: {
+          defaultsTo: {
+            kind: "program",
+            program: {
+              name: "splAssociatedToken",
+              publicKey: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
+            },
+          },
+        },
       },
     },
     "mplCandyGuard.mint": {

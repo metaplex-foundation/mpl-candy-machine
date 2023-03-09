@@ -155,7 +155,10 @@ export function mintFromCandyMachineV2(
     isWritable: false,
   };
   const splAtaProgramAccount = input.splAtaProgram ?? {
-    ...programId,
+    ...context.programs.getPublicKey(
+      'splAssociatedToken',
+      'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'
+    ),
     isWritable: false,
   };
   const systemProgramAccount = input.systemProgram ?? {

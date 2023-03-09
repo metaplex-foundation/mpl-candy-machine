@@ -9,7 +9,6 @@ import test from 'ava';
 import {
   CandyMachine,
   fetchCandyMachine,
-  mintFromCandyMachine,
   mintFromCandyMachineV2,
 } from '../src';
 import {
@@ -127,7 +126,7 @@ test('it can mint whilst creating only the mint account beforehand', async (t) =
   await assertSuccessfulMint(t, umi, { mint, owner });
 });
 
-test.skip('it cannot mint directly from a candy machine if we are not the mint authority', async (t) => {
+test('it cannot mint directly from a candy machine if we are not the mint authority', async (t) => {
   // Given a loaded candy machine with a mint authority A.
   const umi = await createUmi();
   const mintAuthorityA = generateSigner(umi);
@@ -186,26 +185,23 @@ test.skip('it can mint from a candy machine v1', async (t) => {
   });
   const candyMachine = candyMachineSigner.publicKey;
 
-  // When we try to mint from it directly usint the mint v2 instruction.
+  // When mint from it directly usint the mint v2 instruction.
   const mint = generateSigner(umi);
   const owner = generateSigner(umi).publicKey;
-  const promise = transactionBuilder(umi)
+  await transactionBuilder(umi)
     .add(createMintWithSingleToken(umi, { mint, owner }))
     .add(
-      mintFromCandyMachine(umi, {
+      mintFromCandyMachineV2(umi, {
         candyMachine,
         mintAuthority: umi.identity,
         nftMint: mint.publicKey,
+        nftOwner: owner,
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
     .sendAndConfirm();
 
-  // Then we expect a program error.
-  await t.throwsAsync(promise, { message: /Use MintV2 instead/ });
-
-  // And the candy machine stayed the same.
-  const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
-  t.like(candyMachineAccount, <CandyMachine>{ itemsRedeemed: 0n });
+  // Then the mint was successful.
+  await assertSuccessfulMint(t, umi, { mint, owner });
 });

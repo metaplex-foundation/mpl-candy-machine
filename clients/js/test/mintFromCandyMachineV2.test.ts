@@ -4,17 +4,7 @@ import {
   createMintWithSingleToken,
   setComputeUnitLimit,
 } from '@metaplex-foundation/mpl-essentials';
-import {
-  DigitalAssetWithToken,
-  fetchDigitalAssetWithAssociatedToken,
-  TokenStandard,
-} from '@metaplex-foundation/mpl-token-metadata';
-import {
-  generateSigner,
-  publicKey,
-  some,
-  transactionBuilder,
-} from '@metaplex-foundation/umi';
+import { generateSigner, transactionBuilder } from '@metaplex-foundation/umi';
 import test from 'ava';
 import {
   CandyMachine,
@@ -22,7 +12,13 @@ import {
   mintFromCandyMachine,
   mintFromCandyMachineV2,
 } from '../src';
-import { createCollectionNft, createUmi, createV1, createV2 } from './_setup';
+import {
+  assertSuccessfulMint,
+  createCollectionNft,
+  createUmi,
+  createV1,
+  createV2,
+} from './_setup';
 
 test('it can mint directly from a candy machine as the mint authority', async (t) => {
   // Given a loaded candy machine.
@@ -55,24 +51,7 @@ test('it can mint directly from a candy machine as the mint authority', async (t
     .sendAndConfirm();
 
   // Then the mint was successful.
-  const nft = await fetchDigitalAssetWithAssociatedToken(
-    umi,
-    mint.publicKey,
-    owner
-  );
-  t.like(nft, <DigitalAssetWithToken>{
-    publicKey: publicKey(mint),
-    mint: {
-      publicKey: publicKey(mint),
-      supply: 1n,
-    },
-    token: {
-      mint: publicKey(mint),
-      owner: publicKey(owner),
-    },
-    edition: { isOriginal: true },
-    metadata: { tokenStandard: some(TokenStandard.NonFungible) },
-  });
+  await assertSuccessfulMint(t, umi, { mint, owner });
 
   // And the candy machine was updated.
   const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
@@ -111,28 +90,7 @@ test('it can mint whilst creating the mint and token accounts beforehand', async
     .sendAndConfirm();
 
   // Then the mint was successful.
-  const nft = await fetchDigitalAssetWithAssociatedToken(
-    umi,
-    mint.publicKey,
-    owner
-  );
-  t.like(nft, <DigitalAssetWithToken>{
-    publicKey: publicKey(mint),
-    mint: {
-      publicKey: publicKey(mint),
-      supply: 1n,
-    },
-    token: {
-      mint: publicKey(mint),
-      owner: publicKey(owner),
-    },
-    edition: { isOriginal: true },
-    metadata: { tokenStandard: some(TokenStandard.NonFungible) },
-  });
-
-  // And the candy machine was updated.
-  const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
-  t.like(candyMachineAccount, <CandyMachine>{ itemsRedeemed: 1n });
+  await assertSuccessfulMint(t, umi, { mint, owner });
 });
 
 test('it can mint whilst creating only the mint account beforehand', async (t) => {
@@ -166,28 +124,7 @@ test('it can mint whilst creating only the mint account beforehand', async (t) =
     .sendAndConfirm();
 
   // Then the mint was successful.
-  const nft = await fetchDigitalAssetWithAssociatedToken(
-    umi,
-    mint.publicKey,
-    owner
-  );
-  t.like(nft, <DigitalAssetWithToken>{
-    publicKey: publicKey(mint),
-    mint: {
-      publicKey: publicKey(mint),
-      supply: 1n,
-    },
-    token: {
-      mint: publicKey(mint),
-      owner: publicKey(owner),
-    },
-    edition: { isOriginal: true },
-    metadata: { tokenStandard: some(TokenStandard.NonFungible) },
-  });
-
-  // And the candy machine was updated.
-  const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
-  t.like(candyMachineAccount, <CandyMachine>{ itemsRedeemed: 1n });
+  await assertSuccessfulMint(t, umi, { mint, owner });
 });
 
 test.skip('it cannot mint directly from a candy machine if we are not the mint authority', async (t) => {

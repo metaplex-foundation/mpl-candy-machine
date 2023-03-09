@@ -1,18 +1,14 @@
 import { createMintWithSingleToken } from '@metaplex-foundation/mpl-essentials';
-import {
-  DigitalAssetWithToken,
-  fetchDigitalAssetWithAssociatedToken,
-  TokenStandard,
-} from '@metaplex-foundation/mpl-token-metadata';
-import {
-  generateSigner,
-  publicKey,
-  some,
-  transactionBuilder,
-} from '@metaplex-foundation/umi';
+import { generateSigner, transactionBuilder } from '@metaplex-foundation/umi';
 import test from 'ava';
 import { CandyMachine, fetchCandyMachine, mintFromCandyMachine } from '../src';
-import { createCollectionNft, createUmi, createV1, createV2 } from './_setup';
+import {
+  assertSuccessfulMint,
+  createCollectionNft,
+  createUmi,
+  createV1,
+  createV2,
+} from './_setup';
 
 test('it can mint directly from a candy machine as the mint authority', async (t) => {
   // Given a loaded candy machine.
@@ -45,24 +41,7 @@ test('it can mint directly from a candy machine as the mint authority', async (t
     .sendAndConfirm();
 
   // Then the mint was successful.
-  const nft = await fetchDigitalAssetWithAssociatedToken(
-    umi,
-    mint.publicKey,
-    owner
-  );
-  t.like(nft, <DigitalAssetWithToken>{
-    publicKey: publicKey(mint),
-    mint: {
-      publicKey: publicKey(mint),
-      supply: 1n,
-    },
-    token: {
-      mint: publicKey(mint),
-      owner: publicKey(owner),
-    },
-    edition: { isOriginal: true },
-    metadata: { tokenStandard: some(TokenStandard.NonFungible) },
-  });
+  await assertSuccessfulMint(t, umi, { mint, owner });
 
   // And the candy machine was updated.
   const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);

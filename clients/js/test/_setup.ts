@@ -1,18 +1,24 @@
 /* eslint-disable import/no-extraneous-dependencies */
+import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-essentials';
 import {
   createNft,
+  DigitalAssetWithToken,
+  fetchDigitalAssetWithAssociatedToken,
   TokenStandard,
 } from '@metaplex-foundation/mpl-token-metadata';
 import {
   Context,
   generateSigner,
   percentAmount,
+  publicKey,
+  PublicKey,
   Signer,
   some,
   transactionBuilder,
   Umi,
 } from '@metaplex-foundation/umi';
 import { createUmi as basecreateUmi } from '@metaplex-foundation/umi-bundle-tests';
+import { Assertions } from 'ava';
 import {
   addConfigLines,
   CandyGuardDataArgs,
@@ -177,4 +183,55 @@ export const createCandyGuard = async <
     .sendAndConfirm();
 
   return findCandyGuardPda(umi, { base: base.publicKey });
+};
+
+export const assertSuccessfulMint = async (
+  t: Assertions,
+  umi: Umi,
+  input: {
+    mint: PublicKey | Signer;
+    owner: PublicKey | Signer;
+    token?: PublicKey;
+    tokenStandard?: TokenStandard;
+    name?: string | RegExp;
+    uri?: string | RegExp;
+  }
+) => {
+  const mint = publicKey(input.mint);
+  const owner = publicKey(input.owner);
+  const {
+    token = findAssociatedTokenPda(umi, { mint, owner }),
+    tokenStandard = TokenStandard.NonFungible,
+    name,
+    uri,
+  } = input;
+
+  // Nft.
+  const nft = await fetchDigitalAssetWithAssociatedToken(umi, mint, owner);
+  t.like(nft, <DigitalAssetWithToken>{
+    publicKey: publicKey(mint),
+    mint: {
+      publicKey: publicKey(mint),
+      supply: 1n,
+    },
+    token: {
+      publicKey: publicKey(token),
+      mint: publicKey(mint),
+      owner: publicKey(owner),
+    },
+    edition: {
+      isOriginal: true,
+    },
+    metadata: {
+      tokenStandard: some(tokenStandard),
+    },
+  });
+
+  // Name.
+  if (typeof name === 'string') t.is(nft.metadata.name, name);
+  else if (name !== undefined) t.regex(nft.metadata.name, name);
+
+  // Uri.
+  if (typeof uri === 'string') t.is(nft.metadata.uri, uri);
+  else if (uri !== undefined) t.regex(nft.metadata.uri, uri);
 };

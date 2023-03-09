@@ -165,10 +165,9 @@ export function mintFromCandyMachineV2(
     ),
     isWritable: false,
   };
-  const sysvarInstructionsAccount = input.sysvarInstructions ?? {
-    ...programId,
-    isWritable: false,
-  };
+  const sysvarInstructionsAccount =
+    input.sysvarInstructions ??
+    publicKey('Sysvar1nstructions1111111111111111111111111');
   const recentSlothashesAccount =
     input.recentSlothashes ??
     publicKey('SysvarS1otHashes111111111111111111111111111');

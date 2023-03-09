@@ -338,7 +338,17 @@ kinobi.update(
     },
     "mplCandyMachineCore.initializeV2": { name: "initializeCandyMachineV2" },
     "mplCandyMachineCore.mint": { name: "mintFromCandyMachine" },
-    "mplCandyMachineCore.mintV2": { name: "mintFromCandyMachineV2" },
+    "mplCandyMachineCore.mintV2": {
+      name: "mintFromCandyMachineV2",
+      accounts: {
+        sysvarInstructions: {
+          defaultsTo: {
+            kind: "publicKey",
+            publicKey: "Sysvar1nstructions1111111111111111111111111",
+          },
+        },
+      },
+    },
     "mplCandyGuard.mint": {
       name: "mint",
       accounts: {

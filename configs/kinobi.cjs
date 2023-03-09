@@ -341,6 +341,9 @@ kinobi.update(
     "mplCandyMachineCore.mintV2": {
       name: "mintFromCandyMachineV2",
       accounts: {
+        nftMint: {
+          isOptionalSigner: true,
+        },
         sysvarInstructions: {
           defaultsTo: {
             kind: "publicKey",

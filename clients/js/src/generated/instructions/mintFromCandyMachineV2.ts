@@ -26,7 +26,7 @@ import {
 import { findCandyMachineAuthorityPda } from '../../hooked';
 
 // Accounts.
-export type MintV2FromCandyMachineInstructionAccounts = {
+export type MintFromCandyMachineV2InstructionAccounts = {
   candyMachine: PublicKey;
   authorityPda?: PublicKey;
   mintAuthority: Signer;
@@ -54,43 +54,43 @@ export type MintV2FromCandyMachineInstructionAccounts = {
 };
 
 // Arguments.
-export type MintV2FromCandyMachineInstructionData = {
+export type MintFromCandyMachineV2InstructionData = {
   discriminator: Array<number>;
 };
 
-export type MintV2FromCandyMachineInstructionDataArgs = {};
+export type MintFromCandyMachineV2InstructionDataArgs = {};
 
-export function getMintV2FromCandyMachineInstructionDataSerializer(
+export function getMintFromCandyMachineV2InstructionDataSerializer(
   context: Pick<Context, 'serializer'>
 ): Serializer<
-  MintV2FromCandyMachineInstructionDataArgs,
-  MintV2FromCandyMachineInstructionData
+  MintFromCandyMachineV2InstructionDataArgs,
+  MintFromCandyMachineV2InstructionData
 > {
   const s = context.serializer;
   return mapSerializer<
-    MintV2FromCandyMachineInstructionDataArgs,
-    MintV2FromCandyMachineInstructionData,
-    MintV2FromCandyMachineInstructionData
+    MintFromCandyMachineV2InstructionDataArgs,
+    MintFromCandyMachineV2InstructionData,
+    MintFromCandyMachineV2InstructionData
   >(
-    s.struct<MintV2FromCandyMachineInstructionData>(
+    s.struct<MintFromCandyMachineV2InstructionData>(
       [['discriminator', s.array(s.u8(), { size: 8 })]],
-      { description: 'MintV2FromCandyMachineInstructionData' }
+      { description: 'MintFromCandyMachineV2InstructionData' }
     ),
     (value) =>
       ({
         ...value,
         discriminator: [120, 121, 23, 146, 173, 110, 199, 205],
-      } as MintV2FromCandyMachineInstructionData)
+      } as MintFromCandyMachineV2InstructionData)
   ) as Serializer<
-    MintV2FromCandyMachineInstructionDataArgs,
-    MintV2FromCandyMachineInstructionData
+    MintFromCandyMachineV2InstructionDataArgs,
+    MintFromCandyMachineV2InstructionData
   >;
 }
 
 // Instruction.
-export function mintV2FromCandyMachine(
+export function mintFromCandyMachineV2(
   context: Pick<Context, 'serializer' | 'programs' | 'eddsa' | 'payer'>,
-  input: MintV2FromCandyMachineInstructionAccounts
+  input: MintFromCandyMachineV2InstructionAccounts
 ): WrappedInstruction {
   const signers: Signer[] = [];
   const keys: AccountMeta[] = [];
@@ -353,7 +353,7 @@ export function mintV2FromCandyMachine(
   });
 
   // Data.
-  const data = getMintV2FromCandyMachineInstructionDataSerializer(
+  const data = getMintFromCandyMachineV2InstructionDataSerializer(
     context
   ).serialize({});
 

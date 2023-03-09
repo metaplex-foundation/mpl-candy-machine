@@ -338,7 +338,7 @@ kinobi.update(
     },
     "mplCandyMachineCore.initializeV2": { name: "initializeCandyMachineV2" },
     "mplCandyMachineCore.mint": { name: "mintFromCandyMachine" },
-    "mplCandyMachineCore.mintV2": { name: "mintV2FromCandyMachine" },
+    "mplCandyMachineCore.mintV2": { name: "mintFromCandyMachineV2" },
     "mplCandyGuard.mint": {
       name: "mint",
       accounts: {

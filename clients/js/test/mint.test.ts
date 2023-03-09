@@ -9,7 +9,7 @@ import {
   CandyMachine,
   fetchCandyMachine,
   findCandyGuardPda,
-  mintV1,
+  mint as mintV1,
 } from '../src';
 import {
   assertSuccessfulMint,

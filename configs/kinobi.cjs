@@ -339,15 +339,24 @@ kinobi.update(
     "mplCandyMachineCore.initializeV2": {
       name: "initializeV2CandyMachine",
       accounts: {
+        ruleSet: {
+          isOptional: false,
+          defaultsTo: { kind: "programId" },
+        },
         authorizationRulesProgram: {
           isOptional: false,
-          defaultsTo: {
-            kind: "program",
-            program: {
-              name: "mplTokenAuthRules",
-              publicKey: "auth9SigNpDKz4sJJ1DfCTuZrZNSAgh9sFD3rboVmgg",
-            },
-          },
+          defaultsTo: { kind: "programId" },
+          // defaultsTo: {
+          //   kind: "program",
+          //   program: {
+          //     name: "mplTokenAuthRules",
+          //     publicKey: "auth9SigNpDKz4sJJ1DfCTuZrZNSAgh9sFD3rboVmgg",
+          //   },
+          // },
+        },
+        authorizationRules: {
+          isOptional: false,
+          defaultsTo: { kind: "programId" },
         },
       },
     },

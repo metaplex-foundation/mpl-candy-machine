@@ -177,7 +177,7 @@ export function initializeV2CandyMachine(
     });
   const authorityAccount = input.authority ?? context.identity.publicKey;
   const payerAccount = input.payer ?? context.payer;
-  const ruleSetAccount = input.ruleSet;
+  const ruleSetAccount = input.ruleSet ?? { ...programId, isWritable: false };
   const collectionMintAccount = input.collectionMint;
   const collectionMetadataAccount =
     input.collectionMetadata ??
@@ -212,13 +212,13 @@ export function initializeV2CandyMachine(
     input.sysvarInstructions ??
     publicKey('Sysvar1nstructions1111111111111111111111111');
   const authorizationRulesProgramAccount = input.authorizationRulesProgram ?? {
-    ...context.programs.getPublicKey(
-      'mplTokenAuthRules',
-      'auth9SigNpDKz4sJJ1DfCTuZrZNSAgh9sFD3rboVmgg'
-    ),
+    ...programId,
     isWritable: false,
   };
-  const authorizationRulesAccount = input.authorizationRules;
+  const authorizationRulesAccount = input.authorizationRules ?? {
+    ...programId,
+    isWritable: false,
+  };
 
   // Candy Machine.
   keys.push({
@@ -249,14 +249,12 @@ export function initializeV2CandyMachine(
     isWritable: isWritable(payerAccount, false),
   });
 
-  // Rule Set (optional).
-  if (ruleSetAccount) {
-    keys.push({
-      pubkey: ruleSetAccount,
-      isSigner: false,
-      isWritable: isWritable(ruleSetAccount, false),
-    });
-  }
+  // Rule Set.
+  keys.push({
+    pubkey: ruleSetAccount,
+    isSigner: false,
+    isWritable: isWritable(ruleSetAccount, false),
+  });
 
   // Collection Metadata.
   keys.push({
@@ -322,14 +320,12 @@ export function initializeV2CandyMachine(
     isWritable: isWritable(authorizationRulesProgramAccount, false),
   });
 
-  // Authorization Rules (optional).
-  if (authorizationRulesAccount) {
-    keys.push({
-      pubkey: authorizationRulesAccount,
-      isSigner: false,
-      isWritable: isWritable(authorizationRulesAccount, false),
-    });
-  }
+  // Authorization Rules.
+  keys.push({
+    pubkey: authorizationRulesAccount,
+    isSigner: false,
+    isWritable: isWritable(authorizationRulesAccount, false),
+  });
 
   // Data.
   const data =

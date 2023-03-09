@@ -20,6 +20,7 @@ test('it can mint from a candy guard with no guards', async (t) => {
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const candyMachineSigner = await createV1(umi, {
     collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
     guards: {},
     groups: [],
   });

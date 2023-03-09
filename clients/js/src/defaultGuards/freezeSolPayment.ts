@@ -39,7 +39,7 @@ export const freezeSolPaymentGuardManifest: GuardManifest<
       candyGuard: mintContext.candyGuard,
     });
     const nftAta = findAssociatedTokenPda(context, {
-      mint: mintContext.mint.publicKey,
+      mint: mintContext.mint,
       owner: mintContext.minter.publicKey,
     });
     return {

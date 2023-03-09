@@ -1,6 +1,7 @@
 import {
   bitArray,
   Context,
+  isNone,
   isSome,
   mergeBytes,
   none,
@@ -10,6 +11,7 @@ import {
   some,
 } from '@metaplex-foundation/umi';
 import { CandyGuardProgram, GuardRepository } from './guardRepository';
+import { GuardInstructionExtras, MintContext } from './guardManifest';
 
 export type GuardSetArgs = {
   [name: string]: Option<object>;
@@ -72,4 +74,31 @@ export function getGuardSetSerializer<
       return [guardSet as D, offset];
     },
   };
+}
+
+export function parseMintArgs<MA extends GuardSetMintArgs>(
+  context: Pick<Context, 'serializer' | 'eddsa' | 'programs'> & {
+    guards: GuardRepository;
+  },
+  program: CandyGuardProgram,
+  mintContext: MintContext,
+  mintArgs: Partial<MA>
+): GuardInstructionExtras {
+  const manifests = context.guards.forProgram(program);
+  return manifests.reduce(
+    (acc, manifest) => {
+      const args = mintArgs[manifest.name] ?? none();
+      if (isNone(args)) return acc;
+      const { data, remainingAccounts } = manifest.mintParser(
+        context,
+        mintContext,
+        args.value
+      );
+      return {
+        data: mergeBytes([acc.data, data]),
+        remainingAccounts: [...acc.remainingAccounts, ...remainingAccounts],
+      };
+    },
+    { data: new Uint8Array(), remainingAccounts: [] } as GuardInstructionExtras
+  );
 }

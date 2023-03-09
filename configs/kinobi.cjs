@@ -336,30 +336,7 @@ kinobi.update(
         candyGuard: { defaultsTo: { kind: "pda", dependency: "hooked" } },
       },
     },
-    "mplCandyMachineCore.initializeV2": {
-      name: "initializeV2CandyMachine",
-      accounts: {
-        ruleSet: {
-          isOptional: false,
-          defaultsTo: { kind: "programId" },
-        },
-        authorizationRulesProgram: {
-          isOptional: false,
-          defaultsTo: { kind: "programId" },
-          // defaultsTo: {
-          //   kind: "program",
-          //   program: {
-          //     name: "mplTokenAuthRules",
-          //     publicKey: "auth9SigNpDKz4sJJ1DfCTuZrZNSAgh9sFD3rboVmgg",
-          //   },
-          // },
-        },
-        authorizationRules: {
-          isOptional: false,
-          defaultsTo: { kind: "programId" },
-        },
-      },
-    },
+    "mplCandyMachineCore.initializeV2": { name: "initializeV2CandyMachine" },
     "mplCandyMachineCore.mint": { name: "mintFromCandyMachine" },
     "mplCandyMachineCore.mintV2": { name: "mintV2FromCandyMachine" },
     "mplCandyGuard.mint": {

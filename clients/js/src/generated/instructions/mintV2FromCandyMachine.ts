@@ -119,8 +119,11 @@ export function mintV2FromCandyMachine(
   const nftMasterEditionAccount =
     input.nftMasterEdition ??
     findMasterEditionPda(context, { mint: publicKey(nftMintAccount) });
-  const tokenAccount = input.token;
-  const tokenRecordAccount = input.tokenRecord;
+  const tokenAccount = input.token ?? { ...programId, isWritable: false };
+  const tokenRecordAccount = input.tokenRecord ?? {
+    ...programId,
+    isWritable: false,
+  };
   const collectionMintAccount = input.collectionMint;
   const collectionUpdateAuthorityAccount = input.collectionUpdateAuthority;
   const collectionDelegateRecordAccount =
@@ -151,7 +154,10 @@ export function mintV2FromCandyMachine(
     ),
     isWritable: false,
   };
-  const splAtaProgramAccount = input.splAtaProgram;
+  const splAtaProgramAccount = input.splAtaProgram ?? {
+    ...programId,
+    isWritable: false,
+  };
   const systemProgramAccount = input.systemProgram ?? {
     ...context.programs.getPublicKey(
       'splSystem',
@@ -159,12 +165,21 @@ export function mintV2FromCandyMachine(
     ),
     isWritable: false,
   };
-  const sysvarInstructionsAccount = input.sysvarInstructions;
+  const sysvarInstructionsAccount = input.sysvarInstructions ?? {
+    ...programId,
+    isWritable: false,
+  };
   const recentSlothashesAccount =
     input.recentSlothashes ??
     publicKey('SysvarS1otHashes111111111111111111111111111');
-  const authorizationRulesProgramAccount = input.authorizationRulesProgram;
-  const authorizationRulesAccount = input.authorizationRules;
+  const authorizationRulesProgramAccount = input.authorizationRulesProgram ?? {
+    ...programId,
+    isWritable: false,
+  };
+  const authorizationRulesAccount = input.authorizationRules ?? {
+    ...programId,
+    isWritable: false,
+  };
 
   // Candy Machine.
   keys.push({
@@ -232,23 +247,19 @@ export function mintV2FromCandyMachine(
     isWritable: isWritable(nftMasterEditionAccount, true),
   });
 
-  // Token (optional).
-  if (tokenAccount) {
-    keys.push({
-      pubkey: tokenAccount,
-      isSigner: false,
-      isWritable: isWritable(tokenAccount, true),
-    });
-  }
+  // Token.
+  keys.push({
+    pubkey: tokenAccount,
+    isSigner: false,
+    isWritable: isWritable(tokenAccount, true),
+  });
 
-  // Token Record (optional).
-  if (tokenRecordAccount) {
-    keys.push({
-      pubkey: tokenRecordAccount,
-      isSigner: false,
-      isWritable: isWritable(tokenRecordAccount, true),
-    });
-  }
+  // Token Record.
+  keys.push({
+    pubkey: tokenRecordAccount,
+    isSigner: false,
+    isWritable: isWritable(tokenRecordAccount, true),
+  });
 
   // Collection Delegate Record.
   keys.push({
@@ -299,14 +310,12 @@ export function mintV2FromCandyMachine(
     isWritable: isWritable(splTokenProgramAccount, false),
   });
 
-  // Spl Ata Program (optional).
-  if (splAtaProgramAccount) {
-    keys.push({
-      pubkey: splAtaProgramAccount,
-      isSigner: false,
-      isWritable: isWritable(splAtaProgramAccount, false),
-    });
-  }
+  // Spl Ata Program.
+  keys.push({
+    pubkey: splAtaProgramAccount,
+    isSigner: false,
+    isWritable: isWritable(splAtaProgramAccount, false),
+  });
 
   // System Program.
   keys.push({
@@ -315,14 +324,12 @@ export function mintV2FromCandyMachine(
     isWritable: isWritable(systemProgramAccount, false),
   });
 
-  // Sysvar Instructions (optional).
-  if (sysvarInstructionsAccount) {
-    keys.push({
-      pubkey: sysvarInstructionsAccount,
-      isSigner: false,
-      isWritable: isWritable(sysvarInstructionsAccount, false),
-    });
-  }
+  // Sysvar Instructions.
+  keys.push({
+    pubkey: sysvarInstructionsAccount,
+    isSigner: false,
+    isWritable: isWritable(sysvarInstructionsAccount, false),
+  });
 
   // Recent Slothashes.
   keys.push({
@@ -331,23 +338,19 @@ export function mintV2FromCandyMachine(
     isWritable: isWritable(recentSlothashesAccount, false),
   });
 
-  // Authorization Rules Program (optional).
-  if (authorizationRulesProgramAccount) {
-    keys.push({
-      pubkey: authorizationRulesProgramAccount,
-      isSigner: false,
-      isWritable: isWritable(authorizationRulesProgramAccount, false),
-    });
-  }
+  // Authorization Rules Program.
+  keys.push({
+    pubkey: authorizationRulesProgramAccount,
+    isSigner: false,
+    isWritable: isWritable(authorizationRulesProgramAccount, false),
+  });
 
-  // Authorization Rules (optional).
-  if (authorizationRulesAccount) {
-    keys.push({
-      pubkey: authorizationRulesAccount,
-      isSigner: false,
-      isWritable: isWritable(authorizationRulesAccount, false),
-    });
-  }
+  // Authorization Rules.
+  keys.push({
+    pubkey: authorizationRulesAccount,
+    isSigner: false,
+    isWritable: isWritable(authorizationRulesAccount, false),
+  });
 
   // Data.
   const data = getMintV2FromCandyMachineInstructionDataSerializer(

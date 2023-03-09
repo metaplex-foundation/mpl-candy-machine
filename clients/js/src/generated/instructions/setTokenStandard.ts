@@ -113,7 +113,7 @@ export function setTokenStandard(
       candyMachine: publicKey(candyMachineAccount),
     });
   const payerAccount = input.payer ?? context.payer;
-  const ruleSetAccount = input.ruleSet;
+  const ruleSetAccount = input.ruleSet ?? { ...programId, isWritable: false };
   const collectionMintAccount = input.collectionMint;
   const collectionUpdateAuthorityAccount = input.collectionUpdateAuthority;
   const collectionDelegateRecordAccount =
@@ -127,7 +127,10 @@ export function setTokenStandard(
   const collectionMetadataAccount =
     input.collectionMetadata ??
     findMetadataPda(context, { mint: publicKey(collectionMintAccount) });
-  const collectionAuthorityRecordAccount = input.collectionAuthorityRecord;
+  const collectionAuthorityRecordAccount = input.collectionAuthorityRecord ?? {
+    ...programId,
+    isWritable: false,
+  };
   const tokenMetadataProgramAccount = input.tokenMetadataProgram ?? {
     ...context.programs.getPublicKey(
       'mplTokenMetadata',
@@ -145,8 +148,14 @@ export function setTokenStandard(
   const sysvarInstructionsAccount =
     input.sysvarInstructions ??
     publicKey('Sysvar1nstructions1111111111111111111111111');
-  const authorizationRulesProgramAccount = input.authorizationRulesProgram;
-  const authorizationRulesAccount = input.authorizationRules;
+  const authorizationRulesProgramAccount = input.authorizationRulesProgram ?? {
+    ...programId,
+    isWritable: false,
+  };
+  const authorizationRulesAccount = input.authorizationRules ?? {
+    ...programId,
+    isWritable: false,
+  };
 
   // Candy Machine.
   keys.push({
@@ -178,14 +187,12 @@ export function setTokenStandard(
     isWritable: isWritable(payerAccount, false),
   });
 
-  // Rule Set (optional).
-  if (ruleSetAccount) {
-    keys.push({
-      pubkey: ruleSetAccount,
-      isSigner: false,
-      isWritable: isWritable(ruleSetAccount, false),
-    });
-  }
+  // Rule Set.
+  keys.push({
+    pubkey: ruleSetAccount,
+    isSigner: false,
+    isWritable: isWritable(ruleSetAccount, false),
+  });
 
   // Collection Delegate Record.
   keys.push({
@@ -208,14 +215,12 @@ export function setTokenStandard(
     isWritable: isWritable(collectionMetadataAccount, true),
   });
 
-  // Collection Authority Record (optional).
-  if (collectionAuthorityRecordAccount) {
-    keys.push({
-      pubkey: collectionAuthorityRecordAccount,
-      isSigner: false,
-      isWritable: isWritable(collectionAuthorityRecordAccount, true),
-    });
-  }
+  // Collection Authority Record.
+  keys.push({
+    pubkey: collectionAuthorityRecordAccount,
+    isSigner: false,
+    isWritable: isWritable(collectionAuthorityRecordAccount, true),
+  });
 
   // Collection Update Authority.
   signers.push(collectionUpdateAuthorityAccount);
@@ -246,23 +251,19 @@ export function setTokenStandard(
     isWritable: isWritable(sysvarInstructionsAccount, false),
   });
 
-  // Authorization Rules Program (optional).
-  if (authorizationRulesProgramAccount) {
-    keys.push({
-      pubkey: authorizationRulesProgramAccount,
-      isSigner: false,
-      isWritable: isWritable(authorizationRulesProgramAccount, false),
-    });
-  }
+  // Authorization Rules Program.
+  keys.push({
+    pubkey: authorizationRulesProgramAccount,
+    isSigner: false,
+    isWritable: isWritable(authorizationRulesProgramAccount, false),
+  });
 
-  // Authorization Rules (optional).
-  if (authorizationRulesAccount) {
-    keys.push({
-      pubkey: authorizationRulesAccount,
-      isSigner: false,
-      isWritable: isWritable(authorizationRulesAccount, false),
-    });
-  }
+  // Authorization Rules.
+  keys.push({
+    pubkey: authorizationRulesAccount,
+    isSigner: false,
+    isWritable: isWritable(authorizationRulesAccount, false),
+  });
 
   // Data.
   const data =

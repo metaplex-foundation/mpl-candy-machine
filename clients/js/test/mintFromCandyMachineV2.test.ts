@@ -4,11 +4,13 @@ import {
   createMintWithSingleToken,
   setComputeUnitLimit,
 } from '@metaplex-foundation/mpl-essentials';
+import { findCollectionAuthorityRecordPda } from '@metaplex-foundation/mpl-token-metadata';
 import { generateSigner, transactionBuilder } from '@metaplex-foundation/umi';
 import test from 'ava';
 import {
   CandyMachine,
   fetchCandyMachine,
+  findCandyMachineAuthorityPda,
   mintFromCandyMachineV2,
 } from '../src';
 import {
@@ -172,7 +174,7 @@ test('it cannot mint directly from a candy machine if we are not the mint author
   t.like(candyMachineAccount, <CandyMachine>{ itemsRedeemed: 0n });
 });
 
-test.skip('it can mint from a candy machine v1', async (t) => {
+test('it can mint from a candy machine v1', async (t) => {
   // Given a loaded candy machine v1.
   const umi = await createUmi();
   const collectionMint = (await createCollectionNft(umi)).publicKey;
@@ -198,6 +200,14 @@ test.skip('it can mint from a candy machine v1', async (t) => {
         nftOwner: owner,
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
+        // We have to explicitly provide the collection authority record
+        // because v2 defaults to the new way of deriving delegate records.
+        collectionDelegateRecord: findCollectionAuthorityRecordPda(umi, {
+          mint: collectionMint,
+          collectionAuthority: findCandyMachineAuthorityPda(umi, {
+            candyMachine,
+          }),
+        }),
       })
     )
     .sendAndConfirm();

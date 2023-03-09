@@ -378,7 +378,7 @@ kinobi.update(
       },
     },
     "mplCandyGuard.mint": {
-      name: "mint",
+      name: "mintV1",
       accounts: {
         collectionAuthorityRecord: {
           defaultsTo: defaultsToCollectionAuthorityRecordPda(

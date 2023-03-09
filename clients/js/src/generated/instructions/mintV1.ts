@@ -26,7 +26,7 @@ import {
 import { findCandyMachineAuthorityPda } from '../../hooked';
 
 // Accounts.
-export type MintInstructionAccounts = {
+export type MintV1InstructionAccounts = {
   candyGuard: PublicKey;
   candyMachineProgram?: PublicKey;
   candyMachine: PublicKey;
@@ -49,46 +49,46 @@ export type MintInstructionAccounts = {
 };
 
 // Arguments.
-export type MintInstructionData = {
+export type MintV1InstructionData = {
   discriminator: Array<number>;
   mintArgs: Uint8Array;
   label: Option<string>;
 };
 
-export type MintInstructionDataArgs = {
+export type MintV1InstructionDataArgs = {
   mintArgs: Uint8Array;
   label: Option<string>;
 };
 
-export function getMintInstructionDataSerializer(
+export function getMintV1InstructionDataSerializer(
   context: Pick<Context, 'serializer'>
-): Serializer<MintInstructionDataArgs, MintInstructionData> {
+): Serializer<MintV1InstructionDataArgs, MintV1InstructionData> {
   const s = context.serializer;
   return mapSerializer<
-    MintInstructionDataArgs,
-    MintInstructionData,
-    MintInstructionData
+    MintV1InstructionDataArgs,
+    MintV1InstructionData,
+    MintV1InstructionData
   >(
-    s.struct<MintInstructionData>(
+    s.struct<MintV1InstructionData>(
       [
         ['discriminator', s.array(s.u8(), { size: 8 })],
         ['mintArgs', s.bytes()],
         ['label', s.option(s.string())],
       ],
-      { description: 'MintInstructionData' }
+      { description: 'MintV1InstructionData' }
     ),
     (value) =>
       ({
         ...value,
         discriminator: [51, 57, 225, 47, 182, 146, 137, 166],
-      } as MintInstructionData)
-  ) as Serializer<MintInstructionDataArgs, MintInstructionData>;
+      } as MintV1InstructionData)
+  ) as Serializer<MintV1InstructionDataArgs, MintV1InstructionData>;
 }
 
 // Instruction.
-export function mint(
+export function mintV1(
   context: Pick<Context, 'serializer' | 'programs' | 'eddsa' | 'payer'>,
-  input: MintInstructionAccounts & MintInstructionDataArgs
+  input: MintV1InstructionAccounts & MintV1InstructionDataArgs
 ): WrappedInstruction {
   const signers: Signer[] = [];
   const keys: AccountMeta[] = [];
@@ -301,7 +301,7 @@ export function mint(
   });
 
   // Data.
-  const data = getMintInstructionDataSerializer(context).serialize(input);
+  const data = getMintV1InstructionDataSerializer(context).serialize(input);
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

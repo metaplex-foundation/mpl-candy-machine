@@ -393,7 +393,7 @@ kinobi.update(
       },
     },
     "mplCandyGuard.mint": {
-      name: "mint",
+      internal: true,
       accounts: {
         collectionAuthorityRecord: {
           defaultsTo: defaultsToCollectionAuthorityRecordPda(
@@ -403,14 +403,12 @@ kinobi.update(
         },
       },
     },
-    "mplCandyGuard.mintV2": { name: "mintV2" },
+    "mplCandyGuard.mintV2": { internal: true },
+    "mplCandyGuard.route": { internal: true },
     "mplCandyMachineCore.SetAuthority": { name: "SetCandyMachineAuthority" },
     "mplCandyGuard.SetAuthority": { name: "SetCandyGuardAuthority" },
     "mplCandyMachineCore.update": { name: "updateCandyMachine" },
-    "mplCandyGuard.update": {
-      name: "updateCandyGuard",
-      internal: true,
-    },
+    "mplCandyGuard.update": { name: "updateCandyGuard", internal: true },
     "mplCandyMachineCore.withdraw": { name: "deleteCandyMachine" },
     "mplCandyGuard.withdraw": { name: "deleteCandyGuard" },
   })

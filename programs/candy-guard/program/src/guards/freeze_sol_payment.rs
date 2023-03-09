@@ -402,12 +402,24 @@ pub fn initialize_freeze<'info>(
 
     let authority = try_get_account_info(ctx.remaining_accounts, 1)?;
 
-    if let Some(candy_guard) = route_context.candy_guard {
-        if !(cmp_pubkeys(authority.key, &candy_guard.authority) && authority.is_signer) {
-            return err!(CandyGuardError::MissingRequiredSignature);
-        }
-    } else {
-        return err!(CandyGuardError::Uninitialized);
+    let candy_guard = route_context
+        .candy_guard
+        .as_ref()
+        .ok_or(CandyGuardError::Uninitialized)?;
+
+    let candy_machine = route_context
+        .candy_machine
+        .as_ref()
+        .ok_or(CandyGuardError::Uninitialized)?;
+
+    // only the authority can initialize freeze
+    if !(cmp_pubkeys(authority.key, &candy_guard.authority) && authority.is_signer) {
+        return err!(CandyGuardError::MissingRequiredSignature);
+    }
+
+    // and the candy guard and candy machine must be linked
+    if !cmp_pubkeys(&candy_machine.mint_authority, &candy_guard.key()) {
+        return err!(CandyGuardError::InvalidMintAuthority);
     }
 
     if freeze_pda.data_is_empty() {
@@ -465,9 +477,8 @@ pub fn initialize_freeze<'info>(
         destination,
         authority.key(),
     );
-    freeze_escrow.exit(&crate::ID)?;
 
-    Ok(())
+    freeze_escrow.exit(&crate::ID)
 }
 
 /// Helper function to thaw an nft.
@@ -565,13 +576,16 @@ pub fn thaw_nft<'info>(
         let rent = Rent::get()?;
         let rent_exempt_lamports = rent.minimum_balance(freeze_pda.data_len());
         if freeze_pda.lamports() >= rent_exempt_lamports + FREEZE_SOL_FEE {
-            msg!("Paying FREEZE_SOL_FEE from FreezePda account as crank reward...");
+            msg!(
+                "Paying {} lamports from FreezePda account as crank reward",
+                FREEZE_SOL_FEE
+            );
             **freeze_pda.try_borrow_mut_lamports()? =
                 freeze_pda.lamports().checked_sub(FREEZE_SOL_FEE).unwrap();
             **payer.try_borrow_mut_lamports()? =
                 payer.lamports().checked_add(FREEZE_SOL_FEE).unwrap();
         } else {
-            msg!("FreezePda account will not be rent-exempt. Skipping crank reward...");
+            msg!("FreezePda account will not be rent-exempt. Skipping crank reward");
         }
     }
     // save the account state

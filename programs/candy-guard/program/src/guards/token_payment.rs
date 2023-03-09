@@ -53,7 +53,7 @@ impl Condition for TokenPayment {
         assert_keys_equal(&ata_account.mint, &self.mint)?;
 
         let token_account =
-            assert_is_ata(token_account_info, &ctx.accounts.payer.key(), &self.mint)?;
+            assert_is_ata(token_account_info, &ctx.accounts.minter.key(), &self.mint)?;
 
         if token_account.amount < self.amount {
             return err!(CandyGuardError::NotEnoughTokens);
@@ -79,7 +79,7 @@ impl Condition for TokenPayment {
         spl_token_transfer(TokenTransferParams {
             source: token_account_info.to_account_info(),
             destination: destination_ata.to_account_info(),
-            authority: ctx.accounts.payer.to_account_info(),
+            authority: ctx.accounts.minter.to_account_info(),
             authority_signer_seeds: &[],
             token_program: ctx.accounts.spl_token_program.to_account_info(),
             amount: self.amount,

@@ -56,13 +56,24 @@ impl Guard for Allocation {
         let authority = try_get_account_info(ctx.remaining_accounts, 1)?;
         let _system_program = try_get_account_info(ctx.remaining_accounts, 2)?;
 
-        if route_context.candy_guard.is_none() || route_context.candy_machine.is_none() {
-            return err!(CandyGuardError::Uninitialized);
-        } else if let Some(candy_guard) = &route_context.candy_guard {
-            // only the authority can initialize the allocation
-            if !(cmp_pubkeys(authority.key, &candy_guard.authority) && authority.is_signer) {
-                return err!(CandyGuardError::MissingRequiredSignature);
-            }
+        let candy_guard = route_context
+            .candy_guard
+            .as_ref()
+            .ok_or(CandyGuardError::Uninitialized)?;
+
+        let candy_machine = route_context
+            .candy_machine
+            .as_ref()
+            .ok_or(CandyGuardError::Uninitialized)?;
+
+        // only the authority can initialize the allocation
+        if !(cmp_pubkeys(authority.key, &candy_guard.authority) && authority.is_signer) {
+            return err!(CandyGuardError::MissingRequiredSignature);
+        }
+
+        // and the candy guard and candy machine must be linked
+        if !cmp_pubkeys(&candy_machine.mint_authority, &candy_guard.key()) {
+            return err!(CandyGuardError::InvalidMintAuthority);
         }
 
         let allocation_id = if let Some(guard_set) = &route_context.guard_set {

@@ -179,3 +179,13 @@ pub fn try_get_account_info<T>(remaining_accounts: &[T], index: usize) -> Result
         err!(CandyGuardError::MissingRemainingAccount)
     }
 }
+
+/// Utility function to try to get the account from the remaining accounts
+/// array at the specified index.
+pub fn get_account_info<T>(remaining_accounts: &[T], index: usize) -> Option<&T> {
+    if index < remaining_accounts.len() {
+        Some(&remaining_accounts[index])
+    } else {
+        None
+    }
+}

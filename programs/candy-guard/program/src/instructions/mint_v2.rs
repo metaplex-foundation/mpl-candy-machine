@@ -1,7 +1,8 @@
 use std::collections::BTreeMap;
 
-use anchor_lang::{prelude::*, solana_program::sysvar};
+use anchor_lang::{prelude::*, solana_program::sysvar, Discriminator};
 use mpl_candy_machine_core::CandyMachine;
+use solana_program::{instruction::Instruction, program::invoke_signed};
 
 use crate::{
     guards::{CandyGuardError, EvaluationContext},
@@ -20,7 +21,7 @@ pub fn mint_v2<'info>(
         candy_guard: &ctx.accounts.candy_guard,
         candy_machine: &ctx.accounts.candy_machine,
         candy_machine_authority_pda: ctx.accounts.candy_machine_authority_pda.to_account_info(),
-        candy_machine_program: ctx.accounts.candy_machine_program.to_account_info(),
+        _candy_machine_program: ctx.accounts.candy_machine_program.to_account_info(),
         collection_delegate_record: ctx.accounts.collection_delegate_record.to_account_info(),
         collection_master_edition: ctx.accounts.collection_master_edition.to_account_info(),
         collection_metadata: ctx.accounts.collection_metadata.to_account_info(),
@@ -31,6 +32,7 @@ pub fn mint_v2<'info>(
         nft_mint: ctx.accounts.nft_mint.to_account_info(),
         nft_mint_authority: ctx.accounts.nft_mint_authority.to_account_info(),
         payer: ctx.accounts.payer.to_account_info(),
+        minter: ctx.accounts.minter.to_account_info(),
         recent_slothashes: ctx.accounts.recent_slothashes.to_account_info(),
         spl_ata_program: ctx
             .accounts
@@ -147,17 +149,14 @@ fn validate(ctx: &EvaluationContext) -> Result<()> {
 /// Send a mint transaction to the candy machine.
 fn cpi_mint(ctx: &EvaluationContext) -> Result<()> {
     let candy_guard = &ctx.accounts.candy_guard;
-    // PDA signer for the transaction
-    let seeds = [SEED, &candy_guard.base.to_bytes(), &[candy_guard.bump]];
-    let signer = [&seeds[..]];
-    let candy_machine_program = ctx.accounts.candy_machine_program.to_account_info();
 
     // candy machine mint instruction accounts
-    let mint_ix = mpl_candy_machine_core::cpi::accounts::MintV2 {
+    let mint_accounts = Box::new(mpl_candy_machine_core::cpi::accounts::MintV2 {
         candy_machine: ctx.accounts.candy_machine.to_account_info(),
         authority_pda: ctx.accounts.candy_machine_authority_pda.to_owned(),
-        mint_authority: ctx.accounts.candy_guard.to_account_info(),
+        mint_authority: candy_guard.to_account_info(),
         payer: ctx.accounts.payer.to_owned(),
+        nft_owner: ctx.accounts.minter.to_owned(),
         nft_mint: ctx.accounts.nft_mint.to_owned(),
         nft_mint_authority: ctx.accounts.nft_mint_authority.to_owned(),
         nft_metadata: ctx.accounts.nft_metadata.to_owned(),
@@ -175,11 +174,34 @@ fn cpi_mint(ctx: &EvaluationContext) -> Result<()> {
         system_program: ctx.accounts.system_program.to_owned(),
         sysvar_instructions: Some(ctx.accounts.sysvar_instructions.to_owned()),
         recent_slothashes: ctx.accounts.recent_slothashes.to_owned(),
+        authorization_rules_program: None,
+        authorization_rules: None,
+    });
+
+    let mint_infos = mint_accounts.to_account_infos();
+    let mut mint_metas = mint_accounts.to_account_metas(None);
+
+    mint_metas.iter_mut().for_each(|account_meta| {
+        if account_meta.pubkey == ctx.accounts.nft_mint.key() {
+            account_meta.is_signer = ctx.accounts.nft_mint.is_signer;
+        }
+    });
+
+    let mint_ix = Instruction {
+        program_id: mpl_candy_machine_core::ID,
+        accounts: mint_metas,
+        data: mpl_candy_machine_core::instruction::MintV2::DISCRIMINATOR.to_vec(),
     };
 
-    let cpi_ctx = CpiContext::new_with_signer(candy_machine_program, mint_ix, &signer);
+    // PDA signer for the transaction
+    let seeds = [SEED, &candy_guard.base.to_bytes(), &[candy_guard.bump]];
+    let signer = [&seeds[..]];
 
-    mpl_candy_machine_core::cpi::mint_v2(cpi_ctx)
+    msg!("CPI call");
+
+    invoke_signed(&mint_ix, &mint_infos, &signer)?;
+
+    Ok(())
 }
 
 /// Mint an NFT.
@@ -187,35 +209,44 @@ fn cpi_mint(ctx: &EvaluationContext) -> Result<()> {
 pub struct MintV2<'info> {
     /// Candy Guard account.
     #[account(seeds = [SEED, candy_guard.base.key().as_ref()], bump = candy_guard.bump)]
-    pub candy_guard: Account<'info, CandyGuard>,
+    candy_guard: Account<'info, CandyGuard>,
 
     /// Candy Machine program account.
     ///
     /// CHECK: account constraints checked in account trait
     #[account(address = mpl_candy_machine_core::id())]
-    pub candy_machine_program: AccountInfo<'info>,
+    candy_machine_program: AccountInfo<'info>,
 
     /// Candy machine account.
     #[account(mut, constraint = candy_guard.key() == candy_machine.mint_authority)]
-    pub candy_machine: Box<Account<'info, CandyMachine>>,
+    candy_machine: Box<Account<'info, CandyMachine>>,
 
     /// Candy Machine authority account.
     ///
     /// CHECK: account constraints checked in CPI
     #[account(mut)]
-    pub candy_machine_authority_pda: UncheckedAccount<'info>,
+    candy_machine_authority_pda: UncheckedAccount<'info>,
 
-    /// Payer for the transaction and account allocation (rent).
+    /// Payer for the mint (SOL) fees.
     #[account(mut)]
-    pub payer: Signer<'info>,
+    payer: Signer<'info>,
+
+    /// Minter account for validation and non-SOL fees.
+    minter: Signer<'info>,
 
     /// Mint account of the NFT. The account will be initialized if necessary.
+    ///
+    /// Must be a signer if:
+    ///   * the nft_mint account does not exist.
     ///
     /// CHECK: account checked in CPI
     #[account(mut)]
     nft_mint: UncheckedAccount<'info>,
 
-    /// Mint authority of the NFT. In most cases this will be the owner of the NFT.
+    /// Mint authority of the NFT before the authority gets transfer to the master edition account.
+    ///
+    /// If nft_mint account exists:
+    ///   * it must match the mint authority of nft_mint.
     nft_mint_authority: Signer<'info>,
 
     /// Metadata account of the NFT. This account must be uninitialized.
@@ -294,4 +325,16 @@ pub struct MintV2<'info> {
     /// CHECK: account constraints checked in account trait
     #[account(address = sysvar::slot_hashes::id())]
     recent_slothashes: UncheckedAccount<'info>,
+
+    /// Token Authorization Rules program.
+    ///
+    /// CHECK: account checked in CPI
+    #[account(address = mpl_token_auth_rules::id())]
+    authorization_rules_program: Option<UncheckedAccount<'info>>,
+
+    /// Token Authorization rules account for the collection metadata (if any).
+    ///
+    /// CHECK: account constraints checked in account trait
+    #[account(owner = mpl_token_auth_rules::id())]
+    authorization_rules: Option<UncheckedAccount<'info>>,
 }

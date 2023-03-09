@@ -25,7 +25,7 @@ import {
 } from '../src';
 import { createCollectionNft, createUmi, createV1, createV2 } from './_setup';
 
-test.only('it can mint directly from a candy machine as the mint authority', async (t) => {
+test('it can mint directly from a candy machine as the mint authority', async (t) => {
   // Given a loaded candy machine.
   const umi = await createUmi();
   const collectionMint = (await createCollectionNft(umi)).publicKey;
@@ -83,7 +83,7 @@ test.only('it can mint directly from a candy machine as the mint authority', asy
   t.like(candyMachineAccount, <CandyMachine>{ itemsRedeemed: 1n });
 });
 
-test.skip('it can mint whilst creating the mint and token accounts beforehand', async (t) => {
+test('it can mint whilst creating the mint and token accounts beforehand', async (t) => {
   // Given a loaded candy machine.
   const umi = await createUmi();
   const collectionMint = (await createCollectionNft(umi)).publicKey;
@@ -142,7 +142,63 @@ test.skip('it can mint whilst creating the mint and token accounts beforehand', 
   t.like(candyMachineAccount, <CandyMachine>{ itemsRedeemed: 1n });
 });
 
-// TODO it can mint whilst creating only the mint account beforehand
+test('it can mint whilst creating only the mint account beforehand', async (t) => {
+  // Given a loaded candy machine.
+  const umi = await createUmi();
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const candyMachineSigner = await createV2(umi, {
+    collectionMint,
+    configLines: [
+      { name: 'Degen #1', uri: 'https://example.com/degen/1' },
+      { name: 'Degen #2', uri: 'https://example.com/degen/2' },
+    ],
+  });
+  const candyMachine = candyMachineSigner.publicKey;
+
+  // When we mint a new NFT directly from the candy machine as the mint authority.
+  const mint = generateSigner(umi);
+  const owner = generateSigner(umi).publicKey;
+  const ata = findAssociatedTokenPda(umi, { mint: mint.publicKey, owner });
+  await transactionBuilder(umi)
+    .add(createMint(umi, { mint }))
+    .add(
+      mintFromCandyMachineV2(umi, {
+        candyMachine,
+        mintAuthority: umi.identity,
+        nftOwner: owner,
+        nftMint: mint.publicKey,
+        nftMintAuthority: umi.identity,
+        token: ata,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+      })
+    )
+    .sendAndConfirm();
+
+  // Then the mint was successful.
+  const nft = await fetchDigitalAssetWithAssociatedToken(
+    umi,
+    mint.publicKey,
+    owner
+  );
+  t.like(nft, <DigitalAssetWithToken>{
+    publicKey: publicKey(mint),
+    mint: {
+      publicKey: publicKey(mint),
+      supply: 1n,
+    },
+    token: {
+      mint: publicKey(mint),
+      owner: publicKey(owner),
+    },
+    edition: { isOriginal: true },
+    metadata: { tokenStandard: some(TokenStandard.NonFungible) },
+  });
+
+  // And the candy machine was updated.
+  const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
+  t.like(candyMachineAccount, <CandyMachine>{ itemsRedeemed: 1n });
+});
 
 test.skip('it cannot mint directly from a candy machine if we are not the mint authority', async (t) => {
   // Given a loaded candy machine with a mint authority A.
@@ -151,7 +207,7 @@ test.skip('it cannot mint directly from a candy machine if we are not the mint a
   const collectionMint = await createCollectionNft(umi, {
     authority: mintAuthorityA,
   });
-  const candyMachineSigner = await createV1(umi, {
+  const candyMachineSigner = await createV2(umi, {
     authority: mintAuthorityA.publicKey,
     collectionMint: collectionMint.publicKey,
     collectionUpdateAuthority: mintAuthorityA,
@@ -190,7 +246,7 @@ test.skip('it cannot mint directly from a candy machine if we are not the mint a
   t.like(candyMachineAccount, <CandyMachine>{ itemsRedeemed: 0n });
 });
 
-test.skip('it cannot mint from a candy machine v1', async (t) => {
+test.skip('it can mint from a candy machine v1', async (t) => {
   // Given a loaded candy machine v1.
   const umi = await createUmi();
   const collectionMint = (await createCollectionNft(umi)).publicKey;

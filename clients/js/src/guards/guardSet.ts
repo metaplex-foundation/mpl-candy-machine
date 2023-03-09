@@ -1,4 +1,5 @@
 import {
+  AccountMeta,
   bitArray,
   Context,
   isNone,
@@ -8,10 +9,15 @@ import {
   Option,
   reverseSerializer,
   Serializer,
+  Signer,
   some,
 } from '@metaplex-foundation/umi';
+import {
+  GuardInstructionExtras,
+  GuardRemainingAccount,
+  MintContext,
+} from './guardManifest';
 import { CandyGuardProgram, GuardRepository } from './guardRepository';
-import { GuardInstructionExtras, MintContext } from './guardManifest';
 
 export type GuardSetArgs = {
   [name: string]: Option<object>;
@@ -101,4 +107,28 @@ export function parseMintArgs<MA extends GuardSetMintArgs>(
     },
     { data: new Uint8Array(), remainingAccounts: [] } as GuardInstructionExtras
   );
+}
+
+export function parseGuardRemainingAccounts(
+  remainingAccounts: GuardRemainingAccount[]
+): [AccountMeta[], Signer[]] {
+  const accounts = [] as AccountMeta[];
+  const signers = [] as Signer[];
+  remainingAccounts.forEach((account) => {
+    if ('signer' in account) {
+      signers.push(account.signer);
+      accounts.push({
+        pubkey: account.signer.publicKey,
+        isSigner: true,
+        isWritable: account.isWritable,
+      });
+    } else {
+      accounts.push({
+        pubkey: account.publicKey,
+        isSigner: false,
+        isWritable: account.isWritable,
+      });
+    }
+  });
+  return [accounts, signers];
 }

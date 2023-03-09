@@ -403,7 +403,12 @@ kinobi.update(
         },
       },
     },
-    "mplCandyGuard.mintV2": { internal: true },
+    "mplCandyGuard.mintV2": {
+      internal: true,
+      accounts: {
+        minter: { defaultsTo: { kind: "identity" } },
+      },
+    },
     "mplCandyGuard.route": { internal: true },
     "mplCandyMachineCore.SetAuthority": { name: "SetCandyMachineAuthority" },
     "mplCandyGuard.SetAuthority": { name: "SetCandyGuardAuthority" },

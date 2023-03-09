@@ -31,7 +31,7 @@ export type MintV2InstructionAccounts = {
   candyMachine: PublicKey;
   candyMachineAuthorityPda?: PublicKey;
   payer?: Signer;
-  minter: Signer;
+  minter?: Signer;
   nftMint: PublicKey;
   nftMintAuthority: Signer;
   nftMetadata?: PublicKey;
@@ -92,7 +92,10 @@ export function getMintV2InstructionDataSerializer(
 
 // Instruction.
 export function mintV2(
-  context: Pick<Context, 'serializer' | 'programs' | 'eddsa' | 'payer'>,
+  context: Pick<
+    Context,
+    'serializer' | 'programs' | 'eddsa' | 'identity' | 'payer'
+  >,
   input: MintV2InstructionAccounts & MintV2InstructionDataArgs
 ): WrappedInstruction {
   const signers: Signer[] = [];
@@ -120,7 +123,7 @@ export function mintV2(
       candyMachine: publicKey(candyMachineAccount),
     });
   const payerAccount = input.payer ?? context.payer;
-  const minterAccount = input.minter;
+  const minterAccount = input.minter ?? context.identity;
   const nftMintAccount = input.nftMint;
   const nftMintAuthorityAccount = input.nftMintAuthority;
   const nftMetadataAccount =

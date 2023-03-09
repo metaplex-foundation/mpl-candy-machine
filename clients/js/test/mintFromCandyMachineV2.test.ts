@@ -2,7 +2,6 @@ import {
   createAssociatedToken,
   createMint,
   createMintWithSingleToken,
-  findAssociatedTokenPda,
   setComputeUnitLimit,
 } from '@metaplex-foundation/mpl-essentials';
 import {
@@ -41,7 +40,6 @@ test('it can mint directly from a candy machine as the mint authority', async (t
   // When we mint a new NFT directly from the candy machine as the mint authority.
   const mint = generateSigner(umi);
   const owner = generateSigner(umi).publicKey;
-  const ata = findAssociatedTokenPda(umi, { mint: mint.publicKey, owner });
   await transactionBuilder(umi)
     .add(setComputeUnitLimit(umi, { units: 600000 }))
     .add(
@@ -51,7 +49,6 @@ test('it can mint directly from a candy machine as the mint authority', async (t
         nftOwner: owner,
         nftMint: mint,
         nftMintAuthority: umi.identity,
-        token: ata,
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
       })
@@ -99,7 +96,6 @@ test('it can mint whilst creating the mint and token accounts beforehand', async
   // When we mint a new NFT directly from the candy machine as the mint authority.
   const mint = generateSigner(umi);
   const owner = generateSigner(umi).publicKey;
-  const ata = findAssociatedTokenPda(umi, { mint: mint.publicKey, owner });
   await transactionBuilder(umi)
     .add(createMint(umi, { mint }))
     .add(createAssociatedToken(umi, { mint: mint.publicKey, owner }))
@@ -110,7 +106,6 @@ test('it can mint whilst creating the mint and token accounts beforehand', async
         nftOwner: owner,
         nftMint: mint.publicKey,
         nftMintAuthority: umi.identity,
-        token: ata,
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
       })
@@ -158,7 +153,6 @@ test('it can mint whilst creating only the mint account beforehand', async (t) =
   // When we mint a new NFT directly from the candy machine as the mint authority.
   const mint = generateSigner(umi);
   const owner = generateSigner(umi).publicKey;
-  const ata = findAssociatedTokenPda(umi, { mint: mint.publicKey, owner });
   await transactionBuilder(umi)
     .add(createMint(umi, { mint }))
     .add(
@@ -168,7 +162,6 @@ test('it can mint whilst creating only the mint account beforehand', async (t) =
         nftOwner: owner,
         nftMint: mint.publicKey,
         nftMintAuthority: umi.identity,
-        token: ata,
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
       })

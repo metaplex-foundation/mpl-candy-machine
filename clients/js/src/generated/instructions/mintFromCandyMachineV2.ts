@@ -6,6 +6,7 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-essentials';
 import {
   MetadataDelegateRole,
   findMasterEditionPda,
@@ -120,7 +121,12 @@ export function mintFromCandyMachineV2(
   const nftMasterEditionAccount =
     input.nftMasterEdition ??
     findMasterEditionPda(context, { mint: publicKey(nftMintAccount) });
-  const tokenAccount = input.token ?? { ...programId, isWritable: false };
+  const tokenAccount =
+    input.token ??
+    findAssociatedTokenPda(context, {
+      mint: publicKey(nftMintAccount),
+      owner: publicKey(nftOwnerAccount),
+    });
   const tokenRecordAccount = input.tokenRecord ?? {
     ...programId,
     isWritable: false,

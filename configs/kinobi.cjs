@@ -190,6 +190,15 @@ kinobi.update(
 );
 
 // Reusable PDA defaults.
+const defaultsToAssociatedTokenPda = (mint = "mint", owner = "owner") => ({
+  kind: "pda",
+  pdaAccount: "associatedToken",
+  dependency: "mplEssentials",
+  seeds: {
+    mint: { kind: "account", name: mint },
+    owner: { kind: "account", name: owner },
+  },
+});
 const defaultsToCandyMachineAuthorityPda = (candyMachine = "candyMachine") => ({
   kind: "pda",
   pdaAccount: "candyMachineAuthority",
@@ -343,6 +352,9 @@ kinobi.update(
       accounts: {
         nftMint: {
           isOptionalSigner: true,
+        },
+        token: {
+          defaultsTo: defaultsToAssociatedTokenPda("nftMint", "nftOwner"),
         },
         sysvarInstructions: {
           defaultsTo: {

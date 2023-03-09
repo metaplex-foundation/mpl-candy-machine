@@ -407,6 +407,14 @@ kinobi.update(
       internal: true,
       accounts: {
         minter: { defaultsTo: { kind: "identity" } },
+        collectionDelegateRecord: {
+          defaultsTo: defaultsToMetadataDelegateRecordPda(
+            "collection",
+            "collectionMint",
+            "collectionUpdateAuthority",
+            "candyMachineAuthorityPda"
+          ),
+        },
       },
     },
     "mplCandyGuard.route": { internal: true },

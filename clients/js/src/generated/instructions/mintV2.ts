@@ -7,7 +7,9 @@
  */
 
 import {
+  MetadataDelegateRole,
   findMasterEditionPda,
+  findMetadataDelegateRecordPda,
   findMetadataPda,
 } from '@metaplex-foundation/mpl-token-metadata';
 import {
@@ -38,7 +40,7 @@ export type MintV2InstructionAccounts = {
   nftMasterEdition?: PublicKey;
   token?: PublicKey;
   tokenRecord?: PublicKey;
-  collectionDelegateRecord: PublicKey;
+  collectionDelegateRecord?: PublicKey;
   collectionMint: PublicKey;
   collectionMetadata?: PublicKey;
   collectionMasterEdition?: PublicKey;
@@ -137,15 +139,22 @@ export function mintV2(
     ...programId,
     isWritable: false,
   };
-  const collectionDelegateRecordAccount = input.collectionDelegateRecord;
   const collectionMintAccount = input.collectionMint;
+  const collectionUpdateAuthorityAccount = input.collectionUpdateAuthority;
+  const collectionDelegateRecordAccount =
+    input.collectionDelegateRecord ??
+    findMetadataDelegateRecordPda(context, {
+      mint: publicKey(collectionMintAccount),
+      delegateRole: MetadataDelegateRole.Collection,
+      updateAuthority: publicKey(collectionUpdateAuthorityAccount),
+      delegate: publicKey(candyMachineAuthorityPdaAccount),
+    });
   const collectionMetadataAccount =
     input.collectionMetadata ??
     findMetadataPda(context, { mint: publicKey(collectionMintAccount) });
   const collectionMasterEditionAccount =
     input.collectionMasterEdition ??
     findMasterEditionPda(context, { mint: publicKey(collectionMintAccount) });
-  const collectionUpdateAuthorityAccount = input.collectionUpdateAuthority;
   const tokenMetadataProgramAccount = input.tokenMetadataProgram ?? {
     ...context.programs.getPublicKey(
       'mplTokenMetadata',

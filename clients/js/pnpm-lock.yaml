@@ -2,7 +2,7 @@ lockfileVersion: 5.4
 
 specifiers:
   '@ava/typescript': ^3.0.1
-  '@metaplex-foundation/mpl-essentials': ^0.3.2
+  '@metaplex-foundation/mpl-essentials': ^0.3.3
   '@metaplex-foundation/mpl-token-metadata': 3.0.0-alpha.8
   '@metaplex-foundation/umi': ^0.5.3
   '@metaplex-foundation/umi-bundle-tests': ^0.5.3
@@ -26,7 +26,7 @@ specifiers:
   vercel: ^28.16.0
 
 dependencies:
-  '@metaplex-foundation/mpl-essentials': 0.3.2_stwtg3s2aq4sffjj7ffoh7p76q
+  '@metaplex-foundation/mpl-essentials': 0.3.3_stwtg3s2aq4sffjj7ffoh7p76q
   '@metaplex-foundation/mpl-token-metadata': 3.0.0-alpha.8_stwtg3s2aq4sffjj7ffoh7p76q
   '@noble/hashes': 1.2.0
   merkletreejs: 0.3.9
@@ -1606,8 +1606,8 @@ packages:
       - supports-color
     dev: true
 
-  /@metaplex-foundation/mpl-essentials/0.3.2_stwtg3s2aq4sffjj7ffoh7p76q:
-    resolution: {integrity: sha512-zzHsrc+k4XJ43Be/9lUwdaKDhOCek94ZXUAzq388T0h+fOtv65seV5az7vvYVcyReMKgdLU7+EiYIJFazZNrbQ==}
+  /@metaplex-foundation/mpl-essentials/0.3.3_stwtg3s2aq4sffjj7ffoh7p76q:
+    resolution: {integrity: sha512-49SjJY1Dd7aC5fgKXkbvZRzdyIWkmMtfvVQ4Hw9e3/sjcKW4f9LgHEXx0F+ygnx9l0xVwAj39YVlT414tg4PSA==}
     peerDependencies:
       '@metaplex-foundation/umi': ^0.5.3
     dependencies:
@@ -1619,7 +1619,7 @@ packages:
     peerDependencies:
       '@metaplex-foundation/umi': ^0.5.3
     dependencies:
-      '@metaplex-foundation/mpl-essentials': 0.3.2_stwtg3s2aq4sffjj7ffoh7p76q
+      '@metaplex-foundation/mpl-essentials': 0.3.3_stwtg3s2aq4sffjj7ffoh7p76q
       '@metaplex-foundation/umi': 0.5.3
     dev: false
 

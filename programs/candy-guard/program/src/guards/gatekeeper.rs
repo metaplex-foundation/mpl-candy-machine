@@ -56,7 +56,7 @@ impl Condition for Gatekeeper {
         // it should be burned or not
         Gateway::verify_gateway_token_account_info(
             gateway_token_account,
-            ctx.accounts.payer.key,
+            ctx.accounts.minter.key,
             &self.gatekeeper_network,
             None,
         )
@@ -95,12 +95,12 @@ impl Condition for Gatekeeper {
             invoke(
                 &expire_token(
                     *gateway_token_info.key,
-                    *ctx.accounts.payer.key,
+                    *ctx.accounts.minter.key,
                     self.gatekeeper_network,
                 ),
                 &[
                     gateway_token_info.to_account_info(),
-                    ctx.accounts.payer.to_account_info(),
+                    ctx.accounts.minter.to_account_info(),
                     expiry_info.to_account_info(),
                     gateway_program_info.to_account_info(),
                 ],

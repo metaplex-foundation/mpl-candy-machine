@@ -31,6 +31,7 @@ export type MintV2FromCandyMachineInstructionAccounts = {
   authorityPda?: PublicKey;
   mintAuthority: Signer;
   payer?: Signer;
+  nftOwner: PublicKey;
   nftMint: PublicKey;
   nftMintAuthority: Signer;
   nftMetadata?: PublicKey;
@@ -48,6 +49,8 @@ export type MintV2FromCandyMachineInstructionAccounts = {
   systemProgram?: PublicKey;
   sysvarInstructions?: PublicKey;
   recentSlothashes?: PublicKey;
+  authorizationRulesProgram?: PublicKey;
+  authorizationRules?: PublicKey;
 };
 
 // Arguments.
@@ -107,6 +110,7 @@ export function mintV2FromCandyMachine(
     });
   const mintAuthorityAccount = input.mintAuthority;
   const payerAccount = input.payer ?? context.payer;
+  const nftOwnerAccount = input.nftOwner;
   const nftMintAccount = input.nftMint;
   const nftMintAuthorityAccount = input.nftMintAuthority;
   const nftMetadataAccount =
@@ -159,6 +163,8 @@ export function mintV2FromCandyMachine(
   const recentSlothashesAccount =
     input.recentSlothashes ??
     publicKey('SysvarS1otHashes111111111111111111111111111');
+  const authorizationRulesProgramAccount = input.authorizationRulesProgram;
+  const authorizationRulesAccount = input.authorizationRules;
 
   // Candy Machine.
   keys.push({
@@ -188,6 +194,13 @@ export function mintV2FromCandyMachine(
     pubkey: payerAccount.publicKey,
     isSigner: true,
     isWritable: isWritable(payerAccount, true),
+  });
+
+  // Nft Owner.
+  keys.push({
+    pubkey: nftOwnerAccount,
+    isSigner: false,
+    isWritable: isWritable(nftOwnerAccount, false),
   });
 
   // Nft Mint.
@@ -317,6 +330,24 @@ export function mintV2FromCandyMachine(
     isSigner: false,
     isWritable: isWritable(recentSlothashesAccount, false),
   });
+
+  // Authorization Rules Program (optional).
+  if (authorizationRulesProgramAccount) {
+    keys.push({
+      pubkey: authorizationRulesProgramAccount,
+      isSigner: false,
+      isWritable: isWritable(authorizationRulesProgramAccount, false),
+    });
+  }
+
+  // Authorization Rules (optional).
+  if (authorizationRulesAccount) {
+    keys.push({
+      pubkey: authorizationRulesAccount,
+      isSigner: false,
+      isWritable: isWritable(authorizationRulesAccount, false),
+    });
+  }
 
   // Data.
   const data = getMintV2FromCandyMachineInstructionDataSerializer(

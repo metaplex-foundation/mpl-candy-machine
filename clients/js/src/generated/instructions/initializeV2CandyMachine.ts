@@ -49,6 +49,7 @@ export type InitializeV2CandyMachineInstructionAccounts = {
   authorityPda?: PublicKey;
   authority?: PublicKey;
   payer?: Signer;
+  ruleSet?: PublicKey;
   collectionMetadata?: PublicKey;
   collectionMint: PublicKey;
   collectionMasterEdition?: PublicKey;
@@ -176,6 +177,7 @@ export function initializeV2CandyMachine(
     });
   const authorityAccount = input.authority ?? context.identity.publicKey;
   const payerAccount = input.payer ?? context.payer;
+  const ruleSetAccount = input.ruleSet;
   const collectionMintAccount = input.collectionMint;
   const collectionMetadataAccount =
     input.collectionMetadata ??
@@ -246,6 +248,15 @@ export function initializeV2CandyMachine(
     isSigner: true,
     isWritable: isWritable(payerAccount, false),
   });
+
+  // Rule Set (optional).
+  if (ruleSetAccount) {
+    keys.push({
+      pubkey: ruleSetAccount,
+      isSigner: false,
+      isWritable: isWritable(ruleSetAccount, false),
+    });
+  }
 
   // Collection Metadata.
   keys.push({

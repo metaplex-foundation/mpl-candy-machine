@@ -1,5 +1,5 @@
 {
-  "version": "0.1.4",
+  "version": "0.2.0",
   "name": "candy_machine_core",
   "instructions": [
     {
@@ -230,6 +230,16 @@
           "isSigner": true,
           "docs": [
             "Payer of the transaction."
+          ]
+        },
+        {
+          "name": "ruleSet",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Authorization rule set to be used by minted NFTs.",
+            ""
           ]
         },
         {
@@ -586,6 +596,15 @@
           ]
         },
         {
+          "name": "nftOwner",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "NFT account owner.",
+            ""
+          ]
+        },
+        {
           "name": "nftMint",
           "isMut": true,
           "isSigner": false,
@@ -735,6 +754,26 @@
           "isSigner": false,
           "docs": [
             "SlotHashes sysvar cluster data.",
+            ""
+          ]
+        },
+        {
+          "name": "authorizationRulesProgram",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Token Authorization Rules program.",
+            ""
+          ]
+        },
+        {
+          "name": "authorizationRules",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Token Authorization rules account for the collection metadata (if any).",
             ""
           ]
         }
@@ -1206,6 +1245,16 @@
           "isSigner": true,
           "docs": [
             "Payer of the transaction."
+          ]
+        },
+        {
+          "name": "ruleSet",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Authorization rule set to be used by minted NFTs.",
+            ""
           ]
         },
         {

@@ -33,6 +33,7 @@ export type SetTokenStandardInstructionAccounts = {
   authority?: Signer;
   authorityPda?: PublicKey;
   payer?: Signer;
+  ruleSet?: PublicKey;
   collectionDelegateRecord?: PublicKey;
   collectionMint: PublicKey;
   collectionMetadata?: PublicKey;
@@ -112,6 +113,7 @@ export function setTokenStandard(
       candyMachine: publicKey(candyMachineAccount),
     });
   const payerAccount = input.payer ?? context.payer;
+  const ruleSetAccount = input.ruleSet;
   const collectionMintAccount = input.collectionMint;
   const collectionUpdateAuthorityAccount = input.collectionUpdateAuthority;
   const collectionDelegateRecordAccount =
@@ -175,6 +177,15 @@ export function setTokenStandard(
     isSigner: true,
     isWritable: isWritable(payerAccount, false),
   });
+
+  // Rule Set (optional).
+  if (ruleSetAccount) {
+    keys.push({
+      pubkey: ruleSetAccount,
+      isSigner: false,
+      isWritable: isWritable(ruleSetAccount, false),
+    });
+  }
 
   // Collection Delegate Record.
   keys.push({

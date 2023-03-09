@@ -31,6 +31,7 @@ export type MintV2InstructionAccounts = {
   candyMachine: PublicKey;
   candyMachineAuthorityPda?: PublicKey;
   payer?: Signer;
+  minter: Signer;
   nftMint: PublicKey;
   nftMintAuthority: Signer;
   nftMetadata?: PublicKey;
@@ -48,6 +49,8 @@ export type MintV2InstructionAccounts = {
   systemProgram?: PublicKey;
   sysvarInstructions?: PublicKey;
   recentSlothashes?: PublicKey;
+  authorizationRulesProgram?: PublicKey;
+  authorizationRules?: PublicKey;
 };
 
 // Arguments.
@@ -117,6 +120,7 @@ export function mintV2(
       candyMachine: publicKey(candyMachineAccount),
     });
   const payerAccount = input.payer ?? context.payer;
+  const minterAccount = input.minter;
   const nftMintAccount = input.nftMint;
   const nftMintAuthorityAccount = input.nftMintAuthority;
   const nftMetadataAccount =
@@ -164,6 +168,8 @@ export function mintV2(
   const recentSlothashesAccount =
     input.recentSlothashes ??
     publicKey('SysvarS1otHashes111111111111111111111111111');
+  const authorizationRulesProgramAccount = input.authorizationRulesProgram;
+  const authorizationRulesAccount = input.authorizationRules;
 
   // Candy Guard.
   keys.push({
@@ -199,6 +205,14 @@ export function mintV2(
     pubkey: payerAccount.publicKey,
     isSigner: true,
     isWritable: isWritable(payerAccount, true),
+  });
+
+  // Minter.
+  signers.push(minterAccount);
+  keys.push({
+    pubkey: minterAccount.publicKey,
+    isSigner: true,
+    isWritable: isWritable(minterAccount, false),
   });
 
   // Nft Mint.
@@ -326,6 +340,24 @@ export function mintV2(
     isSigner: false,
     isWritable: isWritable(recentSlothashesAccount, false),
   });
+
+  // Authorization Rules Program (optional).
+  if (authorizationRulesProgramAccount) {
+    keys.push({
+      pubkey: authorizationRulesProgramAccount,
+      isSigner: false,
+      isWritable: isWritable(authorizationRulesProgramAccount, false),
+    });
+  }
+
+  // Authorization Rules (optional).
+  if (authorizationRulesAccount) {
+    keys.push({
+      pubkey: authorizationRulesAccount,
+      isSigner: false,
+      isWritable: isWritable(authorizationRulesAccount, false),
+    });
+  }
 
   // Data.
   const data = getMintV2InstructionDataSerializer(context).serialize(input);

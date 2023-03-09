@@ -12,13 +12,13 @@ import {
 } from '@metaplex-foundation/umi';
 import test from 'ava';
 import { CandyMachine, fetchCandyMachine, mintFromCandyMachine } from '../src';
-import { createCollectionNft, createUmi, createCandyMachine } from './_setup';
+import { createCollectionNft, createUmi, createV1 } from './_setup';
 
 test('it can mint directly from a candy machine as the mint authority', async (t) => {
   // Given a loaded candy machine.
   const umi = await createUmi();
   const collectionMint = (await createCollectionNft(umi)).publicKey;
-  const candyMachineSigner = await createCandyMachine(umi, {
+  const candyMachineSigner = await createV1(umi, {
     collectionMint,
     configLines: [
       { name: 'Degen #1', uri: 'https://example.com/degen/1' },
@@ -76,7 +76,7 @@ test('it cannot mint directly from a candy machine if we are not the mint author
   const collectionMint = await createCollectionNft(umi, {
     authority: mintAuthorityA,
   });
-  const candyMachineSigner = await createCandyMachine(umi, {
+  const candyMachineSigner = await createV1(umi, {
     authority: mintAuthorityA.publicKey,
     collectionMint: collectionMint.publicKey,
     collectionUpdateAuthority: mintAuthorityA,
@@ -114,3 +114,5 @@ test('it cannot mint directly from a candy machine if we are not the mint author
   const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
   t.like(candyMachineAccount, <CandyMachine>{ itemsRedeemed: 0n });
 });
+
+// TODO: it cannot mint from a candy machine v2.

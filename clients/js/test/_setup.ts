@@ -1,5 +1,8 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import { createNft } from '@metaplex-foundation/mpl-token-metadata';
+import {
+  createNft,
+  TokenStandard,
+} from '@metaplex-foundation/mpl-token-metadata';
 import {
   Context,
   generateSigner,
@@ -18,6 +21,7 @@ import {
   CreateCandyGuardInstructionAccounts,
   CreateCandyGuardInstructionDataArgs,
   createCandyMachine as baseCreateCandyMachine,
+  createV2CandyMachine as baseCreateV2CandyMachine,
   DefaultGuardSetArgs,
   findCandyGuardPda,
   GuardSetArgs,
@@ -49,9 +53,7 @@ export const createCollectionNft = async (
   return collectionMint;
 };
 
-export const createCandyMachine = async <
-  DA extends GuardSetArgs = DefaultGuardSetArgs
->(
+export const createV1 = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
   umi: Umi,
   input: Partial<Parameters<typeof baseCreateCandyMachine>[1]> &
     Partial<
@@ -93,9 +95,52 @@ export const createCandyMachine = async <
   return candyMachine;
 };
 
+export const createV2 = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
+  umi: Umi,
+  input: Partial<Parameters<typeof baseCreateV2CandyMachine>[1]> &
+    Partial<
+      CandyGuardDataArgs<DA extends undefined ? DefaultGuardSetArgs : DA>
+    > & { configLineIndex?: number; configLines?: ConfigLine[] } = {}
+) => {
+  const candyMachine = input.candyMachine ?? generateSigner(umi);
+  const collectionMint =
+    input.collectionMint ?? (await createCollectionNft(umi)).publicKey;
+  let builder = transactionBuilder(umi).add(
+    await baseCreateV2CandyMachine(umi, {
+      ...defaultCandyMachineData(umi),
+      ...input,
+      itemsAvailable: input.itemsAvailable ?? input.configLines?.length ?? 100,
+      candyMachine,
+      collectionMint,
+    })
+  );
+
+  if (input.configLines !== undefined) {
+    builder = builder.add(
+      addConfigLines(umi, {
+        authority: input.collectionUpdateAuthority ?? umi.identity,
+        candyMachine: candyMachine.publicKey,
+        index: input.configLineIndex ?? 0,
+        configLines: input.configLines,
+      })
+    );
+  }
+
+  if (input.guards !== undefined || input.groups !== undefined) {
+    const candyGuard = findCandyGuardPda(umi, { base: candyMachine.publicKey });
+    builder = builder
+      .add(baseCreateCandyGuard<DA>(umi, { ...input, base: candyMachine }))
+      .add(wrap(umi, { candyMachine: candyMachine.publicKey, candyGuard }));
+  }
+
+  await builder.sendAndConfirm();
+  return candyMachine;
+};
+
 export const defaultCandyMachineData = (
   context: Pick<Context, 'identity'>
 ) => ({
+  tokenStandard: TokenStandard.NonFungible,
   collectionUpdateAuthority: context.identity,
   itemsAvailable: 100,
   sellerFeeBasisPoints: percentAmount(10, 2),

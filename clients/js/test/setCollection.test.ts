@@ -5,16 +5,16 @@ import {
 } from '@metaplex-foundation/umi';
 import test from 'ava';
 import { CandyMachine, fetchCandyMachine, setCollection } from '../src';
-import { createCandyMachine, createCollectionNft, createUmi } from './_setup';
+import { createV1, createCollectionNft, createUmi } from './_setup';
 
-test('it can update the collection of a candy machine', async (t) => {
+test('it can update the collection of a candy machine v1', async (t) => {
   // Given a Candy Machine associated with Collection A.
   const umi = await createUmi();
   const collectionUpdateAuthorityA = generateSigner(umi);
   const collectionA = await createCollectionNft(umi, {
     authority: collectionUpdateAuthorityA,
   });
-  const candyMachine = await createCandyMachine(umi, {
+  const candyMachine = await createV1(umi, {
     collectionMint: collectionA.publicKey,
     collectionUpdateAuthority: collectionUpdateAuthorityA,
   });
@@ -44,3 +44,5 @@ test('it can update the collection of a candy machine', async (t) => {
     collectionMint: publicKey(collectionB.publicKey),
   });
 });
+
+// TODO: it cannot update the collection of a candy machine v2

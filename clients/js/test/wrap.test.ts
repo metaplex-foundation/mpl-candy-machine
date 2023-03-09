@@ -1,12 +1,31 @@
 import { publicKey, transactionBuilder } from '@metaplex-foundation/umi';
 import test from 'ava';
 import { CandyMachine, fetchCandyMachine, wrap } from '../src';
-import { createCandyGuard, createCandyMachine, createUmi } from './_setup';
+import { createCandyGuard, createUmi, createV1, createV2 } from './_setup';
 
-test('it can wrap a candy machine in a candy guard', async (t) => {
+test('it can wrap a candy machine in a candy guard v1', async (t) => {
   // Given an existing candy machine and candy guard.
   const umi = await createUmi();
-  const candyMachine = (await createCandyMachine(umi)).publicKey;
+  const candyMachine = (await createV1(umi)).publicKey;
+  const candyGuard = await createCandyGuard(umi);
+
+  // When we wrap the candy machine in the candy guard.
+  await transactionBuilder(umi)
+    .add(wrap(umi, { candyMachine, candyGuard }))
+    .sendAndConfirm();
+
+  // Then the mint authority of the candy machine is the candy guard.
+  const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
+  t.like(candyMachineAccount, <CandyMachine>{
+    authority: publicKey(umi.identity),
+    mintAuthority: publicKey(candyGuard),
+  });
+});
+
+test('it can wrap a candy machine in a candy guard v2', async (t) => {
+  // Given an existing candy machine and candy guard.
+  const umi = await createUmi();
+  const candyMachine = (await createV2(umi)).publicKey;
   const candyGuard = await createCandyGuard(umi);
 
   // When we wrap the candy machine in the candy guard.
@@ -25,7 +44,7 @@ test('it can wrap a candy machine in a candy guard', async (t) => {
 test('it can update the candy guard associated with a candy machine', async (t) => {
   // Given an existing candy machine and a candy guard associated with it.
   const umi = await createUmi();
-  const candyMachine = (await createCandyMachine(umi)).publicKey;
+  const candyMachine = (await createV2(umi)).publicKey;
   const candyGuardA = await createCandyGuard(umi);
   await transactionBuilder(umi)
     .add(wrap(umi, { candyMachine, candyGuard: candyGuardA }))

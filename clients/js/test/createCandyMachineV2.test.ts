@@ -1,4 +1,3 @@
-import { createAccountWithRent } from '@metaplex-foundation/mpl-essentials';
 import { TokenStandard } from '@metaplex-foundation/mpl-token-metadata';
 import {
   generateSigner,
@@ -12,44 +11,32 @@ import test from 'ava';
 import {
   AccountVersion,
   CandyMachine,
+  createCandyMachineV2,
   Creator,
   fetchCandyMachine,
-  initializeV2CandyMachine,
 } from '../src';
-import { createCollectionNft, createUmi } from './_setup';
+import {
+  createCollectionNft,
+  createUmi,
+  defaultCandyMachineData,
+} from './_setup';
 
-/**
- * Note that most of the tests for the "initializeV2CandyMachine" instructions are
- * part of the "createV2CandyMachine" tests as they are more convenient to test.
- */
-
-test('it can initialize a new candy machine account', async (t) => {
-  // Given an empty candy machine account with a big enough size.
+test('it can create a candy machine for regular NFTs', async (t) => {
+  // Given an existing collection NFT.
   const umi = await createUmi();
-  const candyMachine = generateSigner(umi);
-  await transactionBuilder(umi)
-    .add(
-      createAccountWithRent(umi, {
-        newAccount: candyMachine,
-        space: 5000,
-        programId: umi.programs.get('mplCandyMachineCore').publicKey,
-      })
-    )
-    .sendAndConfirm();
-
-  // And a collection NFT.
   const collectionMint = await createCollectionNft(umi);
 
-  // When we initialize a candy machine at this address.
+  // When we create a new candy machine for that collection.
+  const candyMachine = generateSigner(umi);
   const creator = generateSigner(umi);
   await transactionBuilder(umi)
     .add(
-      initializeV2CandyMachine(umi, {
-        candyMachine: candyMachine.publicKey,
+      await createCandyMachineV2(umi, {
+        candyMachine,
+        tokenStandard: TokenStandard.NonFungible,
         collectionMint: collectionMint.publicKey,
         collectionUpdateAuthority: umi.identity,
         itemsAvailable: 100,
-        tokenStandard: TokenStandard.NonFungible,
         sellerFeeBasisPoints: percentAmount(1.23),
         creators: [
           { address: creator.publicKey, verified: false, percentageShare: 100 },
@@ -100,5 +87,36 @@ test('it can initialize a new candy machine account', async (t) => {
       }),
       hiddenSettings: none(),
     },
+  });
+});
+
+test("it can create a candy machine that's bigger than 10Kb", async (t) => {
+  // Given an existing collection NFT.
+  const umi = await createUmi();
+  const collectionMint = await createCollectionNft(umi);
+
+  // When we create a new candy machine with a large amount of items.
+  const candyMachine = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(
+      await createCandyMachineV2(umi, {
+        ...defaultCandyMachineData(umi),
+        candyMachine,
+        itemsAvailable: 20000,
+        tokenStandard: TokenStandard.NonFungible,
+        collectionMint: collectionMint.publicKey,
+      })
+    )
+    .sendAndConfirm();
+
+  // Then we expect the candy machine account to have been created.
+  const candyMachineAccount = await fetchCandyMachine(
+    umi,
+    candyMachine.publicKey
+  );
+  t.like(candyMachineAccount, <CandyMachine>{
+    publicKey: publicKey(candyMachine),
+    itemsRedeemed: 0n,
+    data: { itemsAvailable: 20000n },
   });
 });

@@ -336,7 +336,7 @@ kinobi.update(
         candyGuard: { defaultsTo: { kind: "pda", dependency: "hooked" } },
       },
     },
-    "mplCandyMachineCore.initializeV2": { name: "initializeV2CandyMachine" },
+    "mplCandyMachineCore.initializeV2": { name: "initializeCandyMachineV2" },
     "mplCandyMachineCore.mint": { name: "mintFromCandyMachine" },
     "mplCandyMachineCore.mintV2": { name: "mintV2FromCandyMachine" },
     "mplCandyGuard.mint": {
@@ -367,7 +367,7 @@ kinobi.update(
 kinobi.update(
   new UnwrapTypeDefinedLinksVisitor([
     "initializeCandyMachine.candyMachineData",
-    "initializeV2CandyMachine.candyMachineData",
+    "initializeCandyMachineV2.candyMachineData",
   ])
 );
 kinobi.update(new FlattenInstructionArgsStructVisitor());
@@ -383,7 +383,7 @@ const defaultInitialCandyMachineData = {
 kinobi.update(
   new SetStructDefaultValuesVisitor({
     initializeCandyMachineInstructionData: defaultInitialCandyMachineData,
-    initializeV2CandyMachineInstructionData: defaultInitialCandyMachineData,
+    initializeCandyMachineV2InstructionData: defaultInitialCandyMachineData,
   })
 );
 
@@ -393,7 +393,7 @@ kinobi.update(
   new SetNumberWrappersVisitor({
     "candyMachineData.sellerFeeBasisPoints": percentAmount,
     "initializeCandyMachineInstructionData.sellerFeeBasisPoints": percentAmount,
-    "initializeV2CandyMachineInstructionData.sellerFeeBasisPoints":
+    "initializeCandyMachineV2InstructionData.sellerFeeBasisPoints":
       percentAmount,
     "startDate.date": { kind: "DateTime" },
     "endDate.date": { kind: "DateTime" },

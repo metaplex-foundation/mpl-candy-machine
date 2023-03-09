@@ -21,7 +21,7 @@ import {
   CreateCandyGuardInstructionAccounts,
   CreateCandyGuardInstructionDataArgs,
   createCandyMachine as baseCreateCandyMachine,
-  createV2CandyMachine as baseCreateV2CandyMachine,
+  createCandyMachineV2 as baseCreateCandyMachineV2,
   DefaultGuardSetArgs,
   findCandyGuardPda,
   GuardSetArgs,
@@ -97,7 +97,7 @@ export const createV1 = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
 
 export const createV2 = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
   umi: Umi,
-  input: Partial<Parameters<typeof baseCreateV2CandyMachine>[1]> &
+  input: Partial<Parameters<typeof baseCreateCandyMachineV2>[1]> &
     Partial<
       CandyGuardDataArgs<DA extends undefined ? DefaultGuardSetArgs : DA>
     > & { configLineIndex?: number; configLines?: ConfigLine[] } = {}
@@ -106,7 +106,7 @@ export const createV2 = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
   const collectionMint =
     input.collectionMint ?? (await createCollectionNft(umi)).publicKey;
   let builder = transactionBuilder(umi).add(
-    await baseCreateV2CandyMachine(umi, {
+    await baseCreateCandyMachineV2(umi, {
       ...defaultCandyMachineData(umi),
       ...input,
       itemsAvailable: input.itemsAvailable ?? input.configLines?.length ?? 100,

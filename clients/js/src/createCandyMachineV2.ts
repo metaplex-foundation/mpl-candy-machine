@@ -5,20 +5,20 @@ import {
   Signer,
   WrappedInstruction,
 } from '@metaplex-foundation/umi';
-import { initializeV2CandyMachine } from './generated';
+import { initializeCandyMachineV2 } from './generated';
 import { getCandyMachineSize } from './hooked';
 
-export type CreateV2CandyMachineInput = Omit<
-  Parameters<typeof initializeV2CandyMachine>[1],
+export type CreateCandyMachineV2Input = Omit<
+  Parameters<typeof initializeCandyMachineV2>[1],
   'candyMachine'
 > & {
   candyMachine: Signer;
 };
 
-export const createV2CandyMachine = async (
-  context: Parameters<typeof initializeV2CandyMachine>[0] &
+export const createCandyMachineV2 = async (
+  context: Parameters<typeof initializeCandyMachineV2>[0] &
     Pick<Context, 'rpc'>,
-  input: CreateV2CandyMachineInput
+  input: CreateCandyMachineV2Input
 ): Promise<WrappedInstruction[]> => {
   const space = getCandyMachineSize(
     input.itemsAvailable,
@@ -32,7 +32,7 @@ export const createV2CandyMachine = async (
       space,
       programId: context.programs.get('mplCandyMachineCore').publicKey,
     }),
-    initializeV2CandyMachine(context, {
+    initializeCandyMachineV2(context, {
       ...input,
       candyMachine: input.candyMachine.publicKey,
     }),

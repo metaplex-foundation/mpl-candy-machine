@@ -10,7 +10,7 @@ export * from './addConfigLines';
 export * from './deleteCandyGuard';
 export * from './deleteCandyMachine';
 export * from './initializeCandyMachine';
-export * from './initializeV2CandyMachine';
+export * from './initializeCandyMachineV2';
 export * from './mint';
 export * from './mintFromCandyMachine';
 export * from './mintV2';

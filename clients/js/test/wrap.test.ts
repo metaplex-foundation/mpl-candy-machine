@@ -3,7 +3,7 @@ import test from 'ava';
 import { CandyMachine, fetchCandyMachine, wrap } from '../src';
 import { createCandyGuard, createUmi, createV1, createV2 } from './_setup';
 
-test('it can wrap a candy machine in a candy guard v1', async (t) => {
+test('it can wrap a candy machine v1 in a candy guard', async (t) => {
   // Given an existing candy machine and candy guard.
   const umi = await createUmi();
   const candyMachine = (await createV1(umi)).publicKey;
@@ -22,7 +22,7 @@ test('it can wrap a candy machine in a candy guard v1', async (t) => {
   });
 });
 
-test('it can wrap a candy machine in a candy guard v2', async (t) => {
+test('it can wrap a candy machine v2 in a candy guard', async (t) => {
   // Given an existing candy machine and candy guard.
   const umi = await createUmi();
   const candyMachine = (await createV2(umi)).publicKey;

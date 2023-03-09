@@ -346,13 +346,17 @@ kinobi.update(
       },
     },
     "mplCandyMachineCore.initializeV2": { name: "initializeCandyMachineV2" },
-    "mplCandyMachineCore.mint": { name: "mintFromCandyMachine" },
+    "mplCandyMachineCore.mint": {
+      name: "mintFromCandyMachine",
+      accounts: {
+        nftMintAuthority: { defaultsTo: { kind: "identity" } },
+      },
+    },
     "mplCandyMachineCore.mintV2": {
       name: "mintFromCandyMachineV2",
       accounts: {
-        nftMint: {
-          isOptionalSigner: true,
-        },
+        nftMint: { isOptionalSigner: true },
+        nftMintAuthority: { defaultsTo: { kind: "identity" } },
         token: {
           defaultsTo: defaultsToAssociatedTokenPda("nftMint", "nftOwner"),
         },

@@ -41,14 +41,13 @@ test('it can mint directly from a candy machine as the mint authority', async (t
   const mint = generateSigner(umi);
   const owner = generateSigner(umi).publicKey;
   await transactionBuilder(umi)
-    .add(setComputeUnitLimit(umi, { units: 600000 }))
+    .add(setComputeUnitLimit(umi, { units: 400000 }))
     .add(
       mintFromCandyMachineV2(umi, {
         candyMachine,
         mintAuthority: umi.identity,
         nftOwner: owner,
         nftMint: mint,
-        nftMintAuthority: umi.identity,
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
       })
@@ -105,7 +104,6 @@ test('it can mint whilst creating the mint and token accounts beforehand', async
         mintAuthority: umi.identity,
         nftOwner: owner,
         nftMint: mint.publicKey,
-        nftMintAuthority: umi.identity,
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
       })
@@ -161,7 +159,6 @@ test('it can mint whilst creating only the mint account beforehand', async (t) =
         mintAuthority: umi.identity,
         nftOwner: owner,
         nftMint: mint.publicKey,
-        nftMintAuthority: umi.identity,
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
       })
@@ -218,11 +215,11 @@ test.skip('it cannot mint directly from a candy machine if we are not the mint a
   const promise = transactionBuilder(umi)
     .add(createMintWithSingleToken(umi, { mint, owner }))
     .add(
-      mintFromCandyMachine(umi, {
+      mintFromCandyMachineV2(umi, {
         candyMachine,
         mintAuthority: mintAuthorityB,
         nftMint: mint.publicKey,
-        nftMintAuthority: umi.identity,
+        nftOwner: owner,
         collectionMint: collectionMint.publicKey,
         collectionUpdateAuthority: umi.identity.publicKey,
       })
@@ -262,7 +259,6 @@ test.skip('it can mint from a candy machine v1', async (t) => {
         candyMachine,
         mintAuthority: umi.identity,
         nftMint: mint.publicKey,
-        nftMintAuthority: umi.identity,
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
       })

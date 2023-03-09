@@ -23,6 +23,8 @@ const {
   vEnum,
   UseCustomAccountSerializerVisitor,
   UpdateDefinedTypesVisitor,
+  TypeOptionNode,
+  TypeStringNode,
 } = require("@metaplex-foundation/kinobi");
 
 // Paths.
@@ -183,6 +185,19 @@ kinobi.update(
         return new TypeStructFieldNode(
           node.metadata,
           new TypeBytesNode({ size: { kind: "fixed", bytes: 32 } })
+        );
+      },
+    },
+    {
+      selector: { type: "TypeStructFieldNode", name: "label" },
+      transformer: (node) => {
+        return new TypeStructFieldNode(
+          node.metadata,
+          new TypeOptionNode(
+            new TypeStringNode({
+              size: { kind: "fixed", bytes: 6 },
+            })
+          )
         );
       },
     },

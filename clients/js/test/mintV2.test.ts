@@ -233,7 +233,7 @@ test('it can mint from a candy guard with guards', async (t) => {
   t.like(candyMachineAccount, <CandyMachine>{ itemsRedeemed: 1n });
 });
 
-test.only('it can mint from a candy guard with groups', async (t) => {
+test('it can mint from a candy guard with groups', async (t) => {
   // Given a candy machine with guard groups.
   const umi = await createUmi();
   const collectionMint = (await createCollectionNft(umi)).publicKey;

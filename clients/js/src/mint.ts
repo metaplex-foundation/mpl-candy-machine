@@ -12,41 +12,43 @@ import {
 import {
   CandyGuardProgram,
   GuardRepository,
-  GuardSetArgs,
   GuardSetMintArgs,
   MintContext,
   parseGuardRemainingAccounts,
   parseMintArgs,
 } from './guards';
+import { findCandyGuardPda } from './hooked';
 
 export { MintInstructionAccounts };
 
 export type MintInstructionData<MA extends GuardSetMintArgs> = {
   discriminator: Array<number>;
   mintArgs: MA;
-  label: Option<string>;
+  group: Option<string>;
 };
 
 export type MintInstructionDataArgs<MA extends GuardSetMintArgs> = {
   mintArgs?: Partial<MA>;
-  label?: Option<string>;
+  group?: Option<string>;
 };
 
-export function mint<MA extends GuardSetArgs = DefaultGuardSetMintArgs>(
+export function mint<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
   context: Parameters<typeof baseMint>[0] & {
     guards: GuardRepository;
   },
   input: MintInstructionAccounts &
     MintInstructionDataArgs<MA extends undefined ? DefaultGuardSetMintArgs : MA>
 ): WrappedInstruction {
-  const { mintArgs = {}, label = none(), ...rest } = input;
+  const { mintArgs = {}, group = none(), ...rest } = input;
   const program = context.programs.get<CandyGuardProgram>('mplCandyGuard');
   const mintContext: MintContext = {
     minter: input.payer ?? context.payer,
     payer: input.payer ?? context.payer,
     mint: input.nftMint,
     candyMachine: input.candyMachine,
-    candyGuard: input.candyGuard,
+    candyGuard:
+      input.candyGuard ??
+      findCandyGuardPda(context, { base: input.candyMachine }),
   };
   const { data, remainingAccounts } = parseMintArgs<
     MA extends undefined ? DefaultGuardSetMintArgs : MA
@@ -55,7 +57,7 @@ export function mint<MA extends GuardSetArgs = DefaultGuardSetMintArgs>(
   const ix = baseMint(context, {
     ...rest,
     mintArgs: mergeBytes([prefix, data]),
-    label,
+    group,
   });
 
   const [keys, signers] = parseGuardRemainingAccounts(remainingAccounts);

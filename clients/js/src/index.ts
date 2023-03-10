@@ -13,4 +13,5 @@ export * from './merkle';
 export * from './mint';
 export * from './mintV2';
 export * from './plugin';
+export * from './route';
 export * from './updateCandyGuard';

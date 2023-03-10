@@ -1,3 +1,4 @@
+import { publicKey, Signer } from '@metaplex-foundation/umi';
 import {
   AllowList,
   AllowListArgs,
@@ -66,10 +67,10 @@ export const allowListGuardManifest: GuardManifest<
       .serialize(args.merkleProof),
     remainingAccounts: [
       {
-        isWritable: false,
+        isWritable: true,
         publicKey: findAllowListProofPda(context, {
           merkleRoot: args.merkleRoot,
-          user: routeContext.payer.publicKey, // TODO: extra arg and fallback to payer.
+          user: publicKey(args.minter ?? routeContext.payer),
           candyMachine: routeContext.candyMachine,
           candyGuard: routeContext.candyGuard,
         }),
@@ -81,6 +82,9 @@ export const allowListGuardManifest: GuardManifest<
           '11111111111111111111111111111111'
         ),
       },
+      ...(args.minter !== undefined
+        ? [{ signer: args.minter, isWritable: false }]
+        : []),
     ],
   }),
 };
@@ -120,4 +124,7 @@ export type AllowListRouteArgs = AllowListArgs & {
    * `getMerkleProof` helper function to generate this.
    */
   merkleProof: Uint8Array[];
+
+  /** The minter account as a signer if it is not the payer. */
+  minter?: Signer;
 };

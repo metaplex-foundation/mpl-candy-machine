@@ -16,12 +16,14 @@ import {
   WrappedInstruction,
   checkForIsWritableOverride as isWritable,
   mapSerializer,
+  publicKey,
 } from '@metaplex-foundation/umi';
+import { findCandyGuardPda } from '../../hooked';
 import { GuardType, GuardTypeArgs, getGuardTypeSerializer } from '../types';
 
 // Accounts.
 export type RouteInstructionAccounts = {
-  candyGuard: PublicKey;
+  candyGuard?: PublicKey;
   candyMachine: PublicKey;
   payer?: Signer;
 };
@@ -33,7 +35,7 @@ export type RouteInstructionData = {
   guard: GuardType;
   /** Arguments for the guard instruction. */
   data: Uint8Array;
-  label: Option<string>;
+  group: Option<string>;
 };
 
 export type RouteInstructionDataArgs = {
@@ -41,7 +43,7 @@ export type RouteInstructionDataArgs = {
   guard: GuardTypeArgs;
   /** Arguments for the guard instruction. */
   data: Uint8Array;
-  label: Option<string>;
+  group: Option<string>;
 };
 
 export function getRouteInstructionDataSerializer(
@@ -58,7 +60,7 @@ export function getRouteInstructionDataSerializer(
         ['discriminator', s.array(s.u8(), { size: 8 })],
         ['guard', getGuardTypeSerializer(context)],
         ['data', s.bytes()],
-        ['label', s.option(s.string({ size: 6 }))],
+        ['group', s.option(s.string())],
       ],
       { description: 'RouteInstructionData' }
     ),
@@ -72,7 +74,7 @@ export function getRouteInstructionDataSerializer(
 
 // Instruction.
 export function route(
-  context: Pick<Context, 'serializer' | 'programs' | 'payer'>,
+  context: Pick<Context, 'serializer' | 'programs' | 'eddsa' | 'payer'>,
   input: RouteInstructionAccounts & RouteInstructionDataArgs
 ): WrappedInstruction {
   const signers: Signer[] = [];
@@ -85,8 +87,10 @@ export function route(
   );
 
   // Resolved accounts.
-  const candyGuardAccount = input.candyGuard;
   const candyMachineAccount = input.candyMachine;
+  const candyGuardAccount =
+    input.candyGuard ??
+    findCandyGuardPda(context, { base: publicKey(candyMachineAccount) });
   const payerAccount = input.payer ?? context.payer;
 
   // Candy Guard.

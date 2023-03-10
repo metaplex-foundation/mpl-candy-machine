@@ -188,19 +188,6 @@ kinobi.update(
         );
       },
     },
-    {
-      selector: { type: "TypeStructFieldNode", name: "label" },
-      transformer: (node) => {
-        return new TypeStructFieldNode(
-          node.metadata,
-          new TypeOptionNode(
-            new TypeStringNode({
-              size: { kind: "fixed", bytes: 6 },
-            })
-          )
-        );
-      },
-    },
   ])
 );
 
@@ -213,6 +200,12 @@ const defaultsToAssociatedTokenPda = (mint = "mint", owner = "owner") => ({
     mint: { kind: "account", name: mint },
     owner: { kind: "account", name: owner },
   },
+});
+const defaultsToCandyGuardPda = (base = "base") => ({
+  kind: "pda",
+  pdaAccount: "candyGuard",
+  dependency: "hooked",
+  seeds: { base: { kind: "account", name: base } },
 });
 const defaultsToCandyMachineAuthorityPda = (candyMachine = "candyMachine") => ({
   kind: "pda",
@@ -393,7 +386,10 @@ kinobi.update(
     },
     "mplCandyGuard.mint": {
       internal: true,
+      args: { label: "group" },
       accounts: {
+        candyGuard: { defaultsTo: defaultsToCandyGuardPda("candyMachine") },
+        nftMintAuthority: { defaultsTo: { kind: "identity" } },
         collectionAuthorityRecord: {
           defaultsTo: defaultsToCollectionAuthorityRecordPda(
             "collectionMint",
@@ -404,9 +400,11 @@ kinobi.update(
     },
     "mplCandyGuard.mintV2": {
       internal: true,
+      args: { label: "group" },
       accounts: {
+        candyGuard: { defaultsTo: defaultsToCandyGuardPda("candyMachine") },
         nftMint: { isOptionalSigner: true },
-        nftMintAuthority: { defaultsTo: { kind: "account", name: "minter" } },
+        nftMintAuthority: { defaultsTo: { kind: "identity" } },
         minter: { defaultsTo: { kind: "identity" } },
         token: {
           defaultsTo: defaultsToAssociatedTokenPda("nftMint", "minter"),
@@ -422,7 +420,13 @@ kinobi.update(
         splAtaProgram: { defaultsTo: defaultsToSplAssociatedTokenProgram() },
       },
     },
-    "mplCandyGuard.route": { internal: true },
+    "mplCandyGuard.route": {
+      internal: true,
+      args: { label: "group" },
+      accounts: {
+        candyGuard: { defaultsTo: defaultsToCandyGuardPda("candyMachine") },
+      },
+    },
     "mplCandyMachineCore.SetAuthority": { name: "SetCandyMachineAuthority" },
     "mplCandyGuard.SetAuthority": { name: "SetCandyGuardAuthority" },
     "mplCandyMachineCore.update": { name: "updateCandyMachine" },

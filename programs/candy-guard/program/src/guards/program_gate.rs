@@ -15,6 +15,7 @@ pub static DEFAULT_PROGRAMS: &[Pubkey] = &[
     spl_token::ID,
     spl_associated_token_account::ID,
     pubkey!("ComputeBudget111111111111111111111111111111"),
+    pubkey!("SysExL2WDyJi9aRZrXorrjHJut3JwHQ7R9bTyctbNNG"),
 ];
 
 // Maximum number of programs in the additional list.

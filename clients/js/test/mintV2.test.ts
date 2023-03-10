@@ -1,4 +1,7 @@
-import { createMintWithSingleToken } from '@metaplex-foundation/mpl-essentials';
+import {
+  createMintWithSingleToken,
+  setComputeUnitLimit,
+} from '@metaplex-foundation/mpl-essentials';
 import {
   generateSigner,
   isEqualToAmount,
@@ -21,7 +24,7 @@ import {
   createV2,
 } from './_setup';
 
-test.only('it can mint from a candy guard with no guards', async (t) => {
+test('it can mint from a candy guard with no guards', async (t) => {
   // Given a candy machine with a candy guard that has no guards.
   const umi = await createUmi();
   const collectionMint = (await createCollectionNft(umi)).publicKey;
@@ -38,6 +41,7 @@ test.only('it can mint from a candy guard with no guards', async (t) => {
   const mint = generateSigner(umi);
   const minter = generateSigner(umi);
   await transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 400_000 }))
     .add(
       mintV2(umi, {
         candyMachine,

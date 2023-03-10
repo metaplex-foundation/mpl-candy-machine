@@ -423,6 +423,9 @@ kinobi.update(
     "mplCandyGuard.route": {
       internal: true,
       args: { label: "group" },
+      accounts: {
+        candyGuard: { defaultsTo: defaultsToCandyGuardPda("candyMachine") },
+      },
     },
     "mplCandyMachineCore.SetAuthority": { name: "SetCandyMachineAuthority" },
     "mplCandyGuard.SetAuthority": { name: "SetCandyGuardAuthority" },

@@ -12,10 +12,12 @@ import {
   Signer,
   some,
 } from '@metaplex-foundation/umi';
+import { UnregisteredCandyGuardError } from '../errors';
 import {
   GuardInstructionExtras,
   GuardRemainingAccount,
   MintContext,
+  RouteContext,
 } from './guardManifest';
 import { CandyGuardProgram, GuardRepository } from './guardRepository';
 
@@ -107,6 +109,28 @@ export function parseMintArgs<MA extends GuardSetMintArgs>(
     },
     { data: new Uint8Array(), remainingAccounts: [] } as GuardInstructionExtras
   );
+}
+
+export function parseRouteArgs<
+  G extends keyof RA & string,
+  RA extends GuardSetRouteArgs
+>(
+  context: Pick<Context, 'serializer' | 'eddsa' | 'programs'> & {
+    guards: GuardRepository;
+  },
+  program: CandyGuardProgram,
+  routeContext: RouteContext,
+  guard: G,
+  routeArgs: RA[G]
+): GuardInstructionExtras & { guardIndex: number } {
+  const manifests = context.guards.forProgram(program);
+  const guardIndex = manifests.findIndex((m) => m.name === guard);
+  if (guardIndex < 0) {
+    throw new UnregisteredCandyGuardError(guard);
+  }
+  const manifest = manifests[guardIndex];
+  const extras = manifest.routeParser(context, routeContext, routeArgs);
+  return { ...extras, guardIndex };
 }
 
 export function parseGuardRemainingAccounts(

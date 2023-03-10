@@ -13,7 +13,6 @@ import {
 import {
   CandyGuardProgram,
   GuardRepository,
-  GuardSetArgs,
   GuardSetMintArgs,
   MintContext,
   parseGuardRemainingAccounts,
@@ -34,7 +33,7 @@ export type MintV2InstructionDataArgs<MA extends GuardSetMintArgs> = {
   group?: Option<string>;
 };
 
-export function mintV2<MA extends GuardSetArgs = DefaultGuardSetMintArgs>(
+export function mintV2<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
   context: Parameters<typeof baseMintV2>[0] & {
     guards: GuardRepository;
   },

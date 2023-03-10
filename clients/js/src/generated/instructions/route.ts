@@ -16,12 +16,14 @@ import {
   WrappedInstruction,
   checkForIsWritableOverride as isWritable,
   mapSerializer,
+  publicKey,
 } from '@metaplex-foundation/umi';
+import { findCandyGuardPda } from '../../hooked';
 import { GuardType, GuardTypeArgs, getGuardTypeSerializer } from '../types';
 
 // Accounts.
 export type RouteInstructionAccounts = {
-  candyGuard: PublicKey;
+  candyGuard?: PublicKey;
   candyMachine: PublicKey;
   payer?: Signer;
 };
@@ -72,7 +74,7 @@ export function getRouteInstructionDataSerializer(
 
 // Instruction.
 export function route(
-  context: Pick<Context, 'serializer' | 'programs' | 'payer'>,
+  context: Pick<Context, 'serializer' | 'programs' | 'eddsa' | 'payer'>,
   input: RouteInstructionAccounts & RouteInstructionDataArgs
 ): WrappedInstruction {
   const signers: Signer[] = [];
@@ -85,8 +87,10 @@ export function route(
   );
 
   // Resolved accounts.
-  const candyGuardAccount = input.candyGuard;
   const candyMachineAccount = input.candyMachine;
+  const candyGuardAccount =
+    input.candyGuard ??
+    findCandyGuardPda(context, { base: publicKey(candyMachineAccount) });
   const payerAccount = input.payer ?? context.payer;
 
   // Candy Guard.

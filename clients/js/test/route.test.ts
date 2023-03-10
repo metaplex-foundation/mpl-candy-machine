@@ -1,6 +1,8 @@
 import {
   base58PublicKey,
   generateSigner,
+  none,
+  sol,
   some,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
@@ -116,5 +118,48 @@ test('it can call the route instruction of a specific guard on a group', async (
   t.false(await umi.rpc.accountExists(allowListProofPdaB));
 });
 
-// Tests from JS SDK
-// Test using CM v1
+test('it cannot call the route instruction of a guard that does not support it', async (t) => {
+  // Given a candy machine with an bot tax guard which does not support the route instruction.
+  const umi = await createUmi();
+  const { publicKey: candyMachine } = await createV2(umi, {
+    guards: { botTax: some({ lamports: sol(0.01), lastInstruction: true }) },
+  });
+
+  // When we try to call the route instruction of the bot tax guard.
+  const promise = transactionBuilder(umi)
+    .add(route(umi, { candyMachine, guard: 'botTax', routeArgs: {} }))
+    .sendAndConfirm();
+
+  // Then we expect a program error.
+  await t.throwsAsync(promise, { message: /InstructionNotFound/ });
+});
+
+test('it must provide a group label if the candy guard has groups', async (t) => {
+  // Given a candy machine with an allow list guard in a group.
+  const umi = await createUmi();
+  const allowedWallets = [base58PublicKey(umi.identity)];
+  const merkleRoot = getMerkleRoot(allowedWallets);
+  const { publicKey: candyMachine } = await createV2(umi, {
+    groups: [{ label: 'GROUP1', guards: { allowList: some({ merkleRoot }) } }],
+  });
+
+  // When we try to call the route instruction without a group label.
+  const merkleProof = getMerkleProof(allowedWallets, allowedWallets[0]);
+  const promise = transactionBuilder(umi)
+    .add(
+      route(umi, {
+        candyMachine,
+        guard: 'allowList',
+        group: none(),
+        routeArgs: { path: 'proof', merkleRoot, merkleProof },
+      })
+    )
+    .sendAndConfirm();
+
+  // Then we expect a program error.
+  await t.throwsAsync(promise, { message: /RequiredGroupLabelNotFound/ });
+});
+
+// it must not provide a group label if the candy guard does not have groups
+
+// it can call the route instruction for guards associated with a candy machine v1

@@ -33,7 +33,7 @@ export type RouteInstructionData = {
   guard: GuardType;
   /** Arguments for the guard instruction. */
   data: Uint8Array;
-  label: Option<string>;
+  group: Option<string>;
 };
 
 export type RouteInstructionDataArgs = {
@@ -41,7 +41,7 @@ export type RouteInstructionDataArgs = {
   guard: GuardTypeArgs;
   /** Arguments for the guard instruction. */
   data: Uint8Array;
-  label: Option<string>;
+  group: Option<string>;
 };
 
 export function getRouteInstructionDataSerializer(
@@ -58,7 +58,7 @@ export function getRouteInstructionDataSerializer(
         ['discriminator', s.array(s.u8(), { size: 8 })],
         ['guard', getGuardTypeSerializer(context)],
         ['data', s.bytes()],
-        ['label', s.option(s.string())],
+        ['group', s.option(s.string())],
       ],
       { description: 'RouteInstructionData' }
     ),

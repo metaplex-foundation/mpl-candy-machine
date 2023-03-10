@@ -386,6 +386,7 @@ kinobi.update(
     },
     "mplCandyGuard.mint": {
       internal: true,
+      args: { label: "group" },
       accounts: {
         candyGuard: { defaultsTo: defaultsToCandyGuardPda("candyMachine") },
         nftMintAuthority: { defaultsTo: { kind: "identity" } },
@@ -399,6 +400,7 @@ kinobi.update(
     },
     "mplCandyGuard.mintV2": {
       internal: true,
+      args: { label: "group" },
       accounts: {
         candyGuard: { defaultsTo: defaultsToCandyGuardPda("candyMachine") },
         nftMint: { isOptionalSigner: true },
@@ -418,7 +420,10 @@ kinobi.update(
         splAtaProgram: { defaultsTo: defaultsToSplAssociatedTokenProgram() },
       },
     },
-    "mplCandyGuard.route": { internal: true },
+    "mplCandyGuard.route": {
+      internal: true,
+      args: { label: "group" },
+    },
     "mplCandyMachineCore.SetAuthority": { name: "SetCandyMachineAuthority" },
     "mplCandyGuard.SetAuthority": { name: "SetCandyGuardAuthority" },
     "mplCandyMachineCore.update": { name: "updateCandyMachine" },

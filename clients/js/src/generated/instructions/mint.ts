@@ -52,12 +52,12 @@ export type MintInstructionAccounts = {
 export type MintInstructionData = {
   discriminator: Array<number>;
   mintArgs: Uint8Array;
-  label: Option<string>;
+  group: Option<string>;
 };
 
 export type MintInstructionDataArgs = {
   mintArgs: Uint8Array;
-  label: Option<string>;
+  group: Option<string>;
 };
 
 export function getMintInstructionDataSerializer(
@@ -73,7 +73,7 @@ export function getMintInstructionDataSerializer(
       [
         ['discriminator', s.array(s.u8(), { size: 8 })],
         ['mintArgs', s.bytes()],
-        ['label', s.option(s.string())],
+        ['group', s.option(s.string())],
       ],
       { description: 'MintInstructionData' }
     ),

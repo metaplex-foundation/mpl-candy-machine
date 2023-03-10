@@ -265,7 +265,7 @@ test.only('it can mint from a candy guard with groups', async (t) => {
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
         mintArgs: { solPayment: some({ destination }) },
-        label: some('GROUP1'),
+        group: some('GROUP1'),
       })
     )
     .sendAndConfirm();

@@ -25,12 +25,12 @@ export { MintInstructionAccounts };
 export type MintInstructionData<MA extends GuardSetMintArgs> = {
   discriminator: Array<number>;
   mintArgs: MA;
-  label: Option<string>;
+  group: Option<string>;
 };
 
 export type MintInstructionDataArgs<MA extends GuardSetMintArgs> = {
   mintArgs?: Partial<MA>;
-  label?: Option<string>;
+  group?: Option<string>;
 };
 
 export function mint<MA extends GuardSetArgs = DefaultGuardSetMintArgs>(
@@ -40,7 +40,7 @@ export function mint<MA extends GuardSetArgs = DefaultGuardSetMintArgs>(
   input: MintInstructionAccounts &
     MintInstructionDataArgs<MA extends undefined ? DefaultGuardSetMintArgs : MA>
 ): WrappedInstruction {
-  const { mintArgs = {}, label = none(), ...rest } = input;
+  const { mintArgs = {}, group = none(), ...rest } = input;
   const program = context.programs.get<CandyGuardProgram>('mplCandyGuard');
   const mintContext: MintContext = {
     minter: input.payer ?? context.payer,
@@ -58,7 +58,7 @@ export function mint<MA extends GuardSetArgs = DefaultGuardSetMintArgs>(
   const ix = baseMint(context, {
     ...rest,
     mintArgs: mergeBytes([prefix, data]),
-    label,
+    group,
   });
 
   const [keys, signers] = parseGuardRemainingAccounts(remainingAccounts);

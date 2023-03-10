@@ -30,7 +30,7 @@ test('it can call the route instruction of a specific guard', async (t) => {
       route(umi, {
         candyMachine,
         guard: 'allowList',
-        routeArgs: { path: 'proof', merkleRoot, merkleProof },
+        routeArgs: { path: 'proof', merkleRoot, merkleProof, minter },
       })
     )
     .sendAndConfirm();

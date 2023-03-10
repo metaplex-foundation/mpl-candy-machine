@@ -8,7 +8,9 @@ import {
 } from '@metaplex-foundation/mpl-token-metadata';
 import {
   Context,
+  DateTime,
   generateSigner,
+  now,
   percentAmount,
   publicKey,
   PublicKey,
@@ -235,3 +237,6 @@ export const assertSuccessfulMint = async (
   if (typeof uri === 'string') t.is(nft.metadata.uri, uri);
   else if (uri !== undefined) t.regex(nft.metadata.uri, uri);
 };
+
+export const yesterday = (): DateTime => now() - 3600n * 24n;
+export const tomorrow = (): DateTime => now() + 3600n * 24n;

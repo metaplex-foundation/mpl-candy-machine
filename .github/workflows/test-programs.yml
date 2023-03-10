@@ -20,7 +20,7 @@ on:
         type: string
       solana:
         description: Solana version
-        default: 1.13.6
+        default: 1.14.13
         required: true
         type: string
 
@@ -56,6 +56,10 @@ jobs:
           folder: ./programs/${{ matrix.program }}
           key: program-${{ matrix.program }}
 
+      - name: Run tests
+        working-directory: ./programs/${{ matrix.program }}
+        run: cargo test-bpf
+
       - name: Run cargo fmt
         uses: actions-rs/cargo@v1
         with:
@@ -67,7 +71,3 @@ jobs:
         with:
           command: clippy
           args: --all-targets --all-features --no-deps --manifest-path ./programs/${{ matrix.program }}/Cargo.toml
-
-      - name: Run tests
-        working-directory: ./programs/${{ matrix.program }}
-        run: cargo test-bpf

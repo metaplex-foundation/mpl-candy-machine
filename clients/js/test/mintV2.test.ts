@@ -531,5 +531,89 @@ test('it can mint from a candy machine using hidden settings', async (t) => {
   });
 });
 
-// it can mint from a candy machine sequentially
-// it can mint from a candy machine in a random order
+test('it can mint from a candy machine sequentially', async (t) => {
+  // Given a candy machine with sequential config line settings.
+  const umi = await createUmi();
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [
+      { name: 'Degen #1', uri: 'https://example.com/degen/1' },
+      { name: 'Degen #2', uri: 'https://example.com/degen/2' },
+      { name: 'Degen #3', uri: 'https://example.com/degen/3' },
+    ],
+    configLineSettings: some({
+      prefixName: '',
+      nameLength: 32,
+      prefixUri: '',
+      uriLength: 200,
+      isSequential: true,
+    }),
+    guards: {},
+  });
+
+  // When we mint from it.
+  const mint = generateSigner(umi);
+  const minter = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        minter,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+      })
+    )
+    .sendAndConfirm();
+
+  // Then the mint was successful and we got the first item.
+  await assertSuccessfulMint(t, umi, {
+    mint,
+    owner: minter,
+    name: 'Degen #1',
+    uri: 'https://example.com/degen/1',
+  });
+});
+
+test('it can mint from a candy machine in a random order', async (t) => {
+  // Given a candy machine with non-sequential config line settings.
+  const umi = await createUmi();
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [
+      { name: 'Degen #1', uri: 'https://example.com/degen/1' },
+      { name: 'Degen #2', uri: 'https://example.com/degen/2' },
+      { name: 'Degen #3', uri: 'https://example.com/degen/3' },
+    ],
+    configLineSettings: some({
+      prefixName: '',
+      nameLength: 32,
+      prefixUri: '',
+      uriLength: 200,
+      isSequential: false,
+    }),
+    guards: {},
+  });
+
+  // When we mint from it.
+  const mint = generateSigner(umi);
+  const minter = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        minter,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+      })
+    )
+    .sendAndConfirm();
+
+  // Then the mint was successful and we got any item.
+  await assertSuccessfulMint(t, umi, { mint, owner: minter });
+});

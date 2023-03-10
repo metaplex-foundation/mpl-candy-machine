@@ -67,7 +67,7 @@ export const allowListGuardManifest: GuardManifest<
       .serialize(args.merkleProof),
     remainingAccounts: [
       {
-        isWritable: false,
+        isWritable: true,
         publicKey: findAllowListProofPda(context, {
           merkleRoot: args.merkleRoot,
           user: publicKey(args.minter ?? routeContext.payer),

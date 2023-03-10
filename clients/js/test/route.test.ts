@@ -5,7 +5,13 @@ import {
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import test from 'ava';
-import { getMerkleProof, getMerkleRoot, route } from '../src';
+import {
+  findAllowListProofPda,
+  findCandyGuardPda,
+  getMerkleProof,
+  getMerkleRoot,
+  route,
+} from '../src';
 import { createUmi, createV2 } from './_setup';
 
 test('it can call the route instruction of a specific guard', async (t) => {
@@ -23,7 +29,7 @@ test('it can call the route instruction of a specific guard', async (t) => {
     guards: { allowList: some({ merkleRoot }) },
   });
 
-  // When
+  // When we call the route instruction of the allow list guard.
   const merkleProof = getMerkleProof(allowedWallets, base58PublicKey(minter));
   await transactionBuilder(umi)
     .add(
@@ -35,8 +41,14 @@ test('it can call the route instruction of a specific guard', async (t) => {
     )
     .sendAndConfirm();
 
-  // Then
-  t.pass();
+  // Then the allow list proof PDA was created.
+  const allowListProofPda = findAllowListProofPda(umi, {
+    merkleRoot,
+    user: minter.publicKey,
+    candyMachine,
+    candyGuard: findCandyGuardPda(umi, { base: candyMachine }),
+  });
+  t.true(await umi.rpc.accountExists(allowListProofPda));
 });
 
 // Tests from JS SDK

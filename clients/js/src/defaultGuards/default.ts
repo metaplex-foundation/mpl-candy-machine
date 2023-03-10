@@ -2,18 +2,38 @@ import { none, Option } from '@metaplex-foundation/umi';
 import {
   AddressGate,
   AddressGateArgs,
+  AllowList,
+  AllowListArgs,
   BotTax,
   BotTaxArgs,
   EndDate,
   EndDateArgs,
+  FreezeSolPayment,
+  FreezeSolPaymentArgs,
+  FreezeTokenPayment,
+  FreezeTokenPaymentArgs,
   Gatekeeper,
   GatekeeperArgs,
+  MintLimit,
+  MintLimitArgs,
+  NftBurn,
+  NftBurnArgs,
+  NftGate,
+  NftGateArgs,
+  NftPayment,
+  NftPaymentArgs,
+  ProgramGate,
+  ProgramGateArgs,
+  RedeemedAmount,
+  RedeemedAmountArgs,
   SolPayment,
   SolPaymentArgs,
   StartDate,
   StartDateArgs,
   ThirdPartySigner,
   ThirdPartySignerArgs,
+  TokenBurn,
+  TokenBurnArgs,
   TokenGate,
   TokenGateArgs,
   TokenPayment,
@@ -25,9 +45,23 @@ import {
   GuardSetMintArgs,
   GuardSetRouteArgs,
 } from '../guards/guardSet';
+import { AllowListMintArgs, AllowListRouteArgs } from './allowList';
+import {
+  FreezeSolPaymentMintArgs,
+  FreezeSolPaymentRouteArgs,
+} from './freezeSolPayment';
+import {
+  FreezeTokenPaymentMintArgs,
+  FreezeTokenPaymentRouteArgs,
+} from './freezeTokenPayment';
 import { GatekeeperMintArgs } from './gatekeeper';
+import { MintLimitMintArgs } from './mintLimit';
+import { NftBurnMintArgs } from './nftBurn';
+import { NftGateMintArgs } from './nftGate';
+import { NftPaymentMintArgs } from './nftPayment';
 import { SolPaymentMintArgs } from './solPayment';
 import { ThirdPartySignerMintArgs } from './thirdPartySigner';
+import { TokenBurnMintArgs } from './tokenBurn';
 import { TokenGateMintArgs } from './tokenGate';
 import { TokenPaymentMintArgs } from './tokenPayment';
 
@@ -43,17 +77,17 @@ export type DefaultGuardSetArgs = GuardSetArgs & {
   tokenGate: Option<TokenGateArgs>;
   gatekeeper: Option<GatekeeperArgs>;
   endDate: Option<EndDateArgs>;
-  // allowList: Option<AllowListGuardSettings>;
-  // mintLimit: Option<MintLimitGuardSettings>;
-  // nftPayment: Option<NftPaymentGuardSettings>;
-  // redeemedAmount: Option<RedeemedAmountGuardSettings>;
+  allowList: Option<AllowListArgs>;
+  mintLimit: Option<MintLimitArgs>;
+  nftPayment: Option<NftPaymentArgs>;
+  redeemedAmount: Option<RedeemedAmountArgs>;
   addressGate: Option<AddressGateArgs>;
-  // nftGate: Option<NftGateGuardSettings>;
-  // nftBurn: Option<NftBurnGuardSettings>;
-  // tokenBurn: Option<TokenBurnGuardSettings>;
-  // freezeSolPayment: Option<FreezeSolPaymentGuardSettings>;
-  // freezeTokenPayment: Option<FreezeTokenPaymentGuardSettings>;
-  // programGate: Option<ProgramGateGuardSettings>;
+  nftGate: Option<NftGateArgs>;
+  nftBurn: Option<NftBurnArgs>;
+  tokenBurn: Option<TokenBurnArgs>;
+  freezeSolPayment: Option<FreezeSolPaymentArgs>;
+  freezeTokenPayment: Option<FreezeTokenPaymentArgs>;
+  programGate: Option<ProgramGateArgs>;
 };
 
 /**
@@ -68,17 +102,17 @@ export type DefaultGuardSet = GuardSet & {
   tokenGate: Option<TokenGate>;
   gatekeeper: Option<Gatekeeper>;
   endDate: Option<EndDate>;
-  // allowList: Option<AllowListGuardSettings>;
-  // mintLimit: Option<MintLimitGuardSettings>;
-  // nftPayment: Option<NftPaymentGuardSettings>;
-  // redeemedAmount: Option<RedeemedAmountGuardSettings>;
+  allowList: Option<AllowList>;
+  mintLimit: Option<MintLimit>;
+  nftPayment: Option<NftPayment>;
+  redeemedAmount: Option<RedeemedAmount>;
   addressGate: Option<AddressGate>;
-  // nftGate: Option<NftGateGuardSettings>;
-  // nftBurn: Option<NftBurnGuardSettings>;
-  // tokenBurn: Option<TokenBurnGuardSettings>;
-  // freezeSolPayment: Option<FreezeSolPaymentGuardSettings>;
-  // freezeTokenPayment: Option<FreezeTokenPaymentGuardSettings>;
-  // programGate: Option<ProgramGateGuardSettings>;
+  nftGate: Option<NftGate>;
+  nftBurn: Option<NftBurn>;
+  tokenBurn: Option<TokenBurn>;
+  freezeSolPayment: Option<FreezeSolPayment>;
+  freezeTokenPayment: Option<FreezeTokenPayment>;
+  programGate: Option<ProgramGate>;
 };
 
 /**
@@ -93,16 +127,16 @@ export type DefaultGuardSetMintArgs = GuardSetMintArgs & {
   tokenGate: Option<TokenGateMintArgs>;
   gatekeeper: Option<GatekeeperMintArgs>;
   // endDate: no mint settings
-  // allowList: no mint settings
-  // mintLimit: no mint settings
-  // nftPayment: Option<NftPaymentGuardMintSettings>;
+  allowList: Option<AllowListMintArgs>;
+  mintLimit: Option<MintLimitMintArgs>;
+  nftPayment: Option<NftPaymentMintArgs>;
   // redeemedAmount: no mint settings
   // addressGate: no mint settings
-  // nftGate: Option<NftGateGuardMintSettings>;
-  // nftBurn: Option<NftBurnGuardMintSettings>;
-  // tokenBurn: no mint settings
-  // freezeSolPayment: no mint settings
-  // freezeTokenPayment: no mint settings
+  nftGate: Option<NftGateMintArgs>;
+  nftBurn: Option<NftBurnMintArgs>;
+  tokenBurn: Option<TokenBurnMintArgs>;
+  freezeSolPayment: Option<FreezeSolPaymentMintArgs>;
+  freezeTokenPayment: Option<FreezeTokenPaymentMintArgs>;
   // programGate: no mint settings
 };
 
@@ -118,7 +152,7 @@ export type DefaultGuardSetRouteArgs = GuardSetRouteArgs & {
   // tokenGate: no route settings
   // gatekeeper: no route settings
   // endDate: no route settings
-  //* allowList: AllowListGuardRouteSettings;
+  allowList: AllowListRouteArgs;
   // mintLimit: no route settings
   // nftPayment: no route settings
   // redeemedAmount: no route settings
@@ -126,8 +160,8 @@ export type DefaultGuardSetRouteArgs = GuardSetRouteArgs & {
   // nftGate: no route settings
   // nftBurn: no route settings
   // tokenBurn: no route settings
-  //* freezeSolPayment: FreezeSolPaymentGuardRouteSettings;
-  //* freezeTokenPayment: FreezeTokenPaymentGuardRouteSettings;
+  freezeSolPayment: FreezeSolPaymentRouteArgs;
+  freezeTokenPayment: FreezeTokenPaymentRouteArgs;
   // programGate: no route settings
 };
 
@@ -141,17 +175,17 @@ export const defaultCandyGuardNames: string[] = [
   'tokenGate',
   'gatekeeper',
   'endDate',
-  // 'allowList',
-  // 'mintLimit',
-  // 'nftPayment',
-  // 'redeemedAmount',
-  // 'addressGate',
-  // 'nftGate',
-  // 'nftBurn',
-  // 'tokenBurn',
-  // 'freezeSolPayment',
-  // 'freezeTokenPayment',
-  // 'programGate',
+  'allowList',
+  'mintLimit',
+  'nftPayment',
+  'redeemedAmount',
+  'addressGate',
+  'nftGate',
+  'nftBurn',
+  'tokenBurn',
+  'freezeSolPayment',
+  'freezeTokenPayment',
+  'programGate',
 ];
 
 /** @internal */

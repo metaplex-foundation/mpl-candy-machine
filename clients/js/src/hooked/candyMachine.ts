@@ -1,3 +1,4 @@
+import { TokenStandard } from '@metaplex-foundation/mpl-token-metadata';
 import { isNone, Option } from '@metaplex-foundation/umi';
 import { CANDY_MACHINE_HIDDEN_SECTION } from '../constants';
 import { ConfigLineSettingsArgs } from '../generated/types/configLineSettings';
@@ -6,10 +7,16 @@ export function getCandyMachineSize(
   itemsAvailable: number | bigint,
   configLineSettings: Option<
     Pick<ConfigLineSettingsArgs, 'nameLength' | 'uriLength'>
-  >
+  >,
+  tokenStandard = TokenStandard.NonFungible
 ): number {
+  const base =
+    tokenStandard === TokenStandard.ProgrammableNonFungible
+      ? CANDY_MACHINE_HIDDEN_SECTION + 33
+      : CANDY_MACHINE_HIDDEN_SECTION;
+
   if (isNone(configLineSettings)) {
-    return CANDY_MACHINE_HIDDEN_SECTION;
+    return base;
   }
 
   const items = Number(itemsAvailable);
@@ -17,7 +24,7 @@ export function getCandyMachineSize(
     configLineSettings.value.nameLength + configLineSettings.value.uriLength;
 
   return Math.ceil(
-    CANDY_MACHINE_HIDDEN_SECTION +
+    base +
       // Number of currently items inserted.
       4 +
       // Config line data.

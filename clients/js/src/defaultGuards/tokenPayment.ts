@@ -1,5 +1,4 @@
 import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-essentials';
-import { PublicKey } from '@metaplex-foundation/umi';
 import {
   getTokenPaymentSerializer,
   TokenPayment,
@@ -39,7 +38,4 @@ export const tokenPaymentGuardManifest: GuardManifest<
   routeParser: noopParser,
 };
 
-export type TokenPaymentMintArgs = {
-  mint: PublicKey;
-  destinationAta: PublicKey;
-};
+export type TokenPaymentMintArgs = Omit<TokenPaymentArgs, 'amount'>;

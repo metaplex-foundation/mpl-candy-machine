@@ -14,16 +14,16 @@ import {
   CandyMachine,
   Creator,
   fetchCandyMachine,
-  initializeV2CandyMachine,
+  initializeCandyMachineV2,
 } from '../src';
 import { createCollectionNft, createUmi } from './_setup';
 
 /**
- * Note that most of the tests for the "initializeV2CandyMachine" instructions are
- * part of the "createV2CandyMachine" tests as they are more convenient to test.
+ * Note that most of the tests for the "initializeCandyMachineV2" instructions are
+ * part of the "createCandyMachineV2" tests as they are more convenient to test.
  */
 
-test.skip('it can initialize a new candy machine account', async (t) => {
+test('it can initialize a new candy machine account', async (t) => {
   // Given an empty candy machine account with a big enough size.
   const umi = await createUmi();
   const candyMachine = generateSigner(umi);
@@ -44,16 +44,12 @@ test.skip('it can initialize a new candy machine account', async (t) => {
   const creator = generateSigner(umi);
   await transactionBuilder(umi)
     .add(
-      initializeV2CandyMachine(umi, {
+      initializeCandyMachineV2(umi, {
         candyMachine: candyMachine.publicKey,
         collectionMint: collectionMint.publicKey,
         collectionUpdateAuthority: umi.identity,
         itemsAvailable: 100,
         tokenStandard: TokenStandard.NonFungible,
-        // TODO: Remove when bug fixed on the program.
-        authorizationRules: publicKey(
-          'auth9SigNpDKz4sJJ1DfCTuZrZNSAgh9sFD3rboVmgg'
-        ),
         sellerFeeBasisPoints: percentAmount(1.23),
         creators: [
           { address: creator.publicKey, verified: false, percentageShare: 100 },

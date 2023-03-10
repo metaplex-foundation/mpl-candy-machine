@@ -1,13 +1,24 @@
 import { mplTokenMetadata } from '@metaplex-foundation/mpl-token-metadata';
 import { UmiPlugin } from '@metaplex-foundation/umi';
 import {
+  addressGateGuardManifest,
+  allowListGuardManifest,
   botTaxGuardManifest,
   defaultCandyGuardNames,
   endDateGuardManifest,
+  freezeSolPaymentGuardManifest,
+  freezeTokenPaymentGuardManifest,
   gatekeeperGuardManifest,
+  mintLimitGuardManifest,
+  nftBurnGuardManifest,
+  nftGateGuardManifest,
+  nftPaymentGuardManifest,
+  programGateGuardManifest,
+  redeemedAmountGuardManifest,
   solPaymentGuardManifest,
   startDateGuardManifest,
   thirdPartySignerGuardManifest,
+  tokenBurnGuardManifest,
   tokenGateGuardManifest,
   tokenPaymentGuardManifest,
 } from './defaultGuards';
@@ -45,7 +56,18 @@ export const mplCandyMachine = (): UmiPlugin => ({
       thirdPartySignerGuardManifest,
       tokenGateGuardManifest,
       gatekeeperGuardManifest,
-      endDateGuardManifest
+      endDateGuardManifest,
+      allowListGuardManifest,
+      mintLimitGuardManifest,
+      nftPaymentGuardManifest,
+      redeemedAmountGuardManifest,
+      addressGateGuardManifest,
+      nftGateGuardManifest,
+      nftBurnGuardManifest,
+      tokenBurnGuardManifest,
+      freezeSolPaymentGuardManifest,
+      freezeTokenPaymentGuardManifest,
+      programGateGuardManifest
     );
   },
 });

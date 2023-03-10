@@ -1,5 +1,5 @@
 {
-  "version": "0.3.0",
+  "version": "0.4.0",
   "name": "candy_guard",
   "instructions": [
     {
@@ -201,7 +201,15 @@
           "isMut": true,
           "isSigner": true,
           "docs": [
-            "Payer for the transaction and account allocation (rent)."
+            "Payer for the mint (SOL) fees."
+          ]
+        },
+        {
+          "name": "minter",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "Minter account for validation and non-SOL fees."
           ]
         },
         {
@@ -210,6 +218,9 @@
           "isSigner": false,
           "docs": [
             "Mint account of the NFT. The account will be initialized if necessary.",
+            "",
+            "Must be a signer if:",
+            "* the nft_mint account does not exist.",
             ""
           ]
         },
@@ -218,7 +229,10 @@
           "isMut": false,
           "isSigner": true,
           "docs": [
-            "Mint authority of the NFT. In most cases this will be the owner of the NFT."
+            "Mint authority of the NFT before the authority gets transfer to the master edition account.",
+            "",
+            "If nft_mint account exists:",
+            "* it must match the mint authority of nft_mint."
           ]
         },
         {
@@ -353,6 +367,26 @@
           "isSigner": false,
           "docs": [
             "SlotHashes sysvar cluster data.",
+            ""
+          ]
+        },
+        {
+          "name": "authorizationRulesProgram",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Token Authorization Rules program.",
+            ""
+          ]
+        },
+        {
+          "name": "authorizationRules",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Token Authorization rules account for the collection metadata (if any).",
             ""
           ]
         }
@@ -937,7 +971,8 @@
         "1. `[writeable]` Metadata account of the NFT.",
         "2. `[writeable]` Master Edition account of the NFT.",
         "3. `[writeable]` Mint account of the NFT.",
-        "4. `[writeable]` Collection metadata account of the NFT."
+        "4. `[writeable]` Collection metadata account of the NFT.",
+        "5. `[writeable]` Token Record of the NFT (pNFT)."
       ],
       "type": {
         "kind": "struct",
@@ -982,7 +1017,12 @@
         "2. `[]` Mint account of the NFT.",
         "3. `[]` Account to receive the NFT.",
         "4. `[writeable]` Destination PDA key (seeds [destination pubkey, token program id, nft mint pubkey]).",
-        "5. `[]` spl-associate-token program ID."
+        "5. `[]` spl-associate-token program ID.",
+        "6. `[]` Master edition (pNFT)",
+        "7. `[writable]` Owner token record (pNFT)",
+        "8. `[writable]` Destination token record (pNFT)",
+        "9. `[]` Token Authorization Rules program (pNFT)",
+        "10. `[]` Token Authorization Rules account (pNFT)"
       ],
       "type": {
         "kind": "struct",
@@ -1803,6 +1843,16 @@
       "code": 6048,
       "name": "AllocationGuardNotEnabled",
       "msg": "Allocation guard must be enabled"
+    },
+    {
+      "code": 6049,
+      "name": "InvalidMintAuthority",
+      "msg": "Candy machine has an invalid mint authority"
+    },
+    {
+      "code": 6050,
+      "name": "InstructionBuilderFailed",
+      "msg": "Instruction could not be created"
     }
   ],
   "metadata": {

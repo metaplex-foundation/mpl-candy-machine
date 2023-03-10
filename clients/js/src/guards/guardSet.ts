@@ -1,14 +1,22 @@
 import {
+  AccountMeta,
   bitArray,
   Context,
+  isNone,
   isSome,
   mergeBytes,
   none,
   Option,
   reverseSerializer,
   Serializer,
+  Signer,
   some,
 } from '@metaplex-foundation/umi';
+import {
+  GuardInstructionExtras,
+  GuardRemainingAccount,
+  MintContext,
+} from './guardManifest';
 import { CandyGuardProgram, GuardRepository } from './guardRepository';
 
 export type GuardSetArgs = {
@@ -72,4 +80,55 @@ export function getGuardSetSerializer<
       return [guardSet as D, offset];
     },
   };
+}
+
+export function parseMintArgs<MA extends GuardSetMintArgs>(
+  context: Pick<Context, 'serializer' | 'eddsa' | 'programs'> & {
+    guards: GuardRepository;
+  },
+  program: CandyGuardProgram,
+  mintContext: MintContext,
+  mintArgs: Partial<MA>
+): GuardInstructionExtras {
+  const manifests = context.guards.forProgram(program);
+  return manifests.reduce(
+    (acc, manifest) => {
+      const args = mintArgs[manifest.name] ?? none();
+      if (isNone(args)) return acc;
+      const { data, remainingAccounts } = manifest.mintParser(
+        context,
+        mintContext,
+        args.value
+      );
+      return {
+        data: mergeBytes([acc.data, data]),
+        remainingAccounts: [...acc.remainingAccounts, ...remainingAccounts],
+      };
+    },
+    { data: new Uint8Array(), remainingAccounts: [] } as GuardInstructionExtras
+  );
+}
+
+export function parseGuardRemainingAccounts(
+  remainingAccounts: GuardRemainingAccount[]
+): [AccountMeta[], Signer[]] {
+  const accounts = [] as AccountMeta[];
+  const signers = [] as Signer[];
+  remainingAccounts.forEach((account) => {
+    if ('signer' in account) {
+      signers.push(account.signer);
+      accounts.push({
+        pubkey: account.signer.publicKey,
+        isSigner: true,
+        isWritable: account.isWritable,
+      });
+    } else {
+      accounts.push({
+        pubkey: account.publicKey,
+        isSigner: false,
+        isWritable: account.isWritable,
+      });
+    }
+  });
+  return [accounts, signers];
 }

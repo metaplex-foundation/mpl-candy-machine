@@ -6,6 +6,7 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-essentials';
 import {
   MetadataDelegateRole,
   findMasterEditionPda,
@@ -20,19 +21,21 @@ import {
   Signer,
   WrappedInstruction,
   checkForIsWritableOverride as isWritable,
+  isSigner,
   mapSerializer,
   publicKey,
 } from '@metaplex-foundation/umi';
 import { findCandyMachineAuthorityPda } from '../../hooked';
 
 // Accounts.
-export type MintV2FromCandyMachineInstructionAccounts = {
+export type MintFromCandyMachineV2InstructionAccounts = {
   candyMachine: PublicKey;
   authorityPda?: PublicKey;
   mintAuthority: Signer;
   payer?: Signer;
-  nftMint: PublicKey;
-  nftMintAuthority: Signer;
+  nftOwner: PublicKey;
+  nftMint: PublicKey | Signer;
+  nftMintAuthority?: Signer;
   nftMetadata?: PublicKey;
   nftMasterEdition?: PublicKey;
   token?: PublicKey;
@@ -48,46 +51,51 @@ export type MintV2FromCandyMachineInstructionAccounts = {
   systemProgram?: PublicKey;
   sysvarInstructions?: PublicKey;
   recentSlothashes?: PublicKey;
+  authorizationRulesProgram?: PublicKey;
+  authorizationRules?: PublicKey;
 };
 
 // Arguments.
-export type MintV2FromCandyMachineInstructionData = {
+export type MintFromCandyMachineV2InstructionData = {
   discriminator: Array<number>;
 };
 
-export type MintV2FromCandyMachineInstructionDataArgs = {};
+export type MintFromCandyMachineV2InstructionDataArgs = {};
 
-export function getMintV2FromCandyMachineInstructionDataSerializer(
+export function getMintFromCandyMachineV2InstructionDataSerializer(
   context: Pick<Context, 'serializer'>
 ): Serializer<
-  MintV2FromCandyMachineInstructionDataArgs,
-  MintV2FromCandyMachineInstructionData
+  MintFromCandyMachineV2InstructionDataArgs,
+  MintFromCandyMachineV2InstructionData
 > {
   const s = context.serializer;
   return mapSerializer<
-    MintV2FromCandyMachineInstructionDataArgs,
-    MintV2FromCandyMachineInstructionData,
-    MintV2FromCandyMachineInstructionData
+    MintFromCandyMachineV2InstructionDataArgs,
+    MintFromCandyMachineV2InstructionData,
+    MintFromCandyMachineV2InstructionData
   >(
-    s.struct<MintV2FromCandyMachineInstructionData>(
+    s.struct<MintFromCandyMachineV2InstructionData>(
       [['discriminator', s.array(s.u8(), { size: 8 })]],
-      { description: 'MintV2FromCandyMachineInstructionData' }
+      { description: 'MintFromCandyMachineV2InstructionData' }
     ),
     (value) =>
       ({
         ...value,
         discriminator: [120, 121, 23, 146, 173, 110, 199, 205],
-      } as MintV2FromCandyMachineInstructionData)
+      } as MintFromCandyMachineV2InstructionData)
   ) as Serializer<
-    MintV2FromCandyMachineInstructionDataArgs,
-    MintV2FromCandyMachineInstructionData
+    MintFromCandyMachineV2InstructionDataArgs,
+    MintFromCandyMachineV2InstructionData
   >;
 }
 
 // Instruction.
-export function mintV2FromCandyMachine(
-  context: Pick<Context, 'serializer' | 'programs' | 'eddsa' | 'payer'>,
-  input: MintV2FromCandyMachineInstructionAccounts
+export function mintFromCandyMachineV2(
+  context: Pick<
+    Context,
+    'serializer' | 'programs' | 'eddsa' | 'identity' | 'payer'
+  >,
+  input: MintFromCandyMachineV2InstructionAccounts
 ): WrappedInstruction {
   const signers: Signer[] = [];
   const keys: AccountMeta[] = [];
@@ -107,16 +115,25 @@ export function mintV2FromCandyMachine(
     });
   const mintAuthorityAccount = input.mintAuthority;
   const payerAccount = input.payer ?? context.payer;
+  const nftOwnerAccount = input.nftOwner;
   const nftMintAccount = input.nftMint;
-  const nftMintAuthorityAccount = input.nftMintAuthority;
+  const nftMintAuthorityAccount = input.nftMintAuthority ?? context.identity;
   const nftMetadataAccount =
     input.nftMetadata ??
     findMetadataPda(context, { mint: publicKey(nftMintAccount) });
   const nftMasterEditionAccount =
     input.nftMasterEdition ??
     findMasterEditionPda(context, { mint: publicKey(nftMintAccount) });
-  const tokenAccount = input.token;
-  const tokenRecordAccount = input.tokenRecord;
+  const tokenAccount =
+    input.token ??
+    findAssociatedTokenPda(context, {
+      mint: publicKey(nftMintAccount),
+      owner: publicKey(nftOwnerAccount),
+    });
+  const tokenRecordAccount = input.tokenRecord ?? {
+    ...programId,
+    isWritable: false,
+  };
   const collectionMintAccount = input.collectionMint;
   const collectionUpdateAuthorityAccount = input.collectionUpdateAuthority;
   const collectionDelegateRecordAccount =
@@ -147,7 +164,13 @@ export function mintV2FromCandyMachine(
     ),
     isWritable: false,
   };
-  const splAtaProgramAccount = input.splAtaProgram;
+  const splAtaProgramAccount = input.splAtaProgram ?? {
+    ...context.programs.getPublicKey(
+      'splAssociatedToken',
+      'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'
+    ),
+    isWritable: false,
+  };
   const systemProgramAccount = input.systemProgram ?? {
     ...context.programs.getPublicKey(
       'splSystem',
@@ -155,10 +178,20 @@ export function mintV2FromCandyMachine(
     ),
     isWritable: false,
   };
-  const sysvarInstructionsAccount = input.sysvarInstructions;
+  const sysvarInstructionsAccount =
+    input.sysvarInstructions ??
+    publicKey('Sysvar1nstructions1111111111111111111111111');
   const recentSlothashesAccount =
     input.recentSlothashes ??
     publicKey('SysvarS1otHashes111111111111111111111111111');
+  const authorizationRulesProgramAccount = input.authorizationRulesProgram ?? {
+    ...programId,
+    isWritable: false,
+  };
+  const authorizationRulesAccount = input.authorizationRules ?? {
+    ...programId,
+    isWritable: false,
+  };
 
   // Candy Machine.
   keys.push({
@@ -190,10 +223,20 @@ export function mintV2FromCandyMachine(
     isWritable: isWritable(payerAccount, true),
   });
 
-  // Nft Mint.
+  // Nft Owner.
   keys.push({
-    pubkey: nftMintAccount,
+    pubkey: nftOwnerAccount,
     isSigner: false,
+    isWritable: isWritable(nftOwnerAccount, false),
+  });
+
+  // Nft Mint.
+  if (isSigner(nftMintAccount)) {
+    signers.push(nftMintAccount);
+  }
+  keys.push({
+    pubkey: publicKey(nftMintAccount),
+    isSigner: isSigner(nftMintAccount),
     isWritable: isWritable(nftMintAccount, true),
   });
 
@@ -219,23 +262,19 @@ export function mintV2FromCandyMachine(
     isWritable: isWritable(nftMasterEditionAccount, true),
   });
 
-  // Token (optional).
-  if (tokenAccount) {
-    keys.push({
-      pubkey: tokenAccount,
-      isSigner: false,
-      isWritable: isWritable(tokenAccount, true),
-    });
-  }
+  // Token.
+  keys.push({
+    pubkey: tokenAccount,
+    isSigner: false,
+    isWritable: isWritable(tokenAccount, true),
+  });
 
-  // Token Record (optional).
-  if (tokenRecordAccount) {
-    keys.push({
-      pubkey: tokenRecordAccount,
-      isSigner: false,
-      isWritable: isWritable(tokenRecordAccount, true),
-    });
-  }
+  // Token Record.
+  keys.push({
+    pubkey: tokenRecordAccount,
+    isSigner: false,
+    isWritable: isWritable(tokenRecordAccount, true),
+  });
 
   // Collection Delegate Record.
   keys.push({
@@ -286,14 +325,12 @@ export function mintV2FromCandyMachine(
     isWritable: isWritable(splTokenProgramAccount, false),
   });
 
-  // Spl Ata Program (optional).
-  if (splAtaProgramAccount) {
-    keys.push({
-      pubkey: splAtaProgramAccount,
-      isSigner: false,
-      isWritable: isWritable(splAtaProgramAccount, false),
-    });
-  }
+  // Spl Ata Program.
+  keys.push({
+    pubkey: splAtaProgramAccount,
+    isSigner: false,
+    isWritable: isWritable(splAtaProgramAccount, false),
+  });
 
   // System Program.
   keys.push({
@@ -302,14 +339,12 @@ export function mintV2FromCandyMachine(
     isWritable: isWritable(systemProgramAccount, false),
   });
 
-  // Sysvar Instructions (optional).
-  if (sysvarInstructionsAccount) {
-    keys.push({
-      pubkey: sysvarInstructionsAccount,
-      isSigner: false,
-      isWritable: isWritable(sysvarInstructionsAccount, false),
-    });
-  }
+  // Sysvar Instructions.
+  keys.push({
+    pubkey: sysvarInstructionsAccount,
+    isSigner: false,
+    isWritable: isWritable(sysvarInstructionsAccount, false),
+  });
 
   // Recent Slothashes.
   keys.push({
@@ -318,8 +353,22 @@ export function mintV2FromCandyMachine(
     isWritable: isWritable(recentSlothashesAccount, false),
   });
 
+  // Authorization Rules Program.
+  keys.push({
+    pubkey: authorizationRulesProgramAccount,
+    isSigner: false,
+    isWritable: isWritable(authorizationRulesProgramAccount, false),
+  });
+
+  // Authorization Rules.
+  keys.push({
+    pubkey: authorizationRulesAccount,
+    isSigner: false,
+    isWritable: isWritable(authorizationRulesAccount, false),
+  });
+
   // Data.
-  const data = getMintV2FromCandyMachineInstructionDataSerializer(
+  const data = getMintFromCandyMachineV2InstructionDataSerializer(
     context
   ).serialize({});
 

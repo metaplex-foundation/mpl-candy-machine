@@ -28,8 +28,10 @@
     "@metaplex-foundation/umi": "^0.5.3"
   },
   "dependencies": {
-    "@metaplex-foundation/mpl-essentials": "^0.3.1",
-    "@metaplex-foundation/mpl-token-metadata": "3.0.0-alpha.7"
+    "@metaplex-foundation/mpl-essentials": "^0.3.3",
+    "@metaplex-foundation/mpl-token-metadata": "3.0.0-alpha.8",
+    "@noble/hashes": "^1.2.0",
+    "merkletreejs": "^0.3.9"
   },
   "devDependencies": {
     "@ava/typescript": "^3.0.1",

@@ -7,13 +7,13 @@ import {
 } from '@metaplex-foundation/umi';
 import test from 'ava';
 import { CandyMachine, fetchCandyMachine, updateCandyMachine } from '../src';
-import { createCandyMachine, createUmi } from './_setup';
+import { createV2, createUmi } from './_setup';
 
 test('it can update the data of a candy machine', async (t) => {
   // Given a Candy Machine with the following data.
   const umi = await createUmi();
   const creatorA = generateSigner(umi).publicKey;
-  const candyMachine = await createCandyMachine(umi, {
+  const candyMachine = await createV2(umi, {
     itemsAvailable: 1000,
     symbol: 'OLD',
     sellerFeeBasisPoints: percentAmount(1),
@@ -85,7 +85,7 @@ test('it can update the data of a candy machine', async (t) => {
 test('it cannot update the number of items when using config line settings', async (t) => {
   // Given a Candy Machine using config line settings with 1000 items.
   const umi = await createUmi();
-  const candyMachine = await createCandyMachine(umi, {
+  const candyMachine = await createV2(umi, {
     itemsAvailable: 1000,
     configLineSettings: some({
       prefixName: 'My NFT #',
@@ -117,7 +117,7 @@ test('it cannot update the number of items when using config line settings', asy
 test('it can update the number of items when using hidden settings', async (t) => {
   // Given a Candy Machine using hidden settings with 1000 items.
   const umi = await createUmi();
-  const candyMachine = await createCandyMachine(umi, {
+  const candyMachine = await createV2(umi, {
     itemsAvailable: 1000,
     configLineSettings: none(),
     hiddenSettings: some({
@@ -154,7 +154,7 @@ test('it can update the number of items when using hidden settings', async (t) =
 test('it can update the hidden settings of a candy machine', async (t) => {
   // Given a Candy Machine using the following hidden settings.
   const umi = await createUmi();
-  const candyMachine = await createCandyMachine(umi, {
+  const candyMachine = await createV2(umi, {
     itemsAvailable: 1000,
     configLineSettings: none(),
     hiddenSettings: some({
@@ -204,7 +204,7 @@ test('it can update the hidden settings of a candy machine', async (t) => {
 test('it cannot go from hidden settings to config line settings', async (t) => {
   // Given a Candy Machine using the following hidden settings.
   const umi = await createUmi();
-  const candyMachine = await createCandyMachine(umi, {
+  const candyMachine = await createV2(umi, {
     itemsAvailable: 1000,
     configLineSettings: none(),
     hiddenSettings: some({
@@ -245,7 +245,7 @@ test('it cannot go from hidden settings to config line settings', async (t) => {
 test('it cannot go from config line settings to hidden settings', async (t) => {
   // Given a Candy Machine using the following config line settings.
   const umi = await createUmi();
-  const candyMachine = await createCandyMachine(umi, {
+  const candyMachine = await createV2(umi, {
     itemsAvailable: 1000,
     hiddenSettings: none(),
     configLineSettings: some({

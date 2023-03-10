@@ -188,19 +188,6 @@ kinobi.update(
         );
       },
     },
-    {
-      selector: { type: "TypeStructFieldNode", name: "label" },
-      transformer: (node) => {
-        return new TypeStructFieldNode(
-          node.metadata,
-          new TypeOptionNode(
-            new TypeStringNode({
-              size: { kind: "fixed", bytes: 6 },
-            })
-          )
-        );
-      },
-    },
   ])
 );
 

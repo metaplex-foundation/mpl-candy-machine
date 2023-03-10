@@ -73,7 +73,7 @@ export function getMintInstructionDataSerializer(
       [
         ['discriminator', s.array(s.u8(), { size: 8 })],
         ['mintArgs', s.bytes()],
-        ['label', s.option(s.string({ size: 6 }))],
+        ['label', s.option(s.string())],
       ],
       { description: 'MintInstructionData' }
     ),

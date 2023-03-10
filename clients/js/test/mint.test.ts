@@ -68,7 +68,7 @@ test('it can mint from a candy guard with guards', async (t) => {
     collectionMint,
     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
     guards: {
-      botTax: some({ lamports: sol(0.01), lastInstruction: false }),
+      botTax: some({ lamports: sol(0.01), lastInstruction: true }),
       solPayment: some({ lamports: sol(2), destination }),
     },
   });

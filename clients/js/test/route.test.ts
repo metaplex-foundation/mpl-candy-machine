@@ -14,7 +14,7 @@ import {
   getMerkleRoot,
   route,
 } from '../src';
-import { createUmi, createV2 } from './_setup';
+import { createUmi, createV1, createV2 } from './_setup';
 
 test('it can call the route instruction of a specific guard', async (t) => {
   // Given a candy machine with an allow list guard.
@@ -160,6 +160,65 @@ test('it must provide a group label if the candy guard has groups', async (t) =>
   await t.throwsAsync(promise, { message: /RequiredGroupLabelNotFound/ });
 });
 
-// it must not provide a group label if the candy guard does not have groups
+test('it must not provide a group label if the candy guard does not have groups', async (t) => {
+  // Given a candy machine with an allow list guard and no groups.
+  const umi = await createUmi();
+  const allowedWallets = [base58PublicKey(umi.identity)];
+  const merkleRoot = getMerkleRoot(allowedWallets);
+  const { publicKey: candyMachine } = await createV2(umi, {
+    guards: { allowList: some({ merkleRoot }) },
+  });
 
-// it can call the route instruction for guards associated with a candy machine v1
+  // When we try to call the route instruction with a group label.
+  const merkleProof = getMerkleProof(allowedWallets, allowedWallets[0]);
+  const promise = transactionBuilder(umi)
+    .add(
+      route(umi, {
+        candyMachine,
+        guard: 'allowList',
+        group: some('GROUPX'),
+        routeArgs: { path: 'proof', merkleRoot, merkleProof },
+      })
+    )
+    .sendAndConfirm();
+
+  // Then we expect a program error.
+  await t.throwsAsync(promise, { message: /GroupNotFound/ });
+});
+
+test('it can call the route instruction for guards associated with a candy machine v1', async (t) => {
+  // Given a candy machine with an allow list guard.
+  const umi = await createUmi();
+  const allowedWallets = [
+    base58PublicKey(umi.identity),
+    'Ur1CbWSGsXCdedknRbJsEk7urwAvu1uddmQv51nAnXB',
+  ];
+  const merkleRoot = getMerkleRoot(allowedWallets);
+  const { publicKey: candyMachine } = await createV1(umi, {
+    guards: { allowList: some({ merkleRoot }) },
+  });
+
+  // When we call the route instruction of the allow list guard.
+  const merkleProof = getMerkleProof(
+    allowedWallets,
+    base58PublicKey(umi.identity)
+  );
+  await transactionBuilder(umi)
+    .add(
+      route(umi, {
+        candyMachine,
+        guard: 'allowList',
+        routeArgs: { path: 'proof', merkleRoot, merkleProof },
+      })
+    )
+    .sendAndConfirm();
+
+  // Then the allow list proof PDA was created.
+  const allowListProofPda = findAllowListProofPda(umi, {
+    merkleRoot,
+    user: umi.identity.publicKey,
+    candyMachine,
+    candyGuard: findCandyGuardPda(umi, { base: candyMachine }),
+  });
+  t.true(await umi.rpc.accountExists(allowListProofPda));
+});

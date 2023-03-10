@@ -21,7 +21,7 @@ import {
   createV2,
 } from './_setup';
 
-test.skip('it can mint from a candy guard with no guards', async (t) => {
+test.only('it can mint from a candy guard with no guards', async (t) => {
   // Given a candy machine with a candy guard that has no guards.
   const umi = await createUmi();
   const collectionMint = (await createCollectionNft(umi)).publicKey;
@@ -36,14 +36,14 @@ test.skip('it can mint from a candy guard with no guards', async (t) => {
 
   // When we mint from the candy guard.
   const mint = generateSigner(umi);
-  const owner = generateSigner(umi).publicKey;
+  const minter = generateSigner(umi);
   await transactionBuilder(umi)
-    .add(createMintWithSingleToken(umi, { mint, owner }))
     .add(
       mintV2(umi, {
         candyMachine,
         candyGuard,
-        nftMint: mint.publicKey,
+        minter,
+        nftMint: mint,
         nftMintAuthority: umi.identity,
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
@@ -52,7 +52,7 @@ test.skip('it can mint from a candy guard with no guards', async (t) => {
     .sendAndConfirm();
 
   // Then the mint was successful.
-  await assertSuccessfulMint(t, umi, { mint, owner, name: 'Degen #1' });
+  await assertSuccessfulMint(t, umi, { mint, owner: minter, name: 'Degen #1' });
 
   // And the candy machine was updated.
   const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);

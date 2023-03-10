@@ -22,6 +22,7 @@ import {
   Signer,
   WrappedInstruction,
   checkForIsWritableOverride as isWritable,
+  isSigner,
   mapSerializer,
   publicKey,
 } from '@metaplex-foundation/umi';
@@ -35,7 +36,7 @@ export type MintV2InstructionAccounts = {
   candyMachineAuthorityPda?: PublicKey;
   payer?: Signer;
   minter?: Signer;
-  nftMint: PublicKey;
+  nftMint: PublicKey | Signer;
   nftMintAuthority: Signer;
   nftMetadata?: PublicKey;
   nftMasterEdition?: PublicKey;
@@ -249,9 +250,12 @@ export function mintV2(
   });
 
   // Nft Mint.
+  if (isSigner(nftMintAccount)) {
+    signers.push(nftMintAccount);
+  }
   keys.push({
-    pubkey: nftMintAccount,
-    isSigner: false,
+    pubkey: publicKey(nftMintAccount),
+    isSigner: isSigner(nftMintAccount),
     isWritable: isWritable(nftMintAccount, true),
   });
 

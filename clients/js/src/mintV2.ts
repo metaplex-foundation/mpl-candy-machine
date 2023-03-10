@@ -2,6 +2,7 @@ import {
   mergeBytes,
   none,
   Option,
+  publicKey,
   WrappedInstruction,
 } from '@metaplex-foundation/umi';
 import { DefaultGuardSetMintArgs } from './defaultGuards';
@@ -46,7 +47,7 @@ export function mintV2<MA extends GuardSetArgs = DefaultGuardSetMintArgs>(
   const mintContext: MintContext = {
     minter: input.minter ?? context.identity,
     payer: input.payer ?? context.payer,
-    mint: input.nftMint,
+    mint: publicKey(input.nftMint),
     candyMachine: input.candyMachine,
     candyGuard: input.candyGuard,
   };

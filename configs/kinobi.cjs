@@ -405,6 +405,7 @@ kinobi.update(
     "mplCandyGuard.mintV2": {
       internal: true,
       accounts: {
+        nftMint: { isOptionalSigner: true },
         minter: { defaultsTo: { kind: "identity" } },
         token: {
           defaultsTo: defaultsToAssociatedTokenPda("nftMint", "minter"),

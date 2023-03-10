@@ -8,6 +8,7 @@ import { findCollectionAuthorityRecordPda } from '@metaplex-foundation/mpl-token
 import {
   generateSigner,
   isEqualToAmount,
+  none,
   sol,
   some,
   transactionBuilder,
@@ -272,4 +273,42 @@ test('it can mint from a candy guard with groups', async (t) => {
 
   // Then the mint was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: minter });
+});
+
+test('it cannot mint using the default guards if the candy guard has groups', async (t) => {
+  // Given a candy machine with guard groups.
+  const umi = await createUmi();
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const destination = generateSigner(umi).publicKey;
+  const candyMachineSigner = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: { solPayment: some({ lamports: sol(2), destination }) },
+    groups: [
+      { label: 'GROUP1', guards: { startDate: some({ date: yesterday() }) } },
+      { label: 'GROUP2', guards: { startDate: some({ date: tomorrow() }) } },
+    ],
+  });
+  const candyMachine = candyMachineSigner.publicKey;
+
+  // When we try to mint using the default guards.
+  const mint = generateSigner(umi);
+  const minter = generateSigner(umi);
+  const promise = transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        minter,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: { solPayment: some({ destination }) },
+        group: none(),
+      })
+    )
+    .sendAndConfirm();
+
+  // Then we expect a program error.
+  await t.throwsAsync(promise, { message: /RequiredGroupLabelNotFound/ });
 });

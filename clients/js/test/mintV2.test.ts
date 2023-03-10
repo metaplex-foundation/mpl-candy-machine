@@ -1,7 +1,4 @@
-import {
-  createMintWithSingleToken,
-  setComputeUnitLimit,
-} from '@metaplex-foundation/mpl-essentials';
+import { setComputeUnitLimit } from '@metaplex-foundation/mpl-essentials';
 import {
   generateSigner,
   isEqualToAmount,
@@ -48,7 +45,6 @@ test('it can mint from a candy guard with no guards', async (t) => {
         candyGuard,
         minter,
         nftMint: mint,
-        nftMintAuthority: umi.identity,
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
       })
@@ -63,7 +59,7 @@ test('it can mint from a candy guard with no guards', async (t) => {
   t.like(candyMachineAccount, <CandyMachine>{ itemsRedeemed: 1n });
 });
 
-test.skip('it can mint from a candy guard with guards', async (t) => {
+test('it can mint from a candy guard with guards', async (t) => {
   // Given a candy machine with some guards.
   const umi = await createUmi();
   const collectionMint = (await createCollectionNft(umi)).publicKey;
@@ -81,17 +77,17 @@ test.skip('it can mint from a candy guard with guards', async (t) => {
 
   // When we mint from the candy guard.
   const mint = generateSigner(umi);
-  const owner = generateSigner(umi).publicKey;
+  const minter = generateSigner(umi);
   const payer = await generateSignerWithSol(umi, sol(10));
   await transactionBuilder(umi)
-    .add(createMintWithSingleToken(umi, { mint, owner }))
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
         candyGuard,
-        nftMint: mint.publicKey,
-        nftMintAuthority: umi.identity,
+        nftMint: mint,
         payer,
+        minter,
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
         mintArgs: {
@@ -102,11 +98,11 @@ test.skip('it can mint from a candy guard with guards', async (t) => {
     .sendAndConfirm();
 
   // Then the mint was successful.
-  await assertSuccessfulMint(t, umi, { mint, owner, name: 'Degen #1' });
+  await assertSuccessfulMint(t, umi, { mint, owner: minter, name: 'Degen #1' });
 
   // And the payer was charged.
   const payerBalance = await umi.rpc.getBalance(payer.publicKey);
-  t.true(isEqualToAmount(payerBalance, sol(8), sol(0.01)));
+  t.true(isEqualToAmount(payerBalance, sol(8), sol(0.1)));
 
   // And the candy machine was updated.
   const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);

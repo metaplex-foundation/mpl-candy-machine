@@ -406,6 +406,7 @@ kinobi.update(
       internal: true,
       accounts: {
         nftMint: { isOptionalSigner: true },
+        nftMintAuthority: { defaultsTo: { kind: "account", name: "minter" } },
         minter: { defaultsTo: { kind: "identity" } },
         token: {
           defaultsTo: defaultsToAssociatedTokenPda("nftMint", "minter"),

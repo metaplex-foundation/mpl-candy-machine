@@ -37,7 +37,7 @@ export type MintV2InstructionAccounts = {
   payer?: Signer;
   minter?: Signer;
   nftMint: PublicKey | Signer;
-  nftMintAuthority: Signer;
+  nftMintAuthority?: Signer;
   nftMetadata?: PublicKey;
   nftMasterEdition?: PublicKey;
   token?: PublicKey;
@@ -129,7 +129,7 @@ export function mintV2(
   const payerAccount = input.payer ?? context.payer;
   const minterAccount = input.minter ?? context.identity;
   const nftMintAccount = input.nftMint;
-  const nftMintAuthorityAccount = input.nftMintAuthority;
+  const nftMintAuthorityAccount = input.nftMintAuthority ?? minterAccount;
   const nftMetadataAccount =
     input.nftMetadata ??
     findMetadataPda(context, { mint: publicKey(nftMintAccount) });

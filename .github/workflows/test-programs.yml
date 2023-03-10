@@ -56,18 +56,18 @@ jobs:
           folder: ./programs/${{ matrix.program }}
           key: program-${{ matrix.program }}
 
-      - name: Run tests
-        working-directory: ./programs/${{ matrix.program }}
-        run: cargo test-bpf
-
       - name: Run cargo fmt
         uses: actions-rs/cargo@v1
         with:
           command: fmt
-          args: --manifest-path ./programs/${{ matrix.program }}/Cargo.toml -- --check
+          args: --manifest-path ./programs/${{ matrix.program }}/Cargo.toml --all -- --check
 
       - name: Run cargo clippy
         uses: actions-rs/cargo@v1
         with:
           command: clippy
           args: --all-targets --all-features --no-deps --manifest-path ./programs/${{ matrix.program }}/Cargo.toml
+
+      - name: Run tests
+        working-directory: ./programs/${{ matrix.program }}
+        run: cargo test-bpf

@@ -4,6 +4,7 @@ import {
   createNft,
   DigitalAssetWithToken,
   fetchDigitalAssetWithAssociatedToken,
+  findMetadataPda,
   TokenStandard,
 } from '@metaplex-foundation/mpl-token-metadata';
 import {
@@ -17,6 +18,7 @@ import {
   Signer,
   some,
   transactionBuilder,
+  TransactionSignature,
   Umi,
 } from '@metaplex-foundation/umi';
 import { createUmi as basecreateUmi } from '@metaplex-foundation/umi-bundle-tests';
@@ -236,6 +238,22 @@ export const assertSuccessfulMint = async (
   // Uri.
   if (typeof uri === 'string') t.is(nft.metadata.uri, uri);
   else if (uri !== undefined) t.regex(nft.metadata.uri, uri);
+};
+
+export const assertBotTax = async (
+  t: Assertions,
+  umi: Umi,
+  mint: Signer | PublicKey,
+  signature: TransactionSignature,
+  extraRegex?: RegExp
+) => {
+  const transaction = await umi.rpc.getTransaction(signature);
+  t.true(transaction !== null);
+  const logs = transaction!.meta.logs.join('');
+  t.regex(logs, /Candy Guard Botting is taxed/);
+  if (extraRegex !== undefined) t.regex(logs, extraRegex);
+  const metadata = findMetadataPda(umi, { mint: publicKey(mint) });
+  t.false(await umi.rpc.accountExists(metadata));
 };
 
 export const yesterday = (): DateTime => now() - 3600n * 24n;

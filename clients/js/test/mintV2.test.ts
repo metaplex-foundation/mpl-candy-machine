@@ -388,3 +388,104 @@ test('it can mint using an explicit payer', async (t) => {
   const payerBalance = await umi.rpc.getBalance(payer.publicKey);
   t.true(isEqualToAmount(payerBalance, sol(8), sol(0.1)));
 });
+
+test('it cannot mint from an empty candy machine', async (t) => {
+  // Given an empty candy machine.
+  const umi = await createUmi();
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [],
+    guards: {},
+  });
+
+  // When we try to mint from it.
+  const mint = generateSigner(umi);
+  const minter = generateSigner(umi);
+  const promise = transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        minter,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+      })
+    )
+    .sendAndConfirm();
+
+  // Then we expect a program error.
+  await t.throwsAsync(promise, { message: /CandyMachineEmpty/ });
+});
+
+test('it cannot mint from a candy machine that is not fully loaded', async (t) => {
+  // Given a candy machine that is 50% loaded.
+  const umi = await createUmi();
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    itemsAvailable: 2,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {},
+  });
+
+  // When we try to mint from it.
+  const mint = generateSigner(umi);
+  const minter = generateSigner(umi);
+  const promise = transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        minter,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+      })
+    )
+    .sendAndConfirm();
+
+  // Then we expect a program error.
+  await t.throwsAsync(promise, { message: /NotFullyLoaded/ });
+});
+
+test('it cannot mint from a candy machine that has been fully minted', async (t) => {
+  // Given a candy machine that has been fully minted.
+  const umi = await createUmi();
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {},
+  });
+  const mint = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+      })
+    )
+    .sendAndConfirm();
+  await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
+
+  // When we try to mint from it again.
+  const promise = transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: generateSigner(umi),
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+      })
+    )
+    .sendAndConfirm();
+
+  // Then we expect a program error.
+  await t.throwsAsync(promise, { message: /CandyMachineEmpty/ });
+});

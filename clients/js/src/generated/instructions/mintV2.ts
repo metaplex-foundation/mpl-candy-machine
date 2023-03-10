@@ -131,7 +131,7 @@ export function mintV2(
   const payerAccount = input.payer ?? context.payer;
   const minterAccount = input.minter ?? context.identity;
   const nftMintAccount = input.nftMint;
-  const nftMintAuthorityAccount = input.nftMintAuthority ?? minterAccount;
+  const nftMintAuthorityAccount = input.nftMintAuthority ?? context.identity;
   const nftMetadataAccount =
     input.nftMetadata ??
     findMetadataPda(context, { mint: publicKey(nftMintAccount) });

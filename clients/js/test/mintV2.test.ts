@@ -1,4 +1,8 @@
-import { setComputeUnitLimit } from '@metaplex-foundation/mpl-essentials';
+import {
+  createAssociatedToken,
+  createMint,
+  setComputeUnitLimit,
+} from '@metaplex-foundation/mpl-essentials';
 import {
   generateSigner,
   isEqualToAmount,
@@ -8,12 +12,7 @@ import {
 } from '@metaplex-foundation/umi';
 import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
 import test from 'ava';
-import {
-  CandyMachine,
-  fetchCandyMachine,
-  findCandyGuardPda,
-  mintV2,
-} from '../src';
+import { CandyMachine, fetchCandyMachine, mintV2 } from '../src';
 import {
   assertSuccessfulMint,
   createCollectionNft,
@@ -57,28 +56,33 @@ test('it can mint from a candy guard with no guards', async (t) => {
   t.like(candyMachineAccount, <CandyMachine>{ itemsRedeemed: 1n });
 });
 
-test.skip('it can mint whilst creating the mint and token accounts beforehand', async (t) => {
+test('it can mint whilst creating the mint and token accounts beforehand', async (t) => {
   // Given a candy machine with a candy guard.
   const umi = await createUmi();
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const candyMachineSigner = await createV2(umi, {
     collectionMint,
     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {},
   });
   const candyMachine = candyMachineSigner.publicKey;
-  const candyGuard = findCandyGuardPda(umi, { base: candyMachine });
 
   // When we mint from the candy guard.
   const mint = generateSigner(umi);
   const minter = generateSigner(umi);
   await transactionBuilder(umi)
-    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(createMint(umi, { mint }))
+    .add(
+      createAssociatedToken(umi, {
+        mint: mint.publicKey,
+        owner: minter.publicKey,
+      })
+    )
     .add(
       mintV2(umi, {
         candyMachine,
-        candyGuard,
         minter,
-        nftMint: mint,
+        nftMint: mint.publicKey,
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
       })
@@ -93,7 +97,40 @@ test.skip('it can mint whilst creating the mint and token accounts beforehand', 
   t.like(candyMachineAccount, <CandyMachine>{ itemsRedeemed: 1n });
 });
 
-// TODO: it can mint whilst creating only the mint account beforehand.
+test('it can mint whilst creating only the mint account beforehand', async (t) => {
+  // Given a candy machine with a candy guard.
+  const umi = await createUmi();
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const candyMachineSigner = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {},
+  });
+  const candyMachine = candyMachineSigner.publicKey;
+
+  // When we mint from the candy guard.
+  const mint = generateSigner(umi);
+  const minter = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(createMint(umi, { mint }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        minter,
+        nftMint: mint.publicKey,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+      })
+    )
+    .sendAndConfirm();
+
+  // Then the mint was successful.
+  await assertSuccessfulMint(t, umi, { mint, owner: minter, name: 'Degen #1' });
+
+  // And the candy machine was updated.
+  const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
+  t.like(candyMachineAccount, <CandyMachine>{ itemsRedeemed: 1n });
+});
 
 test('it can mint from a candy guard with guards', async (t) => {
   // Given a candy machine with some guards.

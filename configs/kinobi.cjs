@@ -415,7 +415,7 @@ kinobi.update(
       accounts: {
         candyGuard: { defaultsTo: defaultsToCandyGuardPda("candyMachine") },
         nftMint: { isOptionalSigner: true },
-        nftMintAuthority: { defaultsTo: { kind: "account", name: "minter" } },
+        nftMintAuthority: { defaultsTo: { kind: "identity" } },
         minter: { defaultsTo: { kind: "identity" } },
         token: {
           defaultsTo: defaultsToAssociatedTokenPda("nftMint", "minter"),

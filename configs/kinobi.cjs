@@ -263,6 +263,13 @@ const defaultsToMetadataDelegateRecordPda = (
     delegate: { kind: "account", name: delegate },
   },
 });
+const defaultsToSplAssociatedTokenProgram = () => ({
+  kind: "program",
+  program: {
+    name: "splAssociatedToken",
+    publicKey: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
+  },
+});
 
 // Automatically recognize account default values.
 kinobi.update(
@@ -381,15 +388,7 @@ kinobi.update(
             publicKey: "Sysvar1nstructions1111111111111111111111111",
           },
         },
-        splAtaProgram: {
-          defaultsTo: {
-            kind: "program",
-            program: {
-              name: "splAssociatedToken",
-              publicKey: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
-            },
-          },
-        },
+        splAtaProgram: { defaultsTo: defaultsToSplAssociatedTokenProgram() },
       },
     },
     "mplCandyGuard.mint": {
@@ -407,6 +406,9 @@ kinobi.update(
       internal: true,
       accounts: {
         minter: { defaultsTo: { kind: "identity" } },
+        token: {
+          defaultsTo: defaultsToAssociatedTokenPda("nftMint", "minter"),
+        },
         collectionDelegateRecord: {
           defaultsTo: defaultsToMetadataDelegateRecordPda(
             "collection",
@@ -415,6 +417,7 @@ kinobi.update(
             "candyMachineAuthorityPda"
           ),
         },
+        splAtaProgram: { defaultsTo: defaultsToSplAssociatedTokenProgram() },
       },
     },
     "mplCandyGuard.route": { internal: true },

@@ -6,6 +6,7 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-essentials';
 import {
   MetadataDelegateRole,
   findMasterEditionPda,
@@ -134,7 +135,12 @@ export function mintV2(
   const nftMasterEditionAccount =
     input.nftMasterEdition ??
     findMasterEditionPda(context, { mint: publicKey(nftMintAccount) });
-  const tokenAccount = input.token ?? { ...programId, isWritable: false };
+  const tokenAccount =
+    input.token ??
+    findAssociatedTokenPda(context, {
+      mint: publicKey(nftMintAccount),
+      owner: publicKey(minterAccount),
+    });
   const tokenRecordAccount = input.tokenRecord ?? {
     ...programId,
     isWritable: false,
@@ -170,7 +176,10 @@ export function mintV2(
     isWritable: false,
   };
   const splAtaProgramAccount = input.splAtaProgram ?? {
-    ...programId,
+    ...context.programs.getPublicKey(
+      'splAssociatedToken',
+      'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'
+    ),
     isWritable: false,
   };
   const systemProgramAccount = input.systemProgram ?? {

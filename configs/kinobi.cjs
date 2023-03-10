@@ -23,6 +23,8 @@ const {
   vEnum,
   UseCustomAccountSerializerVisitor,
   UpdateDefinedTypesVisitor,
+  TypeOptionNode,
+  TypeStringNode,
 } = require("@metaplex-foundation/kinobi");
 
 // Paths.
@@ -145,7 +147,7 @@ kinobi.update(
   })
 );
 
-// Update tokenStandard, maxSupply and hidden settings hash.
+// Update fields.
 kinobi.update(
   new TransformNodesVisitor([
     {
@@ -177,10 +179,41 @@ kinobi.update(
         );
       },
     },
+    {
+      selector: { type: "TypeStructFieldNode", name: "merkleRoot" },
+      transformer: (node) => {
+        return new TypeStructFieldNode(
+          node.metadata,
+          new TypeBytesNode({ size: { kind: "fixed", bytes: 32 } })
+        );
+      },
+    },
+    {
+      selector: { type: "TypeStructFieldNode", name: "label" },
+      transformer: (node) => {
+        return new TypeStructFieldNode(
+          node.metadata,
+          new TypeOptionNode(
+            new TypeStringNode({
+              size: { kind: "fixed", bytes: 6 },
+            })
+          )
+        );
+      },
+    },
   ])
 );
 
 // Reusable PDA defaults.
+const defaultsToAssociatedTokenPda = (mint = "mint", owner = "owner") => ({
+  kind: "pda",
+  pdaAccount: "associatedToken",
+  dependency: "mplEssentials",
+  seeds: {
+    mint: { kind: "account", name: mint },
+    owner: { kind: "account", name: owner },
+  },
+});
 const defaultsToCandyMachineAuthorityPda = (candyMachine = "candyMachine") => ({
   kind: "pda",
   pdaAccount: "candyMachineAuthority",
@@ -228,6 +261,13 @@ const defaultsToMetadataDelegateRecordPda = (
     },
     updateAuthority: { kind: "account", name: updateAuthority },
     delegate: { kind: "account", name: delegate },
+  },
+});
+const defaultsToSplAssociatedTokenProgram = () => ({
+  kind: "program",
+  program: {
+    name: "splAssociatedToken",
+    publicKey: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
   },
 });
 
@@ -327,25 +367,32 @@ kinobi.update(
         candyGuard: { defaultsTo: { kind: "pda", dependency: "hooked" } },
       },
     },
-    "mplCandyMachineCore.initializeV2": {
-      name: "initializeV2CandyMachine",
+    "mplCandyMachineCore.initializeV2": { name: "initializeCandyMachineV2" },
+    "mplCandyMachineCore.mint": {
+      name: "mintFromCandyMachine",
       accounts: {
-        authorizationRulesProgram: {
-          isOptional: false,
-          defaultsTo: {
-            kind: "program",
-            program: {
-              name: "mplTokenAuthRules",
-              publicKey: "auth9SigNpDKz4sJJ1DfCTuZrZNSAgh9sFD3rboVmgg",
-            },
-          },
-        },
+        nftMintAuthority: { defaultsTo: { kind: "identity" } },
       },
     },
-    "mplCandyMachineCore.mint": { name: "mintFromCandyMachine" },
-    "mplCandyMachineCore.mintV2": { name: "mintV2FromCandyMachine" },
+    "mplCandyMachineCore.mintV2": {
+      name: "mintFromCandyMachineV2",
+      accounts: {
+        nftMint: { isOptionalSigner: true },
+        nftMintAuthority: { defaultsTo: { kind: "identity" } },
+        token: {
+          defaultsTo: defaultsToAssociatedTokenPda("nftMint", "nftOwner"),
+        },
+        sysvarInstructions: {
+          defaultsTo: {
+            kind: "publicKey",
+            publicKey: "Sysvar1nstructions1111111111111111111111111",
+          },
+        },
+        splAtaProgram: { defaultsTo: defaultsToSplAssociatedTokenProgram() },
+      },
+    },
     "mplCandyGuard.mint": {
-      name: "mint",
+      internal: true,
       accounts: {
         collectionAuthorityRecord: {
           defaultsTo: defaultsToCollectionAuthorityRecordPda(
@@ -355,13 +402,33 @@ kinobi.update(
         },
       },
     },
-    "mplCandyGuard.mintV2": { name: "mintV2" },
+    "mplCandyGuard.mintV2": {
+      internal: true,
+      accounts: {
+        nftMint: { isOptionalSigner: true },
+        nftMintAuthority: { defaultsTo: { kind: "account", name: "minter" } },
+        minter: { defaultsTo: { kind: "identity" } },
+        token: {
+          defaultsTo: defaultsToAssociatedTokenPda("nftMint", "minter"),
+        },
+        collectionDelegateRecord: {
+          defaultsTo: defaultsToMetadataDelegateRecordPda(
+            "collection",
+            "collectionMint",
+            "collectionUpdateAuthority",
+            "candyMachineAuthorityPda"
+          ),
+        },
+        splAtaProgram: { defaultsTo: defaultsToSplAssociatedTokenProgram() },
+      },
+    },
+    "mplCandyGuard.route": { internal: true },
     "mplCandyMachineCore.SetAuthority": { name: "SetCandyMachineAuthority" },
     "mplCandyGuard.SetAuthority": { name: "SetCandyGuardAuthority" },
     "mplCandyMachineCore.update": { name: "updateCandyMachine" },
-    "mplCandyGuard.update": { name: "updateCandyGuard" },
-    "mplCandyMachineCore.withdraw": { name: "withdrawCandyMachine" },
-    "mplCandyGuard.withdraw": { name: "withdrawCandyGuard" },
+    "mplCandyGuard.update": { name: "updateCandyGuard", internal: true },
+    "mplCandyMachineCore.withdraw": { name: "deleteCandyMachine" },
+    "mplCandyGuard.withdraw": { name: "deleteCandyGuard" },
   })
 );
 
@@ -369,7 +436,7 @@ kinobi.update(
 kinobi.update(
   new UnwrapTypeDefinedLinksVisitor([
     "initializeCandyMachine.candyMachineData",
-    "initializeV2CandyMachine.candyMachineData",
+    "initializeCandyMachineV2.candyMachineData",
   ])
 );
 kinobi.update(new FlattenInstructionArgsStructVisitor());
@@ -385,7 +452,7 @@ const defaultInitialCandyMachineData = {
 kinobi.update(
   new SetStructDefaultValuesVisitor({
     initializeCandyMachineInstructionData: defaultInitialCandyMachineData,
-    initializeV2CandyMachineInstructionData: defaultInitialCandyMachineData,
+    initializeCandyMachineV2InstructionData: defaultInitialCandyMachineData,
   })
 );
 
@@ -395,7 +462,7 @@ kinobi.update(
   new SetNumberWrappersVisitor({
     "candyMachineData.sellerFeeBasisPoints": percentAmount,
     "initializeCandyMachineInstructionData.sellerFeeBasisPoints": percentAmount,
-    "initializeV2CandyMachineInstructionData.sellerFeeBasisPoints":
+    "initializeCandyMachineV2InstructionData.sellerFeeBasisPoints":
       percentAmount,
     "startDate.date": { kind: "DateTime" },
     "endDate.date": { kind: "DateTime" },

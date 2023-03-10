@@ -1,5 +1,4 @@
 import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-essentials';
-import { PublicKey } from '@metaplex-foundation/umi';
 import { getTokenGateSerializer, TokenGate, TokenGateArgs } from '../generated';
 import { GuardManifest, noopParser } from '../guards';
 
@@ -32,6 +31,4 @@ export const tokenGateGuardManifest: GuardManifest<
   routeParser: noopParser,
 };
 
-export type TokenGateMintArgs = {
-  mint: PublicKey;
-};
+export type TokenGateMintArgs = Omit<TokenGateArgs, 'amount'>;

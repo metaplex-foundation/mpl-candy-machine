@@ -1,12 +1,12 @@
 import { none, some, transactionBuilder } from '@metaplex-foundation/umi';
 import test from 'ava';
 import { addConfigLines, CandyMachine, fetchCandyMachine } from '../src';
-import { createCandyMachine, createUmi } from './_setup';
+import { createV2, createUmi } from './_setup';
 
 test('it can add items to a candy machine', async (t) => {
   // Given a Candy Machine with 5 items.
   const umi = await createUmi();
-  const candyMachine = await createCandyMachine(umi, { itemsAvailable: 5 });
+  const candyMachine = await createV2(umi, { itemsAvailable: 5 });
 
   // When we add two items to the Candy Machine.
   await transactionBuilder(umi)
@@ -49,7 +49,7 @@ test('it can add items to a candy machine', async (t) => {
 test('it uses the names and URIs as suffixes when adding items to a candy machine', async (t) => {
   // Given an existing Candy Machine with prefixes for the names and URIs.
   const umi = await createUmi();
-  const candyMachine = await createCandyMachine(umi, {
+  const candyMachine = await createV2(umi, {
     itemsAvailable: 9, // Numbers go from 1 to 9.
     configLineSettings: some({
       type: 'configLines',
@@ -102,7 +102,7 @@ test('it uses the names and URIs as suffixes when adding items to a candy machin
 test('it cannot add items to a candy machine with hidden settings', async (t) => {
   // Given a Candy Machine with hidden settings.
   const umi = await createUmi();
-  const candyMachine = await createCandyMachine(umi, {
+  const candyMachine = await createV2(umi, {
     itemsAvailable: 10,
     configLineSettings: none(),
     hiddenSettings: some({
@@ -135,7 +135,7 @@ test('it cannot add items to a candy machine with hidden settings', async (t) =>
 test('it cannot add items that would make the candy machine exceed the maximum capacity', async (t) => {
   // Given an existing Candy Machine with a capacity of 2 items.
   const umi = await createUmi();
-  const candyMachine = await createCandyMachine(umi, { itemsAvailable: 2 });
+  const candyMachine = await createV2(umi, { itemsAvailable: 2 });
 
   // When we try to add 3 items to the Candy Machine.
   const promise = transactionBuilder(umi)
@@ -161,7 +161,7 @@ test('it cannot add items that would make the candy machine exceed the maximum c
 test('it cannot add items once the candy machine is fully loaded', async (t) => {
   // Given an existing Candy Machine with 2 items loaded and a capacity of 2 items.
   const umi = await createUmi();
-  const candyMachine = await createCandyMachine(umi, { itemsAvailable: 2 });
+  const candyMachine = await createV2(umi, { itemsAvailable: 2 });
   await transactionBuilder(umi)
     .add(
       addConfigLines(umi, {
@@ -195,7 +195,7 @@ test('it cannot add items once the candy machine is fully loaded', async (t) => 
 test('it cannot add items if either of them have a name or URI that is too long', async (t) => {
   // Given a Candy Machine with a name limit of 10 characters and a URI limit of 50 characters.
   const umi = await createUmi();
-  const candyMachine = await createCandyMachine(umi, {
+  const candyMachine = await createV2(umi, {
     itemsAvailable: 2,
     configLineSettings: some({
       prefixName: '',
@@ -248,7 +248,7 @@ test('it cannot add items if either of them have a name or URI that is too long'
 test('it can add items to a custom offset and override existing items', async (t) => {
   // Given an existing Candy Machine with 2 items loaded and capacity of 3 items.
   const umi = await createUmi();
-  const candyMachine = await createCandyMachine(umi, { itemsAvailable: 3 });
+  const candyMachine = await createV2(umi, { itemsAvailable: 3 });
   await transactionBuilder(umi)
     .add(
       addConfigLines(umi, {
@@ -309,7 +309,7 @@ test('it can add items to a custom offset and override existing items', async (t
 test('it can override all items of a candy machine', async (t) => {
   // Given an fully loaded Candy Machine with 2 items.
   const umi = await createUmi();
-  const candyMachine = await createCandyMachine(umi, { itemsAvailable: 2 });
+  const candyMachine = await createV2(umi, { itemsAvailable: 2 });
   await transactionBuilder(umi)
     .add(
       addConfigLines(umi, {

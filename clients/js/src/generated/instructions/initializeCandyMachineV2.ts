@@ -44,11 +44,12 @@ import {
 } from '../types';
 
 // Accounts.
-export type InitializeV2CandyMachineInstructionAccounts = {
+export type InitializeCandyMachineV2InstructionAccounts = {
   candyMachine: PublicKey;
   authorityPda?: PublicKey;
   authority?: PublicKey;
   payer?: Signer;
+  ruleSet?: PublicKey;
   collectionMetadata?: PublicKey;
   collectionMint: PublicKey;
   collectionMasterEdition?: PublicKey;
@@ -62,7 +63,7 @@ export type InitializeV2CandyMachineInstructionAccounts = {
 };
 
 // Arguments.
-export type InitializeV2CandyMachineInstructionData = {
+export type InitializeCandyMachineV2InstructionData = {
   discriminator: Array<number>;
   /** Number of assets available */
   itemsAvailable: bigint;
@@ -83,7 +84,7 @@ export type InitializeV2CandyMachineInstructionData = {
   tokenStandard: TokenStandard;
 };
 
-export type InitializeV2CandyMachineInstructionDataArgs = {
+export type InitializeCandyMachineV2InstructionDataArgs = {
   /** Number of assets available */
   itemsAvailable: number | bigint;
   /** Symbol for the asset */
@@ -103,19 +104,19 @@ export type InitializeV2CandyMachineInstructionDataArgs = {
   tokenStandard: TokenStandardArgs;
 };
 
-export function getInitializeV2CandyMachineInstructionDataSerializer(
+export function getInitializeCandyMachineV2InstructionDataSerializer(
   context: Pick<Context, 'serializer'>
 ): Serializer<
-  InitializeV2CandyMachineInstructionDataArgs,
-  InitializeV2CandyMachineInstructionData
+  InitializeCandyMachineV2InstructionDataArgs,
+  InitializeCandyMachineV2InstructionData
 > {
   const s = context.serializer;
   return mapSerializer<
-    InitializeV2CandyMachineInstructionDataArgs,
-    InitializeV2CandyMachineInstructionData,
-    InitializeV2CandyMachineInstructionData
+    InitializeCandyMachineV2InstructionDataArgs,
+    InitializeCandyMachineV2InstructionData,
+    InitializeCandyMachineV2InstructionData
   >(
-    s.struct<InitializeV2CandyMachineInstructionData>(
+    s.struct<InitializeCandyMachineV2InstructionData>(
       [
         ['discriminator', s.array(s.u8(), { size: 8 })],
         ['itemsAvailable', s.u64()],
@@ -131,7 +132,7 @@ export function getInitializeV2CandyMachineInstructionDataSerializer(
         ['hiddenSettings', s.option(getHiddenSettingsSerializer(context))],
         ['tokenStandard', getTokenStandardSerializer(context)],
       ],
-      { description: 'InitializeV2CandyMachineInstructionData' }
+      { description: 'InitializeCandyMachineV2InstructionData' }
     ),
     (value) =>
       ({
@@ -142,21 +143,21 @@ export function getInitializeV2CandyMachineInstructionDataSerializer(
         isMutable: value.isMutable ?? true,
         configLineSettings: value.configLineSettings ?? none(),
         hiddenSettings: value.hiddenSettings ?? none(),
-      } as InitializeV2CandyMachineInstructionData)
+      } as InitializeCandyMachineV2InstructionData)
   ) as Serializer<
-    InitializeV2CandyMachineInstructionDataArgs,
-    InitializeV2CandyMachineInstructionData
+    InitializeCandyMachineV2InstructionDataArgs,
+    InitializeCandyMachineV2InstructionData
   >;
 }
 
 // Instruction.
-export function initializeV2CandyMachine(
+export function initializeCandyMachineV2(
   context: Pick<
     Context,
     'serializer' | 'programs' | 'eddsa' | 'identity' | 'payer'
   >,
-  input: InitializeV2CandyMachineInstructionAccounts &
-    InitializeV2CandyMachineInstructionDataArgs
+  input: InitializeCandyMachineV2InstructionAccounts &
+    InitializeCandyMachineV2InstructionDataArgs
 ): WrappedInstruction {
   const signers: Signer[] = [];
   const keys: AccountMeta[] = [];
@@ -176,6 +177,7 @@ export function initializeV2CandyMachine(
     });
   const authorityAccount = input.authority ?? context.identity.publicKey;
   const payerAccount = input.payer ?? context.payer;
+  const ruleSetAccount = input.ruleSet ?? { ...programId, isWritable: false };
   const collectionMintAccount = input.collectionMint;
   const collectionMetadataAccount =
     input.collectionMetadata ??
@@ -210,13 +212,13 @@ export function initializeV2CandyMachine(
     input.sysvarInstructions ??
     publicKey('Sysvar1nstructions1111111111111111111111111');
   const authorizationRulesProgramAccount = input.authorizationRulesProgram ?? {
-    ...context.programs.getPublicKey(
-      'mplTokenAuthRules',
-      'auth9SigNpDKz4sJJ1DfCTuZrZNSAgh9sFD3rboVmgg'
-    ),
+    ...programId,
     isWritable: false,
   };
-  const authorizationRulesAccount = input.authorizationRules;
+  const authorizationRulesAccount = input.authorizationRules ?? {
+    ...programId,
+    isWritable: false,
+  };
 
   // Candy Machine.
   keys.push({
@@ -245,6 +247,13 @@ export function initializeV2CandyMachine(
     pubkey: payerAccount.publicKey,
     isSigner: true,
     isWritable: isWritable(payerAccount, false),
+  });
+
+  // Rule Set.
+  keys.push({
+    pubkey: ruleSetAccount,
+    isSigner: false,
+    isWritable: isWritable(ruleSetAccount, false),
   });
 
   // Collection Metadata.
@@ -311,18 +320,16 @@ export function initializeV2CandyMachine(
     isWritable: isWritable(authorizationRulesProgramAccount, false),
   });
 
-  // Authorization Rules (optional).
-  if (authorizationRulesAccount) {
-    keys.push({
-      pubkey: authorizationRulesAccount,
-      isSigner: false,
-      isWritable: isWritable(authorizationRulesAccount, false),
-    });
-  }
+  // Authorization Rules.
+  keys.push({
+    pubkey: authorizationRulesAccount,
+    isSigner: false,
+    isWritable: isWritable(authorizationRulesAccount, false),
+  });
 
   // Data.
   const data =
-    getInitializeV2CandyMachineInstructionDataSerializer(context).serialize(
+    getInitializeCandyMachineV2InstructionDataSerializer(context).serialize(
       input
     );
 

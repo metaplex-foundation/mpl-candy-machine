@@ -692,6 +692,32 @@ nameToErrorMap.set(
   CgAllocationGuardNotEnabledError
 );
 
+/** InvalidMintAuthority: 'Candy machine has an invalid mint authority' */
+export class CgInvalidMintAuthorityError extends ProgramError {
+  readonly name: string = 'InvalidMintAuthority';
+
+  readonly code: number = 0x17a1; // 6049
+
+  constructor(program: Program, cause?: Error) {
+    super('Candy machine has an invalid mint authority', program, cause);
+  }
+}
+codeToErrorMap.set(0x17a1, CgInvalidMintAuthorityError);
+nameToErrorMap.set('InvalidMintAuthority', CgInvalidMintAuthorityError);
+
+/** InstructionBuilderFailed: 'Instruction could not be created' */
+export class CgInstructionBuilderFailedError extends ProgramError {
+  readonly name: string = 'InstructionBuilderFailed';
+
+  readonly code: number = 0x17a2; // 6050
+
+  constructor(program: Program, cause?: Error) {
+    super('Instruction could not be created', program, cause);
+  }
+}
+codeToErrorMap.set(0x17a2, CgInstructionBuilderFailedError);
+nameToErrorMap.set('InstructionBuilderFailed', CgInstructionBuilderFailedError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

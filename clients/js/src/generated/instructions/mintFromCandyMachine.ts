@@ -31,7 +31,7 @@ export type MintFromCandyMachineInstructionAccounts = {
   mintAuthority: Signer;
   payer?: Signer;
   nftMint: PublicKey;
-  nftMintAuthority: Signer;
+  nftMintAuthority?: Signer;
   nftMetadata?: PublicKey;
   nftMasterEdition?: PublicKey;
   collectionAuthorityRecord?: PublicKey;
@@ -81,7 +81,10 @@ export function getMintFromCandyMachineInstructionDataSerializer(
 
 // Instruction.
 export function mintFromCandyMachine(
-  context: Pick<Context, 'serializer' | 'programs' | 'eddsa' | 'payer'>,
+  context: Pick<
+    Context,
+    'serializer' | 'programs' | 'eddsa' | 'identity' | 'payer'
+  >,
   input: MintFromCandyMachineInstructionAccounts
 ): WrappedInstruction {
   const signers: Signer[] = [];
@@ -103,7 +106,7 @@ export function mintFromCandyMachine(
   const mintAuthorityAccount = input.mintAuthority;
   const payerAccount = input.payer ?? context.payer;
   const nftMintAccount = input.nftMint;
-  const nftMintAuthorityAccount = input.nftMintAuthority;
+  const nftMintAuthorityAccount = input.nftMintAuthority ?? context.identity;
   const nftMetadataAccount =
     input.nftMetadata ??
     findMetadataPda(context, { mint: publicKey(nftMintAccount) });

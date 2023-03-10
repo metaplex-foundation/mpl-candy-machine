@@ -1,4 +1,6 @@
-import { Context, Serializer } from '@metaplex-foundation/umi';
+import { Context, mapSerializer, Serializer } from '@metaplex-foundation/umi';
+import { GuardGroupLabelTooLongError } from '../errors';
+import { CANDY_GUARD_LABEL_SIZE } from '../constants';
 import { CandyGuardProgram, GuardRepository } from './guardRepository';
 import { getGuardSetSerializer, GuardSet, GuardSetArgs } from './guardSet';
 
@@ -26,7 +28,18 @@ export function getGuardGroupSerializer<
   const s = context.serializer;
   return s.struct(
     [
-      ['label', s.string()],
+      [
+        'label',
+        mapSerializer(
+          s.string({ size: CANDY_GUARD_LABEL_SIZE }),
+          (label: string): string => {
+            if (label.length > CANDY_GUARD_LABEL_SIZE) {
+              throw new GuardGroupLabelTooLongError(label);
+            }
+            return label;
+          }
+        ),
+      ],
       ['guards', getGuardSetSerializer<DA, D>(context, program)],
     ],
     { description: 'GuardGroup' }

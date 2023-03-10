@@ -58,7 +58,7 @@ export function getRouteInstructionDataSerializer(
         ['discriminator', s.array(s.u8(), { size: 8 })],
         ['guard', getGuardTypeSerializer(context)],
         ['data', s.bytes()],
-        ['label', s.option(s.string())],
+        ['label', s.option(s.string({ size: 6 }))],
       ],
       { description: 'RouteInstructionData' }
     ),

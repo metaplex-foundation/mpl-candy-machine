@@ -18,6 +18,7 @@ import { Context, PublicKey, Serializer } from '@metaplex-foundation/umi';
  * 2. `[writeable]` Master Edition account of the NFT.
  * 3. `[writeable]` Mint account of the NFT.
  * 4. `[writeable]` Collection metadata account of the NFT.
+ * 5. `[writeable]` Token Record of the NFT (pNFT).
  */
 
 export type NftBurn = { requiredCollection: PublicKey };

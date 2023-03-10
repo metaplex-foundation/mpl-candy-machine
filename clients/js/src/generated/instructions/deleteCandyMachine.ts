@@ -18,49 +18,49 @@ import {
 } from '@metaplex-foundation/umi';
 
 // Accounts.
-export type WithdrawCandyMachineInstructionAccounts = {
+export type DeleteCandyMachineInstructionAccounts = {
   candyMachine: PublicKey;
   authority?: Signer;
 };
 
 // Arguments.
-export type WithdrawCandyMachineInstructionData = {
+export type DeleteCandyMachineInstructionData = {
   discriminator: Array<number>;
 };
 
-export type WithdrawCandyMachineInstructionDataArgs = {};
+export type DeleteCandyMachineInstructionDataArgs = {};
 
-export function getWithdrawCandyMachineInstructionDataSerializer(
+export function getDeleteCandyMachineInstructionDataSerializer(
   context: Pick<Context, 'serializer'>
 ): Serializer<
-  WithdrawCandyMachineInstructionDataArgs,
-  WithdrawCandyMachineInstructionData
+  DeleteCandyMachineInstructionDataArgs,
+  DeleteCandyMachineInstructionData
 > {
   const s = context.serializer;
   return mapSerializer<
-    WithdrawCandyMachineInstructionDataArgs,
-    WithdrawCandyMachineInstructionData,
-    WithdrawCandyMachineInstructionData
+    DeleteCandyMachineInstructionDataArgs,
+    DeleteCandyMachineInstructionData,
+    DeleteCandyMachineInstructionData
   >(
-    s.struct<WithdrawCandyMachineInstructionData>(
+    s.struct<DeleteCandyMachineInstructionData>(
       [['discriminator', s.array(s.u8(), { size: 8 })]],
-      { description: 'WithdrawCandyMachineInstructionData' }
+      { description: 'DeleteCandyMachineInstructionData' }
     ),
     (value) =>
       ({
         ...value,
         discriminator: [183, 18, 70, 156, 148, 109, 161, 34],
-      } as WithdrawCandyMachineInstructionData)
+      } as DeleteCandyMachineInstructionData)
   ) as Serializer<
-    WithdrawCandyMachineInstructionDataArgs,
-    WithdrawCandyMachineInstructionData
+    DeleteCandyMachineInstructionDataArgs,
+    DeleteCandyMachineInstructionData
   >;
 }
 
 // Instruction.
-export function withdrawCandyMachine(
+export function deleteCandyMachine(
   context: Pick<Context, 'serializer' | 'programs' | 'identity'>,
-  input: WithdrawCandyMachineInstructionAccounts
+  input: DeleteCandyMachineInstructionAccounts
 ): WrappedInstruction {
   const signers: Signer[] = [];
   const keys: AccountMeta[] = [];
@@ -91,7 +91,7 @@ export function withdrawCandyMachine(
   });
 
   // Data.
-  const data = getWithdrawCandyMachineInstructionDataSerializer(
+  const data = getDeleteCandyMachineInstructionDataSerializer(
     context
   ).serialize({});
 

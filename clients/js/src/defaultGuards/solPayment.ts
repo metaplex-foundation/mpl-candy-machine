@@ -1,4 +1,3 @@
-import { PublicKey } from '@metaplex-foundation/umi';
 import {
   getSolPaymentSerializer,
   SolPayment,
@@ -24,6 +23,4 @@ export const solPaymentGuardManifest: GuardManifest<
   routeParser: noopParser,
 };
 
-export type SolPaymentMintArgs = {
-  destination: PublicKey;
-};
+export type SolPaymentMintArgs = Omit<SolPaymentArgs, 'lamports'>;

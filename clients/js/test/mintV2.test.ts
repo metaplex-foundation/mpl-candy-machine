@@ -38,7 +38,7 @@ test('it can mint from a candy guard with no guards', async (t) => {
   const mint = generateSigner(umi);
   const minter = generateSigner(umi);
   await transactionBuilder(umi)
-    .add(setComputeUnitLimit(umi, { units: 400_000 }))
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
@@ -58,6 +58,10 @@ test('it can mint from a candy guard with no guards', async (t) => {
   const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
   t.like(candyMachineAccount, <CandyMachine>{ itemsRedeemed: 1n });
 });
+
+// TODO: it can mint whilst creating the mint and token accounts beforehand.
+
+// TODO: it can mint whilst creating only the mint account beforehand.
 
 test('it can mint from a candy guard with guards', async (t) => {
   // Given a candy machine with some guards.
@@ -108,3 +112,5 @@ test('it can mint from a candy guard with guards', async (t) => {
   const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
   t.like(candyMachineAccount, <CandyMachine>{ itemsRedeemed: 1n });
 });
+
+// TODO: it can mint from a candy guard attached to a candy machine v1.

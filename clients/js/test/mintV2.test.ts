@@ -489,3 +489,47 @@ test('it cannot mint from a candy machine that has been fully minted', async (t)
   // Then we expect a program error.
   await t.throwsAsync(promise, { message: /CandyMachineEmpty/ });
 });
+
+test('it can mint from a candy machine using hidden settings', async (t) => {
+  // Given a candy machine with hidden settings.
+  const umi = await createUmi();
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    itemsAvailable: 100,
+    configLineSettings: none(),
+    hiddenSettings: some({
+      name: 'Degen #$ID+1$',
+      uri: 'https://example.com/degen/$ID+1$',
+      hash: new Uint8Array(32),
+    }),
+    guards: {},
+  });
+
+  // When we mint from it.
+  const mint = generateSigner(umi);
+  const minter = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        minter,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+      })
+    )
+    .sendAndConfirm();
+
+  // Then the mint was successful.
+  await assertSuccessfulMint(t, umi, {
+    mint,
+    owner: minter,
+    name: 'Degen #1',
+    uri: 'https://example.com/degen/1',
+  });
+});
+
+// it can mint from a candy machine sequentially
+// it can mint from a candy machine in a random order

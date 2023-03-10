@@ -8,12 +8,7 @@ import {
 } from '@metaplex-foundation/umi';
 import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
 import test from 'ava';
-import {
-  CandyMachine,
-  fetchCandyMachine,
-  findCandyGuardPda,
-  mint as mintV1,
-} from '../src';
+import { CandyMachine, fetchCandyMachine, mint as mintV1 } from '../src';
 import {
   assertSuccessfulMint,
   createCollectionNft,
@@ -32,7 +27,6 @@ test('it can mint from a candy guard with no guards', async (t) => {
     groups: [],
   });
   const candyMachine = candyMachineSigner.publicKey;
-  const candyGuard = findCandyGuardPda(umi, { base: candyMachine });
 
   // When we mint from the candy guard.
   const mint = generateSigner(umi);
@@ -42,9 +36,7 @@ test('it can mint from a candy guard with no guards', async (t) => {
     .add(
       mintV1(umi, {
         candyMachine,
-        candyGuard,
         nftMint: mint.publicKey,
-        nftMintAuthority: umi.identity,
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
       })
@@ -73,7 +65,6 @@ test('it can mint from a candy guard with guards', async (t) => {
     },
   });
   const candyMachine = candyMachineSigner.publicKey;
-  const candyGuard = findCandyGuardPda(umi, { base: candyMachine });
 
   // When we mint from the candy guard.
   const mint = generateSigner(umi);
@@ -84,9 +75,7 @@ test('it can mint from a candy guard with guards', async (t) => {
     .add(
       mintV1(umi, {
         candyMachine,
-        candyGuard,
         nftMint: mint.publicKey,
-        nftMintAuthority: umi.identity,
         payer,
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,

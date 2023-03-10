@@ -23,18 +23,18 @@ import {
   mapSerializer,
   publicKey,
 } from '@metaplex-foundation/umi';
-import { findCandyMachineAuthorityPda } from '../../hooked';
+import { findCandyGuardPda, findCandyMachineAuthorityPda } from '../../hooked';
 
 // Accounts.
 export type MintInstructionAccounts = {
-  candyGuard: PublicKey;
+  candyGuard?: PublicKey;
   candyMachineProgram?: PublicKey;
   candyMachine: PublicKey;
   candyMachineAuthorityPda?: PublicKey;
   payer?: Signer;
   nftMetadata?: PublicKey;
   nftMint: PublicKey;
-  nftMintAuthority: Signer;
+  nftMintAuthority?: Signer;
   nftMasterEdition?: PublicKey;
   collectionAuthorityRecord?: PublicKey;
   collectionMint: PublicKey;
@@ -87,7 +87,10 @@ export function getMintInstructionDataSerializer(
 
 // Instruction.
 export function mint(
-  context: Pick<Context, 'serializer' | 'programs' | 'eddsa' | 'payer'>,
+  context: Pick<
+    Context,
+    'serializer' | 'programs' | 'eddsa' | 'identity' | 'payer'
+  >,
   input: MintInstructionAccounts & MintInstructionDataArgs
 ): WrappedInstruction {
   const signers: Signer[] = [];
@@ -100,7 +103,10 @@ export function mint(
   );
 
   // Resolved accounts.
-  const candyGuardAccount = input.candyGuard;
+  const candyMachineAccount = input.candyMachine;
+  const candyGuardAccount =
+    input.candyGuard ??
+    findCandyGuardPda(context, { base: publicKey(candyMachineAccount) });
   const candyMachineProgramAccount = input.candyMachineProgram ?? {
     ...context.programs.getPublicKey(
       'mplCandyMachine',
@@ -108,7 +114,6 @@ export function mint(
     ),
     isWritable: false,
   };
-  const candyMachineAccount = input.candyMachine;
   const candyMachineAuthorityPdaAccount =
     input.candyMachineAuthorityPda ??
     findCandyMachineAuthorityPda(context, {
@@ -119,7 +124,7 @@ export function mint(
   const nftMetadataAccount =
     input.nftMetadata ??
     findMetadataPda(context, { mint: publicKey(nftMintAccount) });
-  const nftMintAuthorityAccount = input.nftMintAuthority;
+  const nftMintAuthorityAccount = input.nftMintAuthority ?? context.identity;
   const nftMasterEditionAccount =
     input.nftMasterEdition ??
     findMasterEditionPda(context, { mint: publicKey(nftMintAccount) });

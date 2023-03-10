@@ -26,11 +26,11 @@ import {
   mapSerializer,
   publicKey,
 } from '@metaplex-foundation/umi';
-import { findCandyMachineAuthorityPda } from '../../hooked';
+import { findCandyGuardPda, findCandyMachineAuthorityPda } from '../../hooked';
 
 // Accounts.
 export type MintV2InstructionAccounts = {
-  candyGuard: PublicKey;
+  candyGuard?: PublicKey;
   candyMachineProgram?: PublicKey;
   candyMachine: PublicKey;
   candyMachineAuthorityPda?: PublicKey;
@@ -112,7 +112,10 @@ export function mintV2(
   );
 
   // Resolved accounts.
-  const candyGuardAccount = input.candyGuard;
+  const candyMachineAccount = input.candyMachine;
+  const candyGuardAccount =
+    input.candyGuard ??
+    findCandyGuardPda(context, { base: publicKey(candyMachineAccount) });
   const candyMachineProgramAccount = input.candyMachineProgram ?? {
     ...context.programs.getPublicKey(
       'mplCandyMachine',
@@ -120,7 +123,6 @@ export function mintV2(
     ),
     isWritable: false,
   };
-  const candyMachineAccount = input.candyMachine;
   const candyMachineAuthorityPdaAccount =
     input.candyMachineAuthorityPda ??
     findCandyMachineAuthorityPda(context, {

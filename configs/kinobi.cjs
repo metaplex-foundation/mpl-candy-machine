@@ -214,6 +214,12 @@ const defaultsToAssociatedTokenPda = (mint = "mint", owner = "owner") => ({
     owner: { kind: "account", name: owner },
   },
 });
+const defaultsToCandyGuardPda = (base = "base") => ({
+  kind: "pda",
+  pdaAccount: "candyGuard",
+  dependency: "hooked",
+  seeds: { base: { kind: "account", name: base } },
+});
 const defaultsToCandyMachineAuthorityPda = (candyMachine = "candyMachine") => ({
   kind: "pda",
   pdaAccount: "candyMachineAuthority",
@@ -394,6 +400,8 @@ kinobi.update(
     "mplCandyGuard.mint": {
       internal: true,
       accounts: {
+        candyGuard: { defaultsTo: defaultsToCandyGuardPda("candyMachine") },
+        nftMintAuthority: { defaultsTo: { kind: "identity" } },
         collectionAuthorityRecord: {
           defaultsTo: defaultsToCollectionAuthorityRecordPda(
             "collectionMint",
@@ -405,6 +413,7 @@ kinobi.update(
     "mplCandyGuard.mintV2": {
       internal: true,
       accounts: {
+        candyGuard: { defaultsTo: defaultsToCandyGuardPda("candyMachine") },
         nftMint: { isOptionalSigner: true },
         nftMintAuthority: { defaultsTo: { kind: "account", name: "minter" } },
         minter: { defaultsTo: { kind: "identity" } },

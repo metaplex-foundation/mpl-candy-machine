@@ -18,6 +18,7 @@ import {
   parseGuardRemainingAccounts,
   parseMintArgs,
 } from './guards';
+import { findCandyGuardPda } from './hooked';
 
 export { MintInstructionAccounts };
 
@@ -46,7 +47,9 @@ export function mint<MA extends GuardSetArgs = DefaultGuardSetMintArgs>(
     payer: input.payer ?? context.payer,
     mint: input.nftMint,
     candyMachine: input.candyMachine,
-    candyGuard: input.candyGuard,
+    candyGuard:
+      input.candyGuard ??
+      findCandyGuardPda(context, { base: input.candyMachine }),
   };
   const { data, remainingAccounts } = parseMintArgs<
     MA extends undefined ? DefaultGuardSetMintArgs : MA

@@ -312,3 +312,79 @@ test('it cannot mint using the default guards if the candy guard has groups', as
   // Then we expect a program error.
   await t.throwsAsync(promise, { message: /RequiredGroupLabelNotFound/ });
 });
+
+test('it cannot mint from a group if the provided group label does not exist', async (t) => {
+  // Given a candy machine with no guard groups.
+  const umi = await createUmi();
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const destination = generateSigner(umi).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: { solPayment: some({ lamports: sol(2), destination }) },
+    groups: [
+      { label: 'GROUP1', guards: { startDate: some({ date: yesterday() }) } },
+    ],
+  });
+
+  // When we try to mint using a group that does not exist.
+  const mint = generateSigner(umi);
+  const minter = generateSigner(umi);
+  const promise = transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        minter,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: { solPayment: some({ destination }) },
+        group: some('GROUPX'),
+      })
+    )
+    .sendAndConfirm();
+
+  // Then we expect a program error.
+  await t.throwsAsync(promise, { message: /GroupNotFound/ });
+});
+
+test('it can mint using an explicit payer', async (t) => {
+  // Given a candy machine with guards.
+  const umi = await createUmi();
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const destination = generateSigner(umi).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: { solPayment: some({ lamports: sol(2), destination }) },
+  });
+
+  // And an explicit payer with 10 SOL.
+  const payer = await generateSignerWithSol(umi, sol(10));
+
+  // When we mint from it using that payer.
+  const mint = generateSigner(umi);
+  const minter = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        minter,
+        payer,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: { solPayment: some({ destination }) },
+      })
+    )
+    .sendAndConfirm();
+
+  // Then the mint was successful.
+  await assertSuccessfulMint(t, umi, { mint, owner: minter, name: 'Degen #1' });
+
+  // And the payer was charged.
+  const payerBalance = await umi.rpc.getBalance(payer.publicKey);
+  t.true(isEqualToAmount(payerBalance, sol(8), sol(0.1)));
+});

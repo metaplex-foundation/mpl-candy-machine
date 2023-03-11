@@ -76,7 +76,7 @@ jobs:
         uses: metaplex-foundation/actions/install-solana@v1
         with:
           version: ${{ vars.SOLANA_VERSION }}
-          cache: ${{ env.CACHE }}
+          cache: false
 
       - name: Cache program dependencies
         if: env.CACHE == 'true'
@@ -93,11 +93,12 @@ jobs:
         if: env.CACHE == 'true'
         uses: metaplex-foundation/actions/cache-idl-generators@v1
 
-      - name: Install IDL generators
+      - name: DEBUG
         run: |
-          ls -la ~/.local/share/solana/install/releases
-          ls -la ~/.cache/solana
-          rm -rf ~/.cache/solana
+          ls ~/.local/share/solana/install/releases
+          ls -la ~/.local/share/solana/install/releases/1.14.13
+          ls -la ~/.local/share/solana/install/releases/1.14.13/solana-release/bin/sdk/bpf/dependencies
+          ls -la ~/.cache
 
       - name: Generate IDLs and clients
         run: pnpm generate

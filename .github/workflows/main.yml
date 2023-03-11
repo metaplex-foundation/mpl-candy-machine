@@ -96,9 +96,11 @@ jobs:
       - name: DEBUG
         run: |
           ls -la ~/.cache
+          ls -la /home/runner/.cache
           ls ~/.local/share/solana/install/releases
           ls -la ~/.local/share/solana/install/releases/1.14.13/solana-release/bin/sdk
           ls -la ~/.local/share/solana/install/releases/1.14.13/solana-release/bin/sdk/bpf/dependencies
+          solana-install init {{ vars.SOLANA_VERSION }}
 
       - name: Generate IDLs and clients
         run: pnpm generate

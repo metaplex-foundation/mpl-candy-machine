@@ -93,6 +93,12 @@ jobs:
         if: env.CACHE == 'true'
         uses: metaplex-foundation/actions/cache-idl-generators@v1
 
+      - name: Install IDL generators
+        run: |
+          ls -la ~/.local/share/solana/install/releases
+          ls -la ~/.cache/solana
+          rm -rf ~/.cache/solana
+
       - name: Generate IDLs and clients
         run: pnpm generate
 

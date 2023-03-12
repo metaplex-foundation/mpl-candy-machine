@@ -56,10 +56,11 @@ jobs:
     if: ${{ needs.changes.outputs.any == 'true' }}
     needs: build_programs
     runs-on: ubuntu-latest
-    # outputs:
-    #   js_changed: ${{ steps.changes.outputs.js_client }}
+    outputs:
+      js_changed: ${{ steps.changes.outputs.js_client }}
     permissions:
       contents: write
+      pull-requests: write
     steps:
       - name: Git checkout
         uses: actions/checkout@v3
@@ -93,13 +94,6 @@ jobs:
         if: env.CACHE == 'true'
         uses: metaplex-foundation/actions/cache-idl-generators@v1
 
-      - name: DEBUG
-        run: |
-          ls -la ~/.cache
-          ls ~/.local/share/solana/install/releases
-          ls -la ~/.local/share/solana/install/releases/1.14.13/solana-release/bin/sdk
-          ls -la ~/.local/share/solana/install/releases/1.14.13/solana-release/bin/sdk/bpf/dependencies
-
       - name: Generate IDLs and clients
         run: pnpm generate
 
@@ -108,14 +102,14 @@ jobs:
         with:
           commit_message: Update generated clients
 
-      # - name: Detect client changes
-      #   uses: dorny/paths-filter@v2
-      #   id: changes
-      #   with:
-      #     filters: .github/file-filters.yml
+      - name: Detect client changes
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: .github/file-filters.yml
 
   test_js:
-    # if: needs.generate_clients.outputs.js_changed == 'true'
+    if: needs.generate_clients.outputs.js_changed == 'true'
     name: JS Client
     needs: generate_clients
     uses: ./.github/workflows/test-js.yml

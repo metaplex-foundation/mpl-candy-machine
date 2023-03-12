@@ -56,13 +56,6 @@ jobs:
             (cd ./programs/$program; cargo build-bpf)
           done
 
-      - name: DEBUG
-        run: |
-          ls -la ~/.cache
-          ls ~/.local/share/solana/install/releases
-          ls -la ~/.local/share/solana/install/releases/1.14.13/solana-release/bin/sdk
-          ls -la ~/.local/share/solana/install/releases/1.14.13/solana-release/bin/sdk/bpf/dependencies
-
       - name: Upload program builds
         uses: actions/upload-artifact@v3
         with:

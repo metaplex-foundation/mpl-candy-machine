@@ -56,8 +56,8 @@ jobs:
     if: ${{ needs.changes.outputs.any == 'true' }}
     needs: build_programs
     runs-on: ubuntu-latest
-    outputs:
-      js_changed: ${{ steps.changes.outputs.js_client }}
+    # outputs:
+    #   js_changed: ${{ steps.changes.outputs.js_client }}
     permissions:
       contents: write
     steps:
@@ -108,14 +108,14 @@ jobs:
         with:
           commit_message: Update generated clients
 
-      - name: Detect client changes
-        uses: dorny/paths-filter@v2
-        id: changes
-        with:
-          filters: .github/file-filters.yml
+      # - name: Detect client changes
+      #   uses: dorny/paths-filter@v2
+      #   id: changes
+      #   with:
+      #     filters: .github/file-filters.yml
 
   test_js:
-    if: needs.generate_clients.outputs.js_changed == 'true'
+    # if: needs.generate_clients.outputs.js_changed == 'true'
     name: JS Client
     needs: generate_clients
     uses: ./.github/workflows/test-js.yml

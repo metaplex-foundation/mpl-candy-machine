@@ -1,130 +1,170 @@
-// import {
-//   generateSigner,
-//   sol,
-//   some,
-//   transactionBuilder,
-// } from '@metaplex-foundation/umi';
-// import test from 'ava';
-// import { createCollectionNft, createUmi, createV2 } from '../_setup';
-// import { mintV2 } from '../../src';
+import {
+  generateSigner,
+  some,
+  transactionBuilder,
+} from '@metaplex-foundation/umi';
+import test from 'ava';
+import {
+  createMint,
+  createToken,
+  setComputeUnitLimit,
+} from '@metaplex-foundation/mpl-essentials';
+import {
+  assertSuccessfulMint,
+  createCollectionNft,
+  createUmi,
+  createV2,
+  createVerifiedNft,
+} from '../_setup';
+import { mintV2 } from '../../src';
 
-// test('it allows minting when the payer owns an NFT from a certain collection', async (t) => {
-//   // Given a payer that owns an NFT from a certain collection.
-//   const umi = await createUmi();
-//   const payer = await generateSignerWithSol(umi, sol(10));
-//   const nftGateCollectionAuthority = generateSigner(umi);
-//   const nftGateCollection = await createCollectionNft(umi, {
-//     updateAuthority: nftGateCollectionAuthority,
-//   });
-//   const payerNft = await createNft(umi, {
-//     tokenOwner: payer.publicKey,
-//     collection: nftGateCollection.address,
-//     collectionAuthority: nftGateCollectionAuthority,
-//   });
+test('it allows minting when the payer owns an NFT from a certain collection', async (t) => {
+  // Given the identity owns an NFT from a certain collection.
+  const umi = await createUmi();
+  const requiredCollectionAuthority = generateSigner(umi);
+  const { publicKey: requiredCollection } = await createCollectionNft(umi, {
+    authority: requiredCollectionAuthority,
+  });
+  const nftToVerify = await createVerifiedNft(umi, {
+    tokenOwner: umi.identity.publicKey,
+    collectionMint: requiredCollection,
+    collectionAuthority: requiredCollectionAuthority,
+  });
 
-//   // And a loaded Candy Machine with an nftGate guard.
-//   const collectionMint = (await createCollectionNft(umi)).publicKey;
-//   const { publicKey: candyMachine } = await createV2(umi, {
-//     collectionMint,
+  // And a loaded Candy Machine with an nftGate guard.
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {
+      nftGate: some({ requiredCollection }),
+    },
+  });
 
-//     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
-//     guards: {
-//       nftGate: {
-//         requiredCollection: nftGateCollection.address,
-//       },
-//     },
-//   });
+  // When we mint from it.
+  const mint = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: {
+          nftGate: some({ requiredCollection, mint: nftToVerify.publicKey }),
+        },
+      })
+    )
+    .sendAndConfirm();
 
-//   // When we mint from it.
-//   const mint = generateSigner(umi);
-//   await transactionBuilder(umi).add().sendAndConfirm();
-//   mintV2(
-//     umi,
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//       guards: {
-//         nftGate: {
-//           mint: payerNft.address,
-//         },
-//       },
-//     },
-//     { payer }
-//   );
+  // Then minting was successful.
+  await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
+});
 
-//   // Then minting was successful.
-//   await assertSuccessfulMint(
-//     t,
-//     umi,
-//     { mint, owner: minter },
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//       nft,
-//       owner: payer.publicKey,
-//     }
-//   );
-// });
+test('it allows minting even when the payer is different from the minter', async (t) => {
+  // Given a separate minter that owns an NFT from a certain collection.
+  const umi = await createUmi();
+  const minter = generateSigner(umi);
+  const requiredCollectionAuthority = generateSigner(umi);
+  const { publicKey: requiredCollection } = await createCollectionNft(umi, {
+    authority: requiredCollectionAuthority,
+  });
+  const nftToVerify = await createVerifiedNft(umi, {
+    tokenOwner: minter.publicKey,
+    collectionMint: requiredCollection,
+    collectionAuthority: requiredCollectionAuthority,
+  });
 
-// test('it allows minting when the NFT is not on an associated token account', async (t) => {
-//   // Given a payer that owns an NFT from a certain collection on a non-associated token account.
-//   const umi = await createUmi();
-//   const payer = await generateSignerWithSol(umi, sol(10));
-//   const nftGateCollectionAuthority = generateSigner(umi);
-//   const nftGateCollection = await createCollectionNft(umi, {
-//     updateAuthority: nftGateCollectionAuthority,
-//   });
-//   const payerNft = await createNft(umi, {
-//     tokenOwner: payer.publicKey,
-//     tokenAddress: generateSigner(umi), // <- We're explicitly creating a non-associated token account.
-//     collection: nftGateCollection.address,
-//     collectionAuthority: nftGateCollectionAuthority,
-//   });
+  // And a loaded Candy Machine with an nftGate guard.
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {
+      nftGate: some({ requiredCollection }),
+    },
+  });
 
-//   // And a loaded Candy Machine with an nftGate guard.
-//   const collectionMint = (await createCollectionNft(umi)).publicKey;
-//   const { publicKey: candyMachine } = await createV2(umi, {
-//     collectionMint,
+  // When we mint from it.
+  const mint = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        minter,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: {
+          nftGate: some({ requiredCollection, mint: nftToVerify.publicKey }),
+        },
+      })
+    )
+    .sendAndConfirm();
 
-//     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
-//     guards: {
-//       nftGate: {
-//         requiredCollection: nftGateCollection.address,
-//       },
-//     },
-//   });
+  // Then minting was successful.
+  await assertSuccessfulMint(t, umi, { mint, owner: minter });
+});
 
-//   // When we mint from it by providing the mint and token addresses.
-//   const mint = generateSigner(umi);
-//   await transactionBuilder(umi).add().sendAndConfirm();
-//   mintV2(
-//     umi,
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//       guards: {
-//         nftGate: {
-//           mint: payerNft.address,
-//           tokenAccount: payerNft.token.address,
-//         },
-//       },
-//     },
-//     { payer }
-//   );
+test.skip('it allows minting when the NFT is not on an associated token account', async (t) => {
+  // Given a payer that owns an NFT from a certain collection on a non-associated token account.
+  const umi = await createUmi();
+  const requiredCollectionAuthority = generateSigner(umi);
+  const { publicKey: requiredCollection } = await createCollectionNft(umi, {
+    authority: requiredCollectionAuthority,
+  });
+  const nftToVerify = generateSigner(umi);
+  const nftToVerifyToken = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(createMint(umi, { mint: nftToVerify }))
+    .add(
+      createToken(umi, {
+        mint: nftToVerify.publicKey,
+        owner: umi.identity.publicKey,
+        token: nftToVerifyToken,
+      })
+    )
+    .sendAndConfirm();
+  await createVerifiedNft(umi, {
+    mint: nftToVerify,
+    tokenOwner: umi.identity.publicKey,
+    token: nftToVerifyToken.publicKey, // <- We're explicitly creating a non-associated token account.
+    collectionMint: requiredCollection,
+    collectionAuthority: requiredCollectionAuthority,
+  });
 
-//   // Then minting was successful.
-//   await assertSuccessfulMint(
-//     t,
-//     umi,
-//     { mint, owner: minter },
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//       nft,
-//       owner: payer.publicKey,
-//     }
-//   );
-// });
+  // And a loaded Candy Machine with an nftGate guard.
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {
+      nftGate: some({ requiredCollection }),
+    },
+  });
+
+  // When we mint from it by providing the mint and token addresses.
+  const mint = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: {
+          nftGate: some({ requiredCollection, mint: nftToVerify.publicKey }),
+        },
+      })
+    )
+    .sendAndConfirm();
+
+  // Then minting was successful.
+  await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
+});
 
 // test('it forbids minting when the payer does not own an NFT from a certain collection', async (t) => {
 //   // Given a payer that used to own an NFT from a certain collection.

@@ -1,4 +1,13 @@
 import {
+  addFeatureToNetwork,
+  addGatekeeper,
+  GatewayTokenData,
+  issueVanilla,
+  NetworkFeature,
+  UserTokenExpiry,
+} from '@identity.com/solana-gateway-ts';
+import { setComputeUnitLimit } from '@metaplex-foundation/mpl-essentials';
+import {
   assertAccountExists,
   dateTime,
   DateTimeInput,
@@ -10,23 +19,16 @@ import {
   transactionBuilder,
   Umi,
 } from '@metaplex-foundation/umi';
-import test from 'ava';
-import { Buffer } from 'buffer';
-import {
-  addGatekeeper,
-  issueVanilla,
-  addFeatureToNetwork,
-  NetworkFeature,
-  UserTokenExpiry,
-  GatewayTokenData,
-} from '@identity.com/solana-gateway-ts';
+import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
 import {
   fromWeb3JsInstruction,
   toWeb3JsPublicKey,
 } from '@metaplex-foundation/umi-web3js-adapters';
-import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
-import { setComputeUnitLimit } from '@metaplex-foundation/mpl-essentials';
+import test from 'ava';
+import { Buffer } from 'buffer';
+import { mintV2 } from '../../src';
 import {
+  assertBotTax,
   assertSuccessfulMint,
   createCollectionNft,
   createUmi,
@@ -34,7 +36,6 @@ import {
   tomorrow,
   yesterday,
 } from '../_setup';
-import { mintV2 } from '../../src';
 
 test('it allows minting via a gatekeeper service', async (t) => {
   // Given a Gatekeeper Network.
@@ -417,60 +418,49 @@ test('it may immediately mark gateway tokens as expired after using them', async
   );
 });
 
-// test('it charges a bot tax when trying to mint using the wrong token', async (t) => {
-//   // Given a Gatekeeper Network.
-//   const umi = await createUmi();
-//   const { gatekeeperNetwork } = await createGatekeeperNetwork(umi);
+test('it charges a bot tax when trying to mint using the wrong token', async (t) => {
+  // Given a Gatekeeper Network such that the identity doesn't
+  // have a valid gateway Token Account from that network.
+  const umi = await createUmi();
+  const { gatekeeperNetwork } = await createGatekeeperNetwork(umi);
 
-//   // And a payer without a valid gateway Token Account from that network.
-//   const payer = await generateSignerWithSol(umi, sol(10));
-//   const wrongToken = generateSigner(umi).publicKey;
+  // Given a loaded Candy Machine with a gatekeeper guard and a botTax guard.
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {
+      botTax: some({ lamports: sol(0.1), lastInstruction: true }),
+      gatekeeper: some({
+        gatekeeperNetwork: gatekeeperNetwork.publicKey,
+        expireOnUse: false,
+      }),
+    },
+  });
 
-//   // Given a loaded Candy Machine with a gatekeeper guard and a botTax guard.
-//   const collectionMint = (await createCollectionNft(umi)).publicKey;
-//   const { publicKey: candyMachine } = await createV2(umi, {
-//     collectionMint,
+  // When the identity tries to mint from it with no valid token.
+  const mint = generateSigner(umi);
+  const { signature } = await transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: {
+          gatekeeper: some({
+            gatekeeperNetwork: gatekeeperNetwork.publicKey,
+            expireOnUse: false,
+          }),
+        },
+      })
+    )
+    .sendAndConfirm();
 
-//     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
-//     guards: {
-//       botTax: {
-//         lamports: sol(0.1),
-//         lastInstruction: true,
-//       },
-//       gatekeeper: {
-//         network: gatekeeperNetwork.publicKey,
-//         expireOnUse: false,
-//       },
-//     },
-//   });
-
-//   // When the payer tries to mint from it with the wrong token.
-//   const mint = generateSigner(umi);
-//   const promise = transactionBuilder(umi).add().sendAndConfirm();
-//   mintV2(
-//     umi,
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//       guards: {
-//         gatekeeper: {
-//           tokenAccount: wrongToken,
-//         },
-//       },
-//     },
-//     { payer }
-//   );
-
-//   // Then we expect a bot tax error.
-//   await t.throwsAsync(promise, { message: /CandyMachineBotTaxError/ });
-
-//   // And the payer was charged a bot tax.
-//   const payerBalance = await umi.rpc.getBalance(payer.publicKey);
-//   t.true(
-//     isEqualToAmount(payerBalance, sol(9.9), sol(0.01)),
-//     'payer was charged a bot tax'
-//   );
-// });
+  // Then we expect a bot tax error.
+  await assertBotTax(t, umi, mint, signature, /GatewayTokenInvalid/);
+});
 
 const createGatekeeperNetwork = async (
   umi: Umi

@@ -1,4 +1,7 @@
-import { setComputeUnitLimit } from '@metaplex-foundation/mpl-essentials';
+import {
+  findAssociatedTokenPda,
+  setComputeUnitLimit,
+} from '@metaplex-foundation/mpl-essentials';
 import {
   findMasterEditionPda,
   findMetadataPda,
@@ -23,7 +26,7 @@ test('it burns a specific NFT to allow minting', async (t) => {
   const umi = await createUmi();
   const requiredCollectionAuthority = generateSigner(umi);
   const { publicKey: requiredCollection } = await createCollectionNft(umi, {
-    updateAuthority: requiredCollectionAuthority,
+    authority: requiredCollectionAuthority,
   });
   const nftToBurn = await createNft(umi, {
     tokenOwner: umi.identity.publicKey,
@@ -61,12 +64,17 @@ test('it burns a specific NFT to allow minting', async (t) => {
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
 
   // And the NFT was burned.
+  // TODO: await assertBurnedNft(t, umi, { mint, owner })
+  const nftToBurnToken = findAssociatedTokenPda(umi, {
+    mint: nftToBurn.publicKey,
+    owner: umi.identity.publicKey,
+  });
   const nftToBurnMetadata = findMetadataPda(umi, { mint: nftToBurn.publicKey });
   const nftToBurnEdition = findMasterEditionPda(umi, {
     mint: nftToBurn.publicKey,
   });
   t.false(
-    await umi.rpc.accountExists(nftToBurn.publicKey),
+    await umi.rpc.accountExists(nftToBurnToken),
     'payer NFT token account was burned'
   );
   t.false(

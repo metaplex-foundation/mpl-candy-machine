@@ -1,4 +1,12 @@
+// import {
+//   generateSigner,
+//   sol,
+//   some,
+//   transactionBuilder,
+// } from '@metaplex-foundation/umi';
 // import test from 'ava';
+// import { createCollectionNft, createUmi, createV2 } from '../_setup';
+// import { mintV2 } from '../../src';
 
 // test('it allows minting when the third party signer is provided', async (t) => {
 //   // Given a loaded Candy Machine with a third party signer guard.

@@ -1,4 +1,12 @@
+// import {
+//   generateSigner,
+//   sol,
+//   some,
+//   transactionBuilder,
+// } from '@metaplex-foundation/umi';
 // import test from 'ava';
+// import { createCollectionNft, createUmi, createV2 } from '../_setup';
+// import { mintV2 } from '../../src';
 
 // test('it allows minting with specified program in transaction', async (t) => {
 //   // Given a loaded Candy Machine with a programGate guard allowing the memo program.

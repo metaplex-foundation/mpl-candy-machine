@@ -1,4 +1,12 @@
+// import {
+//   generateSigner,
+//   sol,
+//   some,
+//   transactionBuilder,
+// } from '@metaplex-foundation/umi';
 // import test from 'ava';
+// import { createCollectionNft, createUmi, createV2 } from '../_setup';
+// import { mintV2 } from '../../src';
 
 // test('it transfers tokens to an escrow account and freezes the NFT', async (t) => {
 //   // Given a loaded Candy Machine with a freezeTokenPayment guard.
@@ -27,7 +35,7 @@
 //   route(umi, {
 //     candyMachine,
 //     guard: 'freezeTokenPayment',
-//     settings: {
+//     routeArgs: {
 //       path: 'initialize',
 //       period: 15 * 24 * 3600, // 15 days.
 //       candyGuardAuthority: umi.identity(),
@@ -160,7 +168,7 @@
 //   route(umi, {
 //     candyMachine,
 //     guard: 'freezeTokenPayment',
-//     settings: {
+//     routeArgs: {
 //       path: 'unlockFunds',
 //       candyGuardAuthority: umi.identity(),
 //     },
@@ -213,7 +221,7 @@
 //   const promise = umi.candyMachines().callGuardRoute({
 //     candyMachine,
 //     guard: 'freezeTokenPayment',
-//     settings: {
+//     routeArgs: {
 //       path: 'unlockFunds',
 //       candyGuardAuthority: umi.identity(),
 //     },
@@ -700,7 +708,7 @@
 //     candyMachine,
 //     guard: 'freezeTokenPayment',
 //     group,
-//     settings: {
+//     routeArgs: {
 //       path: 'initialize',
 //       period: 15 * 24 * 3600, // 15 days.
 //       candyGuardAuthority: umi.identity(),
@@ -741,7 +749,7 @@
 //     candyMachine,
 //     guard: 'freezeTokenPayment',
 //     group,
-//     settings: {
+//     routeArgs: {
 //       path: 'thaw',
 //       nftMint,
 //       nftOwner,
@@ -759,7 +767,7 @@
 //     candyMachine,
 //     guard: 'freezeTokenPayment',
 //     group,
-//     settings: {
+//     routeArgs: {
 //       path: 'unlockFunds',
 //       candyGuardAuthority: umi.identity(),
 //     },

@@ -1,4 +1,12 @@
+// import {
+//   generateSigner,
+//   sol,
+//   some,
+//   transactionBuilder,
+// } from '@metaplex-foundation/umi';
 // import test from 'ava';
+// import { createCollectionNft, createUmi, createV2 } from '../_setup';
+// import { mintV2 } from '../../src';
 
 // test('it burns a specific token to allow minting', async (t) => {
 //   // Given a payer with one token.

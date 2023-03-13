@@ -24,7 +24,6 @@ test('it transfers SOL from the payer to the destination', async (t) => {
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
-
     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
     guards: {
       solPayment: some({ lamports: sol(1), destination }),

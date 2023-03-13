@@ -1,66 +1,65 @@
-// import {
-//   generateSigner,
-//   sol,
-//   some,
-//   transactionBuilder,
-// } from '@metaplex-foundation/umi';
-// import test from 'ava';
-// import { createCollectionNft, createUmi, createV2 } from '../_setup';
-// import { mintV2 } from '../../src';
+import {
+  generateSigner,
+  isEqualToAmount,
+  sol,
+  some,
+  transactionBuilder,
+} from '@metaplex-foundation/umi';
+import test from 'ava';
+import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
+import { setComputeUnitLimit } from '@metaplex-foundation/mpl-essentials';
+import {
+  assertSuccessfulMint,
+  createCollectionNft,
+  createUmi,
+  createV2,
+} from '../_setup';
+import { mintV2 } from '../../src';
 
-// test('it transfers SOL from the payer to the destination', async (t) => {
-//   // Given a loaded Candy Machine with a solPayment guard.
-//   const umi = await createUmi();
-//   const treasury = generateSigner(umi);
-//   const collectionMint = (await createCollectionNft(umi)).publicKey;
-//   const { publicKey: candyMachine } = await createV2(umi, {
-//     collectionMint,
+test('it transfers SOL from the payer to the destination', async (t) => {
+  // Given a loaded Candy Machine with a solPayment guard.
+  const umi = await createUmi();
+  const destination = generateSigner(umi).publicKey;
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
 
-//     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
-//     guards: {
-//       solPayment: {
-//         amount: sol(1),
-//         destination: treasury.publicKey,
-//       },
-//     },
-//   });
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {
+      solPayment: some({ lamports: sol(1), destination }),
+    },
+  });
 
-//   // When we mint for another owner using an explicit payer.
-//   const payer = await generateSignerWithSol(umi, sol(10));
-//   const owner = generateSigner(umi).publicKey;
-//   const mint = generateSigner(umi);
-//   await transactionBuilder(umi).add().sendAndConfirm();
-//   mintV2(
-//     umi,
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//       owner,
-//     },
-//     { payer }
-//   );
+  // When we mint for another owner using an explicit payer.
+  const payer = await generateSignerWithSol(umi, sol(10));
+  const minter = generateSigner(umi);
+  const mint = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        minter,
+        payer,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: { solPayment: some({ destination }) },
+      })
+    )
+    .sendAndConfirm();
 
-//   // Then minting was successful.
-//   await assertSuccessfulMint(
-//     t,
-//     umi,
-//     { mint, owner: minter },
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//       nft,
-//       owner,
-//     }
-//   );
+  // Then minting was successful.
+  await assertSuccessfulMint(t, umi, { mint, owner: minter });
 
-//   // And the treasury received SOLs.
-//   const treasuryBalance = await umi.rpc.getBalance(treasury.publicKey);
-//   t.true(isEqualToAmount(treasuryBalance, sol(1)), 'treasury received SOLs');
+  // And the treasury received SOLs.
+  const treasuryBalance = await umi.rpc.getBalance(destination);
+  t.true(isEqualToAmount(treasuryBalance, sol(1)), 'treasury received SOLs');
 
-//   // And the payer lost SOLs.
-//   const payerBalance = await umi.rpc.getBalance(payer.publicKey);
-//   t.true(isEqualToAmount(payerBalance, sol(9), sol(0.1)), 'payer lost SOLs');
-// });
+  // And the payer lost SOLs.
+  const payerBalance = await umi.rpc.getBalance(payer.publicKey);
+  t.true(isEqualToAmount(payerBalance, sol(9), sol(0.1)), 'payer lost SOLs');
+});
 
 // test('it fails if the payer does not have enough funds', async (t) => {
 //   // Given a loaded Candy Machine with a solPayment guard costing 5 SOLs.

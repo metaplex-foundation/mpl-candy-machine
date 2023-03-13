@@ -1,6 +1,5 @@
 import {
-  createAssociatedToken,
-  createMint,
+  createMintWithAssociatedToken,
   fetchToken,
   findAssociatedTokenPda,
   setComputeUnitLimit,
@@ -145,10 +144,9 @@ test('it allows minting when the mint and token accounts are created beforehand'
   const mint = generateSigner(umi);
   await transactionBuilder(umi)
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
-    .add(createMint(umi, { mint }))
     .add(
-      createAssociatedToken(umi, {
-        mint: mint.publicKey,
+      createMintWithAssociatedToken(umi, {
+        mint,
         owner: umi.identity.publicKey,
       })
     )

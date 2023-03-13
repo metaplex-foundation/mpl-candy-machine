@@ -1,7 +1,7 @@
 import {
   createAssociatedToken,
   createMint,
-  createMintWithSingleToken,
+  createMintWithAssociatedToken,
   setComputeUnitLimit,
 } from '@metaplex-foundation/mpl-essentials';
 import { findCollectionAuthorityRecordPda } from '@metaplex-foundation/mpl-token-metadata';
@@ -151,7 +151,7 @@ test('it cannot mint directly from a candy machine if we are not the mint author
   const mint = generateSigner(umi);
   const owner = generateSigner(umi).publicKey;
   const promise = transactionBuilder(umi)
-    .add(createMintWithSingleToken(umi, { mint, owner }))
+    .add(createMintWithAssociatedToken(umi, { mint, owner, amount: 1 }))
     .add(
       mintFromCandyMachineV2(umi, {
         candyMachine,
@@ -191,7 +191,7 @@ test('it can mint from a candy machine v1', async (t) => {
   const mint = generateSigner(umi);
   const owner = generateSigner(umi).publicKey;
   await transactionBuilder(umi)
-    .add(createMintWithSingleToken(umi, { mint, owner }))
+    .add(createMintWithAssociatedToken(umi, { mint, owner, amount: 1 }))
     .add(
       mintFromCandyMachineV2(umi, {
         candyMachine,

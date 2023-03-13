@@ -1,4 +1,4 @@
-import { createMintWithSingleToken } from '@metaplex-foundation/mpl-essentials';
+import { createMintWithAssociatedToken } from '@metaplex-foundation/mpl-essentials';
 import {
   generateSigner,
   isEqualToAmount,
@@ -34,7 +34,7 @@ test('it can mint from a candy guard with no guards', async (t) => {
   const mint = generateSigner(umi);
   const owner = generateSigner(umi).publicKey;
   await transactionBuilder(umi)
-    .add(createMintWithSingleToken(umi, { mint, owner }))
+    .add(createMintWithAssociatedToken(umi, { mint, owner, amount: 1 }))
     .add(
       mintV1(umi, {
         candyMachine,
@@ -73,7 +73,7 @@ test('it can mint from a candy guard with guards', async (t) => {
   const owner = generateSigner(umi).publicKey;
   const payer = await generateSignerWithSol(umi, sol(10));
   await transactionBuilder(umi)
-    .add(createMintWithSingleToken(umi, { mint, owner }))
+    .add(createMintWithAssociatedToken(umi, { mint, owner, amount: 1 }))
     .add(
       mintV1(umi, {
         candyMachine,
@@ -123,7 +123,7 @@ test('it can mint from a candy guard with groups', async (t) => {
   const mint = generateSigner(umi);
   const owner = generateSigner(umi).publicKey;
   await transactionBuilder(umi)
-    .add(createMintWithSingleToken(umi, { mint, owner }))
+    .add(createMintWithAssociatedToken(umi, { mint, owner, amount: 1 }))
     .add(
       mintV1(umi, {
         candyMachine,

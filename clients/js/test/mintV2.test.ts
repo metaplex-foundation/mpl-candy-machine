@@ -1,7 +1,7 @@
 import {
   createAssociatedToken,
   createMint,
-  createMintWithSingleToken,
+  createMintWithAssociatedToken,
   setComputeUnitLimit,
 } from '@metaplex-foundation/mpl-essentials';
 import { findCollectionAuthorityRecordPda } from '@metaplex-foundation/mpl-token-metadata';
@@ -158,7 +158,13 @@ test('it can mint from a candy guard attached to a candy machine v1', async (t) 
   const mint = generateSigner(umi);
   const minter = generateSigner(umi);
   await transactionBuilder(umi)
-    .add(createMintWithSingleToken(umi, { mint, owner: minter.publicKey }))
+    .add(
+      createMintWithAssociatedToken(umi, {
+        mint,
+        owner: minter.publicKey,
+        amount: 1,
+      })
+    )
     .add(
       mintV2(umi, {
         candyMachine,

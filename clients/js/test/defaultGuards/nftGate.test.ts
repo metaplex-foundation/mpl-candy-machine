@@ -1,7 +1,10 @@
 import {
+  createAssociatedToken,
   createMint,
   createToken,
+  findAssociatedTokenPda,
   setComputeUnitLimit,
+  transferTokens,
 } from '@metaplex-foundation/mpl-essentials';
 import {
   generateSigner,
@@ -170,61 +173,69 @@ test('it allows minting when the NFT is not on an associated token account', asy
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
 });
 
-// test('it forbids minting when the payer does not own an NFT from a certain collection', async (t) => {
-//   // Given a payer that used to own an NFT from a certain collection.
-//   const umi = await createUmi();
-//   const payer = await generateSignerWithSol(umi, sol(10));
-//   const nftGateCollectionAuthority = generateSigner(umi);
-//   const nftGateCollection = await createCollectionNft(umi, {
-//     updateAuthority: nftGateCollectionAuthority,
-//   });
-//   const payerNft = await createNft(umi, {
-//     tokenOwner: payer.publicKey,
-//     collection: nftGateCollection.address,
-//     collectionAuthority: nftGateCollectionAuthority,
-//   });
+test('it forbids minting when the payer does not own an NFT from a certain collection', async (t) => {
+  // Given the identity owns an NFT from a certain collection.
+  const umi = await createUmi();
+  const requiredCollectionAuthority = generateSigner(umi);
+  const { publicKey: requiredCollection } = await createCollectionNft(umi, {
+    authority: requiredCollectionAuthority,
+  });
+  const { publicKey: nftToVerify } = await createVerifiedNft(umi, {
+    tokenOwner: umi.identity.publicKey,
+    collectionMint: requiredCollection,
+    collectionAuthority: requiredCollectionAuthority,
+  });
 
-//   // But that sent his NFT to another wallet.
-//   await umi.nfts().transfer({
-//     nftOrSft: payerNft,
-//     authority: payer,
-//     fromOwner: payer.publicKey,
-//     toOwner: generateSigner(umi).publicKey,
-//   });
+  // But sent their NFT to another wallet.
+  const destination = generateSigner(umi).publicKey;
+  await transactionBuilder(umi)
+    .add(createAssociatedToken(umi, { mint: nftToVerify, owner: destination }))
+    .add(
+      transferTokens(umi, {
+        authority: umi.identity,
+        source: findAssociatedTokenPda(umi, {
+          mint: nftToVerify,
+          owner: umi.identity.publicKey,
+        }),
+        destination: findAssociatedTokenPda(umi, {
+          mint: nftToVerify,
+          owner: destination,
+        }),
+        amount: 1,
+      })
+    )
+    .sendAndConfirm();
 
-//   // And a loaded Candy Machine with an nftGate guard on that collection.
-//   const collectionMint = (await createCollectionNft(umi)).publicKey;
-//   const { publicKey: candyMachine } = await createV2(umi, {
-//     collectionMint,
+  // And a loaded Candy Machine with an nftGate guard on that collection.
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {
+      nftGate: some({ requiredCollection }),
+    },
+  });
 
-//     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
-//     guards: {
-//       nftGate: {
-//         requiredCollection: nftGateCollection.address,
-//       },
-//     },
-//   });
+  // When the payer tries to mint from it.
+  const mint = generateSigner(umi);
+  const promise = transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: {
+          nftGate: some({ requiredCollection, mint: nftToVerify }),
+        },
+      })
+    )
+    .sendAndConfirm();
 
-//   // When the payer tries to mint from it.
-//   const mint = generateSigner(umi);
-//   const promise = transactionBuilder(umi).add().sendAndConfirm();
-//   mintV2(
-//     umi,
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//       guards: {
-//         nftGate: {
-//           mint: payerNft.address,
-//         },
-//       },
-//     },
-//     { payer }
-//   );
-
-//   // Then we expect an error.
-//   await t.throwsAsync(promise, { message: /Missing NFT on the account/ });
-// });
+  // Then we expect an error.
+  await t.throwsAsync(promise, { message: /MissingNft/ });
+});
 
 // test('it forbids minting when the payer tries to provide an NFT from the wrong collection', async (t) => {
 //   // Given a payer that owns an NFT from a collection A.

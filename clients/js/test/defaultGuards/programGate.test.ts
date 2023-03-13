@@ -1,167 +1,170 @@
-// import {
-//   generateSigner,
-//   sol,
-//   some,
-//   transactionBuilder,
-// } from '@metaplex-foundation/umi';
-// import test from 'ava';
-// import { createCollectionNft, createUmi, createV2 } from '../_setup';
-// import { mintV2 } from '../../src';
+import {
+  addMemo,
+  setComputeUnitLimit,
+} from '@metaplex-foundation/mpl-essentials';
+import {
+  generateSigner,
+  sol,
+  some,
+  transactionBuilder,
+} from '@metaplex-foundation/umi';
+import test from 'ava';
+import { mintV2 } from '../../src';
+import {
+  assertBotTax,
+  assertSuccessfulMint,
+  createCollectionNft,
+  createUmi,
+  createV2,
+} from '../_setup';
 
-// test('it allows minting with specified program in transaction', async (t) => {
-//   // Given a loaded Candy Machine with a programGate guard allowing the memo program.
-//   const umi = await createUmi();
-//   const collectionMint = (await createCollectionNft(umi)).publicKey;
-//   const { publicKey: candyMachine } = await createV2(umi, {
-//     collectionMint,
+test('it allows minting with specified program in transaction', async (t) => {
+  // Given a loaded Candy Machine with a programGate guard allowing the memo program.
+  const umi = await createUmi();
+  const memoProgram = umi.programs.getPublicKey('splMemo');
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {
+      programGate: some({ additional: [memoProgram] }),
+    },
+  });
 
-//     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
-//     guards: {
-//       programGate: {
-//         additional: [MEMO_PROGRAM_ID],
-//       },
-//     },
-//   });
+  // When we mint an NFT with a memo instruction in the transaction.
+  const mint = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(addMemo(umi, { memo: 'Instruction from the Memo program' }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+      })
+    )
+    .sendAndConfirm();
 
-//   // When we mint an NFT with a memo instruction in the transaction.
-//   const payer = await generateSignerWithSol(umi, sol(10));
-//   const transactionBuilder = await umi.candyMachines().builders().mint(
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//     },
-//     { payer }
-//   );
-//   transactionBuilder.add(createMemoInstruction());
-//   await umi.rpc().sendAndConfirmTransaction(transactionBuilder);
+  // Then minting was successful.
+  await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
+});
 
-//   // Then minting was successful.
-//   const { mintSigner, tokenAddress } = transactionBuilder.getContext();
-//   const nft = (await umi.nfts().findByMint({
-//     mintAddress: mintSigner.publicKey,
-//     tokenAddress,
-//   })) as NftWithToken;
-//   await assertSuccessfulMint(
-//     t,
-//     umi,
-//     { mint, owner: minter },
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//       nft,
-//       owner: payer.publicKey,
-//     }
-//   );
-// });
+test('it allows minting even when the payer is different from the minter', async (t) => {
+  // Given a loaded Candy Machine with a programGate guard allowing the memo program.
+  const umi = await createUmi();
+  const memoProgram = umi.programs.getPublicKey('splMemo');
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {
+      programGate: some({ additional: [memoProgram] }),
+    },
+  });
 
-// test('it forbids minting with unspecified program in transaction', async (t) => {
-//   // Given a loaded Candy Machine with a programGate guard allowing no additional programs.
-//   const umi = await createUmi();
-//   const collectionMint = (await createCollectionNft(umi)).publicKey;
-//   const { publicKey: candyMachine } = await createV2(umi, {
-//     collectionMint,
+  // When we mint an NFT with a memo instruction in the transaction
+  // using an explicit minter.
+  const mint = generateSigner(umi);
+  const minter = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(addMemo(umi, { memo: 'Instruction from the Memo program' }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        minter,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+      })
+    )
+    .sendAndConfirm();
 
-//     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
-//     guards: {
-//       programGate: {
-//         additional: [],
-//       },
-//     },
-//   });
+  // Then minting was successful.
+  await assertSuccessfulMint(t, umi, { mint, owner: minter });
+});
 
-//   // When we try to mint an NFT with a memo instruction in the transaction.
-//   const payer = await generateSignerWithSol(umi, sol(10));
-//   const transactionBuilder = await umi.candyMachines().builders().mint(
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//     },
-//     { payer }
-//   );
-//   transactionBuilder.add(createMemoInstruction());
-//   const promise = umi.rpc().sendAndConfirmTransaction(transactionBuilder);
+test('it forbids minting with unspecified program in transaction', async (t) => {
+  // Given a loaded Candy Machine with a programGate guard allowing no additional programs.
+  const umi = await createUmi();
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {
+      programGate: some({ additional: [] }),
+    },
+  });
 
-//   // Then we expect an error.
-//   await assertThrows(
-//     t,
-//     promise,
-//     /An unauthorized program was found in the transaction/
-//   );
-// });
+  // When we try to mint an NFT with a memo instruction in the transaction.
+  const mint = generateSigner(umi);
+  const promise = transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(addMemo(umi, { memo: 'Instruction from the Memo program' }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+      })
+    )
+    .sendAndConfirm();
 
-// test('it forbids candy machine creation with more than 5 specified programs', async (t) => {
-//   // When we try to create a Candy Machine with a
-//   // programGate guard allowing more than 5 programs.
-//   const umi = await createUmi();
-//   const promise = createCandyMachine(umi, {
-//     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
-//     guards: {
-//       programGate: {
-//         additional: Array(6).fill(MEMO_PROGRAM_ID),
-//       },
-//     },
-//   });
+  // Then we expect a program error.
+  await t.throwsAsync(promise, { message: /UnauthorizedProgramFound/ });
+});
 
-//   // Then we expect an error.
-//   await t.throwsAsync(promise, {
-//     message: /MaximumOfFiveAdditionalProgramsError/,
-//   });
-// });
+test('it forbids candy machine creation with more than 5 specified programs', async (t) => {
+  // When we try to create a Candy Machine with a
+  // programGate guard allowing more than 5 programs.
+  const umi = await createUmi();
+  const memoProgram = umi.programs.getPublicKey('splMemo');
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const promise = createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {
+      programGate: some({ additional: Array(6).fill(memoProgram) }),
+    },
+  });
 
-// test('it charges a bot tax when minting with unspecified program in transaction', async (t) => {
-//   // Given a loaded Candy Machine with a botTax guard
-//   // and a programGate guard allowing no additional programs.
-//   const umi = await createUmi();
-//   const collectionMint = (await createCollectionNft(umi)).publicKey;
-//   const { publicKey: candyMachine } = await createV2(umi, {
-//     collectionMint,
+  // Then we expect a client error.
+  await t.throwsAsync(promise, {
+    name: 'MaximumOfFiveAdditionalProgramsError',
+  });
+});
 
-//     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
-//     guards: {
-//       botTax: {
-//         lamports: sol(0.1),
-//         lastInstruction: false,
-//       },
-//       programGate: {
-//         additional: [],
-//       },
-//     },
-//   });
+test('it charges a bot tax when minting with unspecified program in transaction', async (t) => {
+  // Given a loaded Candy Machine with a botTax guard
+  // and a programGate guard allowing no additional programs.
+  const umi = await createUmi();
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {
+      botTax: some({ lamports: sol(0.1), lastInstruction: true }),
+      programGate: some({ additional: [] }),
+    },
+  });
 
-//   // When we try to mint an NFT with a memo instruction in the transaction.
-//   const payer = await generateSignerWithSol(umi, sol(10));
-//   const transactionBuilder = await umi.candyMachines().builders().mint(
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//     },
-//     { payer }
-//   );
-//   transactionBuilder.add(createMemoInstruction());
-//   await umi.rpc().sendAndConfirmTransaction(transactionBuilder);
+  // When we try to mint an NFT with a memo instruction in the transaction.
+  const mint = generateSigner(umi);
+  const { signature } = await transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(addMemo(umi, { memo: 'Instruction from the Memo program' }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+      })
+    )
+    .sendAndConfirm();
 
-//   // Then the transaction succeeded but the NFT was not minted.
-//   const { mintSigner, tokenAddress } = transactionBuilder.getContext();
-//   const promise = umi.nfts().findByMint({
-//     mintAddress: mintSigner.publicKey,
-//     tokenAddress,
-//   });
-//   await t.throwsAsync(promise, { message: /AccountNotFoundError/ });
-
-//   // And the payer was charged a bot tax.
-//   const payerBalance = await umi.rpc.getBalance(payer.publicKey);
-//   t.true(
-//     isEqualToAmount(payerBalance, sol(9.9), sol(0.01)),
-//     'payer was charged a bot tax'
-//   );
-// });
-
-// const createMemoInstruction = (message = 'Hello World!') =>
-//   TransactionBuilder.make().add({
-//     instruction: new TransactionInstruction({
-//       keys: [],
-//       programId: MEMO_PROGRAM_ID,
-//       data: Buffer.from(message, 'utf8'),
-//     }),
-//     signers: [],
-//   });
+  // Then we expect a silent bot tax error.
+  await assertBotTax(t, umi, mint, signature, /UnauthorizedProgramFound/);
+});

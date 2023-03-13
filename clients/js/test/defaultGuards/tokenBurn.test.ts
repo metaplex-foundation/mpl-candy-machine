@@ -1,240 +1,299 @@
-// import {
-//   generateSigner,
-//   sol,
-//   some,
-//   transactionBuilder,
-// } from '@metaplex-foundation/umi';
-// import test from 'ava';
-// import { createCollectionNft, createUmi, createV2 } from '../_setup';
-// import { mintV2 } from '../../src';
+import {
+  generateSigner,
+  sol,
+  some,
+  transactionBuilder,
+} from '@metaplex-foundation/umi';
+import test from 'ava';
+import {
+  createMintWithAssociatedToken,
+  fetchToken,
+  findAssociatedTokenPda,
+  setComputeUnitLimit,
+} from '@metaplex-foundation/mpl-essentials';
+import {
+  assertBotTax,
+  assertSuccessfulMint,
+  createCollectionNft,
+  createUmi,
+  createV2,
+} from '../_setup';
+import { mintV2 } from '../../src';
 
-// test('it burns a specific token to allow minting', async (t) => {
-//   // Given a payer with one token.
-//   const umi = await createUmi();
-//   const payer = await generateSignerWithSol(umi, sol(10));
-//   const { token: payerTokens } = await createMintAndToken(umi, {
-//     mintAuthority: generateSigner(umi),
-//     owner: payer.publicKey,
-//     initialSupply: token(1),
-//   });
+test('it burns a specific token to allow minting', async (t) => {
+  // Given a payer with one token.
+  const umi = await createUmi();
+  const tokenMint = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(
+      createMintWithAssociatedToken(umi, {
+        mint: tokenMint,
+        owner: umi.identity.publicKey,
+        amount: 1,
+      })
+    )
+    .sendAndConfirm();
 
-//   // And a loaded Candy Machine with the tokenBurn guard.
-//   const collectionMint = (await createCollectionNft(umi)).publicKey;
-//   const { publicKey: candyMachine } = await createV2(umi, {
-//     collectionMint,
+  // And a loaded Candy Machine with the tokenBurn guard.
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {
+      tokenBurn: some({ mint: tokenMint.publicKey, amount: 1 }),
+    },
+  });
 
-//     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
-//     guards: {
-//       tokenBurn: {
-//         mint: payerTokens.mint.address,
-//         amount: token(1),
-//       },
-//     },
-//   });
+  // When the payer mints from it.
+  const mint = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: {
+          tokenBurn: some({ mint: tokenMint.publicKey }),
+        },
+      })
+    )
+    .sendAndConfirm();
 
-//   // When the payer mints from it.
-//   const mint = generateSigner(umi);
-//   await transactionBuilder(umi).add().sendAndConfirm();
-//   mintV2(
-//     umi,
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//     },
-//     { payer }
-//   );
+  // Then minting was successful.
+  await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
 
-//   // Then minting was successful.
-//   await assertSuccessfulMint(
-//     t,
-//     umi,
-//     { mint, owner: minter },
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//       nft,
-//       owner: payer.publicKey,
-//     }
-//   );
+  // And the payer's token was burned.
+  const tokenAccount = await fetchToken(
+    umi,
+    findAssociatedTokenPda(umi, {
+      mint: tokenMint.publicKey,
+      owner: umi.identity.publicKey,
+    })
+  );
+  t.is(tokenAccount.amount, 0n);
+});
 
-//   // And the payer's token was burned.
-//   const refreshedPayerTokens = await umi
-//     .tokens()
-//     .findTokenByAddress({ address: payerTokens.address });
+test('it allows minting even when the payer is different from the minter', async (t) => {
+  // Given an explicit minter with one token.
+  const umi = await createUmi();
+  const minter = generateSigner(umi);
+  const tokenMint = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(
+      createMintWithAssociatedToken(umi, {
+        mint: tokenMint,
+        owner: minter.publicKey,
+        amount: 1,
+      })
+    )
+    .sendAndConfirm();
 
-//   t.ok(
-//     isEqualToAmount(refreshedPayerTokens.amount, token(0)),
-//     'payer now has zero tokens'
-//   );
-// });
+  // And a loaded Candy Machine with the tokenBurn guard.
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {
+      tokenBurn: some({ mint: tokenMint.publicKey, amount: 1 }),
+    },
+  });
 
-// test('it may burn multiple tokens from a specific mint', async (t) => {
-//   // Given a payer with 42 token.
-//   const umi = await createUmi();
-//   const payer = await generateSignerWithSol(umi, sol(10));
-//   const { token: payerTokens } = await createMintAndToken(umi, {
-//     mintAuthority: generateSigner(umi),
-//     owner: payer.publicKey,
-//     initialSupply: token(42),
-//   });
+  // When the minter mints from it.
+  const mint = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        minter,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: {
+          tokenBurn: some({ mint: tokenMint.publicKey }),
+        },
+      })
+    )
+    .sendAndConfirm();
 
-//   // And a loaded Candy Machine with the tokenBurn guard that requires 5 tokens.
-//   const collectionMint = (await createCollectionNft(umi)).publicKey;
-//   const { publicKey: candyMachine } = await createV2(umi, {
-//     collectionMint,
+  // Then minting was successful.
+  await assertSuccessfulMint(t, umi, { mint, owner: minter });
 
-//     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
-//     guards: {
-//       tokenBurn: {
-//         mint: payerTokens.mint.address,
-//         amount: token(5),
-//       },
-//     },
-//   });
+  // And the minter's token was burned.
+  const tokenAccount = await fetchToken(
+    umi,
+    findAssociatedTokenPda(umi, {
+      mint: tokenMint.publicKey,
+      owner: minter.publicKey,
+    })
+  );
+  t.is(tokenAccount.amount, 0n);
+});
 
-//   // When the payer mints from it.
-//   const mint = generateSigner(umi);
-//   await transactionBuilder(umi).add().sendAndConfirm();
-//   mintV2(
-//     umi,
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//     },
-//     { payer }
-//   );
+test('it may burn multiple tokens from a specific mint', async (t) => {
+  // Given a payer with 42 tokens.
+  const umi = await createUmi();
+  const tokenMint = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(
+      createMintWithAssociatedToken(umi, {
+        mint: tokenMint,
+        owner: umi.identity.publicKey,
+        amount: 42,
+      })
+    )
+    .sendAndConfirm();
 
-//   // Then minting was successful.
-//   await assertSuccessfulMint(
-//     t,
-//     umi,
-//     { mint, owner: minter },
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//       nft,
-//       owner: payer.publicKey,
-//     }
-//   );
+  // And a loaded Candy Machine with the tokenBurn guard that requires 5 tokens.
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {
+      tokenBurn: some({ mint: tokenMint.publicKey, amount: 5 }),
+    },
+  });
 
-//   // And the payer lost 5 tokens.
-//   const refreshedPayerTokens = await umi
-//     .tokens()
-//     .findTokenByAddress({ address: payerTokens.address });
+  // When the payer mints from it.
+  const mint = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: {
+          tokenBurn: some({ mint: tokenMint.publicKey }),
+        },
+      })
+    )
+    .sendAndConfirm();
 
-//   t.ok(
-//     isEqualToAmount(refreshedPayerTokens.amount, token(37)),
-//     'payer now has 37 tokens'
-//   );
-// });
+  // Then minting was successful.
+  await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
 
-// test('it fails to mint if there are not enough tokens to burn', async (t) => {
-//   // Given a payer with one token.
-//   const umi = await createUmi();
-//   const payer = await generateSignerWithSol(umi, sol(10));
-//   const { token: payerTokens } = await createMintAndToken(umi, {
-//     mintAuthority: generateSigner(umi),
-//     owner: payer.publicKey,
-//     initialSupply: token(1),
-//   });
+  // And the payer lost 5 tokens.
+  const tokenAccount = await fetchToken(
+    umi,
+    findAssociatedTokenPda(umi, {
+      mint: tokenMint.publicKey,
+      owner: umi.identity.publicKey,
+    })
+  );
+  t.is(tokenAccount.amount, 37n);
+});
 
-//   // And a loaded Candy Machine with the tokenBurn guard that requires 2 tokens.
-//   const collectionMint = (await createCollectionNft(umi)).publicKey;
-//   const { publicKey: candyMachine } = await createV2(umi, {
-//     collectionMint,
+test('it fails to mint if there are not enough tokens to burn', async (t) => {
+  // Given a payer with one token.
+  const umi = await createUmi();
+  const tokenMint = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(
+      createMintWithAssociatedToken(umi, {
+        mint: tokenMint,
+        owner: umi.identity.publicKey,
+        amount: 1,
+      })
+    )
+    .sendAndConfirm();
 
-//     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
-//     guards: {
-//       tokenBurn: {
-//         mint: payerTokens.mint.address,
-//         amount: token(2),
-//       },
-//     },
-//   });
+  // And a loaded Candy Machine with the tokenBurn guard that requires 2 tokens.
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {
+      tokenBurn: some({ mint: tokenMint.publicKey, amount: 2 }),
+    },
+  });
 
-//   // When the payer tries to mint from it.
-//   const mint = generateSigner(umi);
-//   const promise = transactionBuilder(umi).add().sendAndConfirm();
-//   mintV2(
-//     umi,
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//     },
-//     { payer }
-//   );
+  // When the payer tries to mint from it.
+  const mint = generateSigner(umi);
+  const promise = transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: {
+          tokenBurn: some({ mint: tokenMint.publicKey }),
+        },
+      })
+    )
+    .sendAndConfirm();
 
-//   // Then we expect an error.
-//   await t.throwsAsync(promise, { message: /Not enough tokens on the account/ });
+  // Then we expect a program error.
+  await t.throwsAsync(promise, { message: /NotEnoughTokens/ });
 
-//   // And the payer still has one token.
-//   const refreshedPayerTokens = await umi
-//     .tokens()
-//     .findTokenByAddress({ address: payerTokens.address });
+  // And the payer still has one token.
+  const tokenAccount = await fetchToken(
+    umi,
+    findAssociatedTokenPda(umi, {
+      mint: tokenMint.publicKey,
+      owner: umi.identity.publicKey,
+    })
+  );
+  t.is(tokenAccount.amount, 1n);
+});
 
-//   t.ok(
-//     isEqualToAmount(refreshedPayerTokens.amount, token(1)),
-//     'payer still has one token'
-//   );
-// });
+test('it charges a bot tax when trying to mint without the required amount of tokens', async (t) => {
+  // Given a payer with one token.
+  const umi = await createUmi();
+  const tokenMint = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(
+      createMintWithAssociatedToken(umi, {
+        mint: tokenMint,
+        owner: umi.identity.publicKey,
+        amount: 1,
+      })
+    )
+    .sendAndConfirm();
 
-// test('it charges a bot tax when trying to mint without the required amount of tokens', async (t) => {
-//   // Given a payer with one token.
-//   const umi = await createUmi();
-//   const payer = await generateSignerWithSol(umi, sol(10));
-//   const { token: payerTokens } = await createMintAndToken(umi, {
-//     mintAuthority: generateSigner(umi),
-//     owner: payer.publicKey,
-//     initialSupply: token(1),
-//   });
+  // And a loaded Candy Machine with a botTax guard and a tokenBurn guard that requires 2 tokens.
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {
+      botTax: some({ lamports: sol(0.1), lastInstruction: true }),
+      tokenBurn: some({ mint: tokenMint.publicKey, amount: 2 }),
+    },
+  });
 
-//   // And a loaded Candy Machine with a botTax guard and a tokenBurn guard that requires 2 tokens.
-//   const collectionMint = (await createCollectionNft(umi)).publicKey;
-//   const { publicKey: candyMachine } = await createV2(umi, {
-//     collectionMint,
+  // When the payer tries to mint from it.
+  const mint = generateSigner(umi);
+  const { signature } = await transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: {
+          tokenBurn: some({ mint: tokenMint.publicKey }),
+        },
+      })
+    )
+    .sendAndConfirm();
 
-//     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
-//     guards: {
-//       botTax: {
-//         lamports: sol(0.1),
-//         lastInstruction: true,
-//       },
-//       tokenBurn: {
-//         mint: payerTokens.mint.address,
-//         amount: token(2),
-//       },
-//     },
-//   });
+  // Then we expect a silent bot tax error.
+  await assertBotTax(t, umi, mint, signature, /NotEnoughTokens/);
 
-//   // When the payer tries to mint from it.
-//   const mint = generateSigner(umi);
-//   const promise = transactionBuilder(umi).add().sendAndConfirm();
-//   mintV2(
-//     umi,
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//     },
-//     { payer }
-//   );
-
-//   // Then we expect a bot tax error.
-//   await t.throwsAsync(promise, { message: /CandyMachineBotTaxError/ });
-
-//   // And the payer was charged a bot tax.
-//   const payerBalance = await umi.rpc.getBalance(payer.publicKey);
-//   t.true(
-//     isEqualToAmount(payerBalance, sol(9.9), sol(0.01)),
-//     'payer was charged a bot tax'
-//   );
-
-//   // And the payer still has one token.
-//   const refreshedPayerTokens = await umi
-//     .tokens()
-//     .findTokenByAddress({ address: payerTokens.address });
-
-//   t.ok(
-//     isEqualToAmount(refreshedPayerTokens.amount, token(1)),
-//     'payer still has one token'
-//   );
-// });
+  // And the payer still has one token.
+  const tokenAccount = await fetchToken(
+    umi,
+    findAssociatedTokenPda(umi, {
+      mint: tokenMint.publicKey,
+      owner: umi.identity.publicKey,
+    })
+  );
+  t.is(tokenAccount.amount, 1n);
+});

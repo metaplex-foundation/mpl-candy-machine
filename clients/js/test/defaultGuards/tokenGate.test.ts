@@ -13,7 +13,7 @@ test('it allows minting when the payer owns a specific token', async (t) => {
   // Given a payer with one token.
   const umi = await createUmi();
   const payer = await generateSignerWithSol(umi, sol(10));
-  const { token: payerTokens } = await umi.tokens().createTokenWithMint({
+  const { token: payerTokens } = await createMintAndToken(umi, {
     mintAuthority: generateSigner(umi),
     owner: payer.publicKey,
     initialSupply: token(1),
@@ -68,7 +68,7 @@ test('it allows minting when the payer owns multiple tokens from a specific mint
   // Given a payer with 42 tokens.
   const umi = await createUmi();
   const payer = await generateSignerWithSol(umi, sol(10));
-  const { token: payerTokens } = await umi.tokens().createTokenWithMint({
+  const { token: payerTokens } = await createMintAndToken(umi, {
     mintAuthority: generateSigner(umi),
     owner: payer.publicKey,
     initialSupply: token(42),
@@ -123,7 +123,7 @@ test('it defaults to using the associated token account of the payer', async (t)
   // Given a payer with one token using an associated token account.
   const umi = await createUmi();
   const payer = await generateSignerWithSol(umi, sol(10));
-  const { token: payerTokens } = await umi.tokens().createTokenWithMint({
+  const { token: payerTokens } = await createMintAndToken(umi, {
     mintAuthority: generateSigner(umi),
     owner: payer.publicKey,
     initialSupply: token(1),
@@ -173,7 +173,7 @@ test('it forbids minting when the owner does not own a specific token', async (t
   // Given a payer with zero tokens.
   const umi = await createUmi();
   const payer = await generateSignerWithSol(umi, sol(10));
-  const { token: payerTokens } = await umi.tokens().createTokenWithMint({
+  const { token: payerTokens } = await createMintAndToken(umi, {
     mintAuthority: generateSigner(umi),
     owner: payer.publicKey,
     initialSupply: token(0),
@@ -218,7 +218,7 @@ test('it forbids minting when the owner does not own enough tokens', async (t) =
   // Given a payer with 5 tokens.
   const umi = await createUmi();
   const payer = await generateSignerWithSol(umi, sol(10));
-  const { token: payerTokens } = await umi.tokens().createTokenWithMint({
+  const { token: payerTokens } = await createMintAndToken(umi, {
     mintAuthority: generateSigner(umi),
     owner: payer.publicKey,
     initialSupply: token(5),
@@ -263,7 +263,7 @@ test('it charges a bot tax when trying to mint without the right amount of token
   // Given a payer with zero tokens.
   const umi = await createUmi();
   const payer = await generateSignerWithSol(umi, sol(10));
-  const { token: payerTokens } = await umi.tokens().createTokenWithMint({
+  const { token: payerTokens } = await createMintAndToken(umi, {
     mintAuthority: generateSigner(umi),
     owner: payer.publicKey,
     initialSupply: token(0),

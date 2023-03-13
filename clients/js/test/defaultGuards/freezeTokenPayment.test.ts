@@ -638,7 +638,7 @@ const createMint = async (
   umi: Metaplex,
   mintAuthority: Signer
 ): Promise<[Mint, TokenWithMint]> => {
-  const { token: tokenWithMint } = await umi.tokens().createTokenWithMint({
+  const { token: tokenWithMint } = await createMintAndToken(umi, {
     owner: mintAuthority.publicKey,
     mintAuthority,
   });

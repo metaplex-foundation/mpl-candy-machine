@@ -13,7 +13,7 @@ test('it burns a specific token to allow minting', async (t) => {
   // Given a payer with one token.
   const umi = await createUmi();
   const payer = await generateSignerWithSol(umi, sol(10));
-  const { token: payerTokens } = await umi.tokens().createTokenWithMint({
+  const { token: payerTokens } = await createMintAndToken(umi, {
     mintAuthority: generateSigner(umi),
     owner: payer.publicKey,
     initialSupply: token(1),
@@ -73,7 +73,7 @@ test('it may burn multiple tokens from a specific mint', async (t) => {
   // Given a payer with 42 token.
   const umi = await createUmi();
   const payer = await generateSignerWithSol(umi, sol(10));
-  const { token: payerTokens } = await umi.tokens().createTokenWithMint({
+  const { token: payerTokens } = await createMintAndToken(umi, {
     mintAuthority: generateSigner(umi),
     owner: payer.publicKey,
     initialSupply: token(42),
@@ -133,7 +133,7 @@ test('it fails to mint if there are not enough tokens to burn', async (t) => {
   // Given a payer with one token.
   const umi = await createUmi();
   const payer = await generateSignerWithSol(umi, sol(10));
-  const { token: payerTokens } = await umi.tokens().createTokenWithMint({
+  const { token: payerTokens } = await createMintAndToken(umi, {
     mintAuthority: generateSigner(umi),
     owner: payer.publicKey,
     initialSupply: token(1),
@@ -183,7 +183,7 @@ test('it charges a bot tax when trying to mint without the required amount of to
   // Given a payer with one token.
   const umi = await createUmi();
   const payer = await generateSignerWithSol(umi, sol(10));
-  const { token: payerTokens } = await umi.tokens().createTokenWithMint({
+  const { token: payerTokens } = await createMintAndToken(umi, {
     mintAuthority: generateSigner(umi),
     owner: payer.publicKey,
     initialSupply: token(1),

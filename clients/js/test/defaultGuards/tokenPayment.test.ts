@@ -1,19 +1,12 @@
-import { Keypair } from '@solana/web3.js';
+import { generateSigner } from '@metaplex-foundation/umi';
 import test from 'ava';
-import {
-  assertThrows,
-  createWallet,
-  killStuckProcess,
-  metaplex,
-} from '../../../helpers';
-import { assertMintingWasSuccessful, createCandyMachine } from '../helpers';
-import { isEqualToAmount, sol, toBigNumber, token } from '@/index';
+import { createUmi } from '../_setup';
 
 test('it transfers tokens from the payer to the destination', async (t) => {
   // Given a loaded Candy Machine with a tokenPayment guard that requires 5 tokens.
   const umi = await createUmi();
   const treasuryAuthority = generateSigner(umi);
-  const { token: tokenTreasury } = await umi.tokens().createTokenWithMint({
+  const { token: tokenTreasury } = await createMintAndToken(umi, {
     mintAuthority: treasuryAuthority,
     owner: treasuryAuthority.publicKey,
     initialSupply: token(100),
@@ -91,7 +84,7 @@ test('it fails if the payer does not have enough tokens', async (t) => {
   // Given a loaded Candy Machine with a tokenPayment guard that requires 5 tokens.
   const umi = await createUmi();
   const treasuryAuthority = generateSigner(umi);
-  const { token: tokenTreasury } = await umi.tokens().createTokenWithMint({
+  const { token: tokenTreasury } = await createMintAndToken(umi, {
     mintAuthority: treasuryAuthority,
     owner: treasuryAuthority.publicKey,
   });
@@ -139,7 +132,7 @@ test('it charges a bot tax if the payer does not have enough tokens', async (t) 
   // Given a loaded Candy Machine with a tokenPayment guard that requires 5 tokens and a botTax guard.
   const umi = await createUmi();
   const treasuryAuthority = generateSigner(umi);
-  const { token: tokenTreasury } = await umi.tokens().createTokenWithMint({
+  const { token: tokenTreasury } = await createMintAndToken(umi, {
     mintAuthority: treasuryAuthority,
     owner: treasuryAuthority.publicKey,
   });

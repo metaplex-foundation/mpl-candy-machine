@@ -1,4 +1,8 @@
-import { setComputeUnitLimit } from '@metaplex-foundation/mpl-essentials';
+import {
+  createMint,
+  createToken,
+  setComputeUnitLimit,
+} from '@metaplex-foundation/mpl-essentials';
 import { fetchDigitalAssetWithAssociatedToken } from '@metaplex-foundation/mpl-token-metadata';
 import {
   generateSigner,
@@ -131,82 +135,79 @@ test('it allows minting even when the payer is different from the minter', async
   t.deepEqual(updatedNft.token.owner, destination);
 });
 
-// test('it works when the provided NFT is not on an associated token account', async (t) => {
-//   // Given a loaded Candy Machine with an nftPayment guard on a required collection.
-//   const umi = await createUmi();
-//   const nftTreasury = generateSigner(umi);
-//   const requiredCollectionAuthority = generateSigner(umi);
-//   const requiredCollection = await createCollectionNft(umi, {
-//     updateAuthority: requiredCollectionAuthority,
-//   });
-//   const collectionMint = (await createCollectionNft(umi)).publicKey;
-//   const { publicKey: candyMachine } = await createV2(umi, {
-//     collectionMint,
+test('it works when the provided NFT is not on an associated token account', async (t) => {
+  // Given a loaded Candy Machine with an nftPayment guard on a required collection.
+  const umi = await createUmi();
+  const destination = generateSigner(umi).publicKey;
+  const requiredCollectionAuthority = generateSigner(umi);
+  const { publicKey: requiredCollection } = await createCollectionNft(umi, {
+    authority: requiredCollectionAuthority,
+  });
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {
+      nftPayment: some({ requiredCollection, destination }),
+    },
+  });
 
-//     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
-//     guards: {
-//       nftPayment: {
-//         requiredCollection: requiredCollection.address,
-//         destination: nftTreasury.publicKey,
-//       },
-//     },
-//   });
+  // And a payer that owns an NFT from that collection
+  // but not on an associated token account.
+  const nftToSend = generateSigner(umi);
+  const nftToSendToken = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(createMint(umi, { mint: nftToSend }))
+    .add(
+      createToken(umi, {
+        mint: nftToSend.publicKey,
+        owner: umi.identity.publicKey,
+        token: nftToSendToken,
+      })
+    )
+    .sendAndConfirm();
+  await createVerifiedNft(umi, {
+    mint: nftToSend,
+    tokenOwner: umi.identity.publicKey,
+    token: nftToSendToken.publicKey, // <- We're explicitly creating a non-associated token account.
+    collectionMint: requiredCollection,
+    collectionAuthority: requiredCollectionAuthority,
+  });
 
-//   // And a payer that owns an NFT from that collection
-//   // but not on an associated token account.
-//   const payer = await generateSignerWithSol(umi, sol(10));
-//   const payerNftTokenAccount = generateSigner(umi);
-//   const payerNft = await createNft(umi, {
-//     tokenOwner: payer.publicKey,
-//     tokenAddress: payerNftTokenAccount, // <-- This creates a non-associated token account.
-//     collection: requiredCollection.address,
-//     collectionAuthority: requiredCollectionAuthority,
-//   });
+  // When the payer mints from it using its NFT to pay
+  // whilst providing the token address.
+  const mint = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: {
+          nftPayment: some({
+            requiredCollection,
+            mint: nftToSend.publicKey,
+            destination,
+            tokenAccount: nftToSendToken.publicKey,
+          }),
+        },
+      })
+    )
+    .sendAndConfirm();
 
-//   // When the payer mints from it using its NFT to pay
-//   // whilst providing the token address.
-//   const mint = generateSigner(umi);
-//   await transactionBuilder(umi).add().sendAndConfirm();
-//   mintV2(
-//     umi,
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//       guards: {
-//         nftPayment: {
-//           mint: payerNft.address,
-//           tokenAccount: payerNftTokenAccount.publicKey,
-//         },
-//       },
-//     },
-//     { payer }
-//   );
+  // Then minting was successful.
+  await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
 
-//   // Then minting was successful.
-//   await assertSuccessfulMint(
-//     t,
-//     umi,
-//     { mint, owner: minter },
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//       nft,
-//       owner: payer.publicKey,
-//     }
-//   );
-
-//   // And the NFT now belongs to the NFT treasury.
-//   const updatedNft = await umi.nfts().findByMint({
-//     mintAddress: payerNft.address,
-//     tokenOwner: nftTreasury.publicKey,
-//   });
-
-//   assertNftWithToken(updatedNft);
-//   t.true(
-//     updatedNft.token.ownerAddress.equals(nftTreasury.publicKey),
-//     'The NFT is now owned by the NFT treasury'
-//   );
-// });
+  // And the NFT now belongs to the NFT destination.
+  const updatedNft = await fetchDigitalAssetWithAssociatedToken(
+    umi,
+    nftToSend.publicKey,
+    destination
+  );
+  t.deepEqual(updatedNft.token.owner, destination);
+});
 
 // test('it fails if the payer does not own the right NFT', async (t) => {
 //   // Given a loaded Candy Machine with an nftPayment guard on a required collection.

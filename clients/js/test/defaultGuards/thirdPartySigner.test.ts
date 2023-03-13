@@ -1,13 +1,4 @@
-import { Keypair } from '@solana/web3.js';
 import test from 'ava';
-import {
-  assertThrows,
-  createWallet,
-  killStuckProcess,
-  metaplex,
-} from '../../../helpers';
-import { assertMintingWasSuccessful, createCandyMachine } from '../helpers';
-import { isEqualToAmount, sol, toBigNumber } from '@/index';
 
 test('it allows minting when the third party signer is provided', async (t) => {
   // Given a loaded Candy Machine with a third party signer guard.

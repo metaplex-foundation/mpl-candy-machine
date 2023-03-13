@@ -2,7 +2,6 @@
 import {
   createAssociatedToken,
   createMint,
-  createToken,
   findAssociatedTokenPda,
   mintTokensTo,
 } from '@metaplex-foundation/mpl-essentials';

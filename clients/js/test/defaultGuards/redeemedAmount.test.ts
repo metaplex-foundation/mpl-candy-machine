@@ -1,16 +1,4 @@
 import test from 'ava';
-import {
-  assertThrows,
-  createWallet,
-  killStuckProcess,
-  metaplex,
-} from '../../../helpers';
-import {
-  assertMintingWasSuccessful,
-  createCandyMachine,
-  SEQUENTIAL_ITEM_SETTINGS,
-} from '../helpers';
-import { isEqualToAmount, sol, toBigNumber } from '@/index';
 
 test('it allows minting until a threshold of NFTs have been redeemed', async (t) => {
   // Given a loaded Candy Machine with a redeemedAmount guard with a threshold of 1 NFT.

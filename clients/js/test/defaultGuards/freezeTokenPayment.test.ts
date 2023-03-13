@@ -1,32 +1,4 @@
-import { FreezeEscrow } from '@metaplex-foundation/mpl-candy-guard';
-import { AccountState } from '@solana/spl-token';
-import { Keypair, PublicKey } from '@solana/web3.js';
-import spok from 'spok';
 import test from 'ava';
-import {
-  assertThrows,
-  createWallet,
-  killStuckProcess,
-  metaplex,
-  spokSameBignum,
-  spokSamePubkey,
-} from '../../../helpers';
-import {
-  assertMintingWasSuccessful,
-  createCandyMachine,
-  SEQUENTIAL_ITEM_SETTINGS,
-} from '../helpers';
-import {
-  CandyMachine,
-  isEqualToAmount,
-  Metaplex,
-  Mint,
-  Signer,
-  sol,
-  toBigNumber,
-  token,
-  TokenWithMint,
-} from '@/index';
 
 test('it transfers tokens to an escrow account and freezes the NFT', async (t) => {
   // Given a loaded Candy Machine with a freezeTokenPayment guard.

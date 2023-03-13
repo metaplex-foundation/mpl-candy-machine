@@ -1,13 +1,4 @@
-import { Keypair } from '@solana/web3.js';
 import test from 'ava';
-import {
-  assertThrows,
-  createWallet,
-  killStuckProcess,
-  metaplex,
-} from '../../../helpers';
-import { assertMintingWasSuccessful, createCandyMachine } from '../helpers';
-import { isEqualToAmount, sol, toBigNumber, token } from '@/index';
 
 test('it allows minting when the payer owns a specific token', async (t) => {
   // Given a payer with one token.

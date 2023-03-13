@@ -1,15 +1,4 @@
-import { Keypair } from '@solana/web3.js';
 import test from 'ava';
-import {
-  assertThrows,
-  createCollectionNft,
-  createNft,
-  createWallet,
-  killStuckProcess,
-  metaplex,
-} from '../../../helpers';
-import { assertMintingWasSuccessful, createCandyMachine } from '../helpers';
-import { isEqualToAmount, sol, toBigNumber } from '@/index';
 
 test('it burns a specific NFT to allow minting', async (t) => {
   // Given a payer that owns an NFT from a certain collection.

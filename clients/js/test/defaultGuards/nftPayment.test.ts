@@ -1,15 +1,4 @@
-import { Keypair } from '@solana/web3.js';
 import test from 'ava';
-import {
-  assertThrows,
-  createCollectionNft,
-  createNft,
-  createWallet,
-  killStuckProcess,
-  metaplex,
-} from '../../../helpers';
-import { assertMintingWasSuccessful, createCandyMachine } from '../helpers';
-import { assertNftWithToken, isEqualToAmount, sol, toBigNumber } from '@/index';
 
 test('it transfers an NFT from the payer to the destination', async (t) => {
   // Given a loaded Candy Machine with an nftPayment guard on a required collection.

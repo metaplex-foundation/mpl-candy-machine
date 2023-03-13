@@ -1,25 +1,4 @@
-import { Buffer } from 'buffer';
 import test from 'ava';
-import { TransactionInstruction } from '@solana/web3.js';
-import {
-  assertThrows,
-  createWallet,
-  killStuckProcess,
-  metaplex,
-} from '../../../helpers';
-import { assertMintingWasSuccessful, createCandyMachine } from '../helpers';
-import {
-  toBigNumber,
-  PublicKey,
-  NftWithToken,
-  sol,
-  isEqualToAmount,
-  TransactionBuilder,
-} from '@/index';
-
-const MEMO_PROGRAM_ID = new PublicKey(
-  'MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr'
-);
 
 test('it allows minting with specified program in transaction', async (t) => {
   // Given a loaded Candy Machine with a programGate guard allowing the memo program.

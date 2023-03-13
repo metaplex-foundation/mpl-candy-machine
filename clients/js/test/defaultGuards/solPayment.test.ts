@@ -1,13 +1,4 @@
-import { Keypair } from '@solana/web3.js';
 import test from 'ava';
-import {
-  assertThrows,
-  createWallet,
-  killStuckProcess,
-  metaplex,
-} from '../../../helpers';
-import { assertMintingWasSuccessful, createCandyMachine } from '../helpers';
-import { isEqualToAmount, sol, toBigNumber } from '@/index';
 
 test('it transfers SOL from the payer to the destination', async (t) => {
   // Given a loaded Candy Machine with a solPayment guard.

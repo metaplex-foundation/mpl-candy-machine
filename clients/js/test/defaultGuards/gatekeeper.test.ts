@@ -1,5 +1,3 @@
-import { Buffer } from 'buffer';
-import { Keypair } from '@solana/web3.js';
 import test from 'ava';
 import {
   addGatekeeper,
@@ -15,23 +13,6 @@ import {
   killStuckProcess,
   metaplex,
 } from '../../../helpers';
-import { assertMintingWasSuccessful, createCandyMachine } from '../helpers';
-import {
-  assertAccountExists,
-  DateTime,
-  isEqualToAmount,
-  Metaplex,
-  now,
-  Pda,
-  PublicKey,
-  Signer,
-  sol,
-  toBigNumber,
-  toDateTime,
-  TransactionBuilder,
-} from '@/index';
-
-const SECONDS_IN_A_DAY = 24 * 60 * 60;
 
 test('it allows minting via a gatekeeper service', async (t) => {
   // Given a Gatekeeper Network.

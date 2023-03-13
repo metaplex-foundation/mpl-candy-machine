@@ -137,7 +137,59 @@ test('it defaults to calculating the gateway token PDA for us', async (t) => {
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
 });
 
-// TODO: test with different payer and minter.
+test('it allows minting even when the payer is different from the minter', async (t) => {
+  // Given a Gatekeeper Network.
+  const umi = await createUmi();
+  const { gatekeeperNetwork, gatekeeperAuthority } =
+    await createGatekeeperNetwork(umi);
+
+  // And a separate minter that has a valid gateway Token Account from that network.
+  const minter = generateSigner(umi);
+  await issueGatewayToken(
+    umi,
+    gatekeeperNetwork.publicKey,
+    gatekeeperAuthority,
+    umi.payer,
+    minter.publicKey
+  );
+
+  // And a loaded Candy Machine with a gatekeeper guard on that network.
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {
+      gatekeeper: some({
+        gatekeeperNetwork: gatekeeperNetwork.publicKey,
+        expireOnUse: false,
+      }),
+    },
+  });
+
+  // When that minter mints from the Candy Machine without passing in its valid token.
+  const mint = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        minter,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: {
+          gatekeeper: some({
+            gatekeeperNetwork: gatekeeperNetwork.publicKey,
+            expireOnUse: false,
+          }),
+        },
+      })
+    )
+    .sendAndConfirm();
+
+  // Then minting was still successful.
+  await assertSuccessfulMint(t, umi, { mint, owner: minter });
+});
 
 test('it forbids minting when providing the wrong token', async (t) => {
   // Given a Gatekeeper Network such that the identity
@@ -488,6 +540,7 @@ const issueGatewayToken = async (
   expiryDate?: DateTimeInput,
   seeds = [0, 0, 0, 0, 0, 0, 0, 0]
 ): Promise<PublicKey> => {
+  owner = owner ?? payer.publicKey;
   const s = umi.serializer;
   const gatewayProgram = umi.programs.getPublicKey('civicGateway');
   const gatekeeperAccount = umi.eddsa.findPda(gatewayProgram, [
@@ -496,7 +549,7 @@ const issueGatewayToken = async (
     s.string({ size: 'variable' }).serialize('gatekeeper'),
   ]);
   const gatewayTokenAccount = umi.eddsa.findPda(gatewayProgram, [
-    s.publicKey().serialize(payer),
+    s.publicKey().serialize(owner),
     s.string({ size: 'variable' }).serialize('gateway'),
     s.array(s.u8(), { size: 8 }).serialize(seeds),
     s.publicKey().serialize(gatekeeperNetwork),
@@ -509,7 +562,7 @@ const issueGatewayToken = async (
           toWeb3JsPublicKey(gatewayTokenAccount),
           toWeb3JsPublicKey(payer.publicKey),
           toWeb3JsPublicKey(gatekeeperAccount),
-          toWeb3JsPublicKey(owner ?? payer.publicKey),
+          toWeb3JsPublicKey(owner),
           toWeb3JsPublicKey(gatekeeperAuthority.publicKey),
           toWeb3JsPublicKey(gatekeeperNetwork),
           new Uint8Array(seeds),

@@ -1,84 +1,85 @@
-// import {
-//   generateSigner,
-//   sol,
-//   some,
-//   transactionBuilder,
-// } from '@metaplex-foundation/umi';
-// import test from 'ava';
-// import { createCollectionNft, createUmi, createV2 } from '../_setup';
-// import { mintV2 } from '../../src';
+import { setComputeUnitLimit } from '@metaplex-foundation/mpl-essentials';
+import {
+  findMasterEditionPda,
+  findMetadataPda,
+} from '@metaplex-foundation/mpl-token-metadata';
+import {
+  generateSigner,
+  some,
+  transactionBuilder,
+} from '@metaplex-foundation/umi';
+import test from 'ava';
+import { mintV2 } from '../../src';
+import {
+  assertSuccessfulMint,
+  createCollectionNft,
+  createNft,
+  createUmi,
+  createV2,
+} from '../_setup';
 
-// test('it burns a specific NFT to allow minting', async (t) => {
-//   // Given a payer that owns an NFT from a certain collection.
-//   const umi = await createUmi();
-//   const payer = await generateSignerWithSol(umi, sol(10));
-//   const nftBurnCollectionAuthority = generateSigner(umi);
-//   const nftBurnCollection = await createCollectionNft(umi, {
-//     updateAuthority: nftBurnCollectionAuthority,
-//   });
-//   const payerNft = await createNft(umi, {
-//     tokenOwner: payer.publicKey,
-//     collection: nftBurnCollection.address,
-//     collectionAuthority: nftBurnCollectionAuthority,
-//   });
+test('it burns a specific NFT to allow minting', async (t) => {
+  // Given a payer that owns an NFT from a certain collection.
+  const umi = await createUmi();
+  const requiredCollectionAuthority = generateSigner(umi);
+  const { publicKey: requiredCollection } = await createCollectionNft(umi, {
+    updateAuthority: requiredCollectionAuthority,
+  });
+  const nftToBurn = await createNft(umi, {
+    tokenOwner: umi.identity.publicKey,
+    collection: some({ verified: false, key: requiredCollection }),
+  });
 
-//   // And a loaded Candy Machine with an nftBurn guard.
-//   const collectionMint = (await createCollectionNft(umi)).publicKey;
-//   const { publicKey: candyMachine } = await createV2(umi, {
-//     collectionMint,
+  // And a loaded Candy Machine with an nftBurn guard.
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {
+      nftBurn: some({ requiredCollection }),
+    },
+  });
 
-//     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
-//     guards: {
-//       nftBurn: {
-//         requiredCollection: nftBurnCollection.address,
-//       },
-//     },
-//   });
+  // When the identity mints from it using its NFT to burn.
+  const mint = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: {
+          nftBurn: some({ requiredCollection, mint: nftToBurn.publicKey }),
+        },
+      })
+    )
+    .sendAndConfirm();
 
-//   // When the payer mints from it using its NFT to burn.
-//   const mint = generateSigner(umi);
-//   await transactionBuilder(umi).add().sendAndConfirm();
-//   mintV2(
-//     umi,
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//       guards: {
-//         nftBurn: {
-//           mint: payerNft.address,
-//         },
-//       },
-//     },
-//     { payer }
-//   );
+  // Then minting was successful.
+  await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
 
-//   // Then minting was successful.
-//   await assertSuccessfulMint(
-//     t,
-//     umi,
-//     { mint, owner: minter },
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//       nft,
-//       owner: payer.publicKey,
-//     }
-//   );
+  // And the NFT was burned.
+  const nftToBurnMetadata = findMetadataPda(umi, { mint: nftToBurn.publicKey });
+  const nftToBurnEdition = findMasterEditionPda(umi, {
+    mint: nftToBurn.publicKey,
+  });
+  t.false(
+    await umi.rpc.accountExists(nftToBurn.publicKey),
+    'payer NFT token account was burned'
+  );
+  t.false(
+    await umi.rpc.accountExists(nftToBurnMetadata),
+    'payer NFT metadata was burned'
+  );
+  t.false(
+    await umi.rpc.accountExists(nftToBurnEdition),
+    'payer NFT master edition was burned'
+  );
+});
 
-//   // And the NFT was burned.
-//   t.false(
-//     await umi.rpc().accountExists(payerNft.token.address),
-//     'payer NFT token account was burned'
-//   );
-//   t.false(
-//     await umi.rpc().accountExists(payerNft.metadataAddress),
-//     'payer NFT metadata was burned'
-//   );
-//   t.false(
-//     await umi.rpc().accountExists(payerNft.edition.address),
-//     'payer NFT master edition was burned'
-//   );
-// });
+// TODO: it allows minting even when the payer is different from the minter
 
 // test('it fails if there is not valid NFT to burn', async (t) => {
 //   // Given a loaded Candy Machine with an nftBurn guard on a specific collection.

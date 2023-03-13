@@ -6,7 +6,7 @@ import {
   mintTokensTo,
 } from '@metaplex-foundation/mpl-essentials';
 import {
-  createNft,
+  createNft as baseCreateNft,
   DigitalAssetWithToken,
   fetchDigitalAssetWithAssociatedToken,
   findMetadataPda,
@@ -47,26 +47,30 @@ import {
 export const createUmi = async () =>
   (await basecreateUmi()).use(mplCandyMachine());
 
-export const createCollectionNft = async (
+export const createNft = async (
   umi: Umi,
-  input: Partial<Parameters<typeof createNft>[1]> = {}
+  input: Partial<Parameters<typeof baseCreateNft>[1]> = {}
 ): Promise<Signer> => {
-  const collectionMint = generateSigner(umi);
+  const mint = generateSigner(umi);
   await transactionBuilder(umi)
     .add(
-      createNft(umi, {
-        mint: collectionMint,
+      baseCreateNft(umi, {
+        mint,
         name: 'My collection NFT',
         sellerFeeBasisPoints: percentAmount(10),
         uri: 'https://example.com/my-collection-nft.json',
-        isCollection: true,
         ...input,
       })
     )
     .sendAndConfirm();
 
-  return collectionMint;
+  return mint;
 };
+
+export const createCollectionNft = async (
+  umi: Umi,
+  input: Partial<Parameters<typeof baseCreateNft>[1]> = {}
+): Promise<Signer> => createNft(umi, { ...input, isCollection: true });
 
 export const createMintAndToken = async (
   umi: Umi,

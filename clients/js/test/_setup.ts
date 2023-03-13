@@ -9,8 +9,10 @@ import {
   createNft as baseCreateNft,
   DigitalAssetWithToken,
   fetchDigitalAssetWithAssociatedToken,
+  findMasterEditionPda,
   findMetadataPda,
   TokenStandard,
+  verifyCollectionV1,
 } from '@metaplex-foundation/mpl-token-metadata';
 import {
   Context,
@@ -71,6 +73,31 @@ export const createCollectionNft = async (
   umi: Umi,
   input: Partial<Parameters<typeof baseCreateNft>[1]> = {}
 ): Promise<Signer> => createNft(umi, { ...input, isCollection: true });
+
+export const createVerifiedNft = async (
+  umi: Umi,
+  input: Partial<Parameters<typeof baseCreateNft>[1]> & {
+    collectionMint: PublicKey;
+    collectionAuthority?: Signer;
+  }
+): Promise<Signer> => {
+  const { collectionMint, collectionAuthority = umi.identity, ...rest } = input;
+  const mint = await createNft(umi, {
+    ...rest,
+    collection: some({ verified: false, key: collectionMint }),
+  });
+  await transactionBuilder(umi)
+    .add(
+      verifyCollectionV1(umi, {
+        authority: collectionAuthority,
+        collectionMint,
+        metadata: findMetadataPda(umi, { mint: mint.publicKey }),
+      })
+    )
+    .sendAndConfirm();
+
+  return mint;
+};
 
 export const createMintAndToken = async (
   umi: Umi,
@@ -300,6 +327,24 @@ export const assertBotTax = async (
   if (extraRegex !== undefined) t.regex(logs, extraRegex);
   const metadata = findMetadataPda(umi, { mint: publicKey(mint) });
   t.false(await umi.rpc.accountExists(metadata));
+};
+
+export const assertBurnedNft = async (
+  t: Assertions,
+  umi: Umi,
+  mint: Signer | PublicKey,
+  owner?: Signer | PublicKey
+) => {
+  owner = owner ?? umi.identity;
+  const tokenAccount = findAssociatedTokenPda(umi, {
+    mint: publicKey(mint),
+    owner: publicKey(owner),
+  });
+  const metadataAccount = findMetadataPda(umi, { mint: publicKey(mint) });
+  const editionAccount = findMasterEditionPda(umi, { mint: publicKey(mint) });
+  t.false(await umi.rpc.accountExists(tokenAccount));
+  t.false(await umi.rpc.accountExists(metadataAccount));
+  t.false(await umi.rpc.accountExists(editionAccount));
 };
 
 export const yesterday = (): DateTime => now() - 3600n * 24n;

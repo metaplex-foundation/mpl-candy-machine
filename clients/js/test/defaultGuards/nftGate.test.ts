@@ -1,14 +1,15 @@
 import {
+  createMint,
+  createToken,
+  setComputeUnitLimit,
+} from '@metaplex-foundation/mpl-essentials';
+import {
   generateSigner,
   some,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import test from 'ava';
-import {
-  createMint,
-  createToken,
-  setComputeUnitLimit,
-} from '@metaplex-foundation/mpl-essentials';
+import { mintV2 } from '../../src';
 import {
   assertSuccessfulMint,
   createCollectionNft,
@@ -16,7 +17,6 @@ import {
   createV2,
   createVerifiedNft,
 } from '../_setup';
-import { mintV2 } from '../../src';
 
 test('it allows minting when the payer owns an NFT from a certain collection', async (t) => {
   // Given the identity owns an NFT from a certain collection.
@@ -108,7 +108,7 @@ test('it allows minting even when the payer is different from the minter', async
   await assertSuccessfulMint(t, umi, { mint, owner: minter });
 });
 
-test.skip('it allows minting when the NFT is not on an associated token account', async (t) => {
+test('it allows minting when the NFT is not on an associated token account', async (t) => {
   // Given a payer that owns an NFT from a certain collection on a non-associated token account.
   const umi = await createUmi();
   const requiredCollectionAuthority = generateSigner(umi);
@@ -156,7 +156,11 @@ test.skip('it allows minting when the NFT is not on an associated token account'
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
         mintArgs: {
-          nftGate: some({ requiredCollection, mint: nftToVerify.publicKey }),
+          nftGate: some({
+            requiredCollection,
+            mint: nftToVerify.publicKey,
+            tokenAccount: nftToVerifyToken.publicKey,
+          }),
         },
       })
     )

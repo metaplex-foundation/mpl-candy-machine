@@ -86,12 +86,14 @@ export const createVerifiedNft = async (
     ...rest,
     collection: some({ verified: false, key: collectionMint }),
   });
+  const effectiveMint = publicKey(rest.mint ?? mint.publicKey);
+
   await transactionBuilder(umi)
     .add(
       verifyCollectionV1(umi, {
         authority: collectionAuthority,
         collectionMint,
-        metadata: findMetadataPda(umi, { mint: mint.publicKey }),
+        metadata: findMetadataPda(umi, { mint: effectiveMint }),
       })
     )
     .sendAndConfirm();

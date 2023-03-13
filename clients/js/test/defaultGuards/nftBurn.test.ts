@@ -62,7 +62,54 @@ test('it burns a specific NFT to allow minting', async (t) => {
   await assertBurnedNft(t, umi, nftToBurn, umi.identity);
 });
 
-// TODO: it allows minting even when the payer is different from the minter
+test('it allows minting even when the payer is different from the minter', async (t) => {
+  // Given a separate minter owns an NFT from a certain collection.
+  const umi = await createUmi();
+  const minter = generateSigner(umi);
+  const requiredCollectionAuthority = generateSigner(umi);
+  const { publicKey: requiredCollection } = await createCollectionNft(umi, {
+    authority: requiredCollectionAuthority,
+  });
+  const nftToBurn = await createVerifiedNft(umi, {
+    tokenOwner: minter.publicKey,
+    collectionMint: requiredCollection,
+    collectionAuthority: requiredCollectionAuthority,
+  });
+
+  // And a loaded Candy Machine with an nftBurn guard on that collection.
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {
+      nftBurn: some({ requiredCollection }),
+    },
+  });
+
+  // When the minter mints from it using its NFT to burn.
+  const mint = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        minter,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: {
+          nftBurn: some({ requiredCollection, mint: nftToBurn.publicKey }),
+        },
+      })
+    )
+    .sendAndConfirm();
+
+  // Then minting was successful.
+  await assertSuccessfulMint(t, umi, { mint, owner: minter });
+
+  // And the NFT was burned.
+  await assertBurnedNft(t, umi, nftToBurn, minter);
+});
 
 // test('it fails if there is not valid NFT to burn', async (t) => {
 //   // Given a loaded Candy Machine with an nftBurn guard on a specific collection.

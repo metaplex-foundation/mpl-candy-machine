@@ -5,6 +5,7 @@ import {
 import {
   findMasterEditionPda,
   findMetadataPda,
+  verifyCollectionV1,
 } from '@metaplex-foundation/mpl-token-metadata';
 import {
   generateSigner,
@@ -28,10 +29,24 @@ test('it burns a specific NFT to allow minting', async (t) => {
   const { publicKey: requiredCollection } = await createCollectionNft(umi, {
     authority: requiredCollectionAuthority,
   });
+  // TODO: Create verified Nft.
   const nftToBurn = await createNft(umi, {
     tokenOwner: umi.identity.publicKey,
     collection: some({ verified: false, key: requiredCollection }),
   });
+  await transactionBuilder(umi)
+    .add(
+      verifyCollectionV1(umi, {
+        authority: requiredCollectionAuthority,
+        collectionMint: requiredCollection,
+        collectionMetadata: findMetadataPda(umi, { mint: requiredCollection }),
+        collectionMasterEdition: findMasterEditionPda(umi, {
+          mint: requiredCollection,
+        }),
+        metadata: findMetadataPda(umi, { mint: nftToBurn.publicKey }),
+      })
+    )
+    .sendAndConfirm();
 
   // And a loaded Candy Machine with an nftBurn guard.
   const collectionMint = (await createCollectionNft(umi)).publicKey;

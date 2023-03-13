@@ -137,49 +137,49 @@ test('it defaults to calculating the gateway token PDA for us', async (t) => {
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
 });
 
-// test('it forbids minting when providing the wrong token', async (t) => {
-//   // Given a Gatekeeper Network.
-//   const umi = await createUmi();
-//   const { gatekeeperNetwork } = await createGatekeeperNetwork(umi);
+// TODO: test with different payer and minter.
 
-//   // And a payer without a valid gateway Token Account from that network.
-//   const payer = await generateSignerWithSol(umi, sol(10));
-//   const wrongToken = generateSigner(umi).publicKey;
+test('it forbids minting when providing the wrong token', async (t) => {
+  // Given a Gatekeeper Network such that the identity
+  // has no valid gateway Token Account from that network.
+  const umi = await createUmi();
+  const { gatekeeperNetwork } = await createGatekeeperNetwork(umi);
 
-//   // Given a loaded Candy Machine with a gatekeeper guard.
-//   const collectionMint = (await createCollectionNft(umi)).publicKey;
-//   const { publicKey: candyMachine } = await createV2(umi, {
-//     collectionMint,
+  // Given a loaded Candy Machine with a gatekeeper guard.
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {
+      gatekeeper: some({
+        gatekeeperNetwork: gatekeeperNetwork.publicKey,
+        expireOnUse: false,
+      }),
+    },
+  });
 
-//     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
-//     guards: {
-//       gatekeeper: {
-//         network: gatekeeperNetwork.publicKey,
-//         expireOnUse: false,
-//       },
-//     },
-//   });
+  // When the payer tries to mint from it with the wrong token.
+  const mint = generateSigner(umi);
+  const promise = transactionBuilder(umi)
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: {
+          gatekeeper: some({
+            gatekeeperNetwork: gatekeeperNetwork.publicKey,
+            expireOnUse: false,
+          }),
+        },
+      })
+    )
+    .sendAndConfirm();
 
-//   // When the payer tries to mint from it with the wrong token.
-//   const mint = generateSigner(umi);
-//   const promise = transactionBuilder(umi).add().sendAndConfirm();
-//   mintV2(
-//     umi,
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//       guards: {
-//         gatekeeper: {
-//           tokenAccount: wrongToken,
-//         },
-//       },
-//     },
-//     { payer }
-//   );
-
-//   // Then we expect an error.
-//   await t.throwsAsync(promise, { message: /Gateway token is not valid/ });
-// });
+  // Then we expect an error.
+  await t.throwsAsync(promise, { message: /GatewayTokenInvalid/ });
+});
 
 // test('it allows minting using gateway tokens that expire when they are still valid', async (t) => {
 //   // Given a Gatekeeper Network.

@@ -1,80 +1,90 @@
-// import {
-//   generateSigner,
-//   sol,
-//   some,
-//   transactionBuilder,
-// } from '@metaplex-foundation/umi';
-// import test from 'ava';
-// import { createCollectionNft, createUmi, createV2 } from '../_setup';
-// import { mintV2 } from '../../src';
-// import {
-//   addGatekeeper,
-//   issueVanilla,
-//   addFeatureToNetwork,
-//   NetworkFeature,
-//   UserTokenExpiry,
-//   GatewayTokenData,
-// } from '@identity.com/solana-gateway-ts';
+import {
+  assertAccountExists,
+  dateTime,
+  DateTimeInput,
+  generateSigner,
+  PublicKey,
+  Signer,
+  sol,
+  some,
+  transactionBuilder,
+  Umi,
+} from '@metaplex-foundation/umi';
+import test from 'ava';
+import { Buffer } from 'buffer';
+import {
+  addGatekeeper,
+  issueVanilla,
+  addFeatureToNetwork,
+  NetworkFeature,
+  UserTokenExpiry,
+  GatewayTokenData,
+} from '@identity.com/solana-gateway-ts';
+import {
+  fromWeb3JsInstruction,
+  toWeb3JsPublicKey,
+} from '@metaplex-foundation/umi-web3js-adapters';
+import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
+import { setComputeUnitLimit } from '@metaplex-foundation/mpl-essentials';
+import {
+  assertSuccessfulMint,
+  createCollectionNft,
+  createUmi,
+  createV2,
+} from '../_setup';
+import { mintV2 } from '../../src';
 
-// test('it allows minting via a gatekeeper service', async (t) => {
-//   // Given a Gatekeeper Network.
-//   const umi = await createUmi();
-//   const { gatekeeperNetwork, gatekeeperAuthority } =
-//     await createGatekeeperNetwork(umi);
+test('it allows minting via a gatekeeper service', async (t) => {
+  // Given a Gatekeeper Network.
+  const umi = await createUmi();
+  const { gatekeeperNetwork, gatekeeperAuthority } =
+    await createGatekeeperNetwork(umi);
 
-//   // And a payer with a valid gateway Token Account from that network.
-//   const payer = await generateSignerWithSol(umi, sol(10));
-//   const gatewayTokenAccount = await issueGatewayToken(
-//     umi,
-//     gatekeeperNetwork.publicKey,
-//     gatekeeperAuthority,
-//     payer
-//   );
+  // And given the identity has a valid gateway Token Account from that network.
+  const gatewayTokenAccount = await issueGatewayToken(
+    umi,
+    gatekeeperNetwork.publicKey,
+    gatekeeperAuthority,
+    umi.identity
+  );
 
-//   // And a loaded Candy Machine with a gatekeeper guard on that network.
-//   const collectionMint = (await createCollectionNft(umi)).publicKey;
-//   const { publicKey: candyMachine } = await createV2(umi, {
-//     collectionMint,
+  // And a loaded Candy Machine with a gatekeeper guard on that network.
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {
+      gatekeeper: some({
+        gatekeeperNetwork: gatekeeperNetwork.publicKey,
+        expireOnUse: false,
+      }),
+    },
+  });
 
-//     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
-//     guards: {
-//       gatekeeper: {
-//         network: gatekeeperNetwork.publicKey,
-//         expireOnUse: false,
-//       },
-//     },
-//   });
+  // When the identity mints from the Candy Machine using its valid token.
+  const mint = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: {
+          gatekeeper: some({
+            gatekeeperNetwork: gatekeeperNetwork.publicKey,
+            expireOnUse: false,
+            tokenAccount: gatewayTokenAccount,
+          }),
+        },
+      })
+    )
+    .sendAndConfirm();
 
-//   // When that payer mints from the Candy Machine using its valid token.
-//   const mint = generateSigner(umi);
-//   await transactionBuilder(umi).add().sendAndConfirm();
-//   mintV2(
-//     umi,
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//       guards: {
-//         gatekeeper: {
-//           tokenAccount: gatewayTokenAccount,
-//         },
-//       },
-//     },
-//     { payer }
-//   );
-
-//   // Then minting was successful.
-//   await assertSuccessfulMint(
-//     t,
-//     umi,
-//     { mint, owner: minter },
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//       nft,
-//       owner: payer.publicKey,
-//     }
-//   );
-// });
+  // Then minting was successful.
+  await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
+});
 
 // test('it defaults to calculating the gateway token PDA for us', async (t) => {
 //   // Given a Gatekeeper Network.
@@ -422,96 +432,108 @@
 //   );
 // });
 
-// const createGatekeeperNetwork = async (
-//   umi: Metaplex
-// ): Promise<{
-//   gatekeeperNetwork: Signer;
-//   gatekeeperAuthority: Signer;
-// }> => {
-//   // Prepare the accounts.
-//   const gatewayProgram = umi.programs().getGateway();
-//   const gatekeeperAuthority = await generateSignerWithSol(umi, sol(10));
-//   const gatekeeperNetwork = generateSigner(umi);
-//   const gatekeeperAccount = Pda.find(gatewayProgram.address, [
-//     gatekeeperAuthority.publicKey.toBuffer(),
-//     gatekeeperNetwork.publicKey.toBuffer(),
-//     Buffer.from('gatekeeper'),
-//   ]);
+const createGatekeeperNetwork = async (
+  umi: Umi
+): Promise<{
+  gatekeeperNetwork: Signer;
+  gatekeeperAuthority: Signer;
+}> => {
+  // Prepare the accounts.
+  const gatekeeperAuthority = await generateSignerWithSol(umi, sol(10));
+  const gatekeeperNetwork = generateSigner(umi);
+  const s = umi.serializer;
+  const gatewayProgram = umi.programs.getPublicKey('civicGateway');
+  const gatekeeperAccount = umi.eddsa.findPda(gatewayProgram, [
+    s.publicKey().serialize(gatekeeperAuthority),
+    s.publicKey().serialize(gatekeeperNetwork),
+    s.string({ size: 'variable' }).serialize('gatekeeper'),
+  ]);
 
-//   // Create the gatekeeper network.
-//   const addGatekeeperTx = TransactionBuilder.make().add({
-//     instruction: addGatekeeper(
-//       gatekeeperAuthority.publicKey,
-//       gatekeeperAccount,
-//       gatekeeperAuthority.publicKey,
-//       gatekeeperNetwork.publicKey
-//     ),
-//     signers: [gatekeeperAuthority, gatekeeperNetwork],
-//   });
-//   await addGatekeeperTx.sendAndConfirm(umi);
+  // Create the gatekeeper network.
+  await transactionBuilder(umi)
+    .add({
+      instruction: fromWeb3JsInstruction(
+        addGatekeeper(
+          toWeb3JsPublicKey(gatekeeperAuthority.publicKey),
+          toWeb3JsPublicKey(gatekeeperAccount),
+          toWeb3JsPublicKey(gatekeeperAuthority.publicKey),
+          toWeb3JsPublicKey(gatekeeperNetwork.publicKey)
+        )
+      ),
+      signers: [gatekeeperAuthority, gatekeeperNetwork],
+      bytesCreatedOnChain: 0,
+    })
+    .sendAndConfirm();
 
-//   // Add the expire feature to the gatekeeper network.
-//   const expireFeature = new NetworkFeature({
-//     userTokenExpiry: new UserTokenExpiry({}),
-//   });
-//   const addExpireFeatureTx = TransactionBuilder.make().add({
-//     instruction: await addFeatureToNetwork(
-//       gatekeeperAuthority.publicKey,
-//       gatekeeperNetwork.publicKey,
-//       expireFeature
-//     ),
-//     signers: [gatekeeperAuthority, gatekeeperNetwork],
-//   });
-//   await addExpireFeatureTx.sendAndConfirm(umi);
+  // Add the expire feature to the gatekeeper network.
+  await transactionBuilder(umi)
+    .add({
+      instruction: fromWeb3JsInstruction(
+        await addFeatureToNetwork(
+          toWeb3JsPublicKey(gatekeeperAuthority.publicKey),
+          toWeb3JsPublicKey(gatekeeperNetwork.publicKey),
+          new NetworkFeature({ userTokenExpiry: new UserTokenExpiry({}) })
+        )
+      ),
+      signers: [gatekeeperAuthority, gatekeeperNetwork],
+      bytesCreatedOnChain: 0,
+    })
+    .sendAndConfirm();
 
-//   return { gatekeeperNetwork, gatekeeperAuthority };
-// };
+  return { gatekeeperNetwork, gatekeeperAuthority };
+};
 
-// const issueGatewayToken = async (
-//   umi: Metaplex,
-//   gatekeeperNetwork: PublicKey,
-//   gatekeeperAuthority: Signer,
-//   payer: Signer,
-//   expiryDate?: DateTime,
-//   seeds = [0, 0, 0, 0, 0, 0, 0, 0]
-// ): Promise<PublicKey> => {
-//   const gatewayProgram = umi.programs().getGateway();
-//   const gatekeeperAccount = Pda.find(gatewayProgram.address, [
-//     gatekeeperAuthority.publicKey.toBuffer(),
-//     gatekeeperNetwork.toBuffer(),
-//     Buffer.from('gatekeeper'),
-//   ]);
-//   const gatewayTokenAccount = Pda.find(gatewayProgram.address, [
-//     payer.publicKey.toBuffer(),
-//     Buffer.from('gateway'),
-//     Buffer.from(seeds),
-//     gatekeeperNetwork.toBuffer(),
-//   ]);
+const issueGatewayToken = async (
+  umi: Umi,
+  gatekeeperNetwork: PublicKey,
+  gatekeeperAuthority: Signer,
+  payer: Signer,
+  owner?: PublicKey,
+  expiryDate?: DateTimeInput,
+  seeds = [0, 0, 0, 0, 0, 0, 0, 0]
+): Promise<PublicKey> => {
+  const s = umi.serializer;
+  const gatewayProgram = umi.programs.getPublicKey('civicGateway');
+  const gatekeeperAccount = umi.eddsa.findPda(gatewayProgram, [
+    s.publicKey().serialize(gatekeeperAuthority),
+    s.publicKey().serialize(gatekeeperNetwork),
+    s.string({ size: 'variable' }).serialize('gatekeeper'),
+  ]);
+  const gatewayTokenAccount = umi.eddsa.findPda(gatewayProgram, [
+    s.publicKey().serialize(payer),
+    s.string({ size: 'variable' }).serialize('gateway'),
+    s.array(s.u8(), { size: 8 }).serialize(seeds),
+    s.publicKey().serialize(gatekeeperNetwork),
+  ]);
 
-//   const issueVanillaTx = TransactionBuilder.make().add({
-//     instruction: issueVanilla(
-//       gatewayTokenAccount,
-//       payer.publicKey,
-//       gatekeeperAccount,
-//       payer.publicKey,
-//       gatekeeperAuthority.publicKey,
-//       gatekeeperNetwork,
-//       Buffer.from(seeds),
-//       expiryDate?.toNumber()
-//     ),
-//     signers: [payer, gatekeeperAuthority],
-//   });
-//   await issueVanillaTx.sendAndConfirm(umi);
+  await transactionBuilder(umi)
+    .add({
+      instruction: fromWeb3JsInstruction(
+        issueVanilla(
+          toWeb3JsPublicKey(gatewayTokenAccount),
+          toWeb3JsPublicKey(payer.publicKey),
+          toWeb3JsPublicKey(gatekeeperAccount),
+          toWeb3JsPublicKey(owner ?? payer.publicKey),
+          toWeb3JsPublicKey(gatekeeperAuthority.publicKey),
+          toWeb3JsPublicKey(gatekeeperNetwork),
+          new Uint8Array(seeds),
+          expiryDate ? Number(dateTime(expiryDate)) : undefined
+        )
+      ),
+      signers: [payer, gatekeeperAuthority],
+      bytesCreatedOnChain: 0,
+    })
+    .sendAndConfirm();
 
-//   return gatewayTokenAccount;
-// };
+  return gatewayTokenAccount;
+};
 
-// const getGatewayTokenData = async (
-//   umi: Metaplex,
-//   gatewayTokenAccount: PublicKey
-// ): Promise<GatewayTokenData> => {
-//   const account = await umi.rpc().getAccount(gatewayTokenAccount);
-//   assertAccountExists(account);
+export const getGatewayTokenData = async (
+  umi: Umi,
+  gatewayTokenAccount: PublicKey
+): Promise<GatewayTokenData> => {
+  const account = await umi.rpc.getAccount(gatewayTokenAccount);
+  assertAccountExists(account);
 
-//   return GatewayTokenData.fromAccount(account.data);
-// };
+  return GatewayTokenData.fromAccount(Buffer.from(account.data));
+};

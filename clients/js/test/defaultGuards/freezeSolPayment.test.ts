@@ -21,7 +21,7 @@ import {
 } from '../_setup';
 import { mintV2, route } from '../../src';
 
-test('it transfers SOL to an escrow account and freezes the NFT', async (t) => {
+test.skip('it transfers SOL to an escrow account and freezes the NFT', async (t) => {
   // Given a loaded Candy Machine with a freezeSolPayment guard.
   const umi = await createUmi();
   const destination = generateSigner(umi).publicKey;

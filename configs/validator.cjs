@@ -40,6 +40,11 @@ module.exports = {
         programId: "TokExjvjJmhKaRBShsBAsbSvEWMA1AgUNK7ps4SAc2p",
         deployPath: getExternalProgram("mpl_token_extras.so"),
       },
+      {
+        label: "Civic Gateway",
+        programId: "gatem74V238djXdzWnJf94Wo1DcnuGkfijbf3AuBhfs",
+        deployPath: getExternalProgram("civic_gateway.so"),
+      },
     ],
   },
 };

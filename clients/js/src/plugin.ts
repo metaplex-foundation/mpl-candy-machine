@@ -1,5 +1,5 @@
 import { mplTokenMetadata } from '@metaplex-foundation/mpl-token-metadata';
-import { UmiPlugin } from '@metaplex-foundation/umi';
+import { publicKey, UmiPlugin } from '@metaplex-foundation/umi';
 import {
   addressGateGuardManifest,
   allowListGuardManifest,
@@ -43,6 +43,16 @@ export const mplCandyMachine = (): UmiPlugin => ({
         ...getMplCandyGuardProgram(),
         availableGuards: defaultCandyGuardNames,
       } as CandyGuardProgram,
+      false
+    );
+    umi.programs.add(
+      {
+        name: 'civicGateway',
+        publicKey: publicKey('gatem74V238djXdzWnJf94Wo1DcnuGkfijbf3AuBhfs'),
+        getErrorFromCode: () => null,
+        getErrorFromName: () => null,
+        isOnCluster: () => true,
+      },
       false
     );
 

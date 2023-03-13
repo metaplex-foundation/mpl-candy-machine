@@ -345,84 +345,77 @@ test('it forbids minting using gateway tokens that have expired', async (t) => {
   await t.throwsAsync(promise, { message: /GatewayTokenInvalid/ });
 });
 
-// test('it may immediately mark gateway tokens as expired after using them', async (t) => {
-//   // Given a Gatekeeper Network.
-//   const umi = await createUmi();
-//   const { gatekeeperNetwork, gatekeeperAuthority } =
-//     await createGatekeeperNetwork(umi);
+test('it may immediately mark gateway tokens as expired after using them', async (t) => {
+  // Given a Gatekeeper Network.
+  const umi = await createUmi();
+  const { gatekeeperNetwork, gatekeeperAuthority } =
+    await createGatekeeperNetwork(umi);
 
-//   // And a payer with a valid gateway Token Account from that network
-//   // that is set to expire tomorrow.
-//   const payer = await generateSignerWithSol(umi, sol(10));
-//   const tomorrowDateTime = toDateTime(now().addn(SECONDS_IN_A_DAY));
-//   const gatewayTokenAccount = await issueGatewayToken(
-//     umi,
-//     gatekeeperNetwork.publicKey,
-//     gatekeeperAuthority,
-//     payer,
-//     tomorrowDateTime
-//   );
-//   const gatewayTokenData = await getGatewayTokenData(umi, gatewayTokenAccount);
-//   t.true(!!gatewayTokenData.expiry, 'Gateway token expires');
-//   t.iss(gatewayTokenData.expiry?.toNumber(), tomorrowDateTime.toNumber());
+  // And given the identity has a valid gateway Token Account
+  // from that network that is set to expire tomorrow.
+  const tomorrowDateTime = tomorrow();
+  const gatewayTokenAccount = await issueGatewayToken(
+    umi,
+    gatekeeperNetwork.publicKey,
+    gatekeeperAuthority,
+    umi.identity,
+    umi.identity.publicKey,
+    tomorrowDateTime
+  );
+  const gatewayTokenData = await getGatewayTokenData(umi, gatewayTokenAccount);
+  t.true(!!gatewayTokenData.expiry, 'Gateway token expires');
+  t.is(gatewayTokenData.expiry?.toNumber(), Number(tomorrowDateTime));
 
-//   // And a loaded Candy Machine with a gatekeeper guard
-//   // that mark tokens as expire after using them.
-//   const collectionMint = (await createCollectionNft(umi)).publicKey;
-//   const { publicKey: candyMachine } = await createV2(umi, {
-//     collectionMint,
+  // And a loaded Candy Machine with a gatekeeper guard
+  // that mark tokens as expire after using them.
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {
+      gatekeeper: some({
+        gatekeeperNetwork: gatekeeperNetwork.publicKey,
+        expireOnUse: true,
+      }),
+    },
+  });
 
-//     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
-//     guards: {
-//       gatekeeper: {
-//         network: gatekeeperNetwork.publicKey,
-//         expireOnUse: true,
-//       },
-//     },
-//   });
+  // When the identity mints from the Candy Machine using its token.
+  const mint = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: {
+          gatekeeper: some({
+            gatekeeperNetwork: gatekeeperNetwork.publicKey,
+            expireOnUse: true,
+            tokenAccount: gatewayTokenAccount,
+          }),
+        },
+      })
+    )
+    .sendAndConfirm();
 
-//   // When that payer mints from the Candy Machine using its token.
-//   const mint = generateSigner(umi);
-//   await transactionBuilder(umi).add().sendAndConfirm();
-//   mintV2(
-//     umi,
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//       guards: {
-//         gatekeeper: {
-//           tokenAccount: gatewayTokenAccount,
-//         },
-//       },
-//     },
-//     { payer }
-//   );
+  // Then minting was successful.
+  await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
 
-//   // Then minting was successful.
-//   await assertSuccessfulMint(
-//     t,
-//     umi,
-//     { mint, owner: minter },
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//       nft,
-//       owner: payer.publicKey,
-//     }
-//   );
-
-//   // And the gateway token is now expired.
-//   const updatedGatewayTokenData = await getGatewayTokenData(
-//     umi,
-//     gatewayTokenAccount
-//   );
-//   t.true(!!updatedGatewayTokenData.expiry, 'Gateway token expires');
-//   const updateExpiry = updatedGatewayTokenData.expiry?.toNumber() as number;
-//   t.true(
-//     updateExpiry < tomorrowDateTime.toNumber(),
-//     'Gateway token expiry date was shortened'
-//   );
-// });
+  // And the gateway token is now expired.
+  const updatedGatewayTokenData = await getGatewayTokenData(
+    umi,
+    gatewayTokenAccount
+  );
+  t.true(!!updatedGatewayTokenData.expiry, 'Gateway token expires');
+  const updateExpiry = updatedGatewayTokenData.expiry?.toNumber() as number;
+  t.true(
+    updateExpiry < tomorrowDateTime,
+    'Gateway token expiry date was shortened'
+  );
+});
 
 // test('it charges a bot tax when trying to mint using the wrong token', async (t) => {
 //   // Given a Gatekeeper Network.
@@ -576,7 +569,7 @@ const issueGatewayToken = async (
   return gatewayTokenAccount;
 };
 
-export const getGatewayTokenData = async (
+const getGatewayTokenData = async (
   umi: Umi,
   gatewayTokenAccount: PublicKey
 ): Promise<GatewayTokenData> => {

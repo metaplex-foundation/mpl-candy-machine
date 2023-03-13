@@ -1,5 +1,5 @@
 import { Keypair } from '@solana/web3.js';
-import test from 'tape';
+import test from 'ava';
 import {
   assertThrows,
   createCollectionNft,
@@ -11,19 +11,19 @@ import {
 import { assertMintingWasSuccessful, createCandyMachine } from '../helpers';
 import { assertNftWithToken, isEqualToAmount, sol, toBigNumber } from '@/index';
 
-killStuckProcess();
-
-test('[candyMachineModule] nftPayment guard: it transfers an NFT from the payer to the destination', async (t) => {
+test('it transfers an NFT from the payer to the destination', async (t) => {
   // Given a loaded Candy Machine with an nftPayment guard on a required collection.
-  const mx = await metaplex();
-  const nftTreasury = Keypair.generate();
-  const requiredCollectionAuthority = Keypair.generate();
-  const requiredCollection = await createCollectionNft(mx, {
+  const umi = await createUmi();
+  const nftTreasury = generateSigner(umi);
+  const requiredCollectionAuthority = generateSigner(umi);
+  const requiredCollection = await createCollectionNft(umi, {
     updateAuthority: requiredCollectionAuthority,
   });
-  const { candyMachine, collection } = await createCandyMachine(mx, {
-    itemsAvailable: toBigNumber(1),
-    items: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
     guards: {
       nftPayment: {
         requiredCollection: requiredCollection.address,
@@ -33,15 +33,18 @@ test('[candyMachineModule] nftPayment guard: it transfers an NFT from the payer 
   });
 
   // And a payer that owns an NFT from that collection.
-  const payer = await createWallet(mx, 10);
-  const payerNft = await createNft(mx, {
+  const payer = await generateSignerWithSol(umi, sol(10));
+  const payerNft = await createNft(umi, {
     tokenOwner: payer.publicKey,
     collection: requiredCollection.address,
     collectionAuthority: requiredCollectionAuthority,
   });
 
   // When the payer mints from it using its NFT to pay.
-  const { nft } = await mx.candyMachines().mint(
+  const mint = generateSigner(umi);
+  await transactionBuilder(umi).add().sendAndConfirm();
+  mintV2(
+    umi,
     {
       candyMachine,
       collectionUpdateAuthority: collection.updateAuthority.publicKey,
@@ -55,15 +58,20 @@ test('[candyMachineModule] nftPayment guard: it transfers an NFT from the payer 
   );
 
   // Then minting was successful.
-  await assertMintingWasSuccessful(t, mx, {
-    candyMachine,
-    collectionUpdateAuthority: collection.updateAuthority.publicKey,
-    nft,
-    owner: payer.publicKey,
-  });
+  await assertSuccessfulMint(
+    t,
+    umi,
+    { mint, owner: minter },
+    {
+      candyMachine,
+      collectionUpdateAuthority: collection.updateAuthority.publicKey,
+      nft,
+      owner: payer.publicKey,
+    }
+  );
 
   // And the NFT now belongs to the NFT treasury.
-  const updatedNft = await mx.nfts().findByMint({
+  const updatedNft = await umi.nfts().findByMint({
     mintAddress: payerNft.address,
     tokenOwner: nftTreasury.publicKey,
   });
@@ -75,17 +83,19 @@ test('[candyMachineModule] nftPayment guard: it transfers an NFT from the payer 
   );
 });
 
-test('[candyMachineModule] nftPayment guard: it works when the provided NFT is not on an associated token account', async (t) => {
+test('it works when the provided NFT is not on an associated token account', async (t) => {
   // Given a loaded Candy Machine with an nftPayment guard on a required collection.
-  const mx = await metaplex();
-  const nftTreasury = Keypair.generate();
-  const requiredCollectionAuthority = Keypair.generate();
-  const requiredCollection = await createCollectionNft(mx, {
+  const umi = await createUmi();
+  const nftTreasury = generateSigner(umi);
+  const requiredCollectionAuthority = generateSigner(umi);
+  const requiredCollection = await createCollectionNft(umi, {
     updateAuthority: requiredCollectionAuthority,
   });
-  const { candyMachine, collection } = await createCandyMachine(mx, {
-    itemsAvailable: toBigNumber(1),
-    items: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
     guards: {
       nftPayment: {
         requiredCollection: requiredCollection.address,
@@ -96,9 +106,9 @@ test('[candyMachineModule] nftPayment guard: it works when the provided NFT is n
 
   // And a payer that owns an NFT from that collection
   // but not on an associated token account.
-  const payer = await createWallet(mx, 10);
-  const payerNftTokenAccount = Keypair.generate();
-  const payerNft = await createNft(mx, {
+  const payer = await generateSignerWithSol(umi, sol(10));
+  const payerNftTokenAccount = generateSigner(umi);
+  const payerNft = await createNft(umi, {
     tokenOwner: payer.publicKey,
     tokenAddress: payerNftTokenAccount, // <-- This creates a non-associated token account.
     collection: requiredCollection.address,
@@ -107,7 +117,10 @@ test('[candyMachineModule] nftPayment guard: it works when the provided NFT is n
 
   // When the payer mints from it using its NFT to pay
   // whilst providing the token address.
-  const { nft } = await mx.candyMachines().mint(
+  const mint = generateSigner(umi);
+  await transactionBuilder(umi).add().sendAndConfirm();
+  mintV2(
+    umi,
     {
       candyMachine,
       collectionUpdateAuthority: collection.updateAuthority.publicKey,
@@ -122,15 +135,20 @@ test('[candyMachineModule] nftPayment guard: it works when the provided NFT is n
   );
 
   // Then minting was successful.
-  await assertMintingWasSuccessful(t, mx, {
-    candyMachine,
-    collectionUpdateAuthority: collection.updateAuthority.publicKey,
-    nft,
-    owner: payer.publicKey,
-  });
+  await assertSuccessfulMint(
+    t,
+    umi,
+    { mint, owner: minter },
+    {
+      candyMachine,
+      collectionUpdateAuthority: collection.updateAuthority.publicKey,
+      nft,
+      owner: payer.publicKey,
+    }
+  );
 
   // And the NFT now belongs to the NFT treasury.
-  const updatedNft = await mx.nfts().findByMint({
+  const updatedNft = await umi.nfts().findByMint({
     mintAddress: payerNft.address,
     tokenOwner: nftTreasury.publicKey,
   });
@@ -142,17 +160,19 @@ test('[candyMachineModule] nftPayment guard: it works when the provided NFT is n
   );
 });
 
-test('[candyMachineModule] nftPayment guard: it fails if the payer does not own the right NFT', async (t) => {
+test('it fails if the payer does not own the right NFT', async (t) => {
   // Given a loaded Candy Machine with an nftPayment guard on a required collection.
-  const mx = await metaplex();
-  const nftTreasury = Keypair.generate();
-  const requiredCollectionAuthority = Keypair.generate();
-  const requiredCollection = await createCollectionNft(mx, {
+  const umi = await createUmi();
+  const nftTreasury = generateSigner(umi);
+  const requiredCollectionAuthority = generateSigner(umi);
+  const requiredCollection = await createCollectionNft(umi, {
     updateAuthority: requiredCollectionAuthority,
   });
-  const { candyMachine, collection } = await createCandyMachine(mx, {
-    itemsAvailable: toBigNumber(1),
-    items: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
     guards: {
       nftPayment: {
         requiredCollection: requiredCollection.address,
@@ -162,13 +182,16 @@ test('[candyMachineModule] nftPayment guard: it fails if the payer does not own 
   });
 
   // And a payer that owns an NFT this is not from that collection.
-  const payer = await createWallet(mx, 10);
-  const payerNft = await createNft(mx, {
+  const payer = await generateSignerWithSol(umi, sol(10));
+  const payerNft = await createNft(umi, {
     tokenOwner: payer.publicKey,
   });
 
   // When the payer tries to mint from it using its NFT to pay.
-  const promise = mx.candyMachines().mint(
+  const mint = generateSigner(umi);
+  const promise = transactionBuilder(umi).add().sendAndConfirm();
+  mintV2(
+    umi,
     {
       candyMachine,
       collectionUpdateAuthority: collection.updateAuthority.publicKey,
@@ -182,20 +205,22 @@ test('[candyMachineModule] nftPayment guard: it fails if the payer does not own 
   );
 
   // Then we expect an error.
-  await assertThrows(t, promise, /Invalid NFT collection/);
+  await t.throwsAsync(promise, { message: /Invalid NFT collection/ });
 });
 
-test('[candyMachineModule] nftPayment guard: it fails if the payer tries to provide an NFT from an unverified collection', async (t) => {
+test('it fails if the payer tries to provide an NFT from an unverified collection', async (t) => {
   // Given a loaded Candy Machine with an nftPayment guard on a required collection.
-  const mx = await metaplex();
-  const nftTreasury = Keypair.generate();
-  const requiredCollectionAuthority = Keypair.generate();
-  const requiredCollection = await createCollectionNft(mx, {
+  const umi = await createUmi();
+  const nftTreasury = generateSigner(umi);
+  const requiredCollectionAuthority = generateSigner(umi);
+  const requiredCollection = await createCollectionNft(umi, {
     updateAuthority: requiredCollectionAuthority,
   });
-  const { candyMachine, collection } = await createCandyMachine(mx, {
-    itemsAvailable: toBigNumber(1),
-    items: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
     guards: {
       nftPayment: {
         requiredCollection: requiredCollection.address,
@@ -205,14 +230,17 @@ test('[candyMachineModule] nftPayment guard: it fails if the payer tries to prov
   });
 
   // And a payer that owns an unverified NFT from that collection.
-  const payer = await createWallet(mx, 10);
-  const payerNft = await createNft(mx, {
+  const payer = await generateSignerWithSol(umi, sol(10));
+  const payerNft = await createNft(umi, {
     tokenOwner: payer.publicKey,
     collection: requiredCollection.address,
   });
 
   // When the payer tries to mint from it using its NFT to pay.
-  const promise = mx.candyMachines().mint(
+  const mint = generateSigner(umi);
+  const promise = transactionBuilder(umi).add().sendAndConfirm();
+  mintV2(
+    umi,
     {
       candyMachine,
       collectionUpdateAuthority: collection.updateAuthority.publicKey,
@@ -226,21 +254,23 @@ test('[candyMachineModule] nftPayment guard: it fails if the payer tries to prov
   );
 
   // Then we expect an error.
-  await assertThrows(t, promise, /Invalid NFT collection/);
+  await t.throwsAsync(promise, { message: /Invalid NFT collection/ });
 });
 
-test('[candyMachineModule] nftPayment guard with bot tax: it charges a bot tax when trying to pay with the wrong NFT', async (t) => {
+test('it charges a bot tax when trying to pay with the wrong NFT', async (t) => {
   // Given a loaded Candy Machine with an nftPayment guard
   // on a required collection and a bot tax guard.
-  const mx = await metaplex();
-  const nftTreasury = Keypair.generate();
-  const requiredCollectionAuthority = Keypair.generate();
-  const requiredCollection = await createCollectionNft(mx, {
+  const umi = await createUmi();
+  const nftTreasury = generateSigner(umi);
+  const requiredCollectionAuthority = generateSigner(umi);
+  const requiredCollection = await createCollectionNft(umi, {
     updateAuthority: requiredCollectionAuthority,
   });
-  const { candyMachine, collection } = await createCandyMachine(mx, {
-    itemsAvailable: toBigNumber(1),
-    items: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
     guards: {
       botTax: {
         lamports: sol(0.1),
@@ -254,13 +284,16 @@ test('[candyMachineModule] nftPayment guard with bot tax: it charges a bot tax w
   });
 
   // And a payer that owns an NFT this is not from that collection.
-  const payer = await createWallet(mx, 10);
-  const payerNft = await createNft(mx, {
+  const payer = await generateSignerWithSol(umi, sol(10));
+  const payerNft = await createNft(umi, {
     tokenOwner: payer.publicKey,
   });
 
   // When the payer tries to mint from it using its NFT to pay.
-  const promise = mx.candyMachines().mint(
+  const mint = generateSigner(umi);
+  const promise = transactionBuilder(umi).add().sendAndConfirm();
+  mintV2(
+    umi,
     {
       candyMachine,
       collectionUpdateAuthority: collection.updateAuthority.publicKey,
@@ -274,33 +307,38 @@ test('[candyMachineModule] nftPayment guard with bot tax: it charges a bot tax w
   );
 
   // Then we expect a bot tax error.
-  await assertThrows(t, promise, /CandyMachineBotTaxError/);
+  await t.throwsAsync(promise, { message: /CandyMachineBotTaxError/ });
 
   // And the payer was charged a bot tax.
-  const payerBalance = await mx.rpc().getBalance(payer.publicKey);
+  const payerBalance = await umi.rpc.getBalance(payer.publicKey);
   t.true(
     isEqualToAmount(payerBalance, sol(9.9), sol(0.01)),
     'payer was charged a bot tax'
   );
 });
 
-test('[candyMachineModule] nftPayment guard: minting settings must be provided', async (t) => {
+test('minting settings must be provided', async (t) => {
   // Given a loaded Candy Machine with a third party signer guard.
-  const mx = await metaplex();
-  const { candyMachine, collection } = await createCandyMachine(mx, {
-    itemsAvailable: toBigNumber(1),
-    items: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+  const umi = await createUmi();
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
     guards: {
       nftPayment: {
-        requiredCollection: Keypair.generate().publicKey,
-        destination: Keypair.generate().publicKey,
+        requiredCollection: generateSigner(umi).publicKey,
+        destination: generateSigner(umi).publicKey,
       },
     },
   });
 
   // When we try to mint from it without providing the third party signer.
-  const payer = await createWallet(mx, 10);
-  const promise = mx.candyMachines().mint(
+  const payer = await generateSignerWithSol(umi, sol(10));
+  const mint = generateSigner(umi);
+  const promise = transactionBuilder(umi).add().sendAndConfirm();
+  mintV2(
+    umi,
     {
       candyMachine,
       collectionUpdateAuthority: collection.updateAuthority.publicKey,

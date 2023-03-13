@@ -1,5 +1,5 @@
 import { Keypair } from '@solana/web3.js';
-import test from 'tape';
+import test from 'ava';
 import {
   assertThrows,
   createWallet,
@@ -9,15 +9,15 @@ import {
 import { assertMintingWasSuccessful, createCandyMachine } from '../helpers';
 import { isEqualToAmount, sol, toBigNumber } from '@/index';
 
-killStuckProcess();
-
-test('[candyMachineModule] thirdPartySigner guard: it allows minting when the third party signer is provided', async (t) => {
+test('it allows minting when the third party signer is provided', async (t) => {
   // Given a loaded Candy Machine with a third party signer guard.
-  const mx = await metaplex();
-  const thirdPartySigner = Keypair.generate();
-  const { candyMachine, collection } = await createCandyMachine(mx, {
-    itemsAvailable: toBigNumber(1),
-    items: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+  const umi = await createUmi();
+  const thirdPartySigner = generateSigner(umi);
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
     guards: {
       thirdPartySigner: {
         signerKey: thirdPartySigner.publicKey,
@@ -26,8 +26,11 @@ test('[candyMachineModule] thirdPartySigner guard: it allows minting when the th
   });
 
   // When we mint from it by providing the third party as a Signer.
-  const payer = await createWallet(mx, 10);
-  const { nft } = await mx.candyMachines().mint(
+  const payer = await generateSignerWithSol(umi, sol(10));
+  const mint = generateSigner(umi);
+  await transactionBuilder(umi).add().sendAndConfirm();
+  mintV2(
+    umi,
     {
       candyMachine,
       collectionUpdateAuthority: collection.updateAuthority.publicKey,
@@ -41,21 +44,28 @@ test('[candyMachineModule] thirdPartySigner guard: it allows minting when the th
   );
 
   // Then minting was successful.
-  await assertMintingWasSuccessful(t, mx, {
-    candyMachine,
-    collectionUpdateAuthority: collection.updateAuthority.publicKey,
-    nft,
-    owner: payer.publicKey,
-  });
+  await assertSuccessfulMint(
+    t,
+    umi,
+    { mint, owner: minter },
+    {
+      candyMachine,
+      collectionUpdateAuthority: collection.updateAuthority.publicKey,
+      nft,
+      owner: payer.publicKey,
+    }
+  );
 });
 
-test('[candyMachineModule] thirdPartySigner guard: it forbids minting when the third party signer is wrong', async (t) => {
+test('it forbids minting when the third party signer is wrong', async (t) => {
   // Given a loaded Candy Machine with a third party signer guard.
-  const mx = await metaplex();
-  const thirdPartySigner = Keypair.generate();
-  const { candyMachine, collection } = await createCandyMachine(mx, {
-    itemsAvailable: toBigNumber(1),
-    items: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+  const umi = await createUmi();
+  const thirdPartySigner = generateSigner(umi);
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
     guards: {
       thirdPartySigner: {
         signerKey: thirdPartySigner.publicKey,
@@ -64,9 +74,12 @@ test('[candyMachineModule] thirdPartySigner guard: it forbids minting when the t
   });
 
   // When we try to mint from it by providing the wrong third party signer.
-  const wrongThirdPartySigner = Keypair.generate();
-  const payer = await createWallet(mx, 10);
-  const promise = mx.candyMachines().mint(
+  const wrongThirdPartySigner = generateSigner(umi);
+  const payer = await generateSignerWithSol(umi, sol(10));
+  const mint = generateSigner(umi);
+  const promise = transactionBuilder(umi).add().sendAndConfirm();
+  mintV2(
+    umi,
     {
       candyMachine,
       collectionUpdateAuthority: collection.updateAuthority.publicKey,
@@ -80,16 +93,20 @@ test('[candyMachineModule] thirdPartySigner guard: it forbids minting when the t
   );
 
   // Then we expect an error.
-  await assertThrows(t, promise, /A signature was required but not found/);
+  await t.throwsAsync(promise, {
+    message: /A signature was required but not found/,
+  });
 });
 
-test('[candyMachineModule] thirdPartySigner guard with bot tax: it charges a bot tax when trying to mint using the wrong third party signer', async (t) => {
+test('it charges a bot tax when trying to mint using the wrong third party signer', async (t) => {
   // Given a loaded Candy Machine with a third party signer guard and a bot tax guard.
-  const mx = await metaplex();
-  const thirdPartySigner = Keypair.generate();
-  const { candyMachine, collection } = await createCandyMachine(mx, {
-    itemsAvailable: toBigNumber(1),
-    items: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+  const umi = await createUmi();
+  const thirdPartySigner = generateSigner(umi);
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
     guards: {
       botTax: {
         lamports: sol(0.1),
@@ -102,9 +119,12 @@ test('[candyMachineModule] thirdPartySigner guard with bot tax: it charges a bot
   });
 
   // When we try to mint from it by providing the wrong third party signer.
-  const wrongThirdPartySigner = Keypair.generate();
-  const payer = await createWallet(mx, 10);
-  const promise = mx.candyMachines().mint(
+  const wrongThirdPartySigner = generateSigner(umi);
+  const payer = await generateSignerWithSol(umi, sol(10));
+  const mint = generateSigner(umi);
+  const promise = transactionBuilder(umi).add().sendAndConfirm();
+  mintV2(
+    umi,
     {
       candyMachine,
       collectionUpdateAuthority: collection.updateAuthority.publicKey,
@@ -118,23 +138,25 @@ test('[candyMachineModule] thirdPartySigner guard with bot tax: it charges a bot
   );
 
   // Then we expect a bot tax error.
-  await assertThrows(t, promise, /CandyMachineBotTaxError/);
+  await t.throwsAsync(promise, { message: /CandyMachineBotTaxError/ });
 
   // And the payer was charged a bot tax.
-  const payerBalance = await mx.rpc().getBalance(payer.publicKey);
+  const payerBalance = await umi.rpc.getBalance(payer.publicKey);
   t.true(
     isEqualToAmount(payerBalance, sol(9.9), sol(0.01)),
     'payer was charged a bot tax'
   );
 });
 
-test('[candyMachineModule] thirdPartySigner guard: minting settings must be provided', async (t) => {
+test('minting settings must be provided', async (t) => {
   // Given a loaded Candy Machine with a third party signer guard.
-  const mx = await metaplex();
-  const thirdPartySigner = Keypair.generate();
-  const { candyMachine, collection } = await createCandyMachine(mx, {
-    itemsAvailable: toBigNumber(1),
-    items: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+  const umi = await createUmi();
+  const thirdPartySigner = generateSigner(umi);
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
     guards: {
       thirdPartySigner: {
         signerKey: thirdPartySigner.publicKey,
@@ -143,8 +165,11 @@ test('[candyMachineModule] thirdPartySigner guard: minting settings must be prov
   });
 
   // When we try to mint from it without providing the third party signer.
-  const payer = await createWallet(mx, 10);
-  const promise = mx.candyMachines().mint(
+  const payer = await generateSignerWithSol(umi, sol(10));
+  const mint = generateSigner(umi);
+  const promise = transactionBuilder(umi).add().sendAndConfirm();
+  mintV2(
+    umi,
     {
       candyMachine,
       collectionUpdateAuthority: collection.updateAuthority.publicKey,

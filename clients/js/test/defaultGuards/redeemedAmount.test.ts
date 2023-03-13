@@ -1,4 +1,4 @@
-import test from 'tape';
+import test from 'ava';
 import {
   assertThrows,
   createWallet,
@@ -12,15 +12,14 @@ import {
 } from '../helpers';
 import { isEqualToAmount, sol, toBigNumber } from '@/index';
 
-killStuckProcess();
-
-test('[candyMachineModule] redeemedAmount guard: it allows minting until a threshold of NFTs have been redeemed', async (t) => {
+test('it allows minting until a threshold of NFTs have been redeemed', async (t) => {
   // Given a loaded Candy Machine with a redeemedAmount guard with a threshold of 1 NFT.
-  const mx = await metaplex();
-  const { candyMachine, collection } = await createCandyMachine(mx, {
-    itemsAvailable: toBigNumber(2),
-    itemSettings: SEQUENTIAL_ITEM_SETTINGS,
-    items: [
+  const umi = await createUmi();
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+
+    configLines: [
       { name: 'Degen #1', uri: 'https://example.com/degen/1' },
       { name: 'Degen #1', uri: 'https://example.com/degen/1' },
     ],
@@ -32,8 +31,11 @@ test('[candyMachineModule] redeemedAmount guard: it allows minting until a thres
   });
 
   // When we mint its first item.
-  const payer = await createWallet(mx, 10);
-  const { nft } = await mx.candyMachines().mint(
+  const payer = await generateSignerWithSol(umi, sol(10));
+  const mint = generateSigner(umi);
+  await transactionBuilder(umi).add().sendAndConfirm();
+  mintV2(
+    umi,
     {
       candyMachine,
       collectionUpdateAuthority: collection.updateAuthority.publicKey,
@@ -42,21 +44,27 @@ test('[candyMachineModule] redeemedAmount guard: it allows minting until a thres
   );
 
   // Then minting was successful.
-  await assertMintingWasSuccessful(t, mx, {
-    candyMachine,
-    collectionUpdateAuthority: collection.updateAuthority.publicKey,
-    nft,
-    owner: payer.publicKey,
-  });
+  await assertSuccessfulMint(
+    t,
+    umi,
+    { mint, owner: minter },
+    {
+      candyMachine,
+      collectionUpdateAuthority: collection.updateAuthority.publicKey,
+      nft,
+      owner: payer.publicKey,
+    }
+  );
 });
 
-test('[candyMachineModule] redeemedAmount guard: it forbids minting once the redeemed threshold has been reached', async (t) => {
+test('it forbids minting once the redeemed threshold has been reached', async (t) => {
   // Given a loaded Candy Machine with a redeemedAmount guard with a threshold of 1 NFT.
-  const mx = await metaplex();
-  const { candyMachine, collection } = await createCandyMachine(mx, {
-    itemsAvailable: toBigNumber(2),
-    itemSettings: SEQUENTIAL_ITEM_SETTINGS,
-    items: [
+  const umi = await createUmi();
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+
+    configLines: [
       { name: 'Degen #1', uri: 'https://example.com/degen/1' },
       { name: 'Degen #1', uri: 'https://example.com/degen/1' },
     ],
@@ -68,17 +76,23 @@ test('[candyMachineModule] redeemedAmount guard: it forbids minting once the red
   });
 
   // And assuming its first item has already been minted.
-  await mx.candyMachines().mint(
+  const mint = generateSigner(umi);
+  await transactionBuilder(umi).add().sendAndConfirm();
+  mintV2(
+    umi,
     {
       candyMachine,
       collectionUpdateAuthority: collection.updateAuthority.publicKey,
     },
-    { payer: await createWallet(mx, 10) }
+    { payer: await generateSignerWithSol(umi, sol(10)) }
   );
 
   // When we try to mint its second item.
-  const payer = await createWallet(mx, 10);
-  const promise = mx.candyMachines().mint(
+  const payer = await generateSignerWithSol(umi, sol(10));
+  const mint = generateSigner(umi);
+  const promise = transactionBuilder(umi).add().sendAndConfirm();
+  mintV2(
+    umi,
     {
       candyMachine,
       collectionUpdateAuthority: collection.updateAuthority.publicKey,
@@ -94,14 +108,15 @@ test('[candyMachineModule] redeemedAmount guard: it forbids minting once the red
   );
 });
 
-test('[candyMachineModule] redeemedAmount guard with bot tax: it charges a bot tax when trying to mint once the threshold has been reached', async (t) => {
+test('it charges a bot tax when trying to mint once the threshold has been reached', async (t) => {
   // Given a loaded Candy Machine with a bot tax guard
   // and a redeemedAmount guard with a threshold of 1 NFT.
-  const mx = await metaplex();
-  const { candyMachine, collection } = await createCandyMachine(mx, {
-    itemsAvailable: toBigNumber(2),
-    itemSettings: SEQUENTIAL_ITEM_SETTINGS,
-    items: [
+  const umi = await createUmi();
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+
+    configLines: [
       { name: 'Degen #1', uri: 'https://example.com/degen/1' },
       { name: 'Degen #1', uri: 'https://example.com/degen/1' },
     ],
@@ -117,17 +132,23 @@ test('[candyMachineModule] redeemedAmount guard with bot tax: it charges a bot t
   });
 
   // And assuming its first item has already been minted.
-  await mx.candyMachines().mint(
+  const mint = generateSigner(umi);
+  await transactionBuilder(umi).add().sendAndConfirm();
+  mintV2(
+    umi,
     {
       candyMachine,
       collectionUpdateAuthority: collection.updateAuthority.publicKey,
     },
-    { payer: await createWallet(mx, 10) }
+    { payer: await generateSignerWithSol(umi, sol(10)) }
   );
 
   // When we try to mint its second item.
-  const payer = await createWallet(mx, 10);
-  const promise = mx.candyMachines().mint(
+  const payer = await generateSignerWithSol(umi, sol(10));
+  const mint = generateSigner(umi);
+  const promise = transactionBuilder(umi).add().sendAndConfirm();
+  mintV2(
+    umi,
     {
       candyMachine,
       collectionUpdateAuthority: collection.updateAuthority.publicKey,
@@ -136,10 +157,10 @@ test('[candyMachineModule] redeemedAmount guard with bot tax: it charges a bot t
   );
 
   // Then we expect a bot tax error.
-  await assertThrows(t, promise, /CandyMachineBotTaxError/);
+  await t.throwsAsync(promise, { message: /CandyMachineBotTaxError/ });
 
   // And the payer was charged a bot tax.
-  const payerBalance = await mx.rpc().getBalance(payer.publicKey);
+  const payerBalance = await umi.rpc.getBalance(payer.publicKey);
   t.true(
     isEqualToAmount(payerBalance, sol(9.9), sol(0.01)),
     'payer was charged a bot tax'

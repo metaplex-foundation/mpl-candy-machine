@@ -1,5 +1,5 @@
 import { Keypair } from '@solana/web3.js';
-import test from 'tape';
+import test from 'ava';
 import {
   assertThrows,
   createWallet,
@@ -9,22 +9,22 @@ import {
 import { assertMintingWasSuccessful, createCandyMachine } from '../helpers';
 import { isEqualToAmount, sol, toBigNumber, token } from '@/index';
 
-killStuckProcess();
-
-test('[candyMachineModule] tokenBurn guard: it burns a specific token to allow minting', async (t) => {
+test('it burns a specific token to allow minting', async (t) => {
   // Given a payer with one token.
-  const mx = await metaplex();
-  const payer = await createWallet(mx, 10);
-  const { token: payerTokens } = await mx.tokens().createTokenWithMint({
-    mintAuthority: Keypair.generate(),
+  const umi = await createUmi();
+  const payer = await generateSignerWithSol(umi, sol(10));
+  const { token: payerTokens } = await umi.tokens().createTokenWithMint({
+    mintAuthority: generateSigner(umi),
     owner: payer.publicKey,
     initialSupply: token(1),
   });
 
   // And a loaded Candy Machine with the tokenBurn guard.
-  const { candyMachine, collection } = await createCandyMachine(mx, {
-    itemsAvailable: toBigNumber(1),
-    items: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
     guards: {
       tokenBurn: {
         mint: payerTokens.mint.address,
@@ -34,7 +34,10 @@ test('[candyMachineModule] tokenBurn guard: it burns a specific token to allow m
   });
 
   // When the payer mints from it.
-  const { nft } = await mx.candyMachines().mint(
+  const mint = generateSigner(umi);
+  await transactionBuilder(umi).add().sendAndConfirm();
+  mintV2(
+    umi,
     {
       candyMachine,
       collectionUpdateAuthority: collection.updateAuthority.publicKey,
@@ -43,15 +46,20 @@ test('[candyMachineModule] tokenBurn guard: it burns a specific token to allow m
   );
 
   // Then minting was successful.
-  await assertMintingWasSuccessful(t, mx, {
-    candyMachine,
-    collectionUpdateAuthority: collection.updateAuthority.publicKey,
-    nft,
-    owner: payer.publicKey,
-  });
+  await assertSuccessfulMint(
+    t,
+    umi,
+    { mint, owner: minter },
+    {
+      candyMachine,
+      collectionUpdateAuthority: collection.updateAuthority.publicKey,
+      nft,
+      owner: payer.publicKey,
+    }
+  );
 
   // And the payer's token was burned.
-  const refreshedPayerTokens = await mx
+  const refreshedPayerTokens = await umi
     .tokens()
     .findTokenByAddress({ address: payerTokens.address });
 
@@ -61,20 +69,22 @@ test('[candyMachineModule] tokenBurn guard: it burns a specific token to allow m
   );
 });
 
-test('[candyMachineModule] tokenBurn guard: it may burn multiple tokens from a specific mint', async (t) => {
+test('it may burn multiple tokens from a specific mint', async (t) => {
   // Given a payer with 42 token.
-  const mx = await metaplex();
-  const payer = await createWallet(mx, 10);
-  const { token: payerTokens } = await mx.tokens().createTokenWithMint({
-    mintAuthority: Keypair.generate(),
+  const umi = await createUmi();
+  const payer = await generateSignerWithSol(umi, sol(10));
+  const { token: payerTokens } = await umi.tokens().createTokenWithMint({
+    mintAuthority: generateSigner(umi),
     owner: payer.publicKey,
     initialSupply: token(42),
   });
 
   // And a loaded Candy Machine with the tokenBurn guard that requires 5 tokens.
-  const { candyMachine, collection } = await createCandyMachine(mx, {
-    itemsAvailable: toBigNumber(1),
-    items: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
     guards: {
       tokenBurn: {
         mint: payerTokens.mint.address,
@@ -84,7 +94,10 @@ test('[candyMachineModule] tokenBurn guard: it may burn multiple tokens from a s
   });
 
   // When the payer mints from it.
-  const { nft } = await mx.candyMachines().mint(
+  const mint = generateSigner(umi);
+  await transactionBuilder(umi).add().sendAndConfirm();
+  mintV2(
+    umi,
     {
       candyMachine,
       collectionUpdateAuthority: collection.updateAuthority.publicKey,
@@ -93,15 +106,20 @@ test('[candyMachineModule] tokenBurn guard: it may burn multiple tokens from a s
   );
 
   // Then minting was successful.
-  await assertMintingWasSuccessful(t, mx, {
-    candyMachine,
-    collectionUpdateAuthority: collection.updateAuthority.publicKey,
-    nft,
-    owner: payer.publicKey,
-  });
+  await assertSuccessfulMint(
+    t,
+    umi,
+    { mint, owner: minter },
+    {
+      candyMachine,
+      collectionUpdateAuthority: collection.updateAuthority.publicKey,
+      nft,
+      owner: payer.publicKey,
+    }
+  );
 
   // And the payer lost 5 tokens.
-  const refreshedPayerTokens = await mx
+  const refreshedPayerTokens = await umi
     .tokens()
     .findTokenByAddress({ address: payerTokens.address });
 
@@ -111,20 +129,22 @@ test('[candyMachineModule] tokenBurn guard: it may burn multiple tokens from a s
   );
 });
 
-test('[candyMachineModule] tokenBurn guard: it fails to mint if there are not enough tokens to burn', async (t) => {
+test('it fails to mint if there are not enough tokens to burn', async (t) => {
   // Given a payer with one token.
-  const mx = await metaplex();
-  const payer = await createWallet(mx, 10);
-  const { token: payerTokens } = await mx.tokens().createTokenWithMint({
-    mintAuthority: Keypair.generate(),
+  const umi = await createUmi();
+  const payer = await generateSignerWithSol(umi, sol(10));
+  const { token: payerTokens } = await umi.tokens().createTokenWithMint({
+    mintAuthority: generateSigner(umi),
     owner: payer.publicKey,
     initialSupply: token(1),
   });
 
   // And a loaded Candy Machine with the tokenBurn guard that requires 2 tokens.
-  const { candyMachine, collection } = await createCandyMachine(mx, {
-    itemsAvailable: toBigNumber(1),
-    items: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
     guards: {
       tokenBurn: {
         mint: payerTokens.mint.address,
@@ -134,7 +154,10 @@ test('[candyMachineModule] tokenBurn guard: it fails to mint if there are not en
   });
 
   // When the payer tries to mint from it.
-  const promise = mx.candyMachines().mint(
+  const mint = generateSigner(umi);
+  const promise = transactionBuilder(umi).add().sendAndConfirm();
+  mintV2(
+    umi,
     {
       candyMachine,
       collectionUpdateAuthority: collection.updateAuthority.publicKey,
@@ -143,10 +166,10 @@ test('[candyMachineModule] tokenBurn guard: it fails to mint if there are not en
   );
 
   // Then we expect an error.
-  await assertThrows(t, promise, /Not enough tokens on the account/);
+  await t.throwsAsync(promise, { message: /Not enough tokens on the account/ });
 
   // And the payer still has one token.
-  const refreshedPayerTokens = await mx
+  const refreshedPayerTokens = await umi
     .tokens()
     .findTokenByAddress({ address: payerTokens.address });
 
@@ -156,20 +179,22 @@ test('[candyMachineModule] tokenBurn guard: it fails to mint if there are not en
   );
 });
 
-test('[candyMachineModule] tokenBurn guard with bot tax: it charges a bot tax when trying to mint without the required amount of tokens', async (t) => {
+test('it charges a bot tax when trying to mint without the required amount of tokens', async (t) => {
   // Given a payer with one token.
-  const mx = await metaplex();
-  const payer = await createWallet(mx, 10);
-  const { token: payerTokens } = await mx.tokens().createTokenWithMint({
-    mintAuthority: Keypair.generate(),
+  const umi = await createUmi();
+  const payer = await generateSignerWithSol(umi, sol(10));
+  const { token: payerTokens } = await umi.tokens().createTokenWithMint({
+    mintAuthority: generateSigner(umi),
     owner: payer.publicKey,
     initialSupply: token(1),
   });
 
   // And a loaded Candy Machine with a botTax guard and a tokenBurn guard that requires 2 tokens.
-  const { candyMachine, collection } = await createCandyMachine(mx, {
-    itemsAvailable: toBigNumber(1),
-    items: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
     guards: {
       botTax: {
         lamports: sol(0.1),
@@ -183,7 +208,10 @@ test('[candyMachineModule] tokenBurn guard with bot tax: it charges a bot tax wh
   });
 
   // When the payer tries to mint from it.
-  const promise = mx.candyMachines().mint(
+  const mint = generateSigner(umi);
+  const promise = transactionBuilder(umi).add().sendAndConfirm();
+  mintV2(
+    umi,
     {
       candyMachine,
       collectionUpdateAuthority: collection.updateAuthority.publicKey,
@@ -192,17 +220,17 @@ test('[candyMachineModule] tokenBurn guard with bot tax: it charges a bot tax wh
   );
 
   // Then we expect a bot tax error.
-  await assertThrows(t, promise, /CandyMachineBotTaxError/);
+  await t.throwsAsync(promise, { message: /CandyMachineBotTaxError/ });
 
   // And the payer was charged a bot tax.
-  const payerBalance = await mx.rpc().getBalance(payer.publicKey);
+  const payerBalance = await umi.rpc.getBalance(payer.publicKey);
   t.true(
     isEqualToAmount(payerBalance, sol(9.9), sol(0.01)),
     'payer was charged a bot tax'
   );
 
   // And the payer still has one token.
-  const refreshedPayerTokens = await mx
+  const refreshedPayerTokens = await umi
     .tokens()
     .findTokenByAddress({ address: payerTokens.address });
 

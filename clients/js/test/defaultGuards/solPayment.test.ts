@@ -1,5 +1,5 @@
 import { Keypair } from '@solana/web3.js';
-import test from 'tape';
+import test from 'ava';
 import {
   assertThrows,
   createWallet,
@@ -9,15 +9,15 @@ import {
 import { assertMintingWasSuccessful, createCandyMachine } from '../helpers';
 import { isEqualToAmount, sol, toBigNumber } from '@/index';
 
-killStuckProcess();
-
-test('[candyMachineModule] solPayment guard: it transfers SOL from the payer to the destination', async (t) => {
+test('it transfers SOL from the payer to the destination', async (t) => {
   // Given a loaded Candy Machine with a solPayment guard.
-  const mx = await metaplex();
-  const treasury = Keypair.generate();
-  const { candyMachine, collection } = await createCandyMachine(mx, {
-    itemsAvailable: toBigNumber(1),
-    items: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+  const umi = await createUmi();
+  const treasury = generateSigner(umi);
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
     guards: {
       solPayment: {
         amount: sol(1),
@@ -27,9 +27,12 @@ test('[candyMachineModule] solPayment guard: it transfers SOL from the payer to 
   });
 
   // When we mint for another owner using an explicit payer.
-  const payer = await createWallet(mx, 10);
-  const owner = Keypair.generate().publicKey;
-  const { nft } = await mx.candyMachines().mint(
+  const payer = await generateSignerWithSol(umi, sol(10));
+  const owner = generateSigner(umi).publicKey;
+  const mint = generateSigner(umi);
+  await transactionBuilder(umi).add().sendAndConfirm();
+  mintV2(
+    umi,
     {
       candyMachine,
       collectionUpdateAuthority: collection.updateAuthority.publicKey,
@@ -39,29 +42,36 @@ test('[candyMachineModule] solPayment guard: it transfers SOL from the payer to 
   );
 
   // Then minting was successful.
-  await assertMintingWasSuccessful(t, mx, {
-    candyMachine,
-    collectionUpdateAuthority: collection.updateAuthority.publicKey,
-    nft,
-    owner,
-  });
+  await assertSuccessfulMint(
+    t,
+    umi,
+    { mint, owner: minter },
+    {
+      candyMachine,
+      collectionUpdateAuthority: collection.updateAuthority.publicKey,
+      nft,
+      owner,
+    }
+  );
 
   // And the treasury received SOLs.
-  const treasuryBalance = await mx.rpc().getBalance(treasury.publicKey);
+  const treasuryBalance = await umi.rpc.getBalance(treasury.publicKey);
   t.true(isEqualToAmount(treasuryBalance, sol(1)), 'treasury received SOLs');
 
   // And the payer lost SOLs.
-  const payerBalance = await mx.rpc().getBalance(payer.publicKey);
+  const payerBalance = await umi.rpc.getBalance(payer.publicKey);
   t.true(isEqualToAmount(payerBalance, sol(9), sol(0.1)), 'payer lost SOLs');
 });
 
-test('[candyMachineModule] solPayment guard: it fails if the payer does not have enough funds', async (t) => {
+test('it fails if the payer does not have enough funds', async (t) => {
   // Given a loaded Candy Machine with a solPayment guard costing 5 SOLs.
-  const mx = await metaplex();
-  const treasury = Keypair.generate();
-  const { candyMachine, collection } = await createCandyMachine(mx, {
-    itemsAvailable: toBigNumber(1),
-    items: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+  const umi = await createUmi();
+  const treasury = generateSigner(umi);
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
     guards: {
       solPayment: {
         amount: sol(5),
@@ -71,8 +81,11 @@ test('[candyMachineModule] solPayment guard: it fails if the payer does not have
   });
 
   // When we mint from it using a payer that only has 4 SOL.
-  const payer = await createWallet(mx, 4);
-  const promise = mx.candyMachines().mint(
+  const payer = await generateSignerWithSol(umi, 4);
+  const mint = generateSigner(umi);
+  const promise = transactionBuilder(umi).add().sendAndConfirm();
+  mintV2(
+    umi,
     {
       candyMachine,
       collectionUpdateAuthority: collection.updateAuthority.publicKey,
@@ -81,20 +94,24 @@ test('[candyMachineModule] solPayment guard: it fails if the payer does not have
   );
 
   // Then we expect an error.
-  await assertThrows(t, promise, /Not enough SOL to pay for the mint/);
+  await t.throwsAsync(promise, {
+    message: /Not enough SOL to pay for the mint/,
+  });
 
   // And the payer didn't loose any SOL.
-  const payerBalance = await mx.rpc().getBalance(payer.publicKey);
+  const payerBalance = await umi.rpc.getBalance(payer.publicKey);
   t.true(isEqualToAmount(payerBalance, sol(4)), 'payer did not lose SOLs');
 });
 
-test('[candyMachineModule] solPayment guard with bot tax: it charges a bot tax if the payer does not have enough funds', async (t) => {
+test('it charges a bot tax if the payer does not have enough funds', async (t) => {
   // Given a loaded Candy Machine with a solPayment guard costing 5 SOLs and a botTax guard.
-  const mx = await metaplex();
-  const treasury = Keypair.generate();
-  const { candyMachine, collection } = await createCandyMachine(mx, {
-    itemsAvailable: toBigNumber(1),
-    items: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+  const umi = await createUmi();
+  const treasury = generateSigner(umi);
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
     guards: {
       botTax: {
         lamports: sol(0.1),
@@ -108,8 +125,11 @@ test('[candyMachineModule] solPayment guard with bot tax: it charges a bot tax i
   });
 
   // When we mint from it using a payer that only has 4 SOL.
-  const payer = await createWallet(mx, 4);
-  const promise = mx.candyMachines().mint(
+  const payer = await generateSignerWithSol(umi, 4);
+  const mint = generateSigner(umi);
+  const promise = transactionBuilder(umi).add().sendAndConfirm();
+  mintV2(
+    umi,
     {
       candyMachine,
       collectionUpdateAuthority: collection.updateAuthority.publicKey,
@@ -118,10 +138,10 @@ test('[candyMachineModule] solPayment guard with bot tax: it charges a bot tax i
   );
 
   // Then we expect a bot tax error.
-  await assertThrows(t, promise, /CandyMachineBotTaxError/);
+  await t.throwsAsync(promise, { message: /CandyMachineBotTaxError/ });
 
   // And the payer was charged a bot tax.
-  const payerBalance = await mx.rpc().getBalance(payer.publicKey);
+  const payerBalance = await umi.rpc.getBalance(payer.publicKey);
   t.true(
     isEqualToAmount(payerBalance, sol(3.9), sol(0.01)),
     'payer was charged a bot tax'

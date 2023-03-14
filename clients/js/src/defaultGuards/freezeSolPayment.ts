@@ -222,7 +222,7 @@ const thawRouteInstruction: RouteParser<FreezeSolPaymentRouteArgsThaw> = (
     'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
   );
   const tokenMetadataProgram = context.programs.getPublicKey(
-    'splToken',
+    'mplTokenMetadata',
     'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'
   );
   return {

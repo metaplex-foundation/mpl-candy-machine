@@ -230,7 +230,7 @@ test('it allows minting when the mint and token accounts are created beforehand'
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
 });
 
-test.skip('it can thaw an NFT once all NFTs are minted', async (t) => {
+test('it can thaw an NFT once all NFTs are minted', async (t) => {
   // Given a loaded Candy Machine with an initialized
   // freezeSolPayment guard with only one item.
   const umi = await createUmi();

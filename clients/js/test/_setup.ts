@@ -103,43 +103,6 @@ export const createVerifiedNft = async (
   return mint;
 };
 
-export const createMintAndToken = async (
-  umi: Umi,
-  input: Partial<Omit<Parameters<typeof createMint>[1], 'mintAuthority'>> & {
-    owner?: PublicKey;
-    amount?: number | bigint;
-    mintAuthority?: Signer;
-  } = {}
-) => {
-  const mint = input.mint ?? generateSigner(umi);
-  const mintAuthority = input.mintAuthority ?? umi.identity;
-  const owner = input.owner ?? umi.identity.publicKey;
-  const ata = findAssociatedTokenPda(umi, { mint: mint.publicKey, owner });
-  const amount = input.amount ?? 1;
-  const createMintIx = createMint(umi, {
-    ...input,
-    mint,
-    mintAuthority: mintAuthority.publicKey,
-  });
-  const createTokenIx = createAssociatedToken(umi, {
-    mint: mint.publicKey,
-    owner,
-  });
-  const mintTokensIx = mintTokensTo(umi, {
-    mint: mint.publicKey,
-    token: ata,
-    amount,
-    mintAuthority,
-  });
-  await transactionBuilder(umi)
-    .add(createMintIx)
-    .add(createTokenIx)
-    .add(mintTokensIx)
-    .sendAndConfirm();
-
-  return [mint, ata];
-};
-
 export const createMintWithHolders = async (
   umi: Umi,
   input: Partial<Omit<Parameters<typeof createMint>[1], 'mintAuthority'>> & {

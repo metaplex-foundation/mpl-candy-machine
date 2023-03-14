@@ -11,6 +11,7 @@ import {
 import test, { Assertions } from 'ava';
 import {
   createMintWithAssociatedToken,
+  fetchToken,
   setComputeUnitLimit,
 } from '@metaplex-foundation/mpl-essentials';
 import {
@@ -706,165 +707,10 @@ test('it allows minting when the mint and token accounts are created beforehand'
 //   );
 // });
 
-// const createMint = async (
-//   umi: Metaplex,
-//   mintAuthority: Signer
-// ): Promise<[Mint, TokenWithMint]> => {
-//   const { token: tokenWithMint } = await createMintAndToken(umi, {
-//     owner: mintAuthority.publicKey,
-//     mintAuthority,
-//   });
-
-//   return [tokenWithMint.mint, tokenWithMint];
-// };
-
-// const createTokenPayer = async (
-//   umi: Metaplex,
-//   mint: Mint,
-//   mintAuthority: Signer,
-//   amount: number
-// ): Promise<Signer> => {
-//   const payer = await generateSignerWithSol(umi, sol(10));
-//   await mintTokens(umi, mint, mintAuthority, payer, amount);
-//   return payer;
-// };
-
-// const mintTokens = async (
-//   umi: Metaplex,
-//   mint: Mint,
-//   mintAuthority: Signer,
-//   payer: Signer,
-//   amount: number
-// ) => {
-//   await umi.tokens().mint({
-//     mintAddress: mint.address,
-//     mintAuthority,
-//     toOwner: payer.publicKey,
-//     amount: token(amount),
-//   });
-// };
-
-// const getFreezeEscrow = (
-//   umi: Metaplex,
-//   candyMachine: CandyMachine,
-//   destinationAta: { address: PublicKey }
-// ) =>
-//   umi.candyMachines().pdas().freezeEscrow({
-//     destination: destinationAta.address,
-//     candyMachine: candyMachine.address,
-//     candyGuard: candyMachine.candyGuard!.address,
-//   });
-
-// const getTokenBalance = async (umi: Metaplex, mint: Mint, owner: PublicKey) => {
-//   const tokenAccount = await umi.tokens().findTokenByAddress({
-//     address: umi.tokens().pdas().associatedTokenAccount({
-//       mint: mint.address,
-//       owner,
-//     }),
-//   });
-
-//   return tokenAccount.amount;
-// };
-
-// const getFrozenCount = async (
-//   umi: Metaplex,
-//   candyMachine: CandyMachine,
-//   destinationAta: { address: PublicKey }
-// ) => {
-//   const account = await FreezeEscrow.fromAccountAddress(
-//     umi.connection,
-//     getFreezeEscrow(umi, candyMachine, destinationAta)
-//   );
-
-//   return toBigNumber(account.frozenCount).toNumber();
-// };
-
-// const assertFrozenCount = async (
-//   t: Test,
-//   umi: Metaplex,
-//   candyMachine: CandyMachine,
-//   destinationAta: { address: PublicKey },
-//   expected: number
-// ): Promise<void> => {
-//   const frozenCount = await getFrozenCount(umi, candyMachine, destinationAta);
-//   t.is(frozenCount, expected, 'frozen count is correct');
-// };
-
-// const initFreezeEscrow = async (
-//   umi: Metaplex,
-//   candyMachine: CandyMachine,
-//   group?: string
-// ) => {
-//   await transactionBuilder(umi).add().sendAndConfirm();
-//   route(umi, {
-//     candyMachine,
-//     guard: 'freezeTokenPayment',
-//     group,
-//     routeArgs: {
-//       path: 'initialize',
-//       period: 15 * 24 * 3600, // 15 days.
-//       candyGuardAuthority: umi.identity(),
-//     },
-//   });
-// };
-
-// const mintNft = async (
-//   umi: Metaplex,
-//   candyMachine: CandyMachine,
-//   collection: { updateAuthority: Signer },
-//   payer?: Signer,
-//   group?: string
-// ) => {
-//   const mint = generateSigner(umi);
-//   await transactionBuilder(umi).add().sendAndConfirm();
-//   mintV2(
-//     umi,
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//       group,
-//     },
-//     { payer }
-//   );
-//   return nft;
-// };
-
-// const thawNft = async (
-//   umi: Metaplex,
-//   candyMachine: CandyMachine,
-//   nftMint: PublicKey,
-//   nftOwner: PublicKey,
-//   group?: string
-// ) => {
-//   await transactionBuilder(umi).add().sendAndConfirm();
-//   route(umi, {
-//     candyMachine,
-//     guard: 'freezeTokenPayment',
-//     group,
-//     routeArgs: {
-//       path: 'thaw',
-//       nftMint,
-//       nftOwner,
-//     },
-//   });
-// };
-
-// const unlockFunds = async (
-//   umi: Metaplex,
-//   candyMachine: CandyMachine,
-//   group?: string
-// ) => {
-//   await transactionBuilder(umi).add().sendAndConfirm();
-//   route(umi, {
-//     candyMachine,
-//     guard: 'freezeTokenPayment',
-//     group,
-//     routeArgs: {
-//       path: 'unlockFunds',
-//       candyGuardAuthority: umi.identity(),
-//     },
-//   });
-// };
+const getTokenBalance = async (umi: Umi, token: PublicKey) => {
+  const tokenAccount = await fetchToken(umi, token);
+  return Number(tokenAccount.amount);
+};
 
 const getFreezeEscrow = (
   umi: Umi,
@@ -1009,6 +855,7 @@ const unlockFunds = async (
 export const deletMe = () => {
   // eslint-disable-next-line no-console
   console.log({
+    getTokenBalance,
     getFreezeEscrow,
     getFrozenCount,
     assertFrozenCount,

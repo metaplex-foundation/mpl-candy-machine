@@ -20,6 +20,7 @@ import {
 } from '@metaplex-foundation/umi';
 import test, { Assertions } from 'ava';
 import {
+  addConfigLines,
   fetchFreezeEscrow,
   findCandyGuardPda,
   findFreezeEscrowPda,
@@ -439,7 +440,7 @@ test('it cannot unlock funds if not all NFTs have been thawed', async (t) => {
   t.is(treasuryBalance, 0, 'treasury received no tokens');
 });
 
-test.skip('it can have multiple freeze escrow and reuse the same ones', async (t) => {
+test('it can have multiple freeze escrow and reuse the same ones', async (t) => {
   // Increase the timeout of this long test to 20 seconds.
   t.timeout(20_000);
 
@@ -474,12 +475,7 @@ test.skip('it can have multiple freeze escrow and reuse the same ones', async (t
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
-    configLines: [
-      { name: 'Degen #1', uri: 'https://example.com/degen/1' },
-      { name: 'Degen #2', uri: 'https://example.com/degen/2' },
-      { name: 'Degen #3', uri: 'https://example.com/degen/3' },
-      { name: 'Degen #4', uri: 'https://example.com/degen/4' },
-    ],
+    itemsAvailable: 4,
     guards: {},
     groups: [
       {
@@ -524,6 +520,20 @@ test.skip('it can have multiple freeze escrow and reuse the same ones', async (t
       },
     ],
   });
+  await transactionBuilder(umi)
+    .add(
+      addConfigLines(umi, {
+        candyMachine,
+        index: 0,
+        configLines: [
+          { name: 'Degen #1', uri: 'https://example.com/degen/1' },
+          { name: 'Degen #2', uri: 'https://example.com/degen/2' },
+          { name: 'Degen #3', uri: 'https://example.com/degen/3' },
+          { name: 'Degen #4', uri: 'https://example.com/degen/4' },
+        ],
+      })
+    )
+    .sendAndConfirm();
 
   // And given all freeze escrows have been initialized.
   const cm = candyMachine;
@@ -534,7 +544,7 @@ test.skip('it can have multiple freeze escrow and reuse the same ones', async (t
   // because it has already been initialized via group A.
   await t.throwsAsync(
     initFreezeEscrow(umi, cm, mintAB, destinationAtaAB, 'GROUPB'),
-    { message: /The freeze escrow account already existsddd/ }
+    { message: /FreezeEscrowAlreadyExists/ }
   );
 
   // When we mint all 4 NFTs via each group.
@@ -548,7 +558,7 @@ test.skip('it can have multiple freeze escrow and reuse the same ones', async (t
     // TODO: REMOVE ME WHEN PROGRAM IS UPDATED.
     .add(
       createMintWithAssociatedToken(umi, {
-        mint: mintD,
+        mint: nftD,
         owner: umi.identity.publicKey,
       })
     )
@@ -556,7 +566,7 @@ test.skip('it can have multiple freeze escrow and reuse the same ones', async (t
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mintD,
+        nftMint: nftD,
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
         group: some('GROUPD'),
@@ -609,7 +619,7 @@ test.skip('it can have multiple freeze escrow and reuse the same ones', async (t
     ]);
   };
   await assertFrozenCounts(2, 1);
-  await thawNft(umi, cm, mintD, destinationAtaD, nftD.publicKey, 'GROUPA'); // Not frozen.
+  await thawNft(umi, cm, mintAB, destinationAtaAB, nftD.publicKey, 'GROUPA'); // Not frozen.
   await assertFrozenCounts(2, 1); // No change.
   await thawNft(umi, cm, mintAB, destinationAtaAB, nftA.publicKey, 'GROUPA');
   await assertFrozenCounts(1, 1); // AB decreased.
@@ -628,9 +638,7 @@ test.skip('it can have multiple freeze escrow and reuse the same ones', async (t
   // because it has already been unlocked via group A.
   await t.throwsAsync(
     unlockFunds(umi, cm, mintAB, destinationAtaAB, 'GROUPB'),
-    {
-      message: /The program expected this account to be already initializedddd/,
-    }
+    { message: /AccountNotInitialized/ }
   );
 
   // Then the treasuries received the funds.

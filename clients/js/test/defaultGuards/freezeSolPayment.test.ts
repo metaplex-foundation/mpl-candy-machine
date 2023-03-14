@@ -75,14 +75,6 @@ test('it transfers SOL to an escrow account and freezes the NFT', async (t) => {
   const mint = generateSigner(umi);
   await transactionBuilder(umi)
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
-    // TODO: REMOVE ME WHEN PROGRAM IS UPDATED.
-    .add(
-      createMintWithAssociatedToken(umi, {
-        mint,
-        owner: umi.identity.publicKey,
-      })
-    )
-    // TODO: END REMOVE ME.
     .add(
       mintV2(umi, {
         candyMachine,
@@ -140,7 +132,7 @@ test('it transfers SOL to an escrow account and freezes the NFT', async (t) => {
   );
 });
 
-test.skip('it allows minting even when the payer is different from the minter', async (t) => {
+test('it allows minting even when the payer is different from the minter', async (t) => {
   // Given a loaded Candy Machine with a freezeSolPayment guard.
   const umi = await createUmi();
   const destination = generateSigner(umi).publicKey;
@@ -164,14 +156,6 @@ test.skip('it allows minting even when the payer is different from the minter', 
   const minter = generateSigner(umi);
   await transactionBuilder(umi)
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
-    // TODO: REMOVE ME WHEN PROGRAM IS UPDATED.
-    .add(
-      createMintWithAssociatedToken(umi, {
-        mint,
-        owner: minter.publicKey,
-      })
-    )
-    // TODO: END REMOVE ME.
     .add(
       mintV2(umi, {
         candyMachine,
@@ -434,14 +418,6 @@ test('it can have multiple freeze escrow and reuse the same ones', async (t) => 
   const mintD = generateSigner(umi); // 3 SOL
   await transactionBuilder(umi)
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
-    // TODO: REMOVE ME WHEN PROGRAM IS UPDATED.
-    .add(
-      createMintWithAssociatedToken(umi, {
-        mint: mintD,
-        owner: umi.identity.publicKey,
-      })
-    )
-    // TODO: END REMOVE ME.
     .add(
       mintV2(umi, {
         candyMachine,
@@ -577,14 +553,6 @@ test('it fails to mint if the freeze escrow was not initialized', async (t) => {
   const mint = generateSigner(umi);
   const promise = transactionBuilder(umi)
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
-    // TODO: REMOVE ME WHEN PROGRAM IS UPDATED.
-    .add(
-      createMintWithAssociatedToken(umi, {
-        mint,
-        owner: umi.identity.publicKey,
-      })
-    )
-    // TODO: END REMOVE ME.
     .add(
       mintV2(umi, {
         candyMachine,
@@ -620,14 +588,6 @@ test('it fails to mint if the payer does not have enough funds', async (t) => {
   const mint = generateSigner(umi);
   const promise = transactionBuilder(umi)
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
-    // TODO: REMOVE ME WHEN PROGRAM IS UPDATED.
-    .add(
-      createMintWithAssociatedToken(umi, {
-        mint,
-        owner: payer.publicKey,
-      })
-    )
-    // TODO: END REMOVE ME.
     .add(
       mintV2(umi, {
         candyMachine,
@@ -667,14 +627,6 @@ test('it charges a bot tax if something goes wrong', async (t) => {
   const mint = generateSigner(umi);
   const { signature } = await transactionBuilder(umi)
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
-    // TODO: REMOVE ME WHEN PROGRAM IS UPDATED.
-    .add(
-      createMintWithAssociatedToken(umi, {
-        mint,
-        owner: umi.identity.publicKey,
-      })
-    )
-    // TODO: END REMOVE ME.
     .add(
       mintV2(umi, {
         candyMachine,
@@ -755,14 +707,6 @@ const mintNft = async (
   const mint = generateSigner(umi);
   await transactionBuilder(umi)
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
-    // TODO: REMOVE ME WHEN PROGRAM IS UPDATED.
-    .add(
-      createMintWithAssociatedToken(umi, {
-        mint,
-        owner: umi.identity.publicKey,
-      })
-    )
-    // TODO: END REMOVE ME.
     .add(
       mintV2(umi, {
         candyMachine,

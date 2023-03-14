@@ -17,8 +17,8 @@ use crate::{
     instructions::Token,
     state::GuardType,
     utils::{
-        assert_initialized, assert_is_ata, assert_keys_equal, assert_owned_by, cmp_pubkeys,
-        spl_token_transfer, TokenTransferParams,
+        assert_initialized, assert_is_ata, assert_is_token_account, assert_keys_equal,
+        assert_owned_by, cmp_pubkeys, spl_token_transfer, TokenTransferParams,
     },
 };
 
@@ -221,7 +221,30 @@ impl Condition for FreezeTokenPayment {
 
         let nft_ata = try_get_account_info(ctx.accounts.remaining, index + 1)?;
         ctx.account_cursor += 1;
-        assert_is_ata(nft_ata, ctx.accounts.minter.key, ctx.accounts.nft_mint.key)?;
+
+        if nft_ata.data_is_empty() {
+            // for unitialized accounts, we need to check the derivation since the
+            // account will be created during mint only if it is an ATA
+
+            let (derivation, _) = Pubkey::find_program_address(
+                &[
+                    ctx.accounts.minter.key.as_ref(),
+                    spl_token::id().as_ref(),
+                    ctx.accounts.nft_mint.key.as_ref(),
+                ],
+                &spl_associated_token_account::id(),
+            );
+
+            assert_keys_equal(&derivation, nft_ata.key)?;
+        } else {
+            // validates if the existing account is a token account
+            assert_is_token_account(nft_ata, ctx.accounts.minter.key, ctx.accounts.nft_mint.key)?;
+        }
+
+        // it has to match the 'token' account (if present)
+        if let Some(token_info) = &ctx.accounts.token {
+            assert_keys_equal(nft_ata.key, token_info.key)?;
+        }
 
         let token_account_info = try_get_account_info(ctx.accounts.remaining, index + 2)?;
         // validate freeze_pda ata

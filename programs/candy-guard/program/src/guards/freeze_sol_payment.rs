@@ -16,7 +16,7 @@ use spl_token::{
 use crate::{
     errors::CandyGuardError,
     state::GuardType,
-    utils::{assert_is_ata, assert_keys_equal, cmp_pubkeys},
+    utils::{assert_is_token_account, assert_keys_equal, cmp_pubkeys},
 };
 
 pub const FREEZE_SOL_FEE: u64 = 10_000;
@@ -163,7 +163,30 @@ impl Condition for FreezeSolPayment {
 
         let nft_ata = try_get_account_info(ctx.accounts.remaining, index + 1)?;
         ctx.account_cursor += 1;
-        assert_is_ata(nft_ata, ctx.accounts.payer.key, ctx.accounts.nft_mint.key)?;
+
+        if nft_ata.data_is_empty() {
+            // for unitialized accounts, we need to check the derivation since the
+            // account will be created during mint only if it is an ATA
+
+            let (derivation, _) = Pubkey::find_program_address(
+                &[
+                    ctx.accounts.minter.key.as_ref(),
+                    spl_token::id().as_ref(),
+                    ctx.accounts.nft_mint.key.as_ref(),
+                ],
+                &spl_associated_token_account::id(),
+            );
+
+            assert_keys_equal(&derivation, nft_ata.key)?;
+        } else {
+            // validates if the existing account is a token account
+            assert_is_token_account(nft_ata, ctx.accounts.minter.key, ctx.accounts.nft_mint.key)?;
+        }
+
+        // it has to match the 'token' account (if present)
+        if let Some(token_info) = &ctx.accounts.token {
+            assert_keys_equal(nft_ata.key, token_info.key)?;
+        }
 
         ctx.indices.insert("freeze_sol_payment", index);
 
@@ -320,7 +343,7 @@ pub fn freeze_nft(
 
     let candy_guard_key = &ctx.accounts.candy_guard.key();
     let candy_machine_key = &ctx.accounts.candy_machine.key();
-    let payer = &ctx.accounts.payer;
+    let owner = &ctx.accounts.minter;
 
     let seeds = [
         FreezeEscrow::PREFIX_SEED,
@@ -355,14 +378,14 @@ pub fn freeze_nft(
             &spl_token::ID,
             &nft_ata.key(),
             &freeze_pda.key(),
-            &payer.key(),
+            &owner.key(),
             &[],
             1,
         )?,
         &[
             nft_ata.to_account_info(),
             freeze_pda.to_account_info(),
-            payer.to_account_info(),
+            owner.to_account_info(),
         ],
     )?;
     invoke_signed(

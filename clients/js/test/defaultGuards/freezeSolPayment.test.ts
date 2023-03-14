@@ -20,6 +20,7 @@ import {
   transactionBuilder,
   Umi,
 } from '@metaplex-foundation/umi';
+import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
 import test, { Assertions } from 'ava';
 import {
   fetchFreezeEscrow,
@@ -30,13 +31,14 @@ import {
   route,
 } from '../../src';
 import {
+  assertBotTax,
   assertSuccessfulMint,
   createCollectionNft,
   createUmi,
   createV2,
 } from '../_setup';
 
-test.skip('it transfers SOL to an escrow account and freezes the NFT', async (t) => {
+test('it transfers SOL to an escrow account and freezes the NFT', async (t) => {
   // Given a loaded Candy Machine with a freezeSolPayment guard.
   const umi = await createUmi();
   const destination = generateSigner(umi).publicKey;
@@ -558,82 +560,135 @@ test('it can have multiple freeze escrow and reuse the same ones', async (t) => 
   );
 });
 
-// test('it fails to mint if the freeze escrow was not initialized', async (t) => {
-//   // Given a loaded Candy Machine with a freezeSolPayment guard.
-//   const umi = await createUmi();
-// const destination = generateSigner(umi).publicKey;
-//   const collectionMint = (await createCollectionNft(umi)).publicKey;
-//   const { publicKey: candyMachine } = await createV2(umi, {
-//     collectionMint,
+test('it fails to mint if the freeze escrow was not initialized', async (t) => {
+  // Given a loaded Candy Machine with a freezeSolPayment guard.
+  const umi = await createUmi();
+  const destination = generateSigner(umi).publicKey;
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {
+      freezeSolPayment: some({ lamports: sol(1), destination }),
+    },
+  });
 
-//     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
-//     guards: {
-// freezeSolPayment: some({ lamports: sol(1), destination }),
-//     },
-//   });
+  // When we try to mint without initializing the freeze escrow.
+  const mint = generateSigner(umi);
+  const promise = transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    // TODO: REMOVE ME WHEN PROGRAM IS UPDATED.
+    .add(
+      createMintWithAssociatedToken(umi, {
+        mint,
+        owner: umi.identity.publicKey,
+      })
+    )
+    // TODO: END REMOVE ME.
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: { freezeSolPayment: some({ destination }) },
+      })
+    )
+    .sendAndConfirm();
 
-//   // When we try to mint without initializing the freeze escrow.
-//   const payer = await generateSignerWithSol(umi, sol(10));
-//   const mint = generateSigner(umi);
-//   const promise = transactionBuilder(umi).add().sendAndConfirm();
-//   mintV2(
-//     umi,
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//     },
-//     { payer }
-//   );
+  // Then we expect an error.
+  await t.throwsAsync(promise, { message: /FreezeNotInitialized/ });
+});
 
-//   // Then we expect an error.
-//   await t.throwsAsync(promise, { message: /Freeze must be initialized/ });
+test('it fails to mint if the payer does not have enough funds', async (t) => {
+  // Given a loaded Candy Machine with an initialized
+  // freezeSolPayment guard costing 5 SOLs.
+  const umi = await createUmi();
+  const destination = generateSigner(umi).publicKey;
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {
+      freezeSolPayment: some({ lamports: sol(5), destination }),
+    },
+  });
+  await initFreezeEscrow(umi, candyMachine, destination);
 
-//   // And the payer didn't loose any SOL.
-//   const payerBalance = await umi.rpc.getBalance(payer.publicKey);
-//   t.true(isEqualToAmount(payerBalance, sol(10)), 'payer did not lose SOLs');
-// });
+  // When we mint from it using a payer that only has 4 SOL.
+  const payer = await generateSignerWithSol(umi, sol(4));
+  const mint = generateSigner(umi);
+  const promise = transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    // TODO: REMOVE ME WHEN PROGRAM IS UPDATED.
+    .add(
+      createMintWithAssociatedToken(umi, {
+        mint,
+        owner: payer.publicKey,
+      })
+    )
+    // TODO: END REMOVE ME.
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        payer,
+        minter: payer,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: { freezeSolPayment: some({ destination }) },
+      })
+    )
+    .sendAndConfirm();
 
-// test('it fails to mint if the payer does not have enough funds', async (t) => {
-//   // Given a loaded Candy Machine with an initialized
-//   // freezeSolPayment guard costing 5 SOLs.
-//   const umi = await createUmi();
-// const destination = generateSigner(umi).publicKey;
-//   const collectionMint = (await createCollectionNft(umi)).publicKey;
-//   const { publicKey: candyMachine } = await createV2(umi, {
-//     collectionMint,
+  // Then we expect an error.
+  await t.throwsAsync(promise, { message: /NotEnoughSOL/ });
 
-//     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
-//     guards: {
-//       freezeSolPayment: {
-//         amount: sol(5),
-//         destination: treasury.publicKey,
-//       },
-//     },
-//   });
-//   await initFreezeEscrow(umi, candyMachine);
+  // And the payer didn't loose any SOL.
+  const payerBalance = await umi.rpc.getBalance(payer.publicKey);
+  t.true(isEqualToAmount(payerBalance, sol(4)), 'payer did not lose SOLs');
+});
 
-//   // When we mint from it using a payer that only has 4 SOL.
-//   const payer = await generateSignerWithSol(umi, 4);
-//   const mint = generateSigner(umi);
-//   const promise = transactionBuilder(umi).add().sendAndConfirm();
-//   mintV2(
-//     umi,
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//     },
-//     { payer }
-//   );
+test('it charges a bot tax if something goes wrong', async (t) => {
+  // Given a loaded Candy Machine with a freezeSolPayment guard and a botTax guard.
+  const umi = await createUmi();
+  const destination = generateSigner(umi).publicKey;
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {
+      botTax: some({ lamports: sol(0.1), lastInstruction: true }),
+      freezeSolPayment: some({ lamports: sol(1), destination }),
+    },
+  });
 
-//   // Then we expect an error.
-//   await t.throwsAsync(promise, {
-//     message: /Not enough SOL to pay for the mint/,
-//   });
+  // When we try to mint without initializing the freeze escrow.
+  const mint = generateSigner(umi);
+  const { signature } = await transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    // TODO: REMOVE ME WHEN PROGRAM IS UPDATED.
+    .add(
+      createMintWithAssociatedToken(umi, {
+        mint,
+        owner: umi.identity.publicKey,
+      })
+    )
+    // TODO: END REMOVE ME.
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: { freezeSolPayment: some({ destination }) },
+      })
+    )
+    .sendAndConfirm();
 
-//   // And the payer didn't loose any SOL.
-//   const payerBalance = await umi.rpc.getBalance(payer.publicKey);
-//   t.true(isEqualToAmount(payerBalance, sol(4)), 'payer did not lose SOLs');
-// });
+  // Then we expect a bot tax error.
+  await assertBotTax(t, umi, mint, signature, /FreezeNotInitialized/);
+});
 
 // test('it fails to mint if the owner is not the payer', async (t) => {
 //   // Given a loaded Candy Machine with an initialized freezeSolPayment guard.
@@ -670,48 +725,6 @@ test('it can have multiple freeze escrow and reuse the same ones', async (t) => 
 //     t,
 //     promise,
 //     /The payer must be the owner when using the \[freezeSolPayment\] guard/
-//   );
-// });
-
-// test('it charges a bot tax if something goes wrong', async (t) => {
-//   // Given a loaded Candy Machine with a freezeSolPayment guard and a botTax guard.
-//   const umi = await createUmi();
-// const destination = generateSigner(umi).publicKey;
-//   const collectionMint = (await createCollectionNft(umi)).publicKey;
-//   const { publicKey: candyMachine } = await createV2(umi, {
-//     collectionMint,
-
-//     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
-//     guards: {
-//       botTax: {
-//         lamports: sol(0.1),
-//         lastInstruction: true,
-//       },
-// freezeSolPayment: some({ lamports: sol(1), destination }),
-//     },
-//   });
-
-//   // When we try to mint without initializing the freeze escrow.
-//   const payer = await generateSignerWithSol(umi, sol(10));
-//   const mint = generateSigner(umi);
-//   const promise = transactionBuilder(umi).add().sendAndConfirm();
-//   mintV2(
-//     umi,
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//     },
-//     { payer }
-//   );
-
-//   // Then we expect a bot tax error.
-//   await t.throwsAsync(promise, { message: /CandyMachineBotTaxError/ });
-
-//   // And the payer was charged a bot tax.
-//   const payerBalance = await umi.rpc.getBalance(payer.publicKey);
-//   t.true(
-//     isEqualToAmount(payerBalance, sol(9.9), sol(0.01)),
-//     'payer was charged a bot tax'
 //   );
 // });
 
@@ -851,13 +864,4 @@ const unlockFunds = async (
       })
     )
     .sendAndConfirm();
-};
-
-export const deletMe = () => {
-  // eslint-disable-next-line no-console
-  console.log({
-    getFrozenCount,
-    assertFrozenCount,
-    initFreezeEscrow,
-  });
 };

@@ -1,6 +1,11 @@
 import {
+  createMintWithAssociatedToken,
+  fetchToken,
+  setComputeUnitLimit,
+} from '@metaplex-foundation/mpl-essentials';
+import {
   generateSigner,
-  Option,
+  none,
   publicKey,
   PublicKey,
   Signer,
@@ -10,10 +15,12 @@ import {
 } from '@metaplex-foundation/umi';
 import test, { Assertions } from 'ava';
 import {
-  createMintWithAssociatedToken,
-  fetchToken,
-  setComputeUnitLimit,
-} from '@metaplex-foundation/mpl-essentials';
+  fetchFreezeEscrow,
+  findCandyGuardPda,
+  findFreezeEscrowPda,
+  mintV2,
+  route,
+} from '../../src';
 import {
   assertSuccessfulMint,
   createCollectionNft,
@@ -21,15 +28,8 @@ import {
   createUmi,
   createV2,
 } from '../_setup';
-import {
-  fetchFreezeEscrow,
-  findCandyGuardPda,
-  findFreezeEscrowPda,
-  mintV2,
-  route,
-} from '../../src';
 
-test.skip('it transfers tokens to an escrow account and freezes the NFT', async (t) => {
+test('it transfers tokens to an escrow account and freezes the NFT', async (t) => {
   // Given a token mint with holders such that the identity has 10 tokens.
   const umi = await createUmi();
   const destination = generateSigner(umi);
@@ -78,6 +78,14 @@ test.skip('it transfers tokens to an escrow account and freezes the NFT', async 
   const mint = generateSigner(umi);
   await transactionBuilder(umi)
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    // TODO: REMOVE ME WHEN PROGRAM IS UPDATED.
+    .add(
+      createMintWithAssociatedToken(umi, {
+        mint,
+        owner: umi.identity.publicKey,
+      })
+    )
+    // TODO: END REMOVE ME.
     .add(
       mintV2(umi, {
         candyMachine,
@@ -749,14 +757,14 @@ const initFreezeEscrow = async (
   candyMachine: PublicKey,
   tokenMint: PublicKey | Signer,
   destinationAta: PublicKey,
-  group?: Option<string>
+  group?: string
 ) => {
   await transactionBuilder(umi)
     .add(
       route(umi, {
         candyMachine,
         guard: 'freezeTokenPayment',
-        group,
+        group: group ? some(group) : none(),
         routeArgs: {
           path: 'initialize',
           period: 15 * 24 * 3600, // 15 days.
@@ -775,24 +783,32 @@ const mintNft = async (
   tokenMint: PublicKey | Signer,
   destinationAta: PublicKey,
   collectionMint: PublicKey,
-  group?: Option<string>
+  group?: string
 ) => {
   const mint = generateSigner(umi);
   await transactionBuilder(umi)
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    // TODO: REMOVE ME WHEN PROGRAM IS UPDATED.
+    .add(
+      createMintWithAssociatedToken(umi, {
+        mint,
+        owner: umi.identity.publicKey,
+      })
+    )
+    // TODO: END REMOVE ME.
     .add(
       mintV2(umi, {
         candyMachine,
         nftMint: mint,
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
+        group: group ? some(group) : none(),
         mintArgs: {
           freezeTokenPayment: some({
             mint: publicKey(tokenMint),
             destinationAta,
           }),
         },
-        group,
       })
     )
     .sendAndConfirm();
@@ -807,14 +823,14 @@ const thawNft = async (
   destinationAta: PublicKey,
   nftMint: PublicKey,
   nftOwner: PublicKey,
-  group?: Option<string>
+  group?: string
 ) => {
   await transactionBuilder(umi)
     .add(
       route(umi, {
         candyMachine,
         guard: 'freezeTokenPayment',
-        group,
+        group: group ? some(group) : none(),
         routeArgs: {
           path: 'thaw',
           nftMint,
@@ -832,7 +848,7 @@ const unlockFunds = async (
   candyMachine: PublicKey,
   tokenMint: PublicKey | Signer,
   destinationAta: PublicKey,
-  group?: Option<string>,
+  group?: string,
   candyGuardAuthority?: Signer
 ) => {
   await transactionBuilder(umi)
@@ -840,7 +856,7 @@ const unlockFunds = async (
       route(umi, {
         candyMachine,
         guard: 'freezeTokenPayment',
-        group,
+        group: group ? some(group) : none(),
         routeArgs: {
           path: 'unlockFunds',
           candyGuardAuthority: candyGuardAuthority ?? umi.identity,

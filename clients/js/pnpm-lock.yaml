@@ -23,7 +23,7 @@ specifiers:
   prettier: ^2.5.1
   rimraf: ^3.0.2
   typedoc: ^0.23.16
-  typedoc-plugin-expand-object-like-types: ^0.1.1
+  typedoc-plugin-expand-object-like-types: ^0.1.2
   typedoc-plugin-missing-exports: ^1.0.0
   typescript: ^4.6.2
   vercel: ^28.16.0
@@ -53,7 +53,7 @@ devDependencies:
   prettier: 2.8.1
   rimraf: 3.0.2
   typedoc: 0.23.23_typescript@4.9.4
-  typedoc-plugin-expand-object-like-types: 0.1.1_typedoc@0.23.23
+  typedoc-plugin-expand-object-like-types: 0.1.2_typedoc@0.23.23
   typedoc-plugin-missing-exports: 1.0.0_typedoc@0.23.23
   typescript: 4.9.4
   vercel: 28.16.0
@@ -7971,8 +7971,8 @@ packages:
       mime-types: 2.1.35
     dev: true
 
-  /typedoc-plugin-expand-object-like-types/0.1.1_typedoc@0.23.23:
-    resolution: {integrity: sha512-h7iw2qugVqEevlqMK4VeAPHMegg63v6zRjvGMoRfsc4ygoCttFYDs05PyLQNwxjEbXZLvGK9TTzig/oHiXUOJg==}
+  /typedoc-plugin-expand-object-like-types/0.1.2_typedoc@0.23.23:
+    resolution: {integrity: sha512-RRMOCWMElQHBOVraWMWrh/0tDqCdS5oxYwaWMZBB3KlUUUUCxKllpvJPsRH/uFLO1nOuy28CbJxGVU1umv7LOQ==}
     peerDependencies:
       typedoc: 0.22.x || 0.23.x
     dependencies:

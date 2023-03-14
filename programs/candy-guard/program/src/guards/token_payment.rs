@@ -4,8 +4,8 @@ use crate::{
     errors::CandyGuardError,
     state::GuardType,
     utils::{
-        assert_initialized, assert_is_ata, assert_keys_equal, spl_token_transfer,
-        TokenTransferParams,
+        assert_initialized, assert_is_token_account, assert_keys_equal,
+        spl_token_transfer, TokenTransferParams,
     },
 };
 
@@ -53,7 +53,7 @@ impl Condition for TokenPayment {
         assert_keys_equal(&ata_account.mint, &self.mint)?;
 
         let token_account =
-            assert_is_ata(token_account_info, &ctx.accounts.minter.key(), &self.mint)?;
+            assert_is_token_account(token_account_info, ctx.accounts.minter.key, &self.mint)?;
 
         if token_account.amount < self.amount {
             return err!(CandyGuardError::NotEnoughTokens);

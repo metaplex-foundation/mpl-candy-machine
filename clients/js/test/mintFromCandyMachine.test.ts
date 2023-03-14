@@ -1,4 +1,4 @@
-import { createMintWithSingleToken } from '@metaplex-foundation/mpl-essentials';
+import { createMintWithAssociatedToken } from '@metaplex-foundation/mpl-essentials';
 import { generateSigner, transactionBuilder } from '@metaplex-foundation/umi';
 import test from 'ava';
 import { CandyMachine, fetchCandyMachine, mintFromCandyMachine } from '../src';
@@ -27,7 +27,7 @@ test('it can mint directly from a candy machine as the mint authority', async (t
   const mint = generateSigner(umi);
   const owner = generateSigner(umi).publicKey;
   await transactionBuilder(umi)
-    .add(createMintWithSingleToken(umi, { mint, owner }))
+    .add(createMintWithAssociatedToken(umi, { mint, owner, amount: 1 }))
     .add(
       mintFromCandyMachine(umi, {
         candyMachine,
@@ -71,7 +71,7 @@ test('it cannot mint directly from a candy machine if we are not the mint author
   const mint = generateSigner(umi);
   const owner = generateSigner(umi).publicKey;
   const promise = transactionBuilder(umi)
-    .add(createMintWithSingleToken(umi, { mint, owner }))
+    .add(createMintWithAssociatedToken(umi, { mint, owner, amount: 1 }))
     .add(
       mintFromCandyMachine(umi, {
         candyMachine,
@@ -111,7 +111,7 @@ test('it cannot mint from a candy machine v2', async (t) => {
   const mint = generateSigner(umi);
   const owner = generateSigner(umi).publicKey;
   const promise = transactionBuilder(umi)
-    .add(createMintWithSingleToken(umi, { mint, owner }))
+    .add(createMintWithAssociatedToken(umi, { mint, owner, amount: 1 }))
     .add(
       mintFromCandyMachine(umi, {
         candyMachine,

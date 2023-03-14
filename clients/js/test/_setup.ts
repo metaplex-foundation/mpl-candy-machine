@@ -1,20 +1,29 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-essentials';
 import {
-  createNft,
+  createAssociatedToken,
+  createMint,
+  findAssociatedTokenPda,
+  mintTokensTo,
+} from '@metaplex-foundation/mpl-essentials';
+import {
+  createNft as baseCreateNft,
   DigitalAssetWithToken,
   fetchDigitalAssetWithAssociatedToken,
+  findMasterEditionPda,
   findMetadataPda,
   TokenStandard,
+  verifyCollectionV1,
 } from '@metaplex-foundation/mpl-token-metadata';
 import {
   Context,
   DateTime,
   generateSigner,
   now,
+  Pda,
   percentAmount,
   publicKey,
   PublicKey,
+  PublicKeyInput,
   Signer,
   some,
   transactionBuilder,
@@ -42,25 +51,96 @@ import {
 export const createUmi = async () =>
   (await basecreateUmi()).use(mplCandyMachine());
 
-export const createCollectionNft = async (
+export const createNft = async (
   umi: Umi,
-  input: Partial<Parameters<typeof createNft>[1]> = {}
+  input: Partial<Parameters<typeof baseCreateNft>[1]> = {}
 ): Promise<Signer> => {
-  const collectionMint = generateSigner(umi);
+  const mint = generateSigner(umi);
   await transactionBuilder(umi)
     .add(
-      createNft(umi, {
-        mint: collectionMint,
+      baseCreateNft(umi, {
+        mint,
         name: 'My collection NFT',
         sellerFeeBasisPoints: percentAmount(10),
         uri: 'https://example.com/my-collection-nft.json',
-        isCollection: true,
         ...input,
       })
     )
     .sendAndConfirm();
 
-  return collectionMint;
+  return mint;
+};
+
+export const createCollectionNft = async (
+  umi: Umi,
+  input: Partial<Parameters<typeof baseCreateNft>[1]> = {}
+): Promise<Signer> => createNft(umi, { ...input, isCollection: true });
+
+export const createVerifiedNft = async (
+  umi: Umi,
+  input: Partial<Parameters<typeof baseCreateNft>[1]> & {
+    collectionMint: PublicKey;
+    collectionAuthority?: Signer;
+  }
+): Promise<Signer> => {
+  const { collectionMint, collectionAuthority = umi.identity, ...rest } = input;
+  const mint = await createNft(umi, {
+    ...rest,
+    collection: some({ verified: false, key: collectionMint }),
+  });
+  const effectiveMint = publicKey(rest.mint ?? mint.publicKey);
+
+  await transactionBuilder(umi)
+    .add(
+      verifyCollectionV1(umi, {
+        authority: collectionAuthority,
+        collectionMint,
+        metadata: findMetadataPda(umi, { mint: effectiveMint }),
+      })
+    )
+    .sendAndConfirm();
+
+  return mint;
+};
+
+export const createMintWithHolders = async (
+  umi: Umi,
+  input: Partial<Omit<Parameters<typeof createMint>[1], 'mintAuthority'>> & {
+    mintAuthority?: Signer;
+    holders: { owner: PublicKeyInput; amount: number | bigint }[];
+  }
+): Promise<[Signer, ...Pda[]]> => {
+  const atas = [] as Pda[];
+  const mint = input.mint ?? generateSigner(umi);
+  const mintAuthority = input.mintAuthority ?? umi.identity;
+  let builder = transactionBuilder(umi).add(
+    createMint(umi, {
+      ...input,
+      mint,
+      mintAuthority: mintAuthority.publicKey,
+    })
+  );
+  input.holders.forEach((holder) => {
+    const owner = publicKey(holder.owner);
+    const token = findAssociatedTokenPda(umi, { mint: mint.publicKey, owner });
+    atas.push(token);
+    builder = builder.add(
+      createAssociatedToken(umi, { mint: mint.publicKey, owner })
+    );
+    if (holder.amount > 0) {
+      builder = builder.add(
+        mintTokensTo(umi, {
+          mint: mint.publicKey,
+          token,
+          amount: holder.amount,
+          mintAuthority,
+        })
+      );
+    }
+  });
+  await builder.sendAndConfirm();
+
+  return [mint, ...atas];
 };
 
 export const createV1 = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
@@ -254,6 +334,24 @@ export const assertBotTax = async (
   if (extraRegex !== undefined) t.regex(logs, extraRegex);
   const metadata = findMetadataPda(umi, { mint: publicKey(mint) });
   t.false(await umi.rpc.accountExists(metadata));
+};
+
+export const assertBurnedNft = async (
+  t: Assertions,
+  umi: Umi,
+  mint: Signer | PublicKey,
+  owner?: Signer | PublicKey
+) => {
+  owner = owner ?? umi.identity;
+  const tokenAccount = findAssociatedTokenPda(umi, {
+    mint: publicKey(mint),
+    owner: publicKey(owner),
+  });
+  const metadataAccount = findMetadataPda(umi, { mint: publicKey(mint) });
+  const editionAccount = findMasterEditionPda(umi, { mint: publicKey(mint) });
+  t.false(await umi.rpc.accountExists(tokenAccount));
+  t.false(await umi.rpc.accountExists(metadataAccount));
+  t.false(await umi.rpc.accountExists(editionAccount));
 };
 
 export const yesterday = (): DateTime => now() - 3600n * 24n;

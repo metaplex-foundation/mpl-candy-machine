@@ -86,14 +86,6 @@ test('it transfers tokens to an escrow account and freezes the NFT', async (t) =
   const mint = generateSigner(umi);
   await transactionBuilder(umi)
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
-    // TODO: REMOVE ME WHEN PROGRAM IS UPDATED.
-    .add(
-      createMintWithAssociatedToken(umi, {
-        mint,
-        owner: umi.identity.publicKey,
-      })
-    )
-    // TODO: END REMOVE ME.
     .add(
       mintV2(umi, {
         candyMachine,
@@ -148,7 +140,7 @@ test('it transfers tokens to an escrow account and freezes the NFT', async (t) =
   t.is(payerBalance, 9, 'payer lost tokens');
 });
 
-test.skip('it allows minting even when the payer is different from the minter', async (t) => {
+test('it allows minting even when the payer is different from the minter', async (t) => {
   // Given a token mint with holders such that an explicit minter has 10 tokens.
   const umi = await createUmi();
   const minter = generateSigner(umi);
@@ -184,14 +176,6 @@ test.skip('it allows minting even when the payer is different from the minter', 
   const mint = generateSigner(umi);
   await transactionBuilder(umi)
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
-    // TODO: REMOVE ME WHEN PROGRAM IS UPDATED.
-    .add(
-      createMintWithAssociatedToken(umi, {
-        mint,
-        owner: minter.publicKey,
-      })
-    )
-    // TODO: END REMOVE ME.
     .add(
       mintV2(umi, {
         candyMachine,
@@ -555,14 +539,6 @@ test('it can have multiple freeze escrow and reuse the same ones', async (t) => 
   const nftD = generateSigner(umi); // 7 D tokens.
   await transactionBuilder(umi)
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
-    // TODO: REMOVE ME WHEN PROGRAM IS UPDATED.
-    .add(
-      createMintWithAssociatedToken(umi, {
-        mint: nftD,
-        owner: umi.identity.publicKey,
-      })
-    )
-    // TODO: END REMOVE ME.
     .add(
       mintV2(umi, {
         candyMachine,
@@ -927,14 +903,6 @@ const mintNft = async (
   const mint = generateSigner(umi);
   await transactionBuilder(umi)
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
-    // TODO: REMOVE ME WHEN PROGRAM IS UPDATED.
-    .add(
-      createMintWithAssociatedToken(umi, {
-        mint,
-        owner: umi.identity.publicKey,
-      })
-    )
-    // TODO: END REMOVE ME.
     .add(
       mintV2(umi, {
         candyMachine,

@@ -1,10 +1,13 @@
 import {
   createMintWithAssociatedToken,
   fetchToken,
+  findAssociatedTokenPda,
   setComputeUnitLimit,
+  TokenState,
 } from '@metaplex-foundation/mpl-essentials';
 import {
   generateSigner,
+  isSome,
   none,
   publicKey,
   PublicKey,
@@ -18,6 +21,7 @@ import {
   fetchFreezeEscrow,
   findCandyGuardPda,
   findFreezeEscrowPda,
+  FreezeEscrow,
   mintV2,
   route,
 } from '../../src';
@@ -105,43 +109,42 @@ test('it transfers tokens to an escrow account and freezes the NFT', async (t) =
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
 
-  // // And the NFT is frozen.
-  // t.is(nft.token.state, AccountState.Frozen, 'NFT is frozen');
+  // And the NFT is frozen.
+  const ata = findAssociatedTokenPda(umi, {
+    mint: mint.publicKey,
+    owner: umi.identity.publicKey,
+  });
+  const tokenAccount = await fetchToken(umi, ata);
+  t.is(tokenAccount.state, TokenState.Frozen, 'NFT is frozen');
 
-  // // And cannot be thawed since not all NFTs have been minted.
-  // const promise = thawNft(umi, candyMachine, nft.address, payer.publicKey);
-  // await t.throwsAsync(promise, { message: /Thaw is not enabled/ });
+  // And cannot be thawed since not all NFTs have been minted.
+  const cm = candyMachine;
+  const promise = thawNft(umi, cm, tokenMint, destinationAta, mint.publicKey);
+  await t.throwsAsync(promise, { message: /ThawNotEnabled/ });
 
-  // // And the treasury escrow received SOLs.
-  // const freezeEscrow = getFreezeEscrow(umi, candyMachine, treasuryAta);
-  // const escrowTokens = await getTokenBalance(umi, mint, freezeEscrow);
-  // t.true(
-  //   isEqualToAmount(escrowTokens, token(1)),
-  //   'treasury escrow received tokens'
-  // );
+  // And the treasury escrow received tokens.
+  const freezeEscrow = getFreezeEscrow(umi, candyMachine, destinationAta);
+  const escrowTokens = await getTokenBalance(umi, tokenMint, freezeEscrow);
+  t.is(escrowTokens, 1, 'treasury escrow received tokens');
 
-  // // And was assigned the right data.
-  // const freezeEscrowAccount = await FreezeEscrow.fromAccountAddress(
-  //   umi.connection,
-  //   freezeEscrow
-  // );
-  // t.like(freezeEscrowAccount, {
-  //   $topic: 'freeze escrow account',
-  //   candyMachine: spokSamePubkey(candyMachine.address),
-  //   candyGuard: spokSamePubkey(candyMachine.candyGuard!.address),
-  //   frozenCount: spokSameBignum(1),
-  //   firstMintTime: spok.definedObject,
-  //   freezePeriod: spokSameBignum(15 * 24 * 3600),
-  //   destination: spokSamePubkey(treasuryAta.address),
-  //   authority: spokSamePubkey(candyMachine.candyGuard!.authorityAddress),
-  // });
+  // And was assigned the right data.
+  const freezeEscrowAccount = await fetchFreezeEscrow(umi, freezeEscrow);
+  t.true(isSome(freezeEscrowAccount.firstMintTime));
+  t.like(freezeEscrowAccount, <FreezeEscrow>{
+    candyMachine: publicKey(candyMachine),
+    candyGuard: publicKey(findCandyGuardPda(umi, { base: candyMachine })),
+    frozenCount: 1n,
+    freezePeriod: BigInt(15 * 24 * 3600),
+    destination: publicKey(destinationAta),
+    authority: publicKey(umi.identity),
+  });
 
-  // // And the payer lost tokens.
-  // const payerBalance = await getTokenBalance(umi, mint, payer.publicKey);
-  // t.true(isEqualToAmount(payerBalance, token(9)), 'payer lost tokens');
+  // And the payer lost tokens.
+  const payerBalance = await getTokenBalance(umi, tokenMint, umi.identity);
+  t.is(payerBalance, 9, 'payer lost tokens');
 });
 
-// TODO: it allows minting when the mint and token accounts are created beforehand
+// TODO: it allows minting even when the payer is different from the minter
 
 test('it allows minting when the mint and token accounts are created beforehand', async (t) => {
   // Given a token mint with holders such that the identity has 10 tokens.
@@ -715,8 +718,16 @@ test('it allows minting when the mint and token accounts are created beforehand'
 //   );
 // });
 
-const getTokenBalance = async (umi: Umi, token: PublicKey) => {
-  const tokenAccount = await fetchToken(umi, token);
+const getTokenBalance = async (
+  umi: Umi,
+  mint: PublicKey | Signer,
+  owner: PublicKey | Signer
+) => {
+  const ata = findAssociatedTokenPda(umi, {
+    mint: publicKey(mint),
+    owner: publicKey(owner),
+  });
+  const tokenAccount = await fetchToken(umi, ata);
   return Number(tokenAccount.amount);
 };
 
@@ -822,8 +833,8 @@ const thawNft = async (
   tokenMint: PublicKey | Signer,
   destinationAta: PublicKey,
   nftMint: PublicKey,
-  nftOwner: PublicKey,
-  group?: string
+  group?: string,
+  nftOwner?: PublicKey
 ) => {
   await transactionBuilder(umi)
     .add(
@@ -834,7 +845,7 @@ const thawNft = async (
         routeArgs: {
           path: 'thaw',
           nftMint,
-          nftOwner,
+          nftOwner: nftOwner ?? umi.identity.publicKey,
           mint: publicKey(tokenMint),
           destinationAta,
         },

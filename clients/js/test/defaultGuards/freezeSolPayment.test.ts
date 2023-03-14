@@ -690,44 +690,6 @@ test('it charges a bot tax if something goes wrong', async (t) => {
   await assertBotTax(t, umi, mint, signature, /FreezeNotInitialized/);
 });
 
-// test('it fails to mint if the owner is not the payer', async (t) => {
-//   // Given a loaded Candy Machine with an initialized freezeSolPayment guard.
-//   const umi = await createUmi();
-// const destination = generateSigner(umi).publicKey;
-//   const collectionMint = (await createCollectionNft(umi)).publicKey;
-//   const { publicKey: candyMachine } = await createV2(umi, {
-//     collectionMint,
-
-//     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
-//     guards: {
-// freezeSolPayment: some({ lamports: sol(1), destination }),
-//     },
-//   });
-//   await initFreezeEscrow(umi, candyMachine);
-
-//   // When we mint using an owner that is not the payer.
-//   const payer = await generateSignerWithSol(umi, sol(10));
-//   const owner = generateSigner(umi).publicKey;
-//   const mint = generateSigner(umi);
-//   const promise = transactionBuilder(umi).add().sendAndConfirm();
-//   mintV2(
-//     umi,
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//       owner,
-//     },
-//     { payer }
-//   );
-
-//   // Then we expect an error.
-//   await assertThrows(
-//     t,
-//     promise,
-//     /The payer must be the owner when using the \[freezeSolPayment\] guard/
-//   );
-// });
-
 const getFreezeEscrow = (
   umi: Umi,
   candyMachine: PublicKey,

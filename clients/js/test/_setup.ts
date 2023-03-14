@@ -19,9 +19,11 @@ import {
   DateTime,
   generateSigner,
   now,
+  Pda,
   percentAmount,
   publicKey,
   PublicKey,
+  PublicKeyInput,
   Signer,
   some,
   transactionBuilder,
@@ -136,6 +138,46 @@ export const createMintAndToken = async (
     .sendAndConfirm();
 
   return [mint, ata];
+};
+
+export const createMintWithHolders = async (
+  umi: Umi,
+  input: Partial<Omit<Parameters<typeof createMint>[1], 'mintAuthority'>> & {
+    mintAuthority?: Signer;
+    holders: { owner: PublicKeyInput; amount: number | bigint }[];
+  }
+): Promise<[Signer, ...Pda[]]> => {
+  const atas = [] as Pda[];
+  const mint = input.mint ?? generateSigner(umi);
+  const mintAuthority = input.mintAuthority ?? umi.identity;
+  let builder = transactionBuilder(umi).add(
+    createMint(umi, {
+      ...input,
+      mint,
+      mintAuthority: mintAuthority.publicKey,
+    })
+  );
+  input.holders.forEach((holder) => {
+    const owner = publicKey(holder.owner);
+    const token = findAssociatedTokenPda(umi, { mint: mint.publicKey, owner });
+    atas.push(token);
+    builder = builder.add(
+      createAssociatedToken(umi, { mint: mint.publicKey, owner })
+    );
+    if (holder.amount > 0) {
+      builder = builder.add(
+        mintTokensTo(umi, {
+          mint: mint.publicKey,
+          token,
+          amount: holder.amount,
+          mintAuthority,
+        })
+      );
+    }
+  });
+  await builder.sendAndConfirm();
+
+  return [mint, ...atas];
 };
 
 export const createV1 = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(

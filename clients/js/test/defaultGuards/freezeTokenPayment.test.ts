@@ -1,108 +1,200 @@
-// import {
-//   generateSigner,
-//   sol,
-//   some,
-//   transactionBuilder,
-// } from '@metaplex-foundation/umi';
-// import test from 'ava';
-// import { createCollectionNft, createUmi, createV2 } from '../_setup';
-// import { mintV2 } from '../../src';
+import {
+  generateSigner,
+  Option,
+  publicKey,
+  PublicKey,
+  Signer,
+  some,
+  transactionBuilder,
+  Umi,
+} from '@metaplex-foundation/umi';
+import test, { Assertions } from 'ava';
+import {
+  createMintWithAssociatedToken,
+  setComputeUnitLimit,
+} from '@metaplex-foundation/mpl-essentials';
+import {
+  assertSuccessfulMint,
+  createCollectionNft,
+  createMintWithHolders,
+  createUmi,
+  createV2,
+} from '../_setup';
+import {
+  fetchFreezeEscrow,
+  findCandyGuardPda,
+  findFreezeEscrowPda,
+  mintV2,
+  route,
+} from '../../src';
 
-// test('it transfers tokens to an escrow account and freezes the NFT', async (t) => {
-//   // Given a loaded Candy Machine with a freezeTokenPayment guard.
-//   const umi = await createUmi();
-//   const treasury = generateSigner(umi);
-//   const [mint, treasuryAta] = await createMint(umi, treasury);
-//   const collectionMint = (await createCollectionNft(umi)).publicKey;
-//   const { publicKey: candyMachine } = await createV2(umi, {
-//     collectionMint,
+test.skip('it transfers tokens to an escrow account and freezes the NFT', async (t) => {
+  // Given a token mint with holders such that the identity has 10 tokens.
+  const umi = await createUmi();
+  const destination = generateSigner(umi);
+  const [tokenMint, destinationAta] = await createMintWithHolders(umi, {
+    holders: [
+      { owner: destination, amount: 0 },
+      { owner: umi.identity, amount: 10 },
+    ],
+  });
 
-//     configLines: [
-//       { name: 'Degen #1', uri: 'https://example.com/degen/1' },
-//       { name: 'Degen #2', uri: 'https://example.com/degen/2' },
-//     ],
-//     guards: {
-//       freezeTokenPayment: {
-//         amount: token(1),
-//         destinationAta: treasuryAta.address,
-//         mint: mint.address,
-//       },
-//     },
-//   });
+  // And a loaded Candy Machine with a freezeTokenPayment guard.
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [
+      { name: 'Degen #1', uri: 'https://example.com/degen/1' },
+      { name: 'Degen #2', uri: 'https://example.com/degen/2' },
+    ],
+    guards: {
+      freezeTokenPayment: some({
+        mint: tokenMint.publicKey,
+        destinationAta,
+        amount: 1,
+      }),
+    },
+  });
 
-//   // And given the freezeTokenPayment guard is initialized.
-//   await transactionBuilder(umi).add().sendAndConfirm();
-//   route(umi, {
-//     candyMachine,
-//     guard: 'freezeTokenPayment',
-//     routeArgs: {
-//       path: 'initialize',
-//       period: 15 * 24 * 3600, // 15 days.
-//       candyGuardAuthority: umi.identity(),
-//     },
-//   });
+  // And given the freezeTokenPayment guard is initialized.
+  await transactionBuilder(umi)
+    .add(
+      route(umi, {
+        candyMachine,
+        guard: 'freezeTokenPayment',
+        routeArgs: {
+          path: 'initialize',
+          period: 15 * 24 * 3600, // 15 days.
+          candyGuardAuthority: umi.identity,
+          mint: publicKey(tokenMint),
+          destinationAta,
+        },
+      })
+    )
+    .sendAndConfirm();
 
-//   // When we mint from that candy machine.
-//   const payer = await createTokenPayer(umi, mint, treasury, 10);
-//   const mint = generateSigner(umi);
-//   await transactionBuilder(umi).add().sendAndConfirm();
-//   mintV2(
-//     umi,
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//     },
-//     { payer }
-//   );
+  // When we mint from that candy machine.
+  const mint = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: {
+          freezeTokenPayment: some({
+            mint: publicKey(tokenMint),
+            destinationAta,
+          }),
+        },
+      })
+    )
+    .sendAndConfirm();
 
-//   // Then minting was successful.
-//   await assertSuccessfulMint(
-//     t,
-//     umi,
-//     { mint, owner: minter },
-//     {
-//       candyMachine,
-//       collectionUpdateAuthority: collection.updateAuthority.publicKey,
-//       nft,
-//       owner: payer.publicKey,
-//     }
-//   );
+  // Then minting was successful.
+  await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
 
-//   // And the NFT is frozen.
-//   t.is(nft.token.state, AccountState.Frozen, 'NFT is frozen');
+  // // And the NFT is frozen.
+  // t.is(nft.token.state, AccountState.Frozen, 'NFT is frozen');
 
-//   // And cannot be thawed since not all NFTs have been minted.
-//   const promise = thawNft(umi, candyMachine, nft.address, payer.publicKey);
-//   await t.throwsAsync(promise, { message: /Thaw is not enabled/ });
+  // // And cannot be thawed since not all NFTs have been minted.
+  // const promise = thawNft(umi, candyMachine, nft.address, payer.publicKey);
+  // await t.throwsAsync(promise, { message: /Thaw is not enabled/ });
 
-//   // And the treasury escrow received SOLs.
-//   const freezeEscrow = getFreezeEscrow(umi, candyMachine, treasuryAta);
-//   const escrowTokens = await getTokenBalance(umi, mint, freezeEscrow);
-//   t.true(
-//     isEqualToAmount(escrowTokens, token(1)),
-//     'treasury escrow received tokens'
-//   );
+  // // And the treasury escrow received SOLs.
+  // const freezeEscrow = getFreezeEscrow(umi, candyMachine, treasuryAta);
+  // const escrowTokens = await getTokenBalance(umi, mint, freezeEscrow);
+  // t.true(
+  //   isEqualToAmount(escrowTokens, token(1)),
+  //   'treasury escrow received tokens'
+  // );
 
-//   // And was assigned the right data.
-//   const freezeEscrowAccount = await FreezeEscrow.fromAccountAddress(
-//     umi.connection,
-//     freezeEscrow
-//   );
-//   t.like(freezeEscrowAccount, {
-//     $topic: 'freeze escrow account',
-//     candyMachine: spokSamePubkey(candyMachine.address),
-//     candyGuard: spokSamePubkey(candyMachine.candyGuard!.address),
-//     frozenCount: spokSameBignum(1),
-//     firstMintTime: spok.definedObject,
-//     freezePeriod: spokSameBignum(15 * 24 * 3600),
-//     destination: spokSamePubkey(treasuryAta.address),
-//     authority: spokSamePubkey(candyMachine.candyGuard!.authorityAddress),
-//   });
+  // // And was assigned the right data.
+  // const freezeEscrowAccount = await FreezeEscrow.fromAccountAddress(
+  //   umi.connection,
+  //   freezeEscrow
+  // );
+  // t.like(freezeEscrowAccount, {
+  //   $topic: 'freeze escrow account',
+  //   candyMachine: spokSamePubkey(candyMachine.address),
+  //   candyGuard: spokSamePubkey(candyMachine.candyGuard!.address),
+  //   frozenCount: spokSameBignum(1),
+  //   firstMintTime: spok.definedObject,
+  //   freezePeriod: spokSameBignum(15 * 24 * 3600),
+  //   destination: spokSamePubkey(treasuryAta.address),
+  //   authority: spokSamePubkey(candyMachine.candyGuard!.authorityAddress),
+  // });
 
-//   // And the payer lost tokens.
-//   const payerBalance = await getTokenBalance(umi, mint, payer.publicKey);
-//   t.true(isEqualToAmount(payerBalance, token(9)), 'payer lost tokens');
-// });
+  // // And the payer lost tokens.
+  // const payerBalance = await getTokenBalance(umi, mint, payer.publicKey);
+  // t.true(isEqualToAmount(payerBalance, token(9)), 'payer lost tokens');
+});
+
+// TODO: it allows minting when the mint and token accounts are created beforehand
+
+test('it allows minting when the mint and token accounts are created beforehand', async (t) => {
+  // Given a token mint with holders such that the identity has 10 tokens.
+  const umi = await createUmi();
+  const destination = generateSigner(umi);
+  const [tokenMint, destinationAta] = await createMintWithHolders(umi, {
+    holders: [
+      { owner: destination, amount: 0 },
+      { owner: umi.identity, amount: 10 },
+    ],
+  });
+
+  // And a loaded Candy Machine with a freezeTokenPayment guard.
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [
+      { name: 'Degen #1', uri: 'https://example.com/degen/1' },
+      { name: 'Degen #2', uri: 'https://example.com/degen/2' },
+    ],
+    guards: {
+      freezeTokenPayment: some({
+        mint: tokenMint.publicKey,
+        destinationAta,
+        amount: 1,
+      }),
+    },
+  });
+
+  // And given the freezeTokenPayment guard is initialized.
+  await initFreezeEscrow(umi, candyMachine, tokenMint, destinationAta);
+
+  // When we mint from that candy machine by creating
+  // the mint and token accounts beforehand.
+  const mint = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      createMintWithAssociatedToken(umi, {
+        mint,
+        owner: umi.identity.publicKey,
+      })
+    )
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: {
+          freezeTokenPayment: some({
+            mint: publicKey(tokenMint),
+            destinationAta,
+          }),
+        },
+      })
+    )
+    .sendAndConfirm();
+
+  // Then minting was successful.
+  await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
+});
 
 // test('it can thaw an NFT once all NFTs are minted', async (t) => {
 //   // Given a loaded Candy Machine with an initialized
@@ -773,3 +865,156 @@
 //     },
 //   });
 // };
+
+const getFreezeEscrow = (
+  umi: Umi,
+  candyMachine: PublicKey,
+  destinationAta: PublicKey
+) =>
+  findFreezeEscrowPda(umi, {
+    candyMachine,
+    candyGuard: findCandyGuardPda(umi, { base: candyMachine }),
+    destination: publicKey(destinationAta),
+  });
+
+const getFrozenCount = async (
+  umi: Umi,
+  candyMachine: PublicKey,
+  destinationAta: PublicKey
+) => {
+  const pda = getFreezeEscrow(umi, candyMachine, destinationAta);
+  const account = await fetchFreezeEscrow(umi, pda);
+  return Number(account.frozenCount);
+};
+
+const assertFrozenCount = async (
+  t: Assertions,
+  umi: Umi,
+  candyMachine: PublicKey,
+  destinationAta: PublicKey,
+  expected: number
+): Promise<void> => {
+  const frozenCount = await getFrozenCount(umi, candyMachine, destinationAta);
+  t.is(frozenCount, expected, 'frozen count is correct');
+};
+
+const initFreezeEscrow = async (
+  umi: Umi,
+  candyMachine: PublicKey,
+  tokenMint: PublicKey | Signer,
+  destinationAta: PublicKey,
+  group?: Option<string>
+) => {
+  await transactionBuilder(umi)
+    .add(
+      route(umi, {
+        candyMachine,
+        guard: 'freezeTokenPayment',
+        group,
+        routeArgs: {
+          path: 'initialize',
+          period: 15 * 24 * 3600, // 15 days.
+          candyGuardAuthority: umi.identity,
+          mint: publicKey(tokenMint),
+          destinationAta,
+        },
+      })
+    )
+    .sendAndConfirm();
+};
+
+const mintNft = async (
+  umi: Umi,
+  candyMachine: PublicKey,
+  tokenMint: PublicKey | Signer,
+  destinationAta: PublicKey,
+  collectionMint: PublicKey,
+  group?: Option<string>
+) => {
+  const mint = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: {
+          freezeTokenPayment: some({
+            mint: publicKey(tokenMint),
+            destinationAta,
+          }),
+        },
+        group,
+      })
+    )
+    .sendAndConfirm();
+
+  return mint;
+};
+
+const thawNft = async (
+  umi: Umi,
+  candyMachine: PublicKey,
+  tokenMint: PublicKey | Signer,
+  destinationAta: PublicKey,
+  nftMint: PublicKey,
+  nftOwner: PublicKey,
+  group?: Option<string>
+) => {
+  await transactionBuilder(umi)
+    .add(
+      route(umi, {
+        candyMachine,
+        guard: 'freezeTokenPayment',
+        group,
+        routeArgs: {
+          path: 'thaw',
+          nftMint,
+          nftOwner,
+          mint: publicKey(tokenMint),
+          destinationAta,
+        },
+      })
+    )
+    .sendAndConfirm();
+};
+
+const unlockFunds = async (
+  umi: Umi,
+  candyMachine: PublicKey,
+  tokenMint: PublicKey | Signer,
+  destinationAta: PublicKey,
+  group?: Option<string>,
+  candyGuardAuthority?: Signer
+) => {
+  await transactionBuilder(umi)
+    .add(
+      route(umi, {
+        candyMachine,
+        guard: 'freezeTokenPayment',
+        group,
+        routeArgs: {
+          path: 'unlockFunds',
+          candyGuardAuthority: candyGuardAuthority ?? umi.identity,
+          mint: publicKey(tokenMint),
+          destinationAta,
+        },
+      })
+    )
+    .sendAndConfirm();
+};
+
+export const deletMe = () => {
+  // eslint-disable-next-line no-console
+  console.log({
+    getFreezeEscrow,
+    getFrozenCount,
+    assertFrozenCount,
+    initFreezeEscrow,
+    mintNft,
+    thawNft,
+    unlockFunds,
+  });
+};

@@ -144,7 +144,70 @@ test('it transfers tokens to an escrow account and freezes the NFT', async (t) =
   t.is(payerBalance, 9, 'payer lost tokens');
 });
 
-// TODO: it allows minting even when the payer is different from the minter
+test.skip('it allows minting even when the payer is different from the minter', async (t) => {
+  // Given a token mint with holders such that an explicit minter has 10 tokens.
+  const umi = await createUmi();
+  const minter = generateSigner(umi);
+  const destination = generateSigner(umi);
+  const [tokenMint, destinationAta] = await createMintWithHolders(umi, {
+    holders: [
+      { owner: destination, amount: 0 },
+      { owner: minter, amount: 10 },
+    ],
+  });
+
+  // And a loaded Candy Machine with a freezeTokenPayment guard.
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    configLines: [
+      { name: 'Degen #1', uri: 'https://example.com/degen/1' },
+      { name: 'Degen #2', uri: 'https://example.com/degen/2' },
+    ],
+    guards: {
+      freezeTokenPayment: some({
+        mint: tokenMint.publicKey,
+        destinationAta,
+        amount: 1,
+      }),
+    },
+  });
+
+  // And given the freezeTokenPayment guard is initialized.
+  await initFreezeEscrow(umi, candyMachine, tokenMint, destinationAta);
+
+  // When we mint from that candy machine using an explicit minter.
+  const mint = generateSigner(umi);
+  await transactionBuilder(umi)
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    // TODO: REMOVE ME WHEN PROGRAM IS UPDATED.
+    .add(
+      createMintWithAssociatedToken(umi, {
+        mint,
+        owner: minter.publicKey,
+      })
+    )
+    // TODO: END REMOVE ME.
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        minter,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: {
+          freezeTokenPayment: some({
+            mint: publicKey(tokenMint),
+            destinationAta,
+          }),
+        },
+      })
+    )
+    .sendAndConfirm();
+
+  // Then minting was successful.
+  await assertSuccessfulMint(t, umi, { mint, owner: minter });
+});
 
 test('it allows minting when the mint and token accounts are created beforehand', async (t) => {
   // Given a token mint with holders such that the identity has 10 tokens.

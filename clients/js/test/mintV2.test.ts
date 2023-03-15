@@ -46,7 +46,7 @@ test('it can mint from a candy guard with no guards', async (t) => {
   // When we mint from the candy guard.
   const mint = generateSigner(umi);
   const minter = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -57,7 +57,7 @@ test('it can mint from a candy guard with no guards', async (t) => {
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the mint was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: minter, name: 'Degen #1' });
@@ -81,7 +81,7 @@ test('it can mint whilst creating the mint and token accounts beforehand', async
   // When we create a new mint and token account before minting.
   const mint = generateSigner(umi);
   const minter = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(createMint(umi, { mint }))
     .add(
       createAssociatedToken(umi, {
@@ -98,7 +98,7 @@ test('it can mint whilst creating the mint and token accounts beforehand', async
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the mint was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: minter, name: 'Degen #1' });
@@ -122,7 +122,7 @@ test('it can mint whilst creating only the mint account beforehand', async (t) =
   // When we create a new mint account before minting.
   const mint = generateSigner(umi);
   const minter = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(createMint(umi, { mint }))
     .add(
       mintV2(umi, {
@@ -133,7 +133,7 @@ test('it can mint whilst creating only the mint account beforehand', async (t) =
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the mint was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: minter, name: 'Degen #1' });
@@ -157,7 +157,7 @@ test('it can mint from a candy guard attached to a candy machine v1', async (t) 
   // When we mint from it.
   const mint = generateSigner(umi);
   const minter = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       createMintWithAssociatedToken(umi, {
         mint,
@@ -182,7 +182,7 @@ test('it can mint from a candy guard attached to a candy machine v1', async (t) 
         }),
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the mint was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: minter, name: 'Degen #1' });
@@ -211,7 +211,7 @@ test('it can mint from a candy guard with guards', async (t) => {
   const mint = generateSigner(umi);
   const minter = generateSigner(umi);
   const payer = await generateSignerWithSol(umi, sol(10));
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -226,7 +226,7 @@ test('it can mint from a candy guard with guards', async (t) => {
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the mint was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: minter, name: 'Degen #1' });
@@ -262,7 +262,7 @@ test('it can mint from a candy guard with groups', async (t) => {
   // When we mint from it using GROUP1.
   const mint = generateSigner(umi);
   const minter = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -275,7 +275,7 @@ test('it can mint from a candy guard with groups', async (t) => {
         group: some('GROUP1'),
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the mint was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: minter });
@@ -300,7 +300,7 @@ test('it cannot mint using the default guards if the candy guard has groups', as
   // When we try to mint using the default guards.
   const mint = generateSigner(umi);
   const minter = generateSigner(umi);
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -313,7 +313,7 @@ test('it cannot mint using the default guards if the candy guard has groups', as
         group: none(),
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a program error.
   await t.throwsAsync(promise, { message: /RequiredGroupLabelNotFound/ });
@@ -336,7 +336,7 @@ test('it cannot mint from a group if the provided group label does not exist', a
   // When we try to mint using a group that does not exist.
   const mint = generateSigner(umi);
   const minter = generateSigner(umi);
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -349,7 +349,7 @@ test('it cannot mint from a group if the provided group label does not exist', a
         group: some('GROUPX'),
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a program error.
   await t.throwsAsync(promise, { message: /GroupNotFound/ });
@@ -372,7 +372,7 @@ test('it can mint using an explicit payer', async (t) => {
   // When we mint from it using that payer.
   const mint = generateSigner(umi);
   const minter = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -385,7 +385,7 @@ test('it can mint using an explicit payer', async (t) => {
         mintArgs: { solPayment: some({ destination }) },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the mint was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: minter, name: 'Degen #1' });
@@ -408,7 +408,7 @@ test('it cannot mint from an empty candy machine', async (t) => {
   // When we try to mint from it.
   const mint = generateSigner(umi);
   const minter = generateSigner(umi);
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -419,7 +419,7 @@ test('it cannot mint from an empty candy machine', async (t) => {
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a program error.
   await t.throwsAsync(promise, { message: /CandyMachineEmpty/ });
@@ -439,7 +439,7 @@ test('it cannot mint from a candy machine that is not fully loaded', async (t) =
   // When we try to mint from it.
   const mint = generateSigner(umi);
   const minter = generateSigner(umi);
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -450,7 +450,7 @@ test('it cannot mint from a candy machine that is not fully loaded', async (t) =
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a program error.
   await t.throwsAsync(promise, { message: /NotFullyLoaded/ });
@@ -466,7 +466,7 @@ test('it cannot mint from a candy machine that has been fully minted', async (t)
     guards: {},
   });
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -476,11 +476,11 @@ test('it cannot mint from a candy machine that has been fully minted', async (t)
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
 
   // When we try to mint from it again.
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -490,7 +490,7 @@ test('it cannot mint from a candy machine that has been fully minted', async (t)
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a program error.
   await t.throwsAsync(promise, { message: /CandyMachineEmpty/ });
@@ -515,7 +515,7 @@ test('it can mint from a candy machine using hidden settings', async (t) => {
   // When we mint from it.
   const mint = generateSigner(umi);
   const minter = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -526,7 +526,7 @@ test('it can mint from a candy machine using hidden settings', async (t) => {
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the mint was successful.
   await assertSuccessfulMint(t, umi, {
@@ -561,7 +561,7 @@ test('it can mint from a candy machine sequentially', async (t) => {
   // When we mint from it.
   const mint = generateSigner(umi);
   const minter = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -572,7 +572,7 @@ test('it can mint from a candy machine sequentially', async (t) => {
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the mint was successful and we got the first item.
   await assertSuccessfulMint(t, umi, {
@@ -607,7 +607,7 @@ test('it can mint from a candy machine in a random order', async (t) => {
   // When we mint from it.
   const mint = generateSigner(umi);
   const minter = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -618,7 +618,7 @@ test('it can mint from a candy machine in a random order', async (t) => {
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the mint was successful and we got any item.
   await assertSuccessfulMint(t, umi, { mint, owner: minter });

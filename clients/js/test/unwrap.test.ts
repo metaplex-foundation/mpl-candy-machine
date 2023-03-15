@@ -8,14 +8,14 @@ test('it can unwrap a candy machine v1 from its candy guard', async (t) => {
   const umi = await createUmi();
   const candyMachine = (await createV1(umi)).publicKey;
   const candyGuard = await createCandyGuard(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(wrap(umi, { candyMachine, candyGuard }))
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // When we unwrap the candy machine from its candy guard.
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(unwrap(umi, { candyMachine, candyGuard }))
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the mint authority of the candy machine was updated accordingly.
   const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
@@ -30,14 +30,14 @@ test('it can unwrap a candy machine v2 from its candy guard', async (t) => {
   const umi = await createUmi();
   const candyMachine = (await createV2(umi)).publicKey;
   const candyGuard = await createCandyGuard(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(wrap(umi, { candyMachine, candyGuard }))
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // When we unwrap the candy machine from its candy guard.
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(unwrap(umi, { candyMachine, candyGuard }))
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the mint authority of the candy machine was updated accordingly.
   const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);

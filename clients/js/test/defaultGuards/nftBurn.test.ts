@@ -43,7 +43,7 @@ test('it burns a specific NFT to allow minting', async (t) => {
 
   // When the identity mints from it using its NFT to burn.
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -56,7 +56,7 @@ test('it burns a specific NFT to allow minting', async (t) => {
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
@@ -91,7 +91,7 @@ test.skip('it allows minting even when the payer is different from the minter', 
 
   // When the minter mints from it using its NFT to burn.
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -105,7 +105,7 @@ test.skip('it allows minting even when the payer is different from the minter', 
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: minter });
@@ -130,7 +130,7 @@ test('it fails if there is not valid NFT to burn', async (t) => {
   // When we try to mint from it using an NFT that's not part of this collection.
   const nftToBurn = await createNft(umi);
   const mint = generateSigner(umi);
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -143,7 +143,7 @@ test('it fails if there is not valid NFT to burn', async (t) => {
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect an error.
   await t.throwsAsync(promise, { message: /InvalidNftCollection/ });
@@ -167,7 +167,7 @@ test('it charges a bot tax when trying to mint using the wrong NFT', async (t) =
   // When we try to mint from it using an NFT that's not part of this collection.
   const nftToBurn = await createNft(umi);
   const mint = generateSigner(umi);
-  const { signature } = await transactionBuilder(umi)
+  const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -180,7 +180,7 @@ test('it charges a bot tax when trying to mint using the wrong NFT', async (t) =
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a bot tax error.
   await assertBotTax(t, umi, mint, signature, /InvalidNftCollection/);

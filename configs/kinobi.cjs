@@ -370,7 +370,7 @@ kinobi.update(
     "mplCandyMachineCore.mintV2": {
       name: "mintFromCandyMachineV2",
       accounts: {
-        nftMint: { isOptionalSigner: true },
+        nftMint: { isSigner: "either" },
         nftMintAuthority: { defaultsTo: { kind: "identity" } },
         token: {
           defaultsTo: defaultsToAssociatedTokenPda("nftMint", "nftOwner"),
@@ -403,7 +403,7 @@ kinobi.update(
       args: { label: "group" },
       accounts: {
         candyGuard: { defaultsTo: defaultsToCandyGuardPda("candyMachine") },
-        nftMint: { isOptionalSigner: true },
+        nftMint: { isSigner: "either" },
         nftMintAuthority: { defaultsTo: { kind: "identity" } },
         minter: { defaultsTo: { kind: "identity" } },
         token: {

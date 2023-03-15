@@ -29,7 +29,7 @@ test('it can create a candy machine using config line settings', async (t) => {
   // When we create a new candy machine with config line settings.
   const candyMachine = generateSigner(umi);
   const creator = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       await createCandyMachineV2(umi, {
         candyMachine,
@@ -50,7 +50,7 @@ test('it can create a candy machine using config line settings', async (t) => {
         }),
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect the candy machine account to have the right data.
   const candyMachineAccount = await fetchCandyMachine(
@@ -98,7 +98,7 @@ test('it can create a candy machine using hidden settings', async (t) => {
   // When we create a new candy machine with hidden settings.
   const candyMachine = generateSigner(umi);
   const creator = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       await createCandyMachineV2(umi, {
         candyMachine,
@@ -117,7 +117,7 @@ test('it can create a candy machine using hidden settings', async (t) => {
         }),
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect the candy machine account to have the right data.
   const candyMachineAccount = await fetchCandyMachine(
@@ -162,7 +162,7 @@ test('it cannot create a candy machine without hidden or config line settings', 
 
   // When we try to create a new candy machine without any settings.
   const candyMachine = generateSigner(umi);
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(
       await createCandyMachineV2(umi, {
         ...defaultCandyMachineData(umi),
@@ -172,7 +172,7 @@ test('it cannot create a candy machine without hidden or config line settings', 
         hiddenSettings: none(),
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a program error.
   await t.throwsAsync(promise, { message: /A raw constraint was violated/ });
@@ -185,7 +185,7 @@ test('it can create a candy machine of Programmable NFTs', async (t) => {
 
   // When we create a new candy machine using the Programmable NFTs standard.
   const candyMachine = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       await createCandyMachineV2(umi, {
         ...defaultCandyMachineData(umi),
@@ -194,7 +194,7 @@ test('it can create a candy machine of Programmable NFTs', async (t) => {
         tokenStandard: TokenStandard.ProgrammableNonFungible,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect the candy machine account to have the right data.
   const candyMachineAccount = await fetchCandyMachine(
@@ -215,7 +215,7 @@ test("it can create a candy machine that's bigger than 10Kb", async (t) => {
 
   // When we create a new candy machine with a large amount of items.
   const candyMachine = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       await createCandyMachineV2(umi, {
         ...defaultCandyMachineData(umi),
@@ -225,7 +225,7 @@ test("it can create a candy machine that's bigger than 10Kb", async (t) => {
         collectionMint: collectionMint.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect the candy machine account to have been created.
   const candyMachineAccount = await fetchCandyMachine(

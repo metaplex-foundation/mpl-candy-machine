@@ -56,7 +56,7 @@ export const createNft = async (
   input: Partial<Parameters<typeof baseCreateNft>[1]> = {}
 ): Promise<Signer> => {
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       baseCreateNft(umi, {
         mint,
@@ -66,7 +66,7 @@ export const createNft = async (
         ...input,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   return mint;
 };
@@ -90,7 +90,7 @@ export const createVerifiedNft = async (
   });
   const effectiveMint = publicKey(rest.mint ?? mint.publicKey);
 
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       verifyCollectionV1(umi, {
         authority: collectionAuthority,
@@ -98,7 +98,7 @@ export const createVerifiedNft = async (
         metadata: findMetadataPda(umi, { mint: effectiveMint }),
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   return mint;
 };
@@ -113,7 +113,7 @@ export const createMintWithHolders = async (
   const atas = [] as Pda[];
   const mint = input.mint ?? generateSigner(umi);
   const mintAuthority = input.mintAuthority ?? umi.identity;
-  let builder = transactionBuilder(umi).add(
+  let builder = transactionBuilder().add(
     createMint(umi, {
       ...input,
       mint,
@@ -138,7 +138,7 @@ export const createMintWithHolders = async (
       );
     }
   });
-  await builder.sendAndConfirm();
+  await builder.sendAndConfirm(umi);
 
   return [mint, ...atas];
 };
@@ -153,7 +153,7 @@ export const createV1 = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
   const candyMachine = input.candyMachine ?? generateSigner(umi);
   const collectionMint =
     input.collectionMint ?? (await createCollectionNft(umi)).publicKey;
-  let builder = transactionBuilder(umi).add(
+  let builder = transactionBuilder().add(
     await baseCreateCandyMachine(umi, {
       ...defaultCandyMachineData(umi),
       ...input,
@@ -181,7 +181,7 @@ export const createV1 = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
       .add(wrap(umi, { candyMachine: candyMachine.publicKey, candyGuard }));
   }
 
-  await builder.sendAndConfirm();
+  await builder.sendAndConfirm(umi);
   return candyMachine;
 };
 
@@ -195,7 +195,7 @@ export const createV2 = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
   const candyMachine = input.candyMachine ?? generateSigner(umi);
   const collectionMint =
     input.collectionMint ?? (await createCollectionNft(umi)).publicKey;
-  let builder = transactionBuilder(umi).add(
+  let builder = transactionBuilder().add(
     await baseCreateCandyMachineV2(umi, {
       ...defaultCandyMachineData(umi),
       ...input,
@@ -223,7 +223,7 @@ export const createV2 = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
       .add(wrap(umi, { candyMachine: candyMachine.publicKey, candyGuard }));
   }
 
-  await builder.sendAndConfirm();
+  await builder.sendAndConfirm(umi);
   return candyMachine;
 };
 
@@ -262,9 +262,9 @@ export const createCandyGuard = async <
   > = {}
 ) => {
   const base = input.base ?? generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(baseCreateCandyGuard<DA>(umi, { ...input, base }))
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   return findCandyGuardPda(umi, { base: base.publicKey });
 };

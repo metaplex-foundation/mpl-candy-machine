@@ -2,7 +2,8 @@ import {
   mergeBytes,
   none,
   Option,
-  WrappedInstruction,
+  TransactionBuilder,
+  transactionBuilder,
 } from '@metaplex-foundation/umi';
 import { DefaultGuardSetRouteArgs } from './defaultGuards';
 import {
@@ -52,7 +53,7 @@ export function route<
       G,
       RA extends undefined ? DefaultGuardSetRouteArgs : RA
     >
-): WrappedInstruction {
+): TransactionBuilder {
   const { routeArgs = {}, group = none(), ...rest } = input;
   const program = context.programs.get<CandyGuardProgram>('mplCandyGuard');
   const routeContext: RouteContext = {
@@ -72,11 +73,11 @@ export function route<
     guard: guardIndex,
     data: mergeBytes([prefix, data]),
     group,
-  });
+  }).items[0];
 
   const [keys, signers] = parseGuardRemainingAccounts(remainingAccounts);
   ix.instruction.keys.push(...keys);
   ix.signers.push(...signers);
 
-  return ix;
+  return transactionBuilder([ix]);
 }

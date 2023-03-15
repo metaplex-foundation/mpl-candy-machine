@@ -46,7 +46,7 @@ test('it can update the guards of a candy guard', async (t) => {
 
   // When we update all its guards — defaults and groups.
   const treasuryB = generateSigner(umi).publicKey;
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       updateCandyGuard(umi, {
         candyGuard,
@@ -72,7 +72,7 @@ test('it can update the guards of a candy guard', async (t) => {
         ],
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then all guards were updated as expected.
   const candyGuardAccount = await fetchCandyGuard(umi, candyGuard);
@@ -130,9 +130,9 @@ test('it can remove all guards from a candy guard', async (t) => {
   });
 
   // When we update it so that it has no guards.
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(updateCandyGuard(umi, { candyGuard, guards: {}, groups: [] }))
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then all guards were removed as expected.
   const candyGuardAccount = await fetchCandyGuard(umi, candyGuard);
@@ -176,9 +176,9 @@ test('it can update a single guard by passing the current data', async (t) => {
 
   // When we update one guard from one group and pass in the rest of the data.
   groups[1].guards.startDate = some({ date: '2022-09-13T14:00:00.000Z' });
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(updateCandyGuard(umi, { candyGuard, guards, groups }))
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then only that guard was updated.
   const candyGuardAccount = await fetchCandyGuard(umi, candyGuard);

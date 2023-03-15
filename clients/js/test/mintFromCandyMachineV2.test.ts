@@ -37,7 +37,7 @@ test('it can mint directly from a candy machine as the mint authority', async (t
   // When we mint a new NFT directly from the candy machine as the mint authority.
   const mint = generateSigner(umi);
   const owner = generateSigner(umi).publicKey;
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 400000 }))
     .add(
       mintFromCandyMachineV2(umi, {
@@ -49,7 +49,7 @@ test('it can mint directly from a candy machine as the mint authority', async (t
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the mint was successful.
   await assertSuccessfulMint(t, umi, { mint, owner });
@@ -75,7 +75,7 @@ test('it can mint whilst creating the mint and token accounts beforehand', async
   // When we mint a new NFT directly from the candy machine as the mint authority.
   const mint = generateSigner(umi);
   const owner = generateSigner(umi).publicKey;
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(createMint(umi, { mint }))
     .add(createAssociatedToken(umi, { mint: mint.publicKey, owner }))
     .add(
@@ -88,7 +88,7 @@ test('it can mint whilst creating the mint and token accounts beforehand', async
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the mint was successful.
   await assertSuccessfulMint(t, umi, { mint, owner });
@@ -110,7 +110,7 @@ test('it can mint whilst creating only the mint account beforehand', async (t) =
   // When we mint a new NFT directly from the candy machine as the mint authority.
   const mint = generateSigner(umi);
   const owner = generateSigner(umi).publicKey;
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(createMint(umi, { mint }))
     .add(
       mintFromCandyMachineV2(umi, {
@@ -122,7 +122,7 @@ test('it can mint whilst creating only the mint account beforehand', async (t) =
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the mint was successful.
   await assertSuccessfulMint(t, umi, { mint, owner });
@@ -150,7 +150,7 @@ test('it cannot mint directly from a candy machine if we are not the mint author
   const mintAuthorityB = generateSigner(umi);
   const mint = generateSigner(umi);
   const owner = generateSigner(umi).publicKey;
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(createMintWithAssociatedToken(umi, { mint, owner, amount: 1 }))
     .add(
       mintFromCandyMachineV2(umi, {
@@ -162,7 +162,7 @@ test('it cannot mint directly from a candy machine if we are not the mint author
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a program error.
   await t.throwsAsync(promise, {
@@ -190,7 +190,7 @@ test('it can mint from a candy machine v1', async (t) => {
   // When mint from it directly usint the mint v2 instruction.
   const mint = generateSigner(umi);
   const owner = generateSigner(umi).publicKey;
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(createMintWithAssociatedToken(umi, { mint, owner, amount: 1 }))
     .add(
       mintFromCandyMachineV2(umi, {
@@ -210,7 +210,7 @@ test('it can mint from a candy machine v1', async (t) => {
         }),
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the mint was successful.
   await assertSuccessfulMint(t, umi, { mint, owner });

@@ -3,7 +3,8 @@ import {
   Context,
   none,
   Signer,
-  WrappedInstruction,
+  transactionBuilder,
+  TransactionBuilder,
 } from '@metaplex-foundation/umi';
 import { initializeCandyMachine } from './generated';
 import { getCandyMachineSize } from './hooked';
@@ -18,22 +19,25 @@ export type CreateCandyMachineInput = Omit<
 export const createCandyMachine = async (
   context: Parameters<typeof initializeCandyMachine>[0] & Pick<Context, 'rpc'>,
   input: CreateCandyMachineInput
-): Promise<WrappedInstruction[]> => {
+): Promise<TransactionBuilder> => {
   const space = getCandyMachineSize(
     input.itemsAvailable,
     input.configLineSettings ?? none()
   );
   const lamports = await context.rpc.getRent(space);
-  return [
-    createAccount(context, {
-      newAccount: input.candyMachine,
-      lamports,
-      space,
-      programId: context.programs.get('mplCandyMachineCore').publicKey,
-    }),
-    initializeCandyMachine(context, {
-      ...input,
-      candyMachine: input.candyMachine.publicKey,
-    }),
-  ];
+  return transactionBuilder()
+    .add(
+      createAccount(context, {
+        newAccount: input.candyMachine,
+        lamports,
+        space,
+        programId: context.programs.get('mplCandyMachineCore').publicKey,
+      })
+    )
+    .add(
+      initializeCandyMachine(context, {
+        ...input,
+        candyMachine: input.candyMachine.publicKey,
+      })
+    );
 };

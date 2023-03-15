@@ -56,7 +56,7 @@ test('it transfers SOL to an escrow account and freezes the NFT', async (t) => {
   });
 
   // And given the freezeSolPayment guard is initialized.
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       route(umi, {
         candyMachine,
@@ -69,11 +69,11 @@ test('it transfers SOL to an escrow account and freezes the NFT', async (t) => {
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // When we mint from that candy machine.
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -84,7 +84,7 @@ test('it transfers SOL to an escrow account and freezes the NFT', async (t) => {
         mintArgs: { freezeSolPayment: some({ destination }) },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
@@ -154,7 +154,7 @@ test('it allows minting even when the payer is different from the minter', async
   // When we mint from that candy machine using an explicit minter.
   const mint = generateSigner(umi);
   const minter = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -166,7 +166,7 @@ test('it allows minting even when the payer is different from the minter', async
         mintArgs: { freezeSolPayment: some({ destination }) },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: minter });
@@ -194,7 +194,7 @@ test('it allows minting when the mint and token accounts are created beforehand'
   // When we mint from that candy machine by creating
   // the mint and token accounts beforehand.
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       createMintWithAssociatedToken(umi, {
@@ -211,7 +211,7 @@ test('it allows minting when the mint and token accounts are created beforehand'
         mintArgs: { freezeSolPayment: some({ destination }) },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
@@ -268,7 +268,7 @@ test('it can unlock funds once all NFTs have been thawed', async (t) => {
   await thawNft(umi, candyMachine, destination, mint.publicKey);
 
   // When the authority unlocks the funds.
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       route(umi, {
         candyMachine,
@@ -280,7 +280,7 @@ test('it can unlock funds once all NFTs have been thawed', async (t) => {
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the destination wallet received the funds.
   const treasuryBalance = await umi.rpc.getBalance(destination);
@@ -316,7 +316,7 @@ test('it cannot unlock funds if not all NFTs have been thawed', async (t) => {
   await mintNft(umi, candyMachine, destination, collectionMint);
 
   // When the authority tries to unlock the funds.
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(
       route(umi, {
         candyMachine,
@@ -328,7 +328,7 @@ test('it cannot unlock funds if not all NFTs have been thawed', async (t) => {
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect an error.
   await t.throwsAsync(promise, { message: /UnlockNotEnabled/ });
@@ -416,7 +416,7 @@ test('it can have multiple freeze escrow and reuse the same ones', async (t) => 
   const mintB = await mintNft(umi, cm, destinationAB, collectionMint, 'GROUPB'); // 1 SOL
   const mintC = await mintNft(umi, cm, destinationC, collectionMint, 'GROUPC'); // 2 SOL
   const mintD = generateSigner(umi); // 3 SOL
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -430,7 +430,7 @@ test('it can have multiple freeze escrow and reuse the same ones', async (t) => 
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then all NFTs except for group D have been frozen.
   const [tokenA, tokenB, tokenC, tokenD] = await Promise.all(
@@ -551,7 +551,7 @@ test('it fails to mint if the freeze escrow was not initialized', async (t) => {
 
   // When we try to mint without initializing the freeze escrow.
   const mint = generateSigner(umi);
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -562,7 +562,7 @@ test('it fails to mint if the freeze escrow was not initialized', async (t) => {
         mintArgs: { freezeSolPayment: some({ destination }) },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect an error.
   await t.throwsAsync(promise, { message: /FreezeNotInitialized/ });
@@ -586,7 +586,7 @@ test('it fails to mint if the payer does not have enough funds', async (t) => {
   // When we mint from it using a payer that only has 4 SOL.
   const payer = await generateSignerWithSol(umi, sol(4));
   const mint = generateSigner(umi);
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -599,7 +599,7 @@ test('it fails to mint if the payer does not have enough funds', async (t) => {
         mintArgs: { freezeSolPayment: some({ destination }) },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect an error.
   await t.throwsAsync(promise, { message: /NotEnoughSOL/ });
@@ -625,7 +625,7 @@ test('it charges a bot tax if something goes wrong', async (t) => {
 
   // When we try to mint without initializing the freeze escrow.
   const mint = generateSigner(umi);
-  const { signature } = await transactionBuilder(umi)
+  const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -636,7 +636,7 @@ test('it charges a bot tax if something goes wrong', async (t) => {
         mintArgs: { freezeSolPayment: some({ destination }) },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a bot tax error.
   await assertBotTax(t, umi, mint, signature, /FreezeNotInitialized/);
@@ -680,7 +680,7 @@ const initFreezeEscrow = async (
   destination: PublicKey,
   group?: string
 ) => {
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       route(umi, {
         candyMachine,
@@ -694,7 +694,7 @@ const initFreezeEscrow = async (
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 };
 
 const mintNft = async (
@@ -705,7 +705,7 @@ const mintNft = async (
   group?: string
 ) => {
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -719,7 +719,7 @@ const mintNft = async (
         group: group ? some(group) : none(),
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   return mint;
 };
@@ -732,7 +732,7 @@ const thawNft = async (
   group?: string,
   nftOwner?: PublicKey
 ) => {
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       route(umi, {
         candyMachine,
@@ -746,7 +746,7 @@ const thawNft = async (
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 };
 
 const unlockFunds = async (
@@ -756,7 +756,7 @@ const unlockFunds = async (
   group?: string,
   candyGuardAuthority?: Signer
 ) => {
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       route(umi, {
         candyMachine,
@@ -769,5 +769,5 @@ const unlockFunds = async (
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 };

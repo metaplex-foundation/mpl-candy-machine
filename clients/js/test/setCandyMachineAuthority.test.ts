@@ -21,7 +21,7 @@ test('it can update the authority of a candy machine v1', async (t) => {
 
   // When we update it to use authority B.
   const authorityB = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       setCandyMachineAuthority(umi, {
         candyMachine: candyMachine.publicKey,
@@ -29,7 +29,7 @@ test('it can update the authority of a candy machine v1', async (t) => {
         newAuthority: authorityB.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the Candy Machine's authority was updated accordingly.
   const candyMachineAccount = await fetchCandyMachine(
@@ -51,7 +51,7 @@ test('it can update the authority of a candy machine v2', async (t) => {
 
   // When we update it to use authority B.
   const authorityB = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       setCandyMachineAuthority(umi, {
         candyMachine: candyMachine.publicKey,
@@ -59,7 +59,7 @@ test('it can update the authority of a candy machine v2', async (t) => {
         newAuthority: authorityB.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the Candy Machine's authority was updated accordingly.
   const candyMachineAccount = await fetchCandyMachine(

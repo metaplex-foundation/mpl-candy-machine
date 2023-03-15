@@ -26,7 +26,7 @@ test('it can mint directly from a candy machine as the mint authority', async (t
   // When we mint a new NFT directly from the candy machine as the mint authority.
   const mint = generateSigner(umi);
   const owner = generateSigner(umi).publicKey;
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(createMintWithAssociatedToken(umi, { mint, owner, amount: 1 }))
     .add(
       mintFromCandyMachine(umi, {
@@ -38,7 +38,7 @@ test('it can mint directly from a candy machine as the mint authority', async (t
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the mint was successful.
   await assertSuccessfulMint(t, umi, { mint, owner });
@@ -70,7 +70,7 @@ test('it cannot mint directly from a candy machine if we are not the mint author
   const mintAuthorityB = generateSigner(umi);
   const mint = generateSigner(umi);
   const owner = generateSigner(umi).publicKey;
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(createMintWithAssociatedToken(umi, { mint, owner, amount: 1 }))
     .add(
       mintFromCandyMachine(umi, {
@@ -82,7 +82,7 @@ test('it cannot mint directly from a candy machine if we are not the mint author
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a program error.
   await t.throwsAsync(promise, {
@@ -110,7 +110,7 @@ test('it cannot mint from a candy machine v2', async (t) => {
   // When we try to mint from it directly usint the mint v1 instruction.
   const mint = generateSigner(umi);
   const owner = generateSigner(umi).publicKey;
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(createMintWithAssociatedToken(umi, { mint, owner, amount: 1 }))
     .add(
       mintFromCandyMachine(umi, {
@@ -122,7 +122,7 @@ test('it cannot mint from a candy machine v2', async (t) => {
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a program error.
   await t.throwsAsync(promise, { message: /Use MintV2 instead/ });

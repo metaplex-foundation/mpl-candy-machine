@@ -1,4 +1,4 @@
-import { mergeBytes, WrappedInstruction } from '@metaplex-foundation/umi';
+import { mergeBytes, TransactionBuilder } from '@metaplex-foundation/umi';
 import { DefaultGuardSetArgs } from './defaultGuards';
 import {
   updateCandyGuard as baseUpdateCandyGuard,
@@ -33,7 +33,7 @@ export function updateCandyGuard<DA extends GuardSetArgs = DefaultGuardSetArgs>(
     UpdateCandyGuardInstructionDataArgs<
       DA extends undefined ? DefaultGuardSetArgs : DA
     >
-): WrappedInstruction {
+): TransactionBuilder {
   const { guards, groups, ...rest } = input;
   const program = context.programs.get<CandyGuardProgram>('mplCandyGuard');
   const serializer = getCandyGuardDataSerializer<

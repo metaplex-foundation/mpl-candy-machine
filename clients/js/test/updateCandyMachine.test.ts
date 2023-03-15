@@ -31,7 +31,7 @@ test('it can update the data of a candy machine', async (t) => {
 
   // When we update its data.
   const creatorB = generateSigner(umi).publicKey;
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       updateCandyMachine(umi, {
         candyMachine: candyMachine.publicKey,
@@ -55,7 +55,7 @@ test('it can update the data of a candy machine', async (t) => {
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the Candy Machine's data was updated accordingly.
   const candyMachineAccount = await fetchCandyMachine(
@@ -101,14 +101,14 @@ test('it cannot update the number of items when using config line settings', asy
   );
 
   // When we try to update the number of items to 2000.
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(
       updateCandyMachine(umi, {
         candyMachine: candyMachine.publicKey,
         data: { ...originalData, itemsAvailable: 2000 },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a program error.
   await t.throwsAsync(promise, { message: /CannotChangeNumberOfLines/ });
@@ -132,14 +132,14 @@ test('it can update the number of items when using hidden settings', async (t) =
   );
 
   // When we update the number of items to 2000.
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       updateCandyMachine(umi, {
         candyMachine: candyMachine.publicKey,
         data: { ...originalData, itemsAvailable: 2000 },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the Candy Machine's data was updated accordingly.
   const candyMachineAccount = await fetchCandyMachine(
@@ -169,7 +169,7 @@ test('it can update the hidden settings of a candy machine', async (t) => {
   );
 
   // When we update its hidden settings to the following.
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       updateCandyMachine(umi, {
         candyMachine: candyMachine.publicKey,
@@ -183,7 +183,7 @@ test('it can update the hidden settings of a candy machine', async (t) => {
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the Candy Machine's data was updated accordingly.
   const candyMachineAccount = await fetchCandyMachine(
@@ -219,7 +219,7 @@ test('it cannot go from hidden settings to config line settings', async (t) => {
   );
 
   // When we try to update it so it uses config line settings instead.
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(
       updateCandyMachine(umi, {
         candyMachine: candyMachine.publicKey,
@@ -236,7 +236,7 @@ test('it cannot go from hidden settings to config line settings', async (t) => {
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a program error.
   await t.throwsAsync(promise, { message: /CannotSwitchFromHiddenSettings/ });
@@ -262,7 +262,7 @@ test('it cannot go from config line settings to hidden settings', async (t) => {
   );
 
   // When we try to update it so it uses hidden settings instead.
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(
       updateCandyMachine(umi, {
         candyMachine: candyMachine.publicKey,
@@ -277,7 +277,7 @@ test('it cannot go from config line settings to hidden settings', async (t) => {
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a program error.
   await t.throwsAsync(promise, { message: /CannotSwitchToHiddenSettings/ });

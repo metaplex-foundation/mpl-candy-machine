@@ -24,7 +24,7 @@ test('it can update the collection of a candy machine v1', async (t) => {
   const collectionB = await createCollectionNft(umi, {
     authority: collectionUpdateAuthorityB,
   });
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       setCollection(umi, {
         candyMachine: candyMachine.publicKey,
@@ -33,7 +33,7 @@ test('it can update the collection of a candy machine v1', async (t) => {
         newCollectionUpdateAuthority: collectionUpdateAuthorityB,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the Candy Machine's collection was updated accordingly.
   const candyMachineAccount = await fetchCandyMachine(
@@ -62,7 +62,7 @@ test('it cannot update the collection of a candy machine v2', async (t) => {
   const collectionB = await createCollectionNft(umi, {
     authority: collectionUpdateAuthorityB,
   });
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(
       setCollection(umi, {
         candyMachine: candyMachine.publicKey,
@@ -71,7 +71,7 @@ test('it cannot update the collection of a candy machine v2', async (t) => {
         newCollectionUpdateAuthority: collectionUpdateAuthorityB,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a program error.
   await t.throwsAsync(promise, { message: /Use SetCollectionV2 instead/ });

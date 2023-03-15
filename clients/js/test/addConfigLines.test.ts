@@ -9,7 +9,7 @@ test('it can add items to a candy machine', async (t) => {
   const candyMachine = await createV2(umi, { itemsAvailable: 5 });
 
   // When we add two items to the Candy Machine.
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       addConfigLines(umi, {
         candyMachine: candyMachine.publicKey,
@@ -20,7 +20,7 @@ test('it can add items to a candy machine', async (t) => {
         ],
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the Candy Machine has been updated properly.
   const candyMachineAccount = await fetchCandyMachine(
@@ -62,7 +62,7 @@ test('it uses the names and URIs as suffixes when adding items to a candy machin
   });
 
   // When we add two items to the Candy Machine by providing only the suffixes.
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       addConfigLines(umi, {
         candyMachine: candyMachine.publicKey,
@@ -73,7 +73,7 @@ test('it uses the names and URIs as suffixes when adding items to a candy machin
         ],
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the updated Candy Machine returns the full item names and URIs.
   const candyMachineAccount = await fetchCandyMachine(
@@ -113,7 +113,7 @@ test('it cannot add items to a candy machine with hidden settings', async (t) =>
   });
 
   // When we try to add items to the Candy Machine.
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(
       addConfigLines(umi, {
         candyMachine: candyMachine.publicKey,
@@ -124,7 +124,7 @@ test('it cannot add items to a candy machine with hidden settings', async (t) =>
         ],
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect an error from the program.
   await t.throwsAsync(promise, {
@@ -138,7 +138,7 @@ test('it cannot add items that would make the candy machine exceed the maximum c
   const candyMachine = await createV2(umi, { itemsAvailable: 2 });
 
   // When we try to add 3 items to the Candy Machine.
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(
       addConfigLines(umi, {
         candyMachine: candyMachine.publicKey,
@@ -150,7 +150,7 @@ test('it cannot add items that would make the candy machine exceed the maximum c
         ],
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect an error to be thrown.
   await t.throwsAsync(promise, {
@@ -162,7 +162,7 @@ test('it cannot add items once the candy machine is fully loaded', async (t) => 
   // Given an existing Candy Machine with 2 items loaded and a capacity of 2 items.
   const umi = await createUmi();
   const candyMachine = await createV2(umi, { itemsAvailable: 2 });
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       addConfigLines(umi, {
         candyMachine: candyMachine.publicKey,
@@ -173,10 +173,10 @@ test('it cannot add items once the candy machine is fully loaded', async (t) => 
         ],
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // When we try to add one more item to the Candy Machine.
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(
       addConfigLines(umi, {
         candyMachine: candyMachine.publicKey,
@@ -184,7 +184,7 @@ test('it cannot add items once the candy machine is fully loaded', async (t) => 
         configLines: [{ name: 'Degen #3', uri: 'https://example.com/degen/3' }],
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect an error to be thrown.
   await t.throwsAsync(promise, {
@@ -207,7 +207,7 @@ test('it cannot add items if either of them have a name or URI that is too long'
   });
 
   // When we try to add items such that one of the names is too long.
-  const promiseName = transactionBuilder(umi)
+  const promiseName = transactionBuilder()
     .add(
       addConfigLines(umi, {
         candyMachine: candyMachine.publicKey,
@@ -218,7 +218,7 @@ test('it cannot add items if either of them have a name or URI that is too long'
         ],
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect an error to be thrown.
   await t.throwsAsync(promiseName, {
@@ -226,7 +226,7 @@ test('it cannot add items if either of them have a name or URI that is too long'
   });
 
   // And when we try to add items such that one of the URIs is too long.
-  const promiseUri = transactionBuilder(umi)
+  const promiseUri = transactionBuilder()
     .add(
       addConfigLines(umi, {
         candyMachine: candyMachine.publicKey,
@@ -237,7 +237,7 @@ test('it cannot add items if either of them have a name or URI that is too long'
         ],
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect an error to be thrown.
   await t.throwsAsync(promiseUri, {
@@ -249,7 +249,7 @@ test('it can add items to a custom offset and override existing items', async (t
   // Given an existing Candy Machine with 2 items loaded and capacity of 3 items.
   const umi = await createUmi();
   const candyMachine = await createV2(umi, { itemsAvailable: 3 });
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       addConfigLines(umi, {
         candyMachine: candyMachine.publicKey,
@@ -260,10 +260,10 @@ test('it can add items to a custom offset and override existing items', async (t
         ],
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // When we add 2 items to the Candy Machine at index 1.
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       addConfigLines(umi, {
         candyMachine: candyMachine.publicKey,
@@ -274,7 +274,7 @@ test('it can add items to a custom offset and override existing items', async (t
         ],
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the Candy Machine has been updated properly.
   const candyMachineAccount = await fetchCandyMachine(
@@ -310,7 +310,7 @@ test('it can override all items of a candy machine', async (t) => {
   // Given an fully loaded Candy Machine with 2 items.
   const umi = await createUmi();
   const candyMachine = await createV2(umi, { itemsAvailable: 2 });
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       addConfigLines(umi, {
         candyMachine: candyMachine.publicKey,
@@ -321,10 +321,10 @@ test('it can override all items of a candy machine', async (t) => {
         ],
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // When we add 2 new items to the Candy Machine at index 0.
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       addConfigLines(umi, {
         candyMachine: candyMachine.publicKey,
@@ -335,7 +335,7 @@ test('it can override all items of a candy machine', async (t) => {
         ],
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then all items have been overriden.
   const candyMachineAccount = await fetchCandyMachine(

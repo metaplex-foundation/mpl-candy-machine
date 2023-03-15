@@ -22,7 +22,7 @@ test('it can update the mint authority of a candy machine v1', async (t) => {
 
   // When we update its mint authority.
   const mintAuthorityB = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       setMintAuthority(umi, {
         candyMachine: candyMachine.publicKey,
@@ -30,7 +30,7 @@ test('it can update the mint authority of a candy machine v1', async (t) => {
         mintAuthority: mintAuthorityB,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the Candy Machine's mint authority was updated accordingly.
   const candyMachineAccount = await fetchCandyMachine(
@@ -58,7 +58,7 @@ test('it can update the mint authority of a candy machine v2', async (t) => {
 
   // When we update its mint authority.
   const mintAuthorityB = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       setMintAuthority(umi, {
         candyMachine: candyMachine.publicKey,
@@ -66,7 +66,7 @@ test('it can update the mint authority of a candy machine v2', async (t) => {
         mintAuthority: mintAuthorityB,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the Candy Machine's mint authority was updated accordingly.
   const candyMachineAccount = await fetchCandyMachine(

@@ -51,7 +51,7 @@ test('it transfers tokens from the payer to the destination', async (t) => {
 
   // When we mint from it.
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -64,7 +64,7 @@ test('it transfers tokens from the payer to the destination', async (t) => {
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
@@ -111,7 +111,7 @@ test('it allows minting even when the payer is different from the minter', async
 
   // When the minter mints from it.
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -125,7 +125,7 @@ test('it allows minting even when the payer is different from the minter', async
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: minter });
@@ -169,7 +169,7 @@ test('it fails if the payer does not have enough tokens', async (t) => {
 
   // When we try to mint from it.
   const mint = generateSigner(umi);
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -182,7 +182,7 @@ test('it fails if the payer does not have enough tokens', async (t) => {
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a program error.
   await t.throwsAsync(promise, { message: /NotEnoughTokens/ });
@@ -223,7 +223,7 @@ test('it charges a bot tax if the payer does not have enough tokens', async (t) 
 
   // When we try to mint from it.
   const mint = generateSigner(umi);
-  const { signature } = await transactionBuilder(umi)
+  const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -236,7 +236,7 @@ test('it charges a bot tax if the payer does not have enough tokens', async (t) 
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a silent bot tax error.
   await assertBotTax(t, umi, mint, signature, /NotEnoughTokens/);

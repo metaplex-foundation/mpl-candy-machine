@@ -24,7 +24,7 @@ test('it allows minting when the payer owns a specific token', async (t) => {
   // Given a payer with one token.
   const umi = await createUmi();
   const tokenMint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       createMintWithAssociatedToken(umi, {
         mint: tokenMint,
@@ -32,7 +32,7 @@ test('it allows minting when the payer owns a specific token', async (t) => {
         amount: 1,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // And a loaded Candy Machine with the token gate guard.
   const collectionMint = (await createCollectionNft(umi)).publicKey;
@@ -46,7 +46,7 @@ test('it allows minting when the payer owns a specific token', async (t) => {
 
   // When the payer mints from it.
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -59,7 +59,7 @@ test('it allows minting when the payer owns a specific token', async (t) => {
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
@@ -70,7 +70,7 @@ test('it allows minting even when the payer is different from the minter', async
   const umi = await createUmi();
   const minter = generateSigner(umi);
   const tokenMint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       createMintWithAssociatedToken(umi, {
         mint: tokenMint,
@@ -78,7 +78,7 @@ test('it allows minting even when the payer is different from the minter', async
         amount: 1,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // And a loaded Candy Machine with the token gate guard.
   const collectionMint = (await createCollectionNft(umi)).publicKey;
@@ -92,7 +92,7 @@ test('it allows minting even when the payer is different from the minter', async
 
   // When the minter mints from it.
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -106,7 +106,7 @@ test('it allows minting even when the payer is different from the minter', async
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: minter });
@@ -116,7 +116,7 @@ test('it allows minting when the payer owns multiple tokens from a specific mint
   // Given a payer with 42 tokens.
   const umi = await createUmi();
   const tokenMint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       createMintWithAssociatedToken(umi, {
         mint: tokenMint,
@@ -124,7 +124,7 @@ test('it allows minting when the payer owns multiple tokens from a specific mint
         amount: 42,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // And a loaded Candy Machine with the token gate guard that requires 5 tokens.
   const collectionMint = (await createCollectionNft(umi)).publicKey;
@@ -138,7 +138,7 @@ test('it allows minting when the payer owns multiple tokens from a specific mint
 
   // When the payer mints from it.
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -151,7 +151,7 @@ test('it allows minting when the payer owns multiple tokens from a specific mint
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
@@ -171,7 +171,7 @@ test('it forbids minting when the owner does not own any required tokens', async
   // Given a payer with zero tokens.
   const umi = await createUmi();
   const tokenMint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       createMintWithAssociatedToken(umi, {
         mint: tokenMint,
@@ -179,7 +179,7 @@ test('it forbids minting when the owner does not own any required tokens', async
         amount: 0,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // And a loaded Candy Machine with the token gate guard.
   const collectionMint = (await createCollectionNft(umi)).publicKey;
@@ -193,7 +193,7 @@ test('it forbids minting when the owner does not own any required tokens', async
 
   // When the payer tries to mint from it.
   const mint = generateSigner(umi);
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -206,7 +206,7 @@ test('it forbids minting when the owner does not own any required tokens', async
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect an error.
   await t.throwsAsync(promise, { message: /NotEnoughTokens/ });
@@ -216,7 +216,7 @@ test('it forbids minting when the owner does not own enough tokens', async (t) =
   // Given a payer with 5 tokens.
   const umi = await createUmi();
   const tokenMint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       createMintWithAssociatedToken(umi, {
         mint: tokenMint,
@@ -224,7 +224,7 @@ test('it forbids minting when the owner does not own enough tokens', async (t) =
         amount: 5,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // And a loaded Candy Machine with the token gate guard that requires 10 tokens.
   const collectionMint = (await createCollectionNft(umi)).publicKey;
@@ -238,7 +238,7 @@ test('it forbids minting when the owner does not own enough tokens', async (t) =
 
   // When the payer tries to mint from it.
   const mint = generateSigner(umi);
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -251,7 +251,7 @@ test('it forbids minting when the owner does not own enough tokens', async (t) =
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect an error.
   await t.throwsAsync(promise, { message: /NotEnoughTokens/ });
@@ -261,7 +261,7 @@ test('it charges a bot tax when trying to mint without the right amount of token
   // Given a payer with zero tokens.
   const umi = await createUmi();
   const tokenMint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       createMintWithAssociatedToken(umi, {
         mint: tokenMint,
@@ -269,7 +269,7 @@ test('it charges a bot tax when trying to mint without the right amount of token
         amount: 0,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // And a loaded Candy Machine with the token gate guard and a bot tax guard.
   const collectionMint = (await createCollectionNft(umi)).publicKey;
@@ -284,7 +284,7 @@ test('it charges a bot tax when trying to mint without the right amount of token
 
   // When the payer tries to mint from it.
   const mint = generateSigner(umi);
-  const { signature } = await transactionBuilder(umi)
+  const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -297,7 +297,7 @@ test('it charges a bot tax when trying to mint without the right amount of token
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a silent bot tax error.
   await assertBotTax(t, umi, mint, signature, /NotEnoughTokens/);

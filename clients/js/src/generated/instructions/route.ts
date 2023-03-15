@@ -13,10 +13,11 @@ import {
   PublicKey,
   Serializer,
   Signer,
-  WrappedInstruction,
+  TransactionBuilder,
   checkForIsWritableOverride as isWritable,
   mapSerializer,
   publicKey,
+  transactionBuilder,
 } from '@metaplex-foundation/umi';
 import { findCandyGuardPda } from '../../hooked';
 import { GuardType, GuardTypeArgs, getGuardTypeSerializer } from '../types';
@@ -76,7 +77,7 @@ export function getRouteInstructionDataSerializer(
 export function route(
   context: Pick<Context, 'serializer' | 'programs' | 'eddsa' | 'payer'>,
   input: RouteInstructionAccounts & RouteInstructionDataArgs
-): WrappedInstruction {
+): TransactionBuilder {
   const signers: Signer[] = [];
   const keys: AccountMeta[] = [];
 
@@ -121,9 +122,7 @@ export function route(
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;
 
-  return {
-    instruction: { keys, programId, data },
-    signers,
-    bytesCreatedOnChain,
-  };
+  return transactionBuilder([
+    { instruction: { keys, programId, data }, signers, bytesCreatedOnChain },
+  ]);
 }

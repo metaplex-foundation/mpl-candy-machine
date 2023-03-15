@@ -12,9 +12,10 @@ import {
   PublicKey,
   Serializer,
   Signer,
-  WrappedInstruction,
+  TransactionBuilder,
   checkForIsWritableOverride as isWritable,
   mapSerializer,
+  transactionBuilder,
 } from '@metaplex-foundation/umi';
 
 // Accounts.
@@ -68,7 +69,7 @@ export function updateCandyGuard(
   context: Pick<Context, 'serializer' | 'programs' | 'identity' | 'payer'>,
   input: UpdateCandyGuardInstructionAccounts &
     UpdateCandyGuardInstructionDataArgs
-): WrappedInstruction {
+): TransactionBuilder {
   const signers: Signer[] = [];
   const keys: AccountMeta[] = [];
 
@@ -127,9 +128,7 @@ export function updateCandyGuard(
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;
 
-  return {
-    instruction: { keys, programId, data },
-    signers,
-    bytesCreatedOnChain,
-  };
+  return transactionBuilder([
+    { instruction: { keys, programId, data }, signers, bytesCreatedOnChain },
+  ]);
 }

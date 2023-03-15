@@ -3,7 +3,8 @@ import {
   none,
   Option,
   publicKey,
-  WrappedInstruction,
+  transactionBuilder,
+  TransactionBuilder,
 } from '@metaplex-foundation/umi';
 import { DefaultGuardSetMintArgs } from './defaultGuards';
 import {
@@ -41,7 +42,7 @@ export function mintV2<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
     MintV2InstructionDataArgs<
       MA extends undefined ? DefaultGuardSetMintArgs : MA
     >
-): WrappedInstruction {
+): TransactionBuilder {
   const { mintArgs = {}, group = none(), ...rest } = input;
   const program = context.programs.get<CandyGuardProgram>('mplCandyGuard');
   const mintContext: MintContext = {
@@ -61,11 +62,11 @@ export function mintV2<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
     ...rest,
     mintArgs: mergeBytes([prefix, data]),
     group,
-  });
+  }).items[0];
 
   const [keys, signers] = parseGuardRemainingAccounts(remainingAccounts);
   ix.instruction.keys.push(...keys);
   ix.signers.push(...signers);
 
-  return ix;
+  return transactionBuilder([ix]);
 }

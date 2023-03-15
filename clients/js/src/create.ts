@@ -1,4 +1,7 @@
-import { WrappedInstruction } from '@metaplex-foundation/umi';
+import {
+  transactionBuilder,
+  TransactionBuilder,
+} from '@metaplex-foundation/umi';
 import {
   createCandyGuard,
   CreateCandyGuardInstructionDataArgs,
@@ -18,14 +21,24 @@ export const create = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
     guards: GuardRepository;
   },
   input: CreateInput<DA extends undefined ? DefaultGuardSetArgs : DA>
-): Promise<WrappedInstruction[]> => {
+): Promise<TransactionBuilder> => {
   const { guards, groups, ...rest } = input;
   const candyGuard = findCandyGuardPda(context, {
     base: input.candyMachine.publicKey,
   });
-  return [
-    ...(await createCandyMachine(context, rest)),
-    createCandyGuard(context, { base: input.candyMachine, guards, groups }),
-    wrap(context, { candyGuard, candyMachine: input.candyMachine.publicKey }),
-  ];
+  return transactionBuilder()
+    .add(await createCandyMachine(context, rest))
+    .add(
+      createCandyGuard(context, {
+        base: input.candyMachine,
+        guards,
+        groups,
+      })
+    )
+    .add(
+      wrap(context, {
+        candyGuard,
+        candyMachine: input.candyMachine.publicKey,
+      })
+    );
 };

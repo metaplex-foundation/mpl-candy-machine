@@ -34,7 +34,7 @@ test('it transfers SOL from the payer to the destination', async (t) => {
   const payer = await generateSignerWithSol(umi, sol(10));
   const minter = generateSigner(umi);
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -47,7 +47,7 @@ test('it transfers SOL from the payer to the destination', async (t) => {
         mintArgs: { solPayment: some({ destination }) },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: minter });
@@ -77,7 +77,7 @@ test('it fails if the payer does not have enough funds', async (t) => {
   // When we mint from it using a payer that only has 4 SOL.
   const payer = await generateSignerWithSol(umi, sol(4));
   const mint = generateSigner(umi);
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -89,7 +89,7 @@ test('it fails if the payer does not have enough funds', async (t) => {
         mintArgs: { solPayment: some({ destination }) },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect an error.
   await t.throwsAsync(promise, { message: /NotEnoughSOL/ });
@@ -116,7 +116,7 @@ test('it charges a bot tax if the payer does not have enough funds', async (t) =
   // When we mint from it using a payer that only has 4 SOL.
   const payer = await generateSignerWithSol(umi, sol(4));
   const mint = generateSigner(umi);
-  const { signature } = await transactionBuilder(umi)
+  const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -128,7 +128,7 @@ test('it charges a bot tax if the payer does not have enough funds', async (t) =
         mintArgs: { solPayment: some({ destination }) },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a bot tax error.
   await assertBotTax(t, umi, mint, signature, /NotEnoughSOL/);

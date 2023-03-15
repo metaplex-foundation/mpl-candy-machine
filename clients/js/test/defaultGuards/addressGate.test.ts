@@ -30,7 +30,7 @@ test('it allows minting from a specific address only', async (t) => {
 
   // When the allowed address mints from it.
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -41,7 +41,7 @@ test('it allows minting from a specific address only', async (t) => {
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: allowedAddress });
@@ -62,7 +62,7 @@ test('it forbids minting from anyone else', async (t) => {
   // When another wallet tries to mint from it.
   const mint = generateSigner(umi);
   const unauthorizedMinter = generateSigner(umi);
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -73,7 +73,7 @@ test('it forbids minting from anyone else', async (t) => {
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a program error.
   await t.throwsAsync(promise, { message: /AddressNotAuthorized/ });
@@ -95,7 +95,7 @@ test('it charges a bot tax when trying to mint using the wrong address', async (
   // When another wallet tries to mint from it.
   const mint = generateSigner(umi);
   const unauthorizedMinter = generateSigner(umi);
-  const { signature } = await transactionBuilder(umi)
+  const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -106,7 +106,7 @@ test('it charges a bot tax when trying to mint using the wrong address', async (
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a silent bot tax error.
   await assertBotTax(t, umi, mint, signature, /AddressNotAuthorized/);

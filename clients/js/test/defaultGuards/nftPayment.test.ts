@@ -48,7 +48,7 @@ test('it transfers an NFT from the payer to the destination', async (t) => {
 
   // When the payer mints from it using its NFT to pay.
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -65,7 +65,7 @@ test('it transfers an NFT from the payer to the destination', async (t) => {
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
@@ -106,7 +106,7 @@ test('it allows minting even when the payer is different from the minter', async
 
   // When the minter mints from it using its NFT to pay.
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -124,7 +124,7 @@ test('it allows minting even when the payer is different from the minter', async
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: minter });
@@ -159,7 +159,7 @@ test('it works when the provided NFT is not on an associated token account', asy
   // but not on an associated token account.
   const nftToSend = generateSigner(umi);
   const nftToSendToken = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(createMint(umi, { mint: nftToSend }))
     .add(
       createToken(umi, {
@@ -168,7 +168,7 @@ test('it works when the provided NFT is not on an associated token account', asy
         token: nftToSendToken,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
   await createVerifiedNft(umi, {
     mint: nftToSend,
     tokenOwner: umi.identity.publicKey,
@@ -180,7 +180,7 @@ test('it works when the provided NFT is not on an associated token account', asy
   // When the payer mints from it using its NFT to pay
   // whilst providing the token address.
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -198,7 +198,7 @@ test('it works when the provided NFT is not on an associated token account', asy
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
@@ -236,7 +236,7 @@ test('it fails if the payer does not own the right NFT', async (t) => {
 
   // When the identity tries to mint from it using its NFT to pay.
   const mint = generateSigner(umi);
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -253,7 +253,7 @@ test('it fails if the payer does not own the right NFT', async (t) => {
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect an error.
   await t.throwsAsync(promise, { message: /InvalidNftCollection/ });
@@ -284,7 +284,7 @@ test('it fails if the payer tries to provide an NFT from an unverified collectio
 
   // When the identity tries to mint from it using its NFT to pay.
   const mint = generateSigner(umi);
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -301,7 +301,7 @@ test('it fails if the payer tries to provide an NFT from an unverified collectio
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect an error.
   await t.throwsAsync(promise, { message: /InvalidNftCollection/ });
@@ -332,7 +332,7 @@ test('it charges a bot tax when trying to pay with the wrong NFT', async (t) => 
 
   // When the identity tries to mint from it using its NFT to pay.
   const mint = generateSigner(umi);
-  const { signature } = await transactionBuilder(umi)
+  const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -349,7 +349,7 @@ test('it charges a bot tax when trying to pay with the wrong NFT', async (t) => 
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a bot tax error.
   await assertBotTax(t, umi, mint, signature, /InvalidNftCollection/);

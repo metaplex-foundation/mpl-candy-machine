@@ -32,7 +32,7 @@ test('it does nothing if all conditions are valid', async (t) => {
 
   // When we mint from it.
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -42,7 +42,7 @@ test('it does nothing if all conditions are valid', async (t) => {
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the mint was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
@@ -62,7 +62,7 @@ test('it optionally charges a bot tax if the mint instruction is not the last on
 
   // When we try to mint from it whilst having more instructions after the mint instruction.
   const mint = generateSigner(umi);
-  const { signature } = await transactionBuilder(umi)
+  const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -73,7 +73,7 @@ test('it optionally charges a bot tax if the mint instruction is not the last on
       })
     )
     .add(addMemo(umi, { memo: 'I am a post-mint instruction' }))
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a silent bot tax error.
   await assertBotTax(t, umi, mint, signature, /MintNotLastTransaction/);

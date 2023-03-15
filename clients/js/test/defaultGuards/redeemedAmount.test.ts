@@ -32,7 +32,7 @@ test('it allows minting until a threshold of NFTs have been redeemed', async (t)
 
   // When we mint its first item.
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -42,7 +42,7 @@ test('it allows minting until a threshold of NFTs have been redeemed', async (t)
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
@@ -65,7 +65,7 @@ test('it forbids minting once the redeemed threshold has been reached', async (t
 
   // And assuming its first item has already been minted.
   const mintA = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -75,12 +75,12 @@ test('it forbids minting once the redeemed threshold has been reached', async (t
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
   await assertSuccessfulMint(t, umi, { mint: mintA, owner: umi.identity });
 
   // When we try to mint its second item.
   const mintB = generateSigner(umi);
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -90,7 +90,7 @@ test('it forbids minting once the redeemed threshold has been reached', async (t
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a program error.
   await t.throwsAsync(promise, { message: /MaximumRedeemedAmount/ });
@@ -115,7 +115,7 @@ test('it charges a bot tax when trying to mint once the threshold has been reach
 
   // And assuming its first item has already been minted.
   const mintA = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -125,12 +125,12 @@ test('it charges a bot tax when trying to mint once the threshold has been reach
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
   await assertSuccessfulMint(t, umi, { mint: mintA, owner: umi.identity });
 
   // When we try to mint its second item.
   const mintB = generateSigner(umi);
-  const { signature } = await transactionBuilder(umi)
+  const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -140,7 +140,7 @@ test('it charges a bot tax when trying to mint once the threshold has been reach
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a silent bot tax error.
   await assertBotTax(t, umi, mintB, signature, /MaximumRedeemedAmount/);

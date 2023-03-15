@@ -33,7 +33,7 @@ test('it can call the route instruction of a specific guard', async (t) => {
 
   // When we call the route instruction of the allow list guard.
   const merkleProof = getMerkleProof(allowedWallets, base58PublicKey(minter));
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       route(umi, {
         candyMachine,
@@ -41,7 +41,7 @@ test('it can call the route instruction of a specific guard', async (t) => {
         routeArgs: { path: 'proof', merkleRoot, merkleProof, minter },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the allow list proof PDA was created.
   const allowListProofPda = findAllowListProofPda(umi, {
@@ -84,7 +84,7 @@ test('it can call the route instruction of a specific guard on a group', async (
     allowedWalletsA,
     base58PublicKey(umi.identity)
   );
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       route(umi, {
         candyMachine,
@@ -97,7 +97,7 @@ test('it can call the route instruction of a specific guard on a group', async (
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the allow list proof PDA was created for group 1.
   const allowListProofPdaA = findAllowListProofPda(umi, {
@@ -126,9 +126,9 @@ test('it cannot call the route instruction of a guard that does not support it',
   });
 
   // When we try to call the route instruction of the bot tax guard.
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(route(umi, { candyMachine, guard: 'botTax', routeArgs: {} }))
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a program error.
   await t.throwsAsync(promise, { message: /InstructionNotFound/ });
@@ -145,7 +145,7 @@ test('it must provide a group label if the candy guard has groups', async (t) =>
 
   // When we try to call the route instruction without a group label.
   const merkleProof = getMerkleProof(allowedWallets, allowedWallets[0]);
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(
       route(umi, {
         candyMachine,
@@ -154,7 +154,7 @@ test('it must provide a group label if the candy guard has groups', async (t) =>
         routeArgs: { path: 'proof', merkleRoot, merkleProof },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a program error.
   await t.throwsAsync(promise, { message: /RequiredGroupLabelNotFound/ });
@@ -171,7 +171,7 @@ test('it must not provide a group label if the candy guard does not have groups'
 
   // When we try to call the route instruction with a group label.
   const merkleProof = getMerkleProof(allowedWallets, allowedWallets[0]);
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(
       route(umi, {
         candyMachine,
@@ -180,7 +180,7 @@ test('it must not provide a group label if the candy guard does not have groups'
         routeArgs: { path: 'proof', merkleRoot, merkleProof },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a program error.
   await t.throwsAsync(promise, { message: /GroupNotFound/ });
@@ -203,7 +203,7 @@ test('it can call the route instruction for guards associated with a candy machi
     allowedWallets,
     base58PublicKey(umi.identity)
   );
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       route(umi, {
         candyMachine,
@@ -211,7 +211,7 @@ test('it can call the route instruction for guards associated with a candy machi
         routeArgs: { path: 'proof', merkleRoot, merkleProof },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the allow list proof PDA was created.
   const allowListProofPda = findAllowListProofPda(umi, {

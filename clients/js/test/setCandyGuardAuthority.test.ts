@@ -17,7 +17,7 @@ test('it can update the authority of a candy guard', async (t) => {
 
   // When we update it to use authority B.
   const authorityB = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       setCandyGuardAuthority(umi, {
         candyGuard,
@@ -25,7 +25,7 @@ test('it can update the authority of a candy guard', async (t) => {
         newAuthority: authorityB.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the Candy Guard's authority was updated accordingly.
   const candyGuardAccount = await fetchCandyGuard(umi, candyGuard);

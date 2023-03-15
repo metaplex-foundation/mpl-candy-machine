@@ -39,7 +39,7 @@ test('it allows minting from wallets of a predefined list', async (t) => {
   });
 
   // When we verify the payer first by providing a valid merkle proof.
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       route(umi, {
         candyMachine,
@@ -51,11 +51,11 @@ test('it allows minting from wallets of a predefined list', async (t) => {
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // And then mint from the Candy Machine using the identity.
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -66,7 +66,7 @@ test('it allows minting from wallets of a predefined list', async (t) => {
         mintArgs: { allowList: some({ merkleRoot }) },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
@@ -97,7 +97,7 @@ test('it is possible to verify the proof and mint in the same transaction if the
   // When we verify the identity using a valid merkle proof
   // and mint from the Candy Machine at the same time.
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       route(umi, {
@@ -119,7 +119,7 @@ test('it is possible to verify the proof and mint in the same transaction if the
         mintArgs: { allowList: some({ merkleRoot }) },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
@@ -150,7 +150,7 @@ test('it allows minting even when the payer is different from the minter', async
 
   // When we verify and mint from the Candy Machine using the minter.
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       route(umi, {
@@ -174,7 +174,7 @@ test('it allows minting even when the payer is different from the minter', async
         mintArgs: { allowList: some({ merkleRoot }) },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: minter });
@@ -202,7 +202,7 @@ test('it forbids minting from wallets that are not part of a predefined list', a
   });
 
   // When the identity tries to verify itself on the allow list.
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       route(umi, {
@@ -215,7 +215,7 @@ test('it forbids minting from wallets that are not part of a predefined list', a
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a program error.
   await t.throwsAsync(promise, { message: /AddressNotFoundInAllowedList/ });
@@ -248,7 +248,7 @@ test('it forbids minting from wallets that are providing the wrong proof', async
     allowList,
     'Ur1CbWSGsXCdedknRbJsEk7urwAvu1uddmQv51nAnXB'
   );
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(
       route(umi, {
         candyMachine,
@@ -260,7 +260,7 @@ test('it forbids minting from wallets that are providing the wrong proof', async
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a program error.
   await t.throwsAsync(promise, { message: /AddressNotFoundInAllowedList/ });
@@ -291,7 +291,7 @@ test('it forbids minting if the wallet has not been verified via the route instr
   // When the identity tries to mints from that Candy Machine
   // without having been verified via the route instruction.
   const mint = generateSigner(umi);
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -302,7 +302,7 @@ test('it forbids minting if the wallet has not been verified via the route instr
         mintArgs: { allowList: some({ merkleRoot }) },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a program error.
   await t.throwsAsync(promise, { message: /MissingAllowedListProof/ });
@@ -334,7 +334,7 @@ test('it charges a bot tax when trying to mint whilst not verified', async (t) =
   // When the identity tries to mints from that Candy Machine
   // without having been verified via the route instruction.
   const mint = generateSigner(umi);
-  const { signature } = await transactionBuilder(umi)
+  const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -345,7 +345,7 @@ test('it charges a bot tax when trying to mint whilst not verified', async (t) =
         mintArgs: { allowList: some({ merkleRoot }) },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a silent bot tax error.
   await assertBotTax(t, umi, mint, signature, /MissingAllowedListProof/);

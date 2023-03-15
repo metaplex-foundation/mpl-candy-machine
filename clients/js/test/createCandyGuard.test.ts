@@ -26,9 +26,9 @@ test('it can create a candy guard without guards', async (t) => {
   const base = generateSigner(umi);
 
   // When we create a new candy guard without guards.
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(createCandyGuard(umi, { base }))
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then a new candy guard account was created with the expected data.
   const candyGuard = findCandyGuardPda(umi, { base: base.publicKey });
@@ -52,7 +52,7 @@ test('it can create a candy guard with guards', async (t) => {
   const gatekeeperNetwork = generateSigner(umi).publicKey;
   const tokenMint = generateSigner(umi).publicKey;
   const tokenDestination = generateSigner(umi).publicKey;
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       createCandyGuard(umi, {
         base,
@@ -70,7 +70,7 @@ test('it can create a candy guard with guards', async (t) => {
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then a new candy guard account was created with the expected data.
   const candyGuard = findCandyGuardPda(umi, { base: base.publicKey });
@@ -106,7 +106,7 @@ test('it can create a candy guard with guard groups', async (t) => {
   const gatekeeperNetwork = generateSigner(umi).publicKey;
   const tokenGateMint = generateSigner(umi).publicKey;
   const merkleRoot = new Uint8Array(Array(32).fill(42));
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       createCandyGuard(umi, {
         base,
@@ -156,7 +156,7 @@ test('it can create a candy guard with guard groups', async (t) => {
         ],
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then a new candy guard account was created with the expected data.
   const candyGuard = findCandyGuardPda(umi, { base: base.publicKey });
@@ -235,9 +235,9 @@ test('it can create a candy guard with an explicit authority', async (t) => {
   const authority = generateSigner(umi).publicKey;
 
   // When we create a new Candy Guard using that authority.
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(createCandyGuard(umi, { base, authority }))
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect the Candy Guard's authority to be the given authority.
   const candyGuard = findCandyGuardPda(umi, { base: base.publicKey });
@@ -257,10 +257,10 @@ test('it can create a candy guard with an explicit payer', async (t) => {
   const payerBalance = await umi.rpc.getBalance(payer.publicKey);
 
   // When we create a new Candy Guard using that authority.
-  const builder = transactionBuilder(umi).add(
+  const builder = transactionBuilder().add(
     createCandyGuard(umi, { base, payer })
   );
-  await builder.sendAndConfirm();
+  await builder.sendAndConfirm(umi);
 
   // Then the Candy Guard was created successfully.
   const candyGuard = findCandyGuardPda(umi, { base: base.publicKey });
@@ -268,6 +268,6 @@ test('it can create a candy guard with an explicit payer', async (t) => {
 
   // And the payer paid for the rent.
   const newPayerBalance = await umi.rpc.getBalance(payer.publicKey);
-  const expectedRent = await builder.getRentCreatedOnChain();
+  const expectedRent = await builder.getRentCreatedOnChain(umi);
   t.deepEqual(newPayerBalance, subtractAmounts(payerBalance, expectedRent));
 });

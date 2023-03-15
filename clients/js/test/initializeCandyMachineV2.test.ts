@@ -27,7 +27,7 @@ test('it can initialize a new candy machine account', async (t) => {
   // Given an empty candy machine account with a big enough size.
   const umi = await createUmi();
   const candyMachine = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       createAccountWithRent(umi, {
         newAccount: candyMachine,
@@ -35,14 +35,14 @@ test('it can initialize a new candy machine account', async (t) => {
         programId: umi.programs.get('mplCandyMachineCore').publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // And a collection NFT.
   const collectionMint = await createCollectionNft(umi);
 
   // When we initialize a candy machine at this address.
   const creator = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       initializeCandyMachineV2(umi, {
         candyMachine: candyMachine.publicKey,
@@ -63,7 +63,7 @@ test('it can initialize a new candy machine account', async (t) => {
         }),
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect the candy machine account to have the right data.
   const candyMachineAccount = await fetchCandyMachine(

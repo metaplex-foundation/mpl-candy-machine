@@ -25,7 +25,7 @@ test('it can create a candy machine for regular NFTs', async (t) => {
   // When we create a new candy machine for that collection.
   const candyMachine = generateSigner(umi);
   const creator = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       await createCandyMachine(umi, {
         candyMachine,
@@ -45,7 +45,7 @@ test('it can create a candy machine for regular NFTs', async (t) => {
         }),
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect the candy machine account to have the right data.
   const candyMachineAccount = await fetchCandyMachine(
@@ -92,7 +92,7 @@ test("it can create a candy machine that's bigger than 10Kb", async (t) => {
 
   // When we create a new candy machine with a large amount of items.
   const candyMachine = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(
       await createCandyMachine(umi, {
         candyMachine,
@@ -110,7 +110,7 @@ test("it can create a candy machine that's bigger than 10Kb", async (t) => {
         }),
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect the candy machine account to have been created.
   const candyMachineAccount = await fetchCandyMachine(

@@ -9,9 +9,9 @@ test('it can delete a candy machine V1', async (t) => {
   const candyMachine = await createV1(umi);
 
   // When we delete it.
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(deleteCandyMachine(umi, { candyMachine: candyMachine.publicKey }))
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the candy machine account no longer exists.
   t.false(await umi.rpc.accountExists(candyMachine.publicKey));
@@ -23,9 +23,9 @@ test('it can delete a candy machine V2', async (t) => {
   const candyMachine = await createV2(umi);
 
   // When we delete it.
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(deleteCandyMachine(umi, { candyMachine: candyMachine.publicKey }))
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the candy machine account no longer exists.
   t.false(await umi.rpc.accountExists(candyMachine.publicKey));

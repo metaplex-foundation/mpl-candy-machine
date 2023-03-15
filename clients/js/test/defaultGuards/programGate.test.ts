@@ -33,7 +33,7 @@ test('it allows minting with specified program in transaction', async (t) => {
 
   // When we mint an NFT with a memo instruction in the transaction.
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(addMemo(umi, { memo: 'Instruction from the Memo program' }))
     .add(
@@ -44,7 +44,7 @@ test('it allows minting with specified program in transaction', async (t) => {
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
@@ -67,7 +67,7 @@ test('it allows minting even when the payer is different from the minter', async
   // using an explicit minter.
   const mint = generateSigner(umi);
   const minter = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(addMemo(umi, { memo: 'Instruction from the Memo program' }))
     .add(
@@ -79,7 +79,7 @@ test('it allows minting even when the payer is different from the minter', async
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: minter });
@@ -99,7 +99,7 @@ test('it forbids minting with unspecified program in transaction', async (t) => 
 
   // When we try to mint an NFT with a memo instruction in the transaction.
   const mint = generateSigner(umi);
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(addMemo(umi, { memo: 'Instruction from the Memo program' }))
     .add(
@@ -110,7 +110,7 @@ test('it forbids minting with unspecified program in transaction', async (t) => 
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a program error.
   await t.throwsAsync(promise, { message: /UnauthorizedProgramFound/ });
@@ -152,7 +152,7 @@ test('it charges a bot tax when minting with unspecified program in transaction'
 
   // When we try to mint an NFT with a memo instruction in the transaction.
   const mint = generateSigner(umi);
-  const { signature } = await transactionBuilder(umi)
+  const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(addMemo(umi, { memo: 'Instruction from the Memo program' }))
     .add(
@@ -163,7 +163,7 @@ test('it charges a bot tax when minting with unspecified program in transaction'
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a silent bot tax error.
   await assertBotTax(t, umi, mint, signature, /UnauthorizedProgramFound/);

@@ -40,7 +40,7 @@ test('it can create a candy machine with an associated candy guard', async (t) =
     },
     ...defaultCandyMachineData(umi),
   });
-  await transactionBuilder(umi).add(createInstructions).sendAndConfirm();
+  await transactionBuilder().add(createInstructions).sendAndConfirm(umi);
 
   // Then we created a new candy guard derived from the candy machine's address.
   const candyGuard = findCandyGuardPda(umi, { base: candyMachine.publicKey });

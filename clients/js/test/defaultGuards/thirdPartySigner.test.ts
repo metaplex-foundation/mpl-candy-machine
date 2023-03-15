@@ -30,7 +30,7 @@ test('it allows minting when the third party signer is provided', async (t) => {
 
   // When we mint from it by providing the third party as a Signer.
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -43,7 +43,7 @@ test('it allows minting when the third party signer is provided', async (t) => {
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
@@ -65,7 +65,7 @@ test('it forbids minting when the third party signer is wrong', async (t) => {
   // When we try to mint from it by providing the wrong third party signer.
   const wrongThirdPartySigner = generateSigner(umi);
   const mint = generateSigner(umi);
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -78,7 +78,7 @@ test('it forbids minting when the third party signer is wrong', async (t) => {
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect an error.
   await t.throwsAsync(promise, { message: /MissingRequiredSignature/ });
@@ -101,7 +101,7 @@ test('it charges a bot tax when trying to mint using the wrong third party signe
   // When we try to mint from it by providing the wrong third party signer.
   const wrongThirdPartySigner = generateSigner(umi);
   const mint = generateSigner(umi);
-  const { signature } = await transactionBuilder(umi)
+  const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -114,7 +114,7 @@ test('it charges a bot tax when trying to mint using the wrong third party signe
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a silent bot tax error.
   await assertBotTax(t, umi, mint, signature, /MissingRequiredSignature/);

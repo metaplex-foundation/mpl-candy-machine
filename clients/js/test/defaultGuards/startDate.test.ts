@@ -31,7 +31,7 @@ test('it allows minting after the start date', async (t) => {
 
   // When we mint from it.
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -41,7 +41,7 @@ test('it allows minting after the start date', async (t) => {
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the mint was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
@@ -61,7 +61,7 @@ test('it forbids minting before the start date', async (t) => {
 
   // When we try to mint from it.
   const mint = generateSigner(umi);
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -71,7 +71,7 @@ test('it forbids minting before the start date', async (t) => {
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a program error.
   await t.throwsAsync(promise, { message: /MintNotLive/ });
@@ -92,7 +92,7 @@ test('it charges a bot tax when trying to mint before the start date', async (t)
 
   // When we mint from it.
   const mint = generateSigner(umi);
-  const { signature } = await transactionBuilder(umi)
+  const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -102,7 +102,7 @@ test('it charges a bot tax when trying to mint before the start date', async (t)
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a silent bot tax error.
   await assertBotTax(t, umi, mint, signature, /MintNotLive/);

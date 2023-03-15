@@ -66,7 +66,7 @@ test('it allows minting via a gatekeeper service', async (t) => {
 
   // When the identity mints from the Candy Machine using its valid token.
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -83,7 +83,7 @@ test('it allows minting via a gatekeeper service', async (t) => {
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
@@ -118,7 +118,7 @@ test('it defaults to calculating the gateway token PDA for us', async (t) => {
 
   // When that payer mints from the Candy Machine without passing in its valid token.
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -134,7 +134,7 @@ test('it defaults to calculating the gateway token PDA for us', async (t) => {
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was still successful.
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
@@ -171,7 +171,7 @@ test('it allows minting even when the payer is different from the minter', async
 
   // When that minter mints from the Candy Machine without passing in its valid token.
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -188,7 +188,7 @@ test('it allows minting even when the payer is different from the minter', async
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was still successful.
   await assertSuccessfulMint(t, umi, { mint, owner: minter });
@@ -215,7 +215,7 @@ test('it forbids minting when providing the wrong token', async (t) => {
 
   // When the payer tries to mint from it with the wrong token.
   const mint = generateSigner(umi);
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -231,7 +231,7 @@ test('it forbids minting when providing the wrong token', async (t) => {
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect an error.
   await t.throwsAsync(promise, { message: /GatewayTokenInvalid/ });
@@ -269,7 +269,7 @@ test('it allows minting using gateway tokens that expire when they are still val
 
   // When that identity mints from the Candy Machine using its non-expired token.
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -286,7 +286,7 @@ test('it allows minting using gateway tokens that expire when they are still val
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
@@ -323,7 +323,7 @@ test('it forbids minting using gateway tokens that have expired', async (t) => {
 
   // When the payer tries to mint from the Candy Machine using its expired token.
   const mint = generateSigner(umi);
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -340,7 +340,7 @@ test('it forbids minting using gateway tokens that have expired', async (t) => {
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect an error.
   await t.throwsAsync(promise, { message: /GatewayTokenInvalid/ });
@@ -383,7 +383,7 @@ test('it may immediately mark gateway tokens as expired after using them', async
 
   // When the identity mints from the Candy Machine using its token.
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -400,7 +400,7 @@ test('it may immediately mark gateway tokens as expired after using them', async
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
@@ -440,7 +440,7 @@ test('it charges a bot tax when trying to mint using the wrong token', async (t)
 
   // When the identity tries to mint from it with no valid token.
   const mint = generateSigner(umi);
-  const { signature } = await transactionBuilder(umi)
+  const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -456,7 +456,7 @@ test('it charges a bot tax when trying to mint using the wrong token', async (t)
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a bot tax error.
   await assertBotTax(t, umi, mint, signature, /GatewayTokenInvalid/);
@@ -480,7 +480,7 @@ const createGatekeeperNetwork = async (
   ]);
 
   // Create the gatekeeper network.
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add({
       instruction: fromWeb3JsInstruction(
         addGatekeeper(
@@ -493,10 +493,10 @@ const createGatekeeperNetwork = async (
       signers: [gatekeeperAuthority, gatekeeperNetwork],
       bytesCreatedOnChain: 0,
     })
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Add the expire feature to the gatekeeper network.
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add({
       instruction: fromWeb3JsInstruction(
         await addFeatureToNetwork(
@@ -508,7 +508,7 @@ const createGatekeeperNetwork = async (
       signers: [gatekeeperAuthority, gatekeeperNetwork],
       bytesCreatedOnChain: 0,
     })
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   return { gatekeeperNetwork, gatekeeperAuthority };
 };
@@ -537,7 +537,7 @@ const issueGatewayToken = async (
     s.publicKey().serialize(gatekeeperNetwork),
   ]);
 
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add({
       instruction: fromWeb3JsInstruction(
         issueVanilla(
@@ -554,7 +554,7 @@ const issueGatewayToken = async (
       signers: [payer, gatekeeperAuthority],
       bytesCreatedOnChain: 0,
     })
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   return gatewayTokenAccount;
 };

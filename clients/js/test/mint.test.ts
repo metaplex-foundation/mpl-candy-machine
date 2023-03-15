@@ -33,7 +33,7 @@ test('it can mint from a candy guard with no guards', async (t) => {
   // When we mint from the candy guard.
   const mint = generateSigner(umi);
   const owner = generateSigner(umi).publicKey;
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(createMintWithAssociatedToken(umi, { mint, owner, amount: 1 }))
     .add(
       mintV1(umi, {
@@ -43,7 +43,7 @@ test('it can mint from a candy guard with no guards', async (t) => {
         collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the mint was successful.
   await assertSuccessfulMint(t, umi, { mint, owner, name: 'Degen #1' });
@@ -72,7 +72,7 @@ test('it can mint from a candy guard with guards', async (t) => {
   const mint = generateSigner(umi);
   const owner = generateSigner(umi).publicKey;
   const payer = await generateSignerWithSol(umi, sol(10));
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(createMintWithAssociatedToken(umi, { mint, owner, amount: 1 }))
     .add(
       mintV1(umi, {
@@ -86,7 +86,7 @@ test('it can mint from a candy guard with guards', async (t) => {
         },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the mint was successful.
   await assertSuccessfulMint(t, umi, { mint, owner, name: 'Degen #1' });
@@ -122,7 +122,7 @@ test('it can mint from a candy guard with groups', async (t) => {
   // When we mint from the candy guard.
   const mint = generateSigner(umi);
   const owner = generateSigner(umi).publicKey;
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(createMintWithAssociatedToken(umi, { mint, owner, amount: 1 }))
     .add(
       mintV1(umi, {
@@ -134,7 +134,7 @@ test('it can mint from a candy guard with groups', async (t) => {
         group: some('GROUP1'),
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the mint was successful.
   await assertSuccessfulMint(t, umi, { mint, owner, name: 'Degen #1' });

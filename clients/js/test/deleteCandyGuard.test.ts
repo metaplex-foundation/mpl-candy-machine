@@ -9,9 +9,9 @@ test('it can delete a candy guard', async (t) => {
   const candyGuard = await createCandyGuard(umi);
 
   // When we delete it.
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(deleteCandyGuard(umi, { candyGuard }))
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then the candy guard account no longer exists.
   t.false(await umi.rpc.accountExists(candyGuard));

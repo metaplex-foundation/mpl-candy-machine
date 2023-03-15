@@ -37,7 +37,7 @@ test('it allows minting when the mint limit is not reached', async (t) => {
 
   // When we mint from it.
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -48,7 +48,7 @@ test('it allows minting when the mint limit is not reached', async (t) => {
         mintArgs: { mintLimit: some({ id: 1 }) },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
@@ -82,7 +82,7 @@ test('it allows minting even when the payer is different from the minter', async
   // When we mint from it using a separate minter.
   const minter = generateSigner(umi);
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -94,7 +94,7 @@ test('it allows minting even when the payer is different from the minter', async
         mintArgs: { mintLimit: some({ id: 1 }) },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: minter });
@@ -127,7 +127,7 @@ test('it forbids minting when the mint limit is reached', async (t) => {
 
   // And the identity already minted their NFT.
   const mint = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -138,10 +138,10 @@ test('it forbids minting when the mint limit is reached', async (t) => {
         mintArgs: { mintLimit: some({ id: 42 }) },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // When that same identity tries to mint from the same Candy Machine again.
-  const promise = transactionBuilder(umi)
+  const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -152,7 +152,7 @@ test('it forbids minting when the mint limit is reached', async (t) => {
         mintArgs: { mintLimit: some({ id: 42 }) },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect an error.
   await t.throwsAsync(promise, { message: /AllowedMintLimitReached/ });
@@ -176,7 +176,7 @@ test('the mint limit is local to each wallet', async (t) => {
   // And minter A already minted their NFT.
   const minterA = generateSigner(umi);
   const mintA = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -188,13 +188,13 @@ test('the mint limit is local to each wallet', async (t) => {
         mintArgs: { mintLimit: some({ id: 42 }) },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
   await assertSuccessfulMint(t, umi, { mint: mintA, owner: minterA });
 
   // When minter B mints from the same Candy Machine.
   const minterB = generateSigner(umi);
   const mintB = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -206,7 +206,7 @@ test('the mint limit is local to each wallet', async (t) => {
         mintArgs: { mintLimit: some({ id: 42 }) },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then minting was successful as the limit is per wallet.
   await assertSuccessfulMint(t, umi, { mint: mintB, owner: minterB });
@@ -230,7 +230,7 @@ test('it charges a bot tax when trying to mint after the limit', async (t) => {
 
   // And the identity already minted their NFT.
   const mintA = generateSigner(umi);
-  await transactionBuilder(umi)
+  await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -241,11 +241,11 @@ test('it charges a bot tax when trying to mint after the limit', async (t) => {
         mintArgs: { mintLimit: some({ id: 42 }) },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // When the identity tries to mint from the same Candy Machine again.
   const mintB = generateSigner(umi);
-  const { signature } = await transactionBuilder(umi)
+  const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
@@ -256,7 +256,7 @@ test('it charges a bot tax when trying to mint after the limit', async (t) => {
         mintArgs: { mintLimit: some({ id: 42 }) },
       })
     )
-    .sendAndConfirm();
+    .sendAndConfirm(umi);
 
   // Then we expect a bot tax error.
   await assertBotTax(t, umi, mintB, signature, /AllowedMintLimitReached/);

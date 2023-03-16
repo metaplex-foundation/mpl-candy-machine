@@ -11,6 +11,7 @@ function getExternalProgram(programName) {
 module.exports = {
   validator: {
     commitment: "processed",
+    accountsCluster: "https://metaplex.devnet.rpcpool.com/",
     programs: [
       {
         label: "Candy Machine Core",
@@ -44,6 +45,13 @@ module.exports = {
         label: "Civic Gateway",
         programId: "gatem74V238djXdzWnJf94Wo1DcnuGkfijbf3AuBhfs",
         deployPath: getExternalProgram("civic_gateway.so"),
+      },
+    ],
+    accounts: [
+      {
+        label: "Metaplex Default RuleSet",
+        accountId: "eBJLFYPxJmMGKuFwpDWkzxZeUrad92kZRC5BJLpzyT9",
+        executable: false,
       },
     ],
   },

@@ -5,6 +5,8 @@ import {
   Context,
   isNone,
   mapSerializer,
+  Option,
+  PublicKey,
   Serializer,
 } from '@metaplex-foundation/umi';
 import { CANDY_MACHINE_HIDDEN_SECTION } from '../constants';
@@ -17,6 +19,7 @@ import {
 export type CandyMachineAccountData = BaseCandyMachineAccountData & {
   itemsLoaded: number;
   items: CandyMachineItem[];
+  ruleSet: Option<PublicKey>;
 };
 
 export type CandyMachineAccountDataArgs = BaseCandyMachineAccountDataArgs;
@@ -64,7 +67,10 @@ export function getCandyMachineAccountDataSerializer(
     (args) => args,
     (base, bytes, offset) => {
       if (isNone(base.data.configLineSettings)) {
-        return { ...base, items: [], itemsLoaded: 0 };
+        const [ruleSet] = s
+          .option(s.publicKey(), { fixed: true })
+          .deserialize(bytes, offset + CANDY_MACHINE_HIDDEN_SECTION);
+        return { ...base, items: [], itemsLoaded: 0, ruleSet };
       }
 
       const slice = bytes.slice(offset + CANDY_MACHINE_HIDDEN_SECTION);
@@ -91,7 +97,8 @@ export function getCandyMachineAccountDataSerializer(
           ['itemsLeftToMint', s.array(s.u32(), { size: itemsRemaining })],
         ]);
 
-      const [hiddenSection] = hiddenSectionSerializer.deserialize(slice);
+      const [hiddenSection, hiddenSectionOffset] =
+        hiddenSectionSerializer.deserialize(slice);
 
       const items: CandyMachineItem[] = [];
       hiddenSection.itemsLoadedMap.forEach((loaded, index) => {
@@ -107,7 +114,17 @@ export function getCandyMachineAccountDataSerializer(
         });
       });
 
-      return { ...base, items, itemsLoaded: hiddenSection.itemsLoaded };
+      // Parse the rule set.
+      const [ruleSet] = s
+        .option(s.publicKey(), { fixed: true })
+        .deserialize(slice, hiddenSectionOffset);
+
+      return {
+        ...base,
+        items,
+        itemsLoaded: hiddenSection.itemsLoaded,
+        ruleSet,
+      };
     }
   );
 }

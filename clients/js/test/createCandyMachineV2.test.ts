@@ -238,3 +238,79 @@ test("it can create a candy machine that's bigger than 10Kb", async (t) => {
     data: { itemsAvailable: 20000n },
   });
 });
+
+test('it can create a candy machine with an explicit rule set', async (t) => {
+  // Given an existing collection NFT.
+  const umi = await createUmi();
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+
+  // When we create a new PNFT candy machine using an explicit rule set.
+  const candyMachine = generateSigner(umi);
+  const metaplexDefaultRuleSet = publicKey(
+    'eBJLFYPxJmMGKuFwpDWkzxZeUrad92kZRC5BJLpzyT9'
+  );
+  await transactionBuilder()
+    .add(
+      await createCandyMachineV2(umi, {
+        ...defaultCandyMachineData(umi),
+        candyMachine,
+        collectionMint,
+        tokenStandard: TokenStandard.ProgrammableNonFungible,
+        ruleSet: metaplexDefaultRuleSet,
+      })
+    )
+    .sendAndConfirm(umi);
+
+  // Then we expect the candy machine account to store that information.
+  const candyMachineAccount = await fetchCandyMachine(
+    umi,
+    candyMachine.publicKey
+  );
+  t.like(candyMachineAccount, <CandyMachine>{
+    publicKey: publicKey(candyMachine),
+    version: AccountVersion.V2,
+    tokenStandard: TokenStandard.ProgrammableNonFungible,
+    ruleSet: some(metaplexDefaultRuleSet),
+  });
+});
+
+test('it can create a candy machine with an explicit ruleset and hidden settings', async (t) => {
+  // Given an existing collection NFT.
+  const umi = await createUmi();
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+
+  // When we create a new PNFT candy machine with hidden settings using an explicit rule set.
+  const candyMachine = generateSigner(umi);
+  const metaplexDefaultRuleSet = publicKey(
+    'eBJLFYPxJmMGKuFwpDWkzxZeUrad92kZRC5BJLpzyT9'
+  );
+  await transactionBuilder()
+    .add(
+      await createCandyMachineV2(umi, {
+        ...defaultCandyMachineData(umi),
+        configLineSettings: none(),
+        hiddenSettings: some({
+          name: 'My NFT #$ID+1$',
+          uri: 'https://example.com/$ID+1$.json',
+          hash: new Uint8Array(Array(32).fill(42)),
+        }),
+        candyMachine,
+        collectionMint,
+        tokenStandard: TokenStandard.ProgrammableNonFungible,
+        ruleSet: metaplexDefaultRuleSet,
+      })
+    )
+    .sendAndConfirm(umi);
+
+  // Then we expect the candy machine account to store that information.
+  const candyMachineAccount = await fetchCandyMachine(
+    umi,
+    candyMachine.publicKey
+  );
+  t.like(candyMachineAccount, <CandyMachine>{
+    publicKey: publicKey(candyMachine),
+    version: AccountVersion.V2,
+    tokenStandard: TokenStandard.ProgrammableNonFungible,
+    ruleSet: some(metaplexDefaultRuleSet),
+  });
+});

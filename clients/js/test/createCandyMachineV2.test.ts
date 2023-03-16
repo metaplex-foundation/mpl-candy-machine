@@ -19,6 +19,7 @@ import {
   createCollectionNft,
   createUmi,
   defaultCandyMachineData,
+  METAPLEX_DEFAULT_RULESET,
 } from './_setup';
 
 test('it can create a candy machine using config line settings', async (t) => {
@@ -281,9 +282,6 @@ test('it can create a candy machine with an explicit ruleset and hidden settings
 
   // When we create a new PNFT candy machine with hidden settings using an explicit rule set.
   const candyMachine = generateSigner(umi);
-  const metaplexDefaultRuleSet = publicKey(
-    'eBJLFYPxJmMGKuFwpDWkzxZeUrad92kZRC5BJLpzyT9'
-  );
   await transactionBuilder()
     .add(
       await createCandyMachineV2(umi, {
@@ -297,7 +295,7 @@ test('it can create a candy machine with an explicit ruleset and hidden settings
         candyMachine,
         collectionMint,
         tokenStandard: TokenStandard.ProgrammableNonFungible,
-        ruleSet: metaplexDefaultRuleSet,
+        ruleSet: METAPLEX_DEFAULT_RULESET,
       })
     )
     .sendAndConfirm(umi);
@@ -311,6 +309,6 @@ test('it can create a candy machine with an explicit ruleset and hidden settings
     publicKey: publicKey(candyMachine),
     version: AccountVersion.V2,
     tokenStandard: TokenStandard.ProgrammableNonFungible,
-    ruleSet: some(metaplexDefaultRuleSet),
+    ruleSet: some(METAPLEX_DEFAULT_RULESET),
   });
 });

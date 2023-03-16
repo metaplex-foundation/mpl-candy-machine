@@ -10,6 +10,7 @@ export * from './createCandyMachine';
 export * from './createCandyMachineV2';
 export * from './createLutForCandyMachine';
 export * from './errors';
+export * from './getCandyMachineRuleSet';
 export * from './merkle';
 export * from './mint';
 export * from './mintV2';

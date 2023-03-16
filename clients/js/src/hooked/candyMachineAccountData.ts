@@ -1,10 +1,10 @@
-/* eslint-disable no-bitwise */
-/* eslint-disable no-restricted-syntax */
+import { TokenStandard } from '@metaplex-foundation/mpl-token-metadata';
 import {
   bitArray,
   Context,
   isNone,
   mapSerializer,
+  none,
   Option,
   PublicKey,
   Serializer,
@@ -66,14 +66,29 @@ export function getCandyMachineAccountDataSerializer(
     baseGetCandyMachineAccountDataSerializer(context),
     (args) => args,
     (base, bytes, offset) => {
-      if (isNone(base.data.configLineSettings)) {
-        const [ruleSet] = s
+      const slice = bytes.slice(offset + CANDY_MACHINE_HIDDEN_SECTION);
+
+      const deserializeRuleSet = (
+        ruleBytes: Uint8Array,
+        ruleOffset = 0
+      ): [Option<PublicKey>, number] => {
+        if (base.tokenStandard !== TokenStandard.ProgrammableNonFungible) {
+          return [none(), ruleOffset];
+        }
+        return s
           .option(s.publicKey(), { fixed: true })
-          .deserialize(bytes, offset + CANDY_MACHINE_HIDDEN_SECTION);
-        return { ...base, items: [], itemsLoaded: 0, ruleSet };
+          .deserialize(ruleBytes, ruleOffset);
+      };
+
+      if (isNone(base.data.configLineSettings)) {
+        return {
+          ...base,
+          items: [],
+          itemsLoaded: 0,
+          ruleSet: deserializeRuleSet(slice)[0],
+        };
       }
 
-      const slice = bytes.slice(offset + CANDY_MACHINE_HIDDEN_SECTION);
       const itemsAvailable = Number(base.data.itemsAvailable);
       const itemsMinted = Number(base.itemsRedeemed);
       const itemsRemaining = itemsAvailable - itemsMinted;
@@ -94,12 +109,16 @@ export function getCandyMachineAccountDataSerializer(
             ),
           ],
           ['itemsLoadedMap', bitArray(Math.floor(itemsAvailable / 8) + 1)],
-          ['itemsLeftToMint', s.array(s.u32(), { size: itemsRemaining })],
+          ['itemsLeftToMint', s.array(s.u32(), { size: itemsAvailable })],
         ]);
 
       const [hiddenSection, hiddenSectionOffset] =
         hiddenSectionSerializer.deserialize(slice);
 
+      const itemsLeftToMint = hiddenSection.itemsLeftToMint.slice(
+        0,
+        itemsRemaining
+      );
       const items: CandyMachineItem[] = [];
       hiddenSection.itemsLoadedMap.forEach((loaded, index) => {
         if (!loaded) return;
@@ -108,22 +127,17 @@ export function getCandyMachineAccountDataSerializer(
           index,
           minted: isSequential
             ? index < itemsMinted
-            : !hiddenSection.itemsLeftToMint.includes(index),
+            : !itemsLeftToMint.includes(index),
           name: replaceItemPattern(prefixName, index) + rawItem.name,
           uri: replaceItemPattern(prefixUri, index) + rawItem.uri,
         });
       });
 
-      // Parse the rule set.
-      const [ruleSet] = s
-        .option(s.publicKey(), { fixed: true })
-        .deserialize(slice, hiddenSectionOffset);
-
       return {
         ...base,
         items,
         itemsLoaded: hiddenSection.itemsLoaded,
-        ruleSet,
+        ruleSet: deserializeRuleSet(slice, hiddenSectionOffset)[0],
       };
     }
   );

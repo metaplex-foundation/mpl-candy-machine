@@ -54,6 +54,16 @@ pub fn mint_v2<'info>(
             .as_ref()
             .map(|token_record| token_record.to_account_info()),
         remaining: ctx.remaining_accounts,
+        authorization_rules_program: ctx
+            .accounts
+            .authorization_rules_program
+            .as_ref()
+            .map(|authorization_rules_program| authorization_rules_program.to_account_info()),
+        authorization_rules: ctx
+            .accounts
+            .authorization_rules
+            .as_ref()
+            .map(|authorization_rules| authorization_rules.to_account_info()),
     };
 
     // evaluation context for this transaction

@@ -48,6 +48,8 @@ pub(crate) struct MintAccounts<'b, 'c, 'info> {
     pub(crate) sysvar_instructions: AccountInfo<'info>,
     pub(crate) recent_slothashes: AccountInfo<'info>,
     pub(crate) remaining: &'c [AccountInfo<'info>],
+    pub(crate) authorization_rules_program: Option<AccountInfo<'info>>,
+    pub(crate) authorization_rules: Option<AccountInfo<'info>>,
 }
 
 #[derive(Debug, Clone)]

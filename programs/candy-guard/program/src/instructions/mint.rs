@@ -43,6 +43,8 @@ pub fn mint<'info>(
         token_record: None,
         minter: ctx.accounts.payer.to_account_info(),
         remaining: ctx.remaining_accounts,
+        authorization_rules_program: None,
+        authorization_rules: None,
     };
 
     // evaluation context for this transaction

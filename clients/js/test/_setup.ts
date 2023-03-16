@@ -12,7 +12,6 @@ import {
   fetchDigitalAssetWithAssociatedToken,
   findMasterEditionPda,
   findMetadataPda,
-  findTokenRecordPda,
   TokenStandard,
   verifyCollectionV1,
 } from '@metaplex-foundation/mpl-token-metadata';
@@ -80,15 +79,6 @@ export const createProgrammableNft = async (
     mint,
     ...defaultAssetData(),
     ...input,
-    tokenRecord:
-      input.tokenRecord ??
-      findTokenRecordPda(umi, {
-        mint: mint.publicKey,
-        token: findAssociatedTokenPda(umi, {
-          mint: mint.publicKey,
-          owner: input.tokenOwner ?? umi.identity.publicKey,
-        }),
-      }),
   }).sendAndConfirm(umi);
 
   return mint;

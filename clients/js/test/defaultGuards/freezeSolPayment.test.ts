@@ -6,10 +6,7 @@ import {
   Token,
   TokenState,
 } from '@metaplex-foundation/mpl-essentials';
-import {
-  findTokenRecordPda,
-  TokenStandard,
-} from '@metaplex-foundation/mpl-token-metadata';
+import { TokenStandard } from '@metaplex-foundation/mpl-token-metadata';
 import {
   generateSigner,
   isEqualToAmount,
@@ -691,13 +688,7 @@ test.only('it transfers SOL to an escrow account and locks the Programmable NFT'
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
         mintArgs: { freezeSolPayment: some({ destination }) },
-        tokenRecord: findTokenRecordPda(umi, {
-          mint: mint.publicKey,
-          token: findAssociatedTokenPda(umi, {
-            mint: mint.publicKey,
-            owner: umi.identity.publicKey,
-          }),
-        }),
+        tokenStandard: TokenStandard.ProgrammableNonFungible,
       })
     )
     .sendAndConfirm(umi);
@@ -786,21 +777,17 @@ const initFreezeEscrow = async (
   destination: PublicKey,
   group?: string
 ) => {
-  await transactionBuilder()
-    .add(
-      route(umi, {
-        candyMachine,
-        guard: 'freezeSolPayment',
-        group: group ? some(group) : none(),
-        routeArgs: {
-          path: 'initialize',
-          period: 15 * 24 * 3600, // 15 days.
-          candyGuardAuthority: umi.identity,
-          destination,
-        },
-      })
-    )
-    .sendAndConfirm(umi);
+  await route(umi, {
+    candyMachine,
+    guard: 'freezeSolPayment',
+    group: group ? some(group) : none(),
+    routeArgs: {
+      path: 'initialize',
+      period: 15 * 24 * 3600, // 15 days.
+      candyGuardAuthority: umi.identity,
+      destination,
+    },
+  }).sendAndConfirm(umi);
 };
 
 const mintNft = async (

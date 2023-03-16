@@ -4,7 +4,10 @@ import {
   createMintWithAssociatedToken,
   setComputeUnitLimit,
 } from '@metaplex-foundation/mpl-essentials';
-import { findCollectionAuthorityRecordPda } from '@metaplex-foundation/mpl-token-metadata';
+import {
+  findCollectionAuthorityRecordPda,
+  TokenStandard,
+} from '@metaplex-foundation/mpl-token-metadata';
 import {
   generateSigner,
   isEqualToAmount,
@@ -622,4 +625,44 @@ test('it can mint from a candy machine in a random order', async (t) => {
 
   // Then the mint was successful and we got any item.
   await assertSuccessfulMint(t, umi, { mint, owner: minter });
+});
+
+test('it can mint a programmable NFT', async (t) => {
+  // Given a candy machine with a candy guard that mints PNFTs.
+  const umi = await createUmi();
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    tokenStandard: TokenStandard.ProgrammableNonFungible,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {},
+  });
+
+  // When we mint from it whilst specifying the token standard.
+  const mint = generateSigner(umi);
+  const minter = generateSigner(umi);
+  await transactionBuilder()
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        minter,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        tokenStandard: TokenStandard.ProgrammableNonFungible,
+      })
+    )
+    .sendAndConfirm(umi);
+
+  // Then the mint was successful.
+  await assertSuccessfulMint(t, umi, {
+    mint,
+    owner: minter,
+    tokenStandard: TokenStandard.ProgrammableNonFungible,
+  });
+
+  // And the candy machine was updated.
+  const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
+  t.like(candyMachineAccount, <CandyMachine>{ itemsRedeemed: 1n });
 });

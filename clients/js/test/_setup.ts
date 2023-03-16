@@ -285,7 +285,7 @@ export const assertSuccessfulMint = async (
   const owner = publicKey(input.owner);
   const {
     token = findAssociatedTokenPda(umi, { mint, owner }),
-    tokenStandard = TokenStandard.NonFungible,
+    tokenStandard,
     name,
     uri,
   } = input;
@@ -307,9 +307,14 @@ export const assertSuccessfulMint = async (
       isOriginal: true,
     },
     metadata: {
-      tokenStandard: some(tokenStandard),
+      tokenStandard: { __option: 'Some' },
     },
   });
+
+  // Token Stardard.
+  if (tokenStandard !== undefined) {
+    t.deepEqual(nft.metadata.tokenStandard, some(tokenStandard));
+  }
 
   // Name.
   if (typeof name === 'string') t.is(nft.metadata.name, name);

@@ -367,7 +367,7 @@ pub fn freeze_nft(
 
     let nft_ata = try_get_account_info(ctx.accounts.remaining, account_index + 1)?;
 
-    if matches!(ctx.accounts.candy_machine.version, AccountVersion::V2) {
+    if matches!(ctx.accounts.candy_machine.version, AccountVersion::V1) {
         let mut freeze_ix = freeze_delegated_account(
             mpl_token_metadata::ID,
             freeze_pda.key(),
@@ -418,8 +418,8 @@ pub fn freeze_nft(
         // approves a locked transfer delegate
 
         let delegate_accounts = vec![
-            AccountMeta::new(mpl_token_metadata::ID, false), // delegate record
-            AccountMeta::new_readonly(ctx.accounts.candy_machine_authority_pda.key(), false),
+            AccountMeta::new_readonly(mpl_token_metadata::ID, false), // delegate record
+            AccountMeta::new_readonly(freeze_pda.key(), false),
             AccountMeta::new(ctx.accounts.nft_metadata.key(), false),
             AccountMeta::new_readonly(ctx.accounts.nft_master_edition.key(), false),
             AccountMeta::new(token_record.key(), false),
@@ -435,7 +435,7 @@ pub fn freeze_nft(
         ];
 
         let delegagte_infos = vec![
-            ctx.accounts.candy_machine_authority_pda.to_account_info(),
+            freeze_pda.to_account_info(),
             ctx.accounts.nft_metadata.to_account_info(),
             ctx.accounts.nft_master_edition.to_account_info(),
             token_record.to_account_info(),
@@ -477,7 +477,7 @@ pub fn freeze_nft(
             args: LockArgs::V1 {
                 authorization_data: None,
             },
-            authority: ctx.accounts.candy_machine_authority_pda.key(),
+            authority: freeze_pda.key(),
             token_owner: Some(ctx.accounts.minter.key()),
             token: token.key(),
             mint: ctx.accounts.nft_mint.key(),
@@ -492,6 +492,22 @@ pub fn freeze_nft(
             authorization_rules: None,
         };
         let lock_ix = lock.instruction();
+
+        let lock_accounts = vec![
+            freeze_pda.to_account_info(),
+            ctx.accounts.minter.to_account_info(),
+            token.to_account_info(),
+            ctx.accounts.nft_mint.to_account_info(),
+            ctx.accounts.nft_metadata.to_account_info(),
+            ctx.accounts.nft_master_edition.to_account_info(),
+            token_record.to_account_info(),
+            ctx.accounts.payer.to_account_info(),
+            ctx.accounts.system_program.to_account_info(),
+            ctx.accounts.sysvar_instructions.to_account_info(),
+            ctx.accounts.spl_token_program.to_account_info(),
+        ];
+
+        invoke_signed(&lock_ix, &lock_accounts, &[&signer])?;
     }
 
     Ok(())

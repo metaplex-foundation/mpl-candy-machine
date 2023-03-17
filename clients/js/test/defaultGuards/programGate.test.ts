@@ -54,6 +54,7 @@ test('it allows minting with specified program in transaction', async (t) => {
 test('it allows minting even when the payer is different from the minter', async (t) => {
   // Given a loaded Candy Machine with a programGate guard allowing the memo program.
   const umi = await createUmi();
+  const memoProgram = getSplMemoProgramId(umi);
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,

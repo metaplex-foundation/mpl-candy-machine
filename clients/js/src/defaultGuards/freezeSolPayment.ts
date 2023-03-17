@@ -151,9 +151,8 @@ export type FreezeSolPaymentRouteArgsInitialize = Omit<
  *   guard: 'freezeSolPayment',
  *   args: {
  *     path: 'thaw',
- *     nftMint: nftToThaw.address,
- *     nftOwner: nftToThaw.token.ownerAddress,
- *     candyMachineVersion: AccountVersion.V2,
+ *     nftMint,
+ *     nftOwner,
  *     tokenStandard: TokenStandard.NonFungible,
  *   },
  * });

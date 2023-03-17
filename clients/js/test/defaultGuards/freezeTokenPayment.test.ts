@@ -21,6 +21,7 @@ import {
 import test, { Assertions } from 'ava';
 import {
   addConfigLines,
+  fetchCandyMachine,
   fetchFreezeEscrow,
   findCandyGuardPda,
   findFreezeEscrowPda,
@@ -932,6 +933,7 @@ const thawNft = async (
   group?: string,
   nftOwner?: PublicKey
 ) => {
+  const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
   await route(umi, {
     candyMachine,
     guard: 'freezeTokenPayment',
@@ -940,6 +942,7 @@ const thawNft = async (
       path: 'thaw',
       nftMint,
       nftOwner: nftOwner ?? umi.identity.publicKey,
+      nftTokenStandard: candyMachineAccount.tokenStandard,
       mint: publicKey(tokenMint),
       destinationAta,
     },

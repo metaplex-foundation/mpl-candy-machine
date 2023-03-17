@@ -1,5 +1,6 @@
 import {
   addMemo,
+  getSplMemoProgramId,
   setComputeUnitLimit,
 } from '@metaplex-foundation/mpl-essentials';
 import {
@@ -21,7 +22,7 @@ import {
 test('it allows minting with specified program in transaction', async (t) => {
   // Given a loaded Candy Machine with a programGate guard allowing the memo program.
   const umi = await createUmi();
-  const memoProgram = umi.programs.getPublicKey('splMemo');
+  const memoProgram = getSplMemoProgramId(umi);
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
@@ -53,7 +54,6 @@ test('it allows minting with specified program in transaction', async (t) => {
 test('it allows minting even when the payer is different from the minter', async (t) => {
   // Given a loaded Candy Machine with a programGate guard allowing the memo program.
   const umi = await createUmi();
-  const memoProgram = umi.programs.getPublicKey('splMemo');
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
@@ -120,7 +120,7 @@ test('it forbids candy machine creation with more than 5 specified programs', as
   // When we try to create a Candy Machine with a
   // programGate guard allowing more than 5 programs.
   const umi = await createUmi();
-  const memoProgram = umi.programs.getPublicKey('splMemo');
+  const memoProgram = getSplMemoProgramId(umi);
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const promise = createV2(umi, {
     collectionMint,

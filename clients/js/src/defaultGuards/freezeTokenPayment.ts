@@ -1,14 +1,22 @@
-import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-essentials';
-import { findMasterEditionPda } from '@metaplex-foundation/mpl-token-metadata';
+import {
+  findAssociatedTokenPda,
+  getSplAssociatedTokenProgramId,
+  getSplSystemProgramId,
+  getSplTokenProgramId,
+} from '@metaplex-foundation/mpl-essentials';
+import {
+  findMasterEditionPda,
+  getMplTokenMetadataProgramId,
+} from '@metaplex-foundation/mpl-token-metadata';
 import { PublicKey, Signer } from '@metaplex-foundation/umi';
 import { UnrecognizePathForRouteInstructionError } from '../errors';
 import {
   findFreezeEscrowPda,
+  FreezeInstruction,
   FreezeTokenPayment,
   FreezeTokenPaymentArgs,
   getFreezeInstructionSerializer,
   getFreezeTokenPaymentSerializer,
-  FreezeInstruction,
 } from '../generated';
 import { GuardManifest, RouteParser } from '../guards';
 
@@ -197,18 +205,6 @@ const initializeRouteInstruction: RouteParser<
     mint: args.mint,
     owner: freezeEscrow,
   });
-  const systemProgram = context.programs.getPublicKey(
-    'splSystem',
-    '11111111111111111111111111111111'
-  );
-  const tokenProgram = context.programs.getPublicKey(
-    'splToken',
-    'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
-  );
-  const associatedTokenProgram = context.programs.getPublicKey(
-    'splAssociatedToken',
-    'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'
-  );
   const s = context.serializer;
   const serializer = s.tuple([
     getFreezeInstructionSerializer(context),
@@ -219,11 +215,11 @@ const initializeRouteInstruction: RouteParser<
     remainingAccounts: [
       { publicKey: freezeEscrow, isWritable: true },
       { signer: args.candyGuardAuthority, isWritable: false },
-      { publicKey: systemProgram, isWritable: false },
+      { publicKey: getSplSystemProgramId(context), isWritable: false },
       { publicKey: freezeAta, isWritable: true },
       { publicKey: args.mint, isWritable: false },
-      { publicKey: tokenProgram, isWritable: false },
-      { publicKey: associatedTokenProgram, isWritable: false },
+      { publicKey: getSplTokenProgramId(context), isWritable: false },
+      { publicKey: getSplAssociatedTokenProgramId(context), isWritable: false },
       { publicKey: args.destinationAta, isWritable: true },
     ],
   };
@@ -244,14 +240,6 @@ const thawRouteInstruction: RouteParser<FreezeTokenPaymentRouteArgsThaw> = (
     owner: args.nftOwner,
   });
   const nftEdition = findMasterEditionPda(context, { mint: args.nftMint });
-  const tokenProgram = context.programs.getPublicKey(
-    'splToken',
-    'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
-  );
-  const tokenMetadataProgram = context.programs.getPublicKey(
-    'mplTokenMetadata',
-    'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'
-  );
   return {
     data: getFreezeInstructionSerializer(context).serialize(
       FreezeInstruction.Thaw
@@ -262,8 +250,8 @@ const thawRouteInstruction: RouteParser<FreezeTokenPaymentRouteArgsThaw> = (
       { publicKey: args.nftOwner, isWritable: false },
       { publicKey: nftAta, isWritable: true },
       { publicKey: nftEdition, isWritable: false },
-      { publicKey: tokenProgram, isWritable: false },
-      { publicKey: tokenMetadataProgram, isWritable: false },
+      { publicKey: getSplTokenProgramId(context), isWritable: false },
+      { publicKey: getMplTokenMetadataProgramId(context), isWritable: false },
     ],
   };
 };
@@ -280,14 +268,6 @@ const unlockFundsRouteInstruction: RouteParser<
     mint: args.mint,
     owner: freezeEscrow,
   });
-  const tokenProgram = context.programs.getPublicKey(
-    'splToken',
-    'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
-  );
-  const systemProgram = context.programs.getPublicKey(
-    'splSystem',
-    '11111111111111111111111111111111'
-  );
   return {
     data: getFreezeInstructionSerializer(context).serialize(
       FreezeInstruction.UnlockFunds
@@ -297,8 +277,8 @@ const unlockFundsRouteInstruction: RouteParser<
       { signer: args.candyGuardAuthority, isWritable: false },
       { publicKey: freezeAta, isWritable: true },
       { publicKey: args.destinationAta, isWritable: true },
-      { publicKey: tokenProgram, isWritable: false },
-      { publicKey: systemProgram, isWritable: false },
+      { publicKey: getSplTokenProgramId(context), isWritable: false },
+      { publicKey: getSplSystemProgramId(context), isWritable: false },
     ],
   };
 };

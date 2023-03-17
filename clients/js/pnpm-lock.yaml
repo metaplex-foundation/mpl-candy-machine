@@ -3,9 +3,9 @@ lockfileVersion: 5.4
 specifiers:
   '@ava/typescript': ^3.0.1
   '@identity.com/solana-gateway-ts': ^0.9.0
-  '@metaplex-foundation/mpl-essentials': ^0.5.0
+  '@metaplex-foundation/mpl-essentials': ^0.5.1
   '@metaplex-foundation/mpl-token-auth-rules': ^1.2.0
-  '@metaplex-foundation/mpl-token-metadata': 3.0.0-alpha.12
+  '@metaplex-foundation/mpl-token-metadata': 3.0.0-alpha.13
   '@metaplex-foundation/umi': ^0.6.0
   '@metaplex-foundation/umi-bundle-tests': ^0.6.0
   '@metaplex-foundation/umi-web3js-adapters': ^0.6.0
@@ -30,8 +30,8 @@ specifiers:
   vercel: ^28.16.0
 
 dependencies:
-  '@metaplex-foundation/mpl-essentials': 0.5.0_6ygy4nximzcawmzkd5ogkuv4l4
-  '@metaplex-foundation/mpl-token-metadata': 3.0.0-alpha.12_6ygy4nximzcawmzkd5ogkuv4l4
+  '@metaplex-foundation/mpl-essentials': 0.5.1_6ygy4nximzcawmzkd5ogkuv4l4
+  '@metaplex-foundation/mpl-token-metadata': 3.0.0-alpha.13_6ygy4nximzcawmzkd5ogkuv4l4
   '@noble/hashes': 1.2.0
   merkletreejs: 0.3.9
 
@@ -1658,8 +1658,8 @@ packages:
     resolution: {integrity: sha512-S9RulC2fFCFOQraz61bij+5YCHhSO9llJegK8c8Y6731fSi6snUSQJdCUqYS8AIgR0TKbQvdvgSyIIdbDFZbBA==}
     dev: true
 
-  /@metaplex-foundation/mpl-essentials/0.5.0_6ygy4nximzcawmzkd5ogkuv4l4:
-    resolution: {integrity: sha512-2VCC5VBeukBR4O/qAHQNra7G2FnVuerdI5dZqt1O63hR5ahwOFRsUtrQkdspDk4sD/cqkRWXv+X0wwLHWjd5rQ==}
+  /@metaplex-foundation/mpl-essentials/0.5.1_6ygy4nximzcawmzkd5ogkuv4l4:
+    resolution: {integrity: sha512-e7P/BqG4nRoZSbjKmf+F0fIU2ae13jDWzuF+9QvmikqTaWHyanljLM7WWNe4EjeaHl9bFJ91fwki6PGQMVeLyw==}
     peerDependencies:
       '@metaplex-foundation/umi': ^0.6.0
     dependencies:
@@ -1681,12 +1681,12 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@metaplex-foundation/mpl-token-metadata/3.0.0-alpha.12_6ygy4nximzcawmzkd5ogkuv4l4:
-    resolution: {integrity: sha512-MoeYftFEL+l7x8XjHd/12Guote5PmHtCLQHrVEvzl4EfBXz4KdkB0ZgWcSZVFIg2vBuev3p1kAZdUSQzhx3lWw==}
+  /@metaplex-foundation/mpl-token-metadata/3.0.0-alpha.13_6ygy4nximzcawmzkd5ogkuv4l4:
+    resolution: {integrity: sha512-7V57vhUwFFtK6aBcU4W2mGtCVJ63//traRF6IHgFdLh2fJzXJTF+RAV4hhcRdBOv9+JNwa5oy9LBeDmW+xL4/Q==}
     peerDependencies:
       '@metaplex-foundation/umi': ^0.6.0
     dependencies:
-      '@metaplex-foundation/mpl-essentials': 0.5.0_6ygy4nximzcawmzkd5ogkuv4l4
+      '@metaplex-foundation/mpl-essentials': 0.5.1_6ygy4nximzcawmzkd5ogkuv4l4
       '@metaplex-foundation/umi': 0.6.0
     dev: false
 

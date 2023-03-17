@@ -1,8 +1,14 @@
-import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-essentials';
+import {
+  findAssociatedTokenPda,
+  getSplAssociatedTokenProgramId,
+  getSplSystemProgramId,
+  getSplTokenProgramId,
+} from '@metaplex-foundation/mpl-essentials';
 import {
   findMasterEditionPda,
   findMetadataPda,
   findTokenRecordPda,
+  getMplTokenMetadataProgramId,
   isProgrammable,
   TokenStandard,
 } from '@metaplex-foundation/mpl-token-metadata';
@@ -201,10 +207,6 @@ const initializeRouteInstruction: RouteParser<
     candyMachine: routeContext.candyMachine,
     candyGuard: routeContext.candyGuard,
   });
-  const systemProgram = context.programs.getPublicKey(
-    'splSystem',
-    '11111111111111111111111111111111'
-  );
   const s = context.serializer;
   const serializer = s.tuple([
     getFreezeInstructionSerializer(context),
@@ -215,7 +217,7 @@ const initializeRouteInstruction: RouteParser<
     remainingAccounts: [
       { publicKey: freezeEscrow, isWritable: true },
       { signer: args.candyGuardAuthority, isWritable: false },
-      { publicKey: systemProgram, isWritable: false },
+      { publicKey: getSplSystemProgramId(context), isWritable: false },
     ],
   };
 };
@@ -248,22 +250,6 @@ const thawRouteInstruction: RouteParser<FreezeSolPaymentRouteArgsThaw> = (
     mint: args.nftMint,
     token: nftAta,
   });
-  const systemProgram = context.programs.getPublicKey(
-    'splSystem',
-    '11111111111111111111111111111111'
-  );
-  const tokenProgram = context.programs.getPublicKey(
-    'splToken',
-    'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
-  );
-  const associatedTokenProgram = context.programs.getPublicKey(
-    'splAssociatedToken',
-    'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'
-  );
-  const tokenMetadataProgram = context.programs.getPublicKey(
-    'mplTokenMetadata',
-    'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'
-  );
   const tokenAuthRulesProgram = context.programs.getPublicKey(
     'mplTokenAuthRules',
     'auth9SigNpDKz4sJJ1DfCTuZrZNSAgh9sFD3rboVmgg'
@@ -277,8 +263,8 @@ const thawRouteInstruction: RouteParser<FreezeSolPaymentRouteArgsThaw> = (
     { publicKey: args.nftOwner, isWritable: false },
     { publicKey: nftAta, isWritable: true },
     { publicKey: nftEdition, isWritable: false },
-    { publicKey: tokenProgram, isWritable: false },
-    { publicKey: tokenMetadataProgram, isWritable: false },
+    { publicKey: getSplTokenProgramId(context), isWritable: false },
+    { publicKey: getMplTokenMetadataProgramId(context), isWritable: false },
   ];
 
   if (args.candyMachineVersion === AccountVersion.V1) {
@@ -292,14 +278,14 @@ const thawRouteInstruction: RouteParser<FreezeSolPaymentRouteArgsThaw> = (
       //   8. `[]` Freeze PDA associated token account of the NFT.
       { publicKey: nftFreezeAta, isWritable: false },
       //   9. `[]` System program.
-      { publicKey: systemProgram, isWritable: false },
+      { publicKey: getSplSystemProgramId(context), isWritable: false },
       //   10. `[]` Sysvar instructions account.
       {
         publicKey: publicKey('Sysvar1nstructions1111111111111111111111111'),
         isWritable: false,
       },
       //   11. `[]` SPL Associated Token Account program.
-      { publicKey: associatedTokenProgram, isWritable: false },
+      { publicKey: getSplAssociatedTokenProgramId(context), isWritable: false },
     ]
   );
 
@@ -334,10 +320,6 @@ const unlockFundsRouteInstruction: RouteParser<
     candyMachine: routeContext.candyMachine,
     candyGuard: routeContext.candyGuard,
   });
-  const systemProgram = context.programs.getPublicKey(
-    'splSystem',
-    '11111111111111111111111111111111'
-  );
   return {
     data: getFreezeInstructionSerializer(context).serialize(
       FreezeInstruction.UnlockFunds
@@ -346,7 +328,7 @@ const unlockFundsRouteInstruction: RouteParser<
       { publicKey: freezeEscrow, isWritable: true },
       { signer: args.candyGuardAuthority, isWritable: false },
       { publicKey: args.destination, isWritable: true },
-      { publicKey: systemProgram, isWritable: false },
+      { publicKey: getSplSystemProgramId(context), isWritable: false },
     ],
   };
 };

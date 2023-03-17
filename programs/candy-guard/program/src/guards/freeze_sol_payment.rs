@@ -9,7 +9,7 @@ use mpl_token_metadata::{
         freeze_delegated_account, thaw_delegated_account, DelegateArgs, InstructionBuilder,
         LockArgs, TransferArgs, UnlockArgs,
     },
-    state::{TokenMetadataAccount, TokenRecord, TokenStandard},
+    state::{Metadata, TokenMetadataAccount, TokenRecord, TokenStandard},
 };
 use solana_program::{
     program::{invoke, invoke_signed},
@@ -37,6 +37,7 @@ pub const FREEZE_SOL_FEE: u64 = 10_000;
 ///           destination pubkey, candy guard pubkey, candy machine pubkey]`).
 ///   1. `[]` Associate token account of the NFT (seeds `[payer pubkey, token
 ///           program pubkey, nft mint pubkey]`).
+///   2. `[optional]` Authorization rule set for the minted pNFT.
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug)]
 pub struct FreezeSolPayment {
     pub lamports: u64,
@@ -118,16 +119,13 @@ impl Guard for FreezeSolPayment {
             //   5. `[]` SPL Token program.
             //   6. `[]` Metaplex Token Metadata program ID.
             //
-            // Remaining accounts required for Candy Machine account version 2:
+            // Remaining accounts required for Programmable NFTs:
             //
             //   7. `[]` Metadata account of the NFT.
             //   8. `[]` Freeze PDA associated token account of the NFT.
             //   9. `[]` System program.
             //   10. `[]` Sysvar instructions account.
             //   11. `[]` SPL Associated Token Account program.
-            //
-            // Remaining accounts required for Programmable NFTs:
-
             //   12. `[]` Owner token record account.
             //   13. `[]` Freeze PDA token record account.
             //   14. `[]` Token Authorization Rules program.
@@ -209,6 +207,23 @@ impl Condition for FreezeSolPayment {
         // it has to match the 'token' account (if present)
         if let Some(token_info) = &ctx.accounts.token {
             assert_keys_equal(nft_ata.key, token_info.key)?;
+        }
+
+        let candy_machine_info = ctx.accounts.candy_machine.to_account_info();
+        let account_data = candy_machine_info.data.borrow_mut();
+
+        let collection_metadata =
+            Metadata::from_account_info(&ctx.accounts.collection_metadata.to_account_info())?;
+
+        let rule_set = ctx
+            .accounts
+            .candy_machine
+            .get_rule_set(&account_data, &collection_metadata)?;
+
+        if let Some(rule_set) = rule_set {
+            let mint_rule_set = try_get_account_info(ctx.accounts.remaining, index + 2)?;
+            assert_keys_equal(mint_rule_set.key, &rule_set)?;
+            ctx.account_cursor += 1;
         }
 
         ctx.indices.insert("freeze_sol_payment", index);
@@ -428,6 +443,7 @@ pub fn freeze_nft(
             .token_record
             .as_ref()
             .map(|token_record| token_record.to_account_info());
+        let authorization_rules = get_account_info(ctx.accounts.remaining, account_index + 2);
 
         // if we have a token account, it must match the 'nft_ata'
         if let Some(ref token_info) = ctx.accounts.token {
@@ -476,9 +492,7 @@ pub fn freeze_nft(
                 .authorization_rules_program
                 .as_ref()
                 .map(|authorization_rules_program| authorization_rules_program.key()),
-            authorization_rules: ctx
-                .accounts
-                .authorization_rules
+            authorization_rules: authorization_rules
                 .as_ref()
                 .map(|authorization_rules| authorization_rules.key()),
         };
@@ -500,6 +514,10 @@ pub fn freeze_nft(
 
         if let Some(token_record) = &token_record {
             delegagte_infos.push(token_record.to_account_info());
+        }
+
+        if let Some(authorization_rules) = &authorization_rules {
+            delegagte_infos.push(authorization_rules.to_account_info());
         }
 
         invoke_signed(&delegate_ix, &delegagte_infos, &[&signer])?;

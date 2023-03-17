@@ -1,4 +1,7 @@
-import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-essentials';
+import {
+  findAssociatedTokenPda,
+  getSplAssociatedTokenProgramId,
+} from '@metaplex-foundation/mpl-essentials';
 import { findMetadataPda } from '@metaplex-foundation/mpl-token-metadata';
 import { PublicKey } from '@metaplex-foundation/umi';
 import {
@@ -37,10 +40,6 @@ export const nftPaymentGuardManifest: GuardManifest<
       mint: args.mint,
       owner: args.destination,
     });
-    const associatedTokenProgram = context.programs.getPublicKey(
-      'splAssociatedToken',
-      'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'
-    );
     return {
       data: new Uint8Array(),
       remainingAccounts: [
@@ -49,7 +48,10 @@ export const nftPaymentGuardManifest: GuardManifest<
         { publicKey: args.mint, isWritable: false },
         { publicKey: args.destination, isWritable: false },
         { publicKey: destinationAta, isWritable: true },
-        { publicKey: associatedTokenProgram, isWritable: false },
+        {
+          publicKey: getSplAssociatedTokenProgramId(context),
+          isWritable: false,
+        },
       ],
     };
   },

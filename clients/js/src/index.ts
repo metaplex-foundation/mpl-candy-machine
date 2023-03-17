@@ -2,6 +2,7 @@ export * from './defaultGuards';
 export * from './generated';
 export * from './guards';
 export * from './hooked';
+export * from './programs';
 
 export * from './constants';
 export * from './create';
@@ -10,6 +11,7 @@ export * from './createCandyMachine';
 export * from './createCandyMachineV2';
 export * from './createLutForCandyMachine';
 export * from './errors';
+export * from './getCandyMachineRuleSet';
 export * from './merkle';
 export * from './mint';
 export * from './mintV2';

@@ -7,6 +7,12 @@ import {
   TokenState,
 } from '@metaplex-foundation/mpl-essentials';
 import {
+  fetchTokenRecord,
+  findTokenRecordPda,
+  TokenStandard,
+  TokenState as MetadataTokenState,
+} from '@metaplex-foundation/mpl-token-metadata';
+import {
   generateSigner,
   isEqualToAmount,
   isSome,
@@ -23,10 +29,12 @@ import {
 import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
 import test, { Assertions } from 'ava';
 import {
+  fetchCandyMachine,
   fetchFreezeEscrow,
   findCandyGuardPda,
   findFreezeEscrowPda,
   FreezeEscrow,
+  getMplTokenAuthRulesProgramId,
   mintV2,
   route,
 } from '../../src';
@@ -36,6 +44,7 @@ import {
   createCollectionNft,
   createUmi,
   createV2,
+  METAPLEX_DEFAULT_RULESET,
 } from '../_setup';
 
 test('it transfers SOL to an escrow account and freezes the NFT', async (t) => {
@@ -642,6 +651,177 @@ test('it charges a bot tax if something goes wrong', async (t) => {
   await assertBotTax(t, umi, mint, signature, /FreezeNotInitialized/);
 });
 
+test('it transfers SOL to an escrow account and locks the Programmable NFT', async (t) => {
+  // Given a loaded Candy Machine with a freezeSolPayment guard.
+  const umi = await createUmi();
+  const destination = generateSigner(umi).publicKey;
+  const identityBalance = await umi.rpc.getBalance(umi.identity.publicKey);
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    tokenStandard: TokenStandard.ProgrammableNonFungible,
+    ruleSet: METAPLEX_DEFAULT_RULESET,
+    collectionMint,
+    configLines: [
+      { name: 'Degen #1', uri: 'https://example.com/degen/1' },
+      { name: 'Degen #2', uri: 'https://example.com/degen/2' },
+    ],
+    guards: {
+      freezeSolPayment: some({ lamports: sol(1), destination }),
+    },
+  });
+
+  // And given the freezeSolPayment guard is initialized.
+  await initFreezeEscrow(umi, candyMachine, destination);
+
+  // When we mint from that candy machine.
+  const mint = generateSigner(umi);
+  await transactionBuilder()
+    .add(setComputeUnitLimit(umi, { units: 800_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: {
+          freezeSolPayment: some({
+            destination,
+            nftRuleSet: METAPLEX_DEFAULT_RULESET,
+          }),
+        },
+        tokenStandard: TokenStandard.ProgrammableNonFungible,
+        authorizationRulesProgram: getMplTokenAuthRulesProgramId(umi),
+      })
+    )
+    .sendAndConfirm(umi);
+
+  // Then minting was successful.
+  await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
+
+  // And the pNFT is frozen.
+  const ata = findAssociatedTokenPda(umi, {
+    mint: mint.publicKey,
+    owner: umi.identity.publicKey,
+  });
+  const tokenAccount = await fetchToken(umi, ata);
+  t.is(tokenAccount.state, TokenState.Frozen);
+
+  // And the token record is locked.
+  const tokenRecord = findTokenRecordPda(umi, {
+    mint: mint.publicKey,
+    token: ata,
+  });
+  const tokenRecodAccount = await fetchTokenRecord(umi, tokenRecord);
+  t.is(tokenRecodAccount.state, MetadataTokenState.Locked);
+
+  // And cannot be thawed since not all NFTs have been minted.
+  const promise = thawNft(umi, candyMachine, destination, mint.publicKey);
+  await t.throwsAsync(promise, { message: /ThawNotEnabled/ });
+
+  // And the treasury escrow received SOLs.
+  const treasuryEscrow = getFreezeEscrow(umi, candyMachine, destination);
+  const treasuryEscrowBalance = await umi.rpc.getBalance(treasuryEscrow);
+  t.true(
+    isEqualToAmount(treasuryEscrowBalance, sol(1), sol(0.1)),
+    'treasury escrow received SOLs'
+  );
+
+  // And was assigned the right data.
+  const freezeEscrowAccount = await fetchFreezeEscrow(umi, treasuryEscrow);
+  t.true(isSome(freezeEscrowAccount.firstMintTime));
+  t.like(freezeEscrowAccount, <FreezeEscrow>{
+    candyMachine: publicKey(candyMachine),
+    candyGuard: publicKey(findCandyGuardPda(umi, { base: candyMachine })),
+    frozenCount: 1n,
+    freezePeriod: BigInt(15 * 24 * 3600),
+    destination: publicKey(destination),
+    authority: publicKey(umi.identity),
+  });
+
+  // And the payer lost SOLs.
+  const newIdentityBalance = await umi.rpc.getBalance(umi.identity.publicKey);
+  t.true(
+    isEqualToAmount(
+      newIdentityBalance,
+      subtractAmounts(identityBalance, sol(1)),
+      sol(0.1)
+    )
+  );
+});
+
+test('it can thaw a Programmable NFT once all NFTs are minted', async (t) => {
+  // Given a loaded Candy Machine with a ruleSet and an initialized
+  // freezeSolPayment guard with only one item.
+  const umi = await createUmi();
+  const destination = generateSigner(umi).publicKey;
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    tokenStandard: TokenStandard.ProgrammableNonFungible,
+    ruleSet: METAPLEX_DEFAULT_RULESET,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {
+      freezeSolPayment: some({ lamports: sol(1), destination }),
+    },
+  });
+  await initFreezeEscrow(umi, candyMachine, destination);
+
+  // And given we minted the only PNFT from that candy machine.
+  const mint = generateSigner(umi);
+  await transactionBuilder()
+    .add(setComputeUnitLimit(umi, { units: 800_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: {
+          freezeSolPayment: some({
+            destination,
+            nftRuleSet: METAPLEX_DEFAULT_RULESET,
+          }),
+        },
+        tokenStandard: TokenStandard.ProgrammableNonFungible,
+        authorizationRulesProgram: getMplTokenAuthRulesProgramId(umi),
+      })
+    )
+    .sendAndConfirm(umi);
+
+  // And that is it locked.
+  const tokenRecord = findTokenRecordPda(umi, {
+    mint: mint.publicKey,
+    token: findAssociatedTokenPda(umi, {
+      mint: mint.publicKey,
+      owner: umi.identity.publicKey,
+    }),
+  });
+  let tokenRecordAccount = await fetchTokenRecord(umi, tokenRecord);
+  t.is(tokenRecordAccount.state, MetadataTokenState.Locked);
+
+  // When we thaw the locked PNFT.
+  await setComputeUnitLimit(umi, { units: 600_000 })
+    .add(
+      route(umi, {
+        candyMachine,
+        guard: 'freezeSolPayment',
+        routeArgs: {
+          path: 'thaw',
+          nftMint: mint.publicKey,
+          nftOwner: umi.identity.publicKey,
+          nftTokenStandard: TokenStandard.ProgrammableNonFungible,
+          destination,
+          nftRuleSet: METAPLEX_DEFAULT_RULESET,
+        },
+      })
+    )
+    .sendAndConfirm(umi);
+
+  // Then the PNFT is unlocked.
+  tokenRecordAccount = await fetchTokenRecord(umi, tokenRecord);
+  t.is(tokenRecordAccount.state, MetadataTokenState.Unlocked);
+});
+
 const getFreezeEscrow = (
   umi: Umi,
   candyMachine: PublicKey,
@@ -680,21 +860,17 @@ const initFreezeEscrow = async (
   destination: PublicKey,
   group?: string
 ) => {
-  await transactionBuilder()
-    .add(
-      route(umi, {
-        candyMachine,
-        guard: 'freezeSolPayment',
-        group: group ? some(group) : none(),
-        routeArgs: {
-          path: 'initialize',
-          period: 15 * 24 * 3600, // 15 days.
-          candyGuardAuthority: umi.identity,
-          destination,
-        },
-      })
-    )
-    .sendAndConfirm(umi);
+  await route(umi, {
+    candyMachine,
+    guard: 'freezeSolPayment',
+    group: group ? some(group) : none(),
+    routeArgs: {
+      path: 'initialize',
+      period: 15 * 24 * 3600, // 15 days.
+      candyGuardAuthority: umi.identity,
+      destination,
+    },
+  }).sendAndConfirm(umi);
 };
 
 const mintNft = async (
@@ -732,21 +908,19 @@ const thawNft = async (
   group?: string,
   nftOwner?: PublicKey
 ) => {
-  await transactionBuilder()
-    .add(
-      route(umi, {
-        candyMachine,
-        guard: 'freezeSolPayment',
-        group: group ? some(group) : none(),
-        routeArgs: {
-          path: 'thaw',
-          nftMint,
-          nftOwner: nftOwner ?? umi.identity.publicKey,
-          destination,
-        },
-      })
-    )
-    .sendAndConfirm(umi);
+  const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
+  await route(umi, {
+    candyMachine,
+    guard: 'freezeSolPayment',
+    group: group ? some(group) : none(),
+    routeArgs: {
+      path: 'thaw',
+      nftMint,
+      nftOwner: nftOwner ?? umi.identity.publicKey,
+      nftTokenStandard: candyMachineAccount.tokenStandard,
+      destination,
+    },
+  }).sendAndConfirm(umi);
 };
 
 const unlockFunds = async (
@@ -756,18 +930,14 @@ const unlockFunds = async (
   group?: string,
   candyGuardAuthority?: Signer
 ) => {
-  await transactionBuilder()
-    .add(
-      route(umi, {
-        candyMachine,
-        guard: 'freezeSolPayment',
-        group: group ? some(group) : none(),
-        routeArgs: {
-          path: 'unlockFunds',
-          candyGuardAuthority: candyGuardAuthority ?? umi.identity,
-          destination,
-        },
-      })
-    )
-    .sendAndConfirm(umi);
+  await route(umi, {
+    candyMachine,
+    guard: 'freezeSolPayment',
+    group: group ? some(group) : none(),
+    routeArgs: {
+      path: 'unlockFunds',
+      candyGuardAuthority: candyGuardAuthority ?? umi.identity,
+      destination,
+    },
+  }).sendAndConfirm(umi);
 };

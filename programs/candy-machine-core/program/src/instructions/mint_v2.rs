@@ -7,15 +7,12 @@ use mpl_token_metadata::{
         set_and_verify_sized_collection_item, update_metadata_accounts_v2, CreateArgs,
         InstructionBuilder, MintArgs, RuleSetToggle, UpdateArgs, VerificationArgs,
     },
-    state::{
-        AssetData, Collection, Metadata, PrintSupply, ProgrammableConfig, TokenMetadataAccount,
-        TokenStandard,
-    },
+    state::{AssetData, Collection, Metadata, PrintSupply, TokenMetadataAccount, TokenStandard},
 };
 use solana_program::{program::invoke_signed, sysvar};
 
 use crate::{
-    constants::{AUTHORITY_SEED, EMPTY_STR, HIDDEN_SECTION, NULL_STRING, RULE_SET_LENGTH, SET},
+    constants::{AUTHORITY_SEED, EMPTY_STR, HIDDEN_SECTION, NULL_STRING},
     utils::*,
     AccountVersion, CandyError, CandyMachine, ConfigLine,
 };
@@ -437,24 +434,16 @@ fn create_and_mint<'info>(
     *new_update_authority = Some(candy_machine.authority);
 
     if candy_machine.token_standard == TokenStandard::ProgrammableNonFungible as u8 {
-        let required_length = candy_machine.data.get_space_for_candy()?;
         let candy_machine_info = candy_machine.to_account_info();
         let account_data = candy_machine_info.data.borrow_mut();
 
         // the rule set for a newly minted pNFT is determined by:
         //   1. check if there is a rule set stored on the account; otherwise
         //   2. use the rule set from the collection metadata
-        *rule_set = if account_data[required_length] == SET {
-            let index = required_length + 1;
-            RuleSetToggle::Set(Pubkey::from(*array_ref![
-                account_data,
-                index,
-                RULE_SET_LENGTH
-            ]))
-        } else if let Some(ProgrammableConfig::V1 {
-            rule_set: Some(rule_set),
-        }) = collection_metadata.programmable_config
-        {
+        let candy_machine_rule_set =
+            candy_machine.get_rule_set(&account_data, &collection_metadata)?;
+
+        *rule_set = if let Some(rule_set) = candy_machine_rule_set {
             // set the rule set to be the same as the parent collection
             RuleSetToggle::Set(rule_set)
         } else {

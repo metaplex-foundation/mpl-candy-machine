@@ -1,5 +1,5 @@
 import { mplTokenMetadata } from '@metaplex-foundation/mpl-token-metadata';
-import { publicKey, UmiPlugin } from '@metaplex-foundation/umi';
+import { UmiPlugin } from '@metaplex-foundation/umi';
 import {
   addressGateGuardManifest,
   allowListGuardManifest,
@@ -23,38 +23,34 @@ import {
   tokenPaymentGuardManifest,
 } from './defaultGuards';
 import {
-  getMplCandyGuardProgram,
-  getMplCandyMachineCoreProgram,
+  createMplCandyGuardProgram,
+  createMplCandyMachineCoreProgram,
 } from './generated';
 import {
   CandyGuardProgram,
   DefaultGuardRepository,
   GuardRepository,
 } from './guards';
+import {
+  createCivicGatewayProgram,
+  createMplTokenAuthRulesProgram,
+} from './programs';
 
 export const mplCandyMachine = (): UmiPlugin => ({
   install(umi) {
     umi.use(mplTokenMetadata());
 
     // Programs.
-    umi.programs.add(getMplCandyMachineCoreProgram(), false);
+    umi.programs.add(createMplCandyMachineCoreProgram(), false);
     umi.programs.add(
       {
-        ...getMplCandyGuardProgram(),
+        ...createMplCandyGuardProgram(),
         availableGuards: defaultCandyGuardNames,
       } as CandyGuardProgram,
       false
     );
-    umi.programs.add(
-      {
-        name: 'civicGateway',
-        publicKey: publicKey('gatem74V238djXdzWnJf94Wo1DcnuGkfijbf3AuBhfs'),
-        getErrorFromCode: () => null,
-        getErrorFromName: () => null,
-        isOnCluster: () => true,
-      },
-      false
-    );
+    umi.programs.add(createCivicGatewayProgram(), false);
+    umi.programs.add(createMplTokenAuthRulesProgram(), false);
 
     // Default Guards.
     umi.guards = new DefaultGuardRepository(umi);

@@ -1,6 +1,7 @@
 use super::{freeze_sol_payment::freeze_nft, *};
 
 use anchor_lang::AccountsClose;
+use mpl_token_metadata::state::{Metadata, TokenMetadataAccount};
 use solana_program::{
     program::{invoke, invoke_signed},
     program_pack::Pack,
@@ -33,6 +34,7 @@ use crate::{
 ///   2. `[writable]` Token account holding the required amount.
 ///   3. `[writable]` Associate token account of the Freeze PDA (seeds `[freeze PDA
 ///                   pubkey, token program pubkey, nft mint pubkey]`).
+///   4. `[optional]` Authorization rule set for the minted pNFT.
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug)]
 pub struct FreezeTokenPayment {
     pub amount: u64,
@@ -163,7 +165,19 @@ impl Guard for FreezeTokenPayment {
             //   3. `[writable]` Associate token account of the NFT.
             //   4. `[]` Master Edition account of the NFT.
             //   5. `[]` spl-token program ID.
-            //   6. `[]` Metaplex Token Metadata program ID.
+            //   6. `[]` Metaplex Token Metadata program.
+            //
+            // Remaining accounts required for Programmable NFTs:
+            //
+            //   7. `[writable]` Metadata account of the NFT.
+            //   8. `[writable]` Freeze PDA associated token account of the NFT.
+            //   9. `[]` System program.
+            //   10. `[]` Sysvar instructions account.
+            //   11. `[]` SPL Associated Token Account program.
+            //   12. `[optional, writable]` Owner token record account.
+            //   13. `[optional, writable]` Freeze PDA token record account.
+            //   14. `[optional]` Token Authorization Rules program.
+            //   15. `[optional]` Token Authorization Rules account.
             FreezeInstruction::Thaw => {
                 msg!("Instruction: Thaw (FreezeTokenPayment guard)");
                 thaw_nft(ctx, route_context, data)
@@ -260,6 +274,23 @@ impl Condition for FreezeTokenPayment {
             return err!(CandyGuardError::NotEnoughTokens);
         }
 
+        let candy_machine_info = ctx.accounts.candy_machine.to_account_info();
+        let account_data = candy_machine_info.data.borrow_mut();
+
+        let collection_metadata =
+            Metadata::from_account_info(&ctx.accounts.collection_metadata.to_account_info())?;
+
+        let rule_set = ctx
+            .accounts
+            .candy_machine
+            .get_rule_set(&account_data, &collection_metadata)?;
+
+        if let Some(rule_set) = rule_set {
+            let mint_rule_set = try_get_account_info(ctx.accounts.remaining, index + 4)?;
+            assert_keys_equal(mint_rule_set.key, &rule_set)?;
+            ctx.account_cursor += 1;
+        }
+
         if ctx.accounts.payer.lamports() < FREEZE_SOL_FEE {
             msg!(
                 "Require {} lamports, accounts has {} lamports",
@@ -322,6 +353,7 @@ impl Condition for FreezeTokenPayment {
             ctx,
             ctx.indices["freeze_token_payment"],
             &self.destination_ata,
+            4,
         )
     }
 }

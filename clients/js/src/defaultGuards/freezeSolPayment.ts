@@ -1,16 +1,30 @@
-import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-essentials';
-import { findMasterEditionPda } from '@metaplex-foundation/mpl-token-metadata';
+import {
+  findAssociatedTokenPda,
+  getSplAssociatedTokenProgramId,
+  getSplSystemProgramId,
+  getSplTokenProgramId,
+  getSysvar,
+} from '@metaplex-foundation/mpl-essentials';
+import {
+  findMasterEditionPda,
+  findMetadataPda,
+  findTokenRecordPda,
+  getMplTokenMetadataProgramId,
+  isProgrammable,
+  TokenStandard,
+} from '@metaplex-foundation/mpl-token-metadata';
 import { PublicKey, Signer } from '@metaplex-foundation/umi';
+import { getMplTokenAuthRulesProgramId } from '../programs';
 import { UnrecognizePathForRouteInstructionError } from '../errors';
 import {
   findFreezeEscrowPda,
+  FreezeInstruction,
   FreezeSolPayment,
   FreezeSolPaymentArgs,
   getFreezeInstructionSerializer,
   getFreezeSolPaymentSerializer,
-  FreezeInstruction,
 } from '../generated';
-import { GuardManifest, RouteParser } from '../guards';
+import { GuardManifest, GuardRemainingAccount, RouteParser } from '../guards';
 
 /**
  * The freezeSolPayment guard allows minting frozen NFTs by charging
@@ -47,6 +61,9 @@ export const freezeSolPaymentGuardManifest: GuardManifest<
       remainingAccounts: [
         { publicKey: freezeEscrow, isWritable: true },
         { publicKey: nftAta, isWritable: false },
+        ...(args.nftRuleSet
+          ? [{ publicKey: args.nftRuleSet, isWritable: false }]
+          : []),
       ],
     };
   },
@@ -68,7 +85,13 @@ export const freezeSolPaymentGuardManifest: GuardManifest<
   },
 };
 
-export type FreezeSolPaymentMintArgs = Omit<FreezeSolPaymentArgs, 'lamports'>;
+export type FreezeSolPaymentMintArgs = Omit<
+  FreezeSolPaymentArgs,
+  'lamports'
+> & {
+  /** The ruleSet of the minted NFT, if any. */
+  nftRuleSet?: PublicKey;
+};
 
 /**
  * The settings for the freezeSolPayment guard that should be provided
@@ -128,8 +151,9 @@ export type FreezeSolPaymentRouteArgsInitialize = Omit<
  *   guard: 'freezeSolPayment',
  *   args: {
  *     path: 'thaw',
- *     nftMint: nftToThaw.address,
- *     nftOwner: nftToThaw.token.ownerAddress,
+ *     nftMint,
+ *     nftOwner,
+ *     tokenStandard: TokenStandard.NonFungible,
  *   },
  * });
  * ```
@@ -146,6 +170,12 @@ export type FreezeSolPaymentRouteArgsThaw = Omit<
 
   /** The owner address of the NFT to thaw. */
   nftOwner: PublicKey;
+
+  /** The token standard of the minted NFT. */
+  nftTokenStandard: TokenStandard;
+
+  /** The ruleSet of the minted NFT, if any. */
+  nftRuleSet?: PublicKey;
 };
 
 /**
@@ -183,10 +213,6 @@ const initializeRouteInstruction: RouteParser<
     candyMachine: routeContext.candyMachine,
     candyGuard: routeContext.candyGuard,
   });
-  const systemProgram = context.programs.getPublicKey(
-    'splSystem',
-    '11111111111111111111111111111111'
-  );
   const s = context.serializer;
   const serializer = s.tuple([
     getFreezeInstructionSerializer(context),
@@ -197,7 +223,7 @@ const initializeRouteInstruction: RouteParser<
     remainingAccounts: [
       { publicKey: freezeEscrow, isWritable: true },
       { signer: args.candyGuardAuthority, isWritable: false },
-      { publicKey: systemProgram, isWritable: false },
+      { publicKey: getSplSystemProgramId(context), isWritable: false },
     ],
   };
 };
@@ -212,33 +238,64 @@ const thawRouteInstruction: RouteParser<FreezeSolPaymentRouteArgsThaw> = (
     candyMachine: routeContext.candyMachine,
     candyGuard: routeContext.candyGuard,
   });
+  const nftFreezeAta = findAssociatedTokenPda(context, {
+    mint: args.nftMint,
+    owner: freezeEscrow,
+  });
   const nftAta = findAssociatedTokenPda(context, {
     mint: args.nftMint,
     owner: args.nftOwner,
   });
+  const nftMetadata = findMetadataPda(context, { mint: args.nftMint });
   const nftEdition = findMasterEditionPda(context, { mint: args.nftMint });
-  const tokenProgram = context.programs.getPublicKey(
-    'splToken',
-    'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
+  const nftAtaTokenRecord = findTokenRecordPda(context, {
+    mint: args.nftMint,
+    token: nftAta,
+  });
+  const nftFreezeAtaTokenRecord = findTokenRecordPda(context, {
+    mint: args.nftMint,
+    token: nftFreezeAta,
+  });
+  const data = getFreezeInstructionSerializer(context).serialize(
+    FreezeInstruction.Thaw
   );
-  const tokenMetadataProgram = context.programs.getPublicKey(
-    'mplTokenMetadata',
-    'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'
+  const remainingAccounts: GuardRemainingAccount[] = [
+    { publicKey: freezeEscrow, isWritable: true },
+    { publicKey: args.nftMint, isWritable: false },
+    { publicKey: args.nftOwner, isWritable: false },
+    { publicKey: nftAta, isWritable: true },
+    { publicKey: nftEdition, isWritable: false },
+    { publicKey: getSplTokenProgramId(context), isWritable: false },
+    { publicKey: getMplTokenMetadataProgramId(context), isWritable: false },
+  ];
+
+  if (!isProgrammable(args.nftTokenStandard)) {
+    return { data, remainingAccounts };
+  }
+
+  remainingAccounts.push(
+    ...[
+      { publicKey: nftMetadata, isWritable: true },
+      { publicKey: nftFreezeAta, isWritable: true },
+      { publicKey: getSplSystemProgramId(context), isWritable: false },
+      { publicKey: getSysvar('instructions'), isWritable: false },
+      { publicKey: getSplAssociatedTokenProgramId(context), isWritable: false },
+      { publicKey: nftAtaTokenRecord, isWritable: true },
+      { publicKey: nftFreezeAtaTokenRecord, isWritable: true },
+    ]
   );
-  return {
-    data: getFreezeInstructionSerializer(context).serialize(
-      FreezeInstruction.Thaw
-    ),
-    remainingAccounts: [
-      { publicKey: freezeEscrow, isWritable: true },
-      { publicKey: args.nftMint, isWritable: false },
-      { publicKey: args.nftOwner, isWritable: false },
-      { publicKey: nftAta, isWritable: true },
-      { publicKey: nftEdition, isWritable: false },
-      { publicKey: tokenProgram, isWritable: false },
-      { publicKey: tokenMetadataProgram, isWritable: false },
-    ],
-  };
+
+  if (args.nftRuleSet) {
+    const tokenAuthRules = getMplTokenAuthRulesProgramId(context);
+    remainingAccounts.push(
+      ...[
+        { publicKey: tokenAuthRules, isWritable: false },
+        { publicKey: args.nftRuleSet, isWritable: false },
+      ]
+    );
+  }
+
+  return { data, remainingAccounts };
 };
 
 const unlockFundsRouteInstruction: RouteParser<
@@ -249,10 +306,6 @@ const unlockFundsRouteInstruction: RouteParser<
     candyMachine: routeContext.candyMachine,
     candyGuard: routeContext.candyGuard,
   });
-  const systemProgram = context.programs.getPublicKey(
-    'splSystem',
-    '11111111111111111111111111111111'
-  );
   return {
     data: getFreezeInstructionSerializer(context).serialize(
       FreezeInstruction.UnlockFunds
@@ -261,7 +314,7 @@ const unlockFundsRouteInstruction: RouteParser<
       { publicKey: freezeEscrow, isWritable: true },
       { signer: args.candyGuardAuthority, isWritable: false },
       { publicKey: args.destination, isWritable: true },
-      { publicKey: systemProgram, isWritable: false },
+      { publicKey: getSplSystemProgramId(context), isWritable: false },
     ],
   };
 };

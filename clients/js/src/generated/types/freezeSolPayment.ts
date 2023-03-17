@@ -23,6 +23,7 @@ import {
  * destination pubkey, candy guard pubkey, candy machine pubkey]`).
  * 1. `[]` Associate token account of the NFT (seeds `[payer pubkey, token
  * program pubkey, nft mint pubkey]`).
+ * 2. `[optional]` Authorization rule set for the minted pNFT.
  */
 
 export type FreezeSolPayment = { lamports: SolAmount; destination: PublicKey };

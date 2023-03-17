@@ -54,6 +54,16 @@ pub fn mint_v2<'info>(
             .as_ref()
             .map(|token_record| token_record.to_account_info()),
         remaining: ctx.remaining_accounts,
+        authorization_rules_program: ctx
+            .accounts
+            .authorization_rules_program
+            .as_ref()
+            .map(|authorization_rules_program| authorization_rules_program.to_account_info()),
+        authorization_rules: ctx
+            .accounts
+            .authorization_rules
+            .as_ref()
+            .map(|authorization_rules| authorization_rules.to_account_info()),
     };
 
     // evaluation context for this transaction
@@ -153,29 +163,29 @@ fn cpi_mint(ctx: &EvaluationContext) -> Result<()> {
     // candy machine mint instruction accounts
     let mint_accounts = Box::new(mpl_candy_machine_core::cpi::accounts::MintV2 {
         candy_machine: ctx.accounts.candy_machine.to_account_info(),
-        authority_pda: ctx.accounts.candy_machine_authority_pda.to_owned(),
+        authority_pda: ctx.accounts.candy_machine_authority_pda.clone(),
         mint_authority: candy_guard.to_account_info(),
-        payer: ctx.accounts.payer.to_owned(),
-        nft_owner: ctx.accounts.minter.to_owned(),
-        nft_mint: ctx.accounts.nft_mint.to_owned(),
-        nft_mint_authority: ctx.accounts.nft_mint_authority.to_owned(),
-        nft_metadata: ctx.accounts.nft_metadata.to_owned(),
-        nft_master_edition: ctx.accounts.nft_master_edition.to_owned(),
-        token: ctx.accounts.token.to_owned(),
-        token_record: ctx.accounts.token_record.to_owned(),
-        collection_delegate_record: ctx.accounts.collection_delegate_record.to_owned(),
-        collection_mint: ctx.accounts.collection_mint.to_owned(),
-        collection_metadata: ctx.accounts.collection_metadata.to_owned(),
-        collection_master_edition: ctx.accounts.collection_master_edition.to_owned(),
-        collection_update_authority: ctx.accounts.collection_update_authority.to_owned(),
-        token_metadata_program: ctx.accounts.token_metadata_program.to_owned(),
-        spl_token_program: ctx.accounts.spl_token_program.to_owned(),
-        spl_ata_program: ctx.accounts.spl_ata_program.to_owned(),
-        system_program: ctx.accounts.system_program.to_owned(),
+        payer: ctx.accounts.payer.clone(),
+        nft_owner: ctx.accounts.minter.clone(),
+        nft_mint: ctx.accounts.nft_mint.clone(),
+        nft_mint_authority: ctx.accounts.nft_mint_authority.clone(),
+        nft_metadata: ctx.accounts.nft_metadata.clone(),
+        nft_master_edition: ctx.accounts.nft_master_edition.clone(),
+        token: ctx.accounts.token.clone(),
+        token_record: ctx.accounts.token_record.clone(),
+        collection_delegate_record: ctx.accounts.collection_delegate_record.clone(),
+        collection_mint: ctx.accounts.collection_mint.clone(),
+        collection_metadata: ctx.accounts.collection_metadata.clone(),
+        collection_master_edition: ctx.accounts.collection_master_edition.clone(),
+        collection_update_authority: ctx.accounts.collection_update_authority.clone(),
+        token_metadata_program: ctx.accounts.token_metadata_program.clone(),
+        spl_token_program: ctx.accounts.spl_token_program.clone(),
+        spl_ata_program: ctx.accounts.spl_ata_program.clone(),
+        system_program: ctx.accounts.system_program.clone(),
         sysvar_instructions: Some(ctx.accounts.sysvar_instructions.to_owned()),
-        recent_slothashes: ctx.accounts.recent_slothashes.to_owned(),
-        authorization_rules_program: None,
-        authorization_rules: None,
+        recent_slothashes: ctx.accounts.recent_slothashes.clone(),
+        authorization_rules_program: ctx.accounts.authorization_rules_program.clone(),
+        authorization_rules: ctx.accounts.authorization_rules.clone(),
     });
 
     let mint_infos = mint_accounts.to_account_infos();
@@ -196,8 +206,6 @@ fn cpi_mint(ctx: &EvaluationContext) -> Result<()> {
     // PDA signer for the transaction
     let seeds = [SEED, &candy_guard.base.to_bytes(), &[candy_guard.bump]];
     let signer = [&seeds[..]];
-
-    msg!("CPI call");
 
     invoke_signed(&mint_ix, &mint_infos, &signer)?;
 

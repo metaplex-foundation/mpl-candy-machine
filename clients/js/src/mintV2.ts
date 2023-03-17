@@ -1,3 +1,9 @@
+import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-essentials';
+import {
+  findTokenRecordPda,
+  isProgrammable,
+  TokenStandard,
+} from '@metaplex-foundation/mpl-token-metadata';
 import {
   mergeBytes,
   none,
@@ -32,6 +38,8 @@ export type MintV2InstructionData<MA extends GuardSetMintArgs> = {
 export type MintV2InstructionDataArgs<MA extends GuardSetMintArgs> = {
   mintArgs?: Partial<MA>;
   group?: Option<string>;
+  /** @defaultValue `TokenStandard.NonFungible`. */
+  tokenStandard?: TokenStandard;
 };
 
 export function mintV2<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
@@ -44,6 +52,8 @@ export function mintV2<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
     >
 ): TransactionBuilder {
   const { mintArgs = {}, group = none(), ...rest } = input;
+
+  // Parsing mint data.
   const program = context.programs.get<CandyGuardProgram>('mplCandyGuard');
   const mintContext: MintContext = {
     minter: input.minter ?? context.identity,
@@ -58,8 +68,23 @@ export function mintV2<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
     MA extends undefined ? DefaultGuardSetMintArgs : MA
   >(context, program, mintContext, mintArgs);
   const prefix = context.serializer.u32().serialize(data.length);
+
+  // Default token Record value.
+  const defaultTokenRecord = isProgrammable(
+    input.tokenStandard ?? TokenStandard.NonFungible
+  )
+    ? findTokenRecordPda(context, {
+        mint: publicKey(input.nftMint),
+        token: findAssociatedTokenPda(context, {
+          mint: publicKey(input.nftMint),
+          owner: publicKey(input.minter ?? context.identity),
+        }),
+      })
+    : undefined;
+
   const ix = baseMintV2(context, {
     ...rest,
+    tokenRecord: input.tokenRecord ?? defaultTokenRecord,
     mintArgs: mergeBytes([prefix, data]),
     group,
   }).items[0];

@@ -42,7 +42,7 @@ export type FreezeEscrowAccountData = {
    * allowed to thaw after this.
    */
   freezePeriod: bigint;
-  /** The destination address for the frozed fund to go to. */
+  /** The destination address for the frozen fund to go to. */
   destination: PublicKey;
   /**
    * The authority that initialized the freeze. This will be the only
@@ -69,7 +69,7 @@ export type FreezeEscrowAccountDataArgs = {
    * allowed to thaw after this.
    */
   freezePeriod: number | bigint;
-  /** The destination address for the frozed fund to go to. */
+  /** The destination address for the frozen fund to go to. */
   destination: PublicKey;
   /**
    * The authority that initialized the freeze. This will be the only

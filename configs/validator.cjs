@@ -11,6 +11,7 @@ function getExternalProgram(programName) {
 module.exports = {
   validator: {
     commitment: "processed",
+    accountsCluster: "https://metaplex.devnet.rpcpool.com/",
     programs: [
       {
         label: "Candy Machine Core",
@@ -31,6 +32,11 @@ module.exports = {
         deployPath: getExternalProgram("mpl_token_metadata.so"),
       },
       {
+        label: "Token Auth Rules",
+        programId: "auth9SigNpDKz4sJJ1DfCTuZrZNSAgh9sFD3rboVmgg",
+        deployPath: getExternalProgram("mpl_token_auth_rules.so"),
+      },
+      {
         label: "System Extras",
         programId: "SysExL2WDyJi9aRZrXorrjHJut3JwHQ7R9bTyctbNNG",
         deployPath: getExternalProgram("mpl_system_extras.so"),
@@ -44,6 +50,13 @@ module.exports = {
         label: "Civic Gateway",
         programId: "gatem74V238djXdzWnJf94Wo1DcnuGkfijbf3AuBhfs",
         deployPath: getExternalProgram("civic_gateway.so"),
+      },
+    ],
+    accounts: [
+      {
+        label: "Metaplex Default RuleSet",
+        accountId: "eBJLFYPxJmMGKuFwpDWkzxZeUrad92kZRC5BJLpzyT9",
+        executable: false,
       },
     ],
   },

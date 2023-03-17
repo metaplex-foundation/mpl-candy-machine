@@ -1,3 +1,4 @@
+import { getSplSystemProgramId } from '@metaplex-foundation/mpl-essentials';
 import { publicKey, Signer } from '@metaplex-foundation/umi';
 import {
   AllowList,
@@ -75,13 +76,7 @@ export const allowListGuardManifest: GuardManifest<
           candyGuard: routeContext.candyGuard,
         }),
       },
-      {
-        isWritable: false,
-        publicKey: context.programs.getPublicKey(
-          'splSystem',
-          '11111111111111111111111111111111'
-        ),
-      },
+      { isWritable: false, publicKey: getSplSystemProgramId(context) },
       ...(args.minter !== undefined
         ? [{ signer: args.minter, isWritable: false }]
         : []),

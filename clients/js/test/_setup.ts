@@ -7,6 +7,7 @@ import {
 } from '@metaplex-foundation/mpl-essentials';
 import {
   createNft as baseCreateNft,
+  createProgrammableNft as baseCreateProgrammableNft,
   DigitalAssetWithToken,
   fetchDigitalAssetWithAssociatedToken,
   findMasterEditionPda,
@@ -48,6 +49,10 @@ import {
   wrap,
 } from '../src';
 
+export const METAPLEX_DEFAULT_RULESET = publicKey(
+  'eBJLFYPxJmMGKuFwpDWkzxZeUrad92kZRC5BJLpzyT9'
+);
+
 export const createUmi = async () =>
   (await basecreateUmi()).use(mplCandyMachine());
 
@@ -56,17 +61,25 @@ export const createNft = async (
   input: Partial<Parameters<typeof baseCreateNft>[1]> = {}
 ): Promise<Signer> => {
   const mint = generateSigner(umi);
-  await transactionBuilder()
-    .add(
-      baseCreateNft(umi, {
-        mint,
-        name: 'My collection NFT',
-        sellerFeeBasisPoints: percentAmount(10),
-        uri: 'https://example.com/my-collection-nft.json',
-        ...input,
-      })
-    )
-    .sendAndConfirm(umi);
+  await baseCreateNft(umi, {
+    mint,
+    ...defaultAssetData(),
+    ...input,
+  }).sendAndConfirm(umi);
+
+  return mint;
+};
+
+export const createProgrammableNft = async (
+  umi: Umi,
+  input: Partial<Parameters<typeof baseCreateProgrammableNft>[1]> = {}
+): Promise<Signer> => {
+  const mint = generateSigner(umi);
+  await baseCreateProgrammableNft(umi, {
+    mint,
+    ...defaultAssetData(),
+    ...input,
+  }).sendAndConfirm(umi);
 
   return mint;
 };
@@ -195,15 +208,13 @@ export const createV2 = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
   const candyMachine = input.candyMachine ?? generateSigner(umi);
   const collectionMint =
     input.collectionMint ?? (await createCollectionNft(umi)).publicKey;
-  let builder = transactionBuilder().add(
-    await baseCreateCandyMachineV2(umi, {
-      ...defaultCandyMachineData(umi),
-      ...input,
-      itemsAvailable: input.itemsAvailable ?? input.configLines?.length ?? 100,
-      candyMachine,
-      collectionMint,
-    })
-  );
+  let builder = await baseCreateCandyMachineV2(umi, {
+    ...defaultCandyMachineData(umi),
+    ...input,
+    itemsAvailable: input.itemsAvailable ?? input.configLines?.length ?? 100,
+    candyMachine,
+    collectionMint,
+  });
 
   if (input.configLines !== undefined) {
     builder = builder.add(
@@ -226,6 +237,12 @@ export const createV2 = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
   await builder.sendAndConfirm(umi);
   return candyMachine;
 };
+
+export const defaultAssetData = () => ({
+  name: 'My Asset',
+  sellerFeeBasisPoints: percentAmount(10, 2),
+  uri: 'https://example.com/my-asset.json',
+});
 
 export const defaultCandyMachineData = (
   context: Pick<Context, 'identity'>
@@ -285,7 +302,7 @@ export const assertSuccessfulMint = async (
   const owner = publicKey(input.owner);
   const {
     token = findAssociatedTokenPda(umi, { mint, owner }),
-    tokenStandard = TokenStandard.NonFungible,
+    tokenStandard,
     name,
     uri,
   } = input;
@@ -307,9 +324,14 @@ export const assertSuccessfulMint = async (
       isOriginal: true,
     },
     metadata: {
-      tokenStandard: some(tokenStandard),
+      tokenStandard: { __option: 'Some' },
     },
   });
+
+  // Token Stardard.
+  if (tokenStandard !== undefined) {
+    t.deepEqual(nft.metadata.tokenStandard, some(tokenStandard));
+  }
 
   // Name.
   if (typeof name === 'string') t.is(nft.metadata.name, name);

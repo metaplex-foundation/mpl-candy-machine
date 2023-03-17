@@ -1,5 +1,8 @@
 /* eslint-disable no-promise-executor-return */
-import { setComputeUnitLimit } from '@metaplex-foundation/mpl-essentials';
+import {
+  getSysvar,
+  setComputeUnitLimit,
+} from '@metaplex-foundation/mpl-essentials';
 import {
   findCollectionAuthorityRecordPda,
   findMasterEditionPda,
@@ -10,7 +13,6 @@ import {
 import {
   base58PublicKey,
   generateSigner,
-  publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import test from 'ava';
@@ -81,8 +83,8 @@ test('it can create a LUT for a candy machine v2', async (t) => {
         updateAuthority: umi.identity.publicKey,
         delegate: collectionAuthorityPda,
       }),
-      publicKey('Sysvar1nstructions1111111111111111111111111'),
-      publicKey('SysvarS1otHashes111111111111111111111111111'),
+      getSysvar('instructions'),
+      getSysvar('slotHashes'),
     ]
       .map(base58PublicKey)
       .sort()

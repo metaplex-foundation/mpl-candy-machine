@@ -23,8 +23,8 @@ import {
   tokenPaymentGuardManifest,
 } from './defaultGuards';
 import {
-  getMplCandyGuardProgram,
-  getMplCandyMachineCoreProgram,
+  createMplCandyGuardProgram,
+  createMplCandyMachineCoreProgram,
 } from './generated';
 import {
   CandyGuardProgram,
@@ -37,10 +37,10 @@ export const mplCandyMachine = (): UmiPlugin => ({
     umi.use(mplTokenMetadata());
 
     // Programs.
-    umi.programs.add(getMplCandyMachineCoreProgram(), false);
+    umi.programs.add(createMplCandyMachineCoreProgram(), false);
     umi.programs.add(
       {
-        ...getMplCandyGuardProgram(),
+        ...createMplCandyGuardProgram(),
         availableGuards: defaultCandyGuardNames,
       } as CandyGuardProgram,
       false

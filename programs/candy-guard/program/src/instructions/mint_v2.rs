@@ -240,6 +240,7 @@ pub struct MintV2<'info> {
     payer: Signer<'info>,
 
     /// Minter account for validation and non-SOL fees.
+    #[account(mut)]
     minter: Signer<'info>,
 
     /// Mint account of the NFT. The account will be initialized if necessary.

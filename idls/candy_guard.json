@@ -206,7 +206,7 @@
         },
         {
           "name": "minter",
-          "isMut": false,
+          "isMut": true,
           "isSigner": true,
           "docs": [
             "Minter account for validation and non-SOL fees."

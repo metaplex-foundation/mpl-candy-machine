@@ -6,7 +6,12 @@ import {
   Token,
   TokenState,
 } from '@metaplex-foundation/mpl-essentials';
-import { TokenStandard } from '@metaplex-foundation/mpl-token-metadata';
+import {
+  fetchTokenRecord,
+  findTokenRecordPda,
+  TokenStandard,
+  TokenState as MetadataTokenState,
+} from '@metaplex-foundation/mpl-token-metadata';
 import {
   generateSigner,
   isEqualToAmount,
@@ -17,6 +22,7 @@ import {
   Signer,
   sol,
   some,
+  unwrapSomeOrElse,
   subtractAmounts,
   transactionBuilder,
   Umi,
@@ -28,6 +34,7 @@ import {
   findCandyGuardPda,
   findFreezeEscrowPda,
   FreezeEscrow,
+  getCandyMachineRuleSet,
   mintV2,
   route,
 } from '../../src';
@@ -643,7 +650,7 @@ test('it charges a bot tax if something goes wrong', async (t) => {
   await assertBotTax(t, umi, mint, signature, /FreezeNotInitialized/);
 });
 
-test.only('it transfers SOL to an escrow account and locks the Programmable NFT', async (t) => {
+test('it transfers SOL to an escrow account and locks the Programmable NFT', async (t) => {
   // Given a loaded Candy Machine with a freezeSolPayment guard.
   const umi = await createUmi();
   const destination = generateSigner(umi).publicKey;
@@ -677,6 +684,9 @@ test.only('it transfers SOL to an escrow account and locks the Programmable NFT'
     )
     .sendAndConfirm(umi);
 
+  // Retrieves the required ruleSet.
+  const ruleSet = await getCandyMachineRuleSet(umi, candyMachine);
+
   // When we mint from that candy machine.
   const mint = generateSigner(umi);
   await transactionBuilder()
@@ -689,6 +699,7 @@ test.only('it transfers SOL to an escrow account and locks the Programmable NFT'
         collectionUpdateAuthority: umi.identity.publicKey,
         mintArgs: { freezeSolPayment: some({ destination }) },
         tokenStandard: TokenStandard.ProgrammableNonFungible,
+        authorizationRules: unwrapSomeOrElse(ruleSet, () => undefined),
       })
     )
     .sendAndConfirm(umi);
@@ -696,13 +707,21 @@ test.only('it transfers SOL to an escrow account and locks the Programmable NFT'
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
 
-  // And the NFT is frozen.
+  // And the pNFT is frozen.
   const ata = findAssociatedTokenPda(umi, {
     mint: mint.publicKey,
     owner: umi.identity.publicKey,
   });
   const tokenAccount = await fetchToken(umi, ata);
   t.is(tokenAccount.state, TokenState.Frozen);
+
+  // And the token record is locked.
+  const tokenRecord = findTokenRecordPda(umi, {
+    mint: mint.publicKey,
+    token: ata,
+  });
+  const tokenRecodAccount = await fetchTokenRecord(umi, tokenRecord);
+  t.is(tokenRecodAccount.state, MetadataTokenState.Locked);
 
   // And cannot be thawed since not all NFTs have been minted.
   const promise = thawNft(umi, candyMachine, destination, mint.publicKey);

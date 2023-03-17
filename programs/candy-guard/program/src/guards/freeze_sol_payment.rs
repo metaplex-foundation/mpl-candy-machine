@@ -452,21 +452,12 @@ pub fn freeze_nft(
 
         // approves a locked transfer delegate
 
-        let (escrow_ata, _) = Pubkey::find_program_address(
-            &[
-                freeze_escrow.key().as_ref(),
-                spl_token::id().as_ref(),
-                ctx.accounts.nft_mint.key.as_ref(),
-            ],
-            &spl_associated_token_account::id(),
-        );
-
         let args = if ctx.accounts.candy_machine.token_standard
             == TokenStandard::ProgrammableNonFungible as u8
         {
             DelegateArgs::LockedTransferV1 {
                 amount: 1,
-                locked_address: escrow_ata.key(),
+                locked_address: freeze_escrow.key(),
                 authorization_data: None,
             }
         } else {
@@ -731,7 +722,7 @@ pub fn thaw_nft<'info>(
         // token to the freeze escrow ata and then transferring back to the owner; this will
         // clear the delegate reference on the owner token account
 
-        let (escrow_ata, _) = Pubkey::find_program_address(
+        let (escrow_ata_key, _) = Pubkey::find_program_address(
             &[
                 freeze_escrow.key().as_ref(),
                 spl_token::id().as_ref(),
@@ -741,7 +732,7 @@ pub fn thaw_nft<'info>(
         );
 
         let nft_metadata = try_get_account_info(ctx.remaining_accounts, 7)?;
-        let destination_ata = try_get_account_info(ctx.remaining_accounts, 8)?;
+        let escrow_ata = try_get_account_info(ctx.remaining_accounts, 8)?;
         let system_program_info = try_get_account_info(ctx.remaining_accounts, 9)?;
         let sysvar_instructions_info = try_get_account_info(ctx.remaining_accounts, 10)?;
         let spl_ata_program = try_get_account_info(ctx.remaining_accounts, 11)?;
@@ -759,7 +750,7 @@ pub fn thaw_nft<'info>(
 
         // account validation happens on the CPI call, we only need to make sure we got
         // the correct escrow ata account
-        assert_keys_equal(destination_ata.key, &escrow_ata)?;
+        assert_keys_equal(escrow_ata.key, &escrow_ata_key)?;
 
         if is_locked {
             // unlocks the token account
@@ -810,7 +801,7 @@ pub fn thaw_nft<'info>(
             let mut transfer_accounts = vec![
                 nft_ata.to_account_info(),
                 nft_owner.to_account_info(),
-                destination_ata.to_account_info(),
+                escrow_ata.to_account_info(),
                 freeze_pda.to_account_info(),
                 nft_mint.to_account_info(),
                 nft_metadata.to_account_info(),
@@ -851,7 +842,7 @@ pub fn thaw_nft<'info>(
                 },
                 token: nft_ata.key(),
                 token_owner: nft_owner.key(),
-                destination: destination_ata.key(),
+                destination: escrow_ata.key(),
                 destination_owner: freeze_escrow.key(),
                 mint: nft_mint.key(),
                 metadata: nft_metadata.key(),
@@ -887,7 +878,7 @@ pub fn thaw_nft<'info>(
                     amount: 1,
                     authorization_data: None,
                 },
-                token: destination_ata.key(),
+                token: escrow_ata.key(),
                 token_owner: freeze_escrow.key(),
                 destination: nft_ata.key(),
                 destination_owner: nft_owner.key(),

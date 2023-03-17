@@ -16,7 +16,6 @@ import {
 import { PublicKey, Signer } from '@metaplex-foundation/umi';
 import { UnrecognizePathForRouteInstructionError } from '../errors';
 import {
-  AccountVersion,
   findFreezeEscrowPda,
   FreezeInstruction,
   FreezeSolPayment,
@@ -163,14 +162,11 @@ export type FreezeSolPaymentRouteArgsThaw = Omit<
   /** The owner address of the NFT to thaw. */
   nftOwner: PublicKey;
 
-  /** The version of the Candy Machine account. */
-  candyMachineVersion: AccountVersion;
+  /** The token standard of the minted NFT. */
+  nftTokenStandard: TokenStandard;
 
-  /** The token standard of assets being minted. */
-  tokenStandard: TokenStandard;
-
-  /** The Candy Machine's ruleSet if any. */
-  ruleSet?: PublicKey;
+  /** The ruleSet of the minted NFT, if any. */
+  nftRuleSet?: PublicKey;
 };
 
 /**
@@ -268,43 +264,29 @@ const thawRouteInstruction: RouteParser<FreezeSolPaymentRouteArgsThaw> = (
     { publicKey: getMplTokenMetadataProgramId(context), isWritable: false },
   ];
 
-  if (args.candyMachineVersion === AccountVersion.V1) {
+  if (!isProgrammable(args.nftTokenStandard)) {
     return { data, remainingAccounts };
   }
 
   remainingAccounts.push(
     ...[
-      //   7. `[]` Metadata account of the NFT.
       { publicKey: nftMetadata, isWritable: false },
-      //   8. `[]` Freeze PDA associated token account of the NFT.
       { publicKey: nftFreezeAta, isWritable: false },
-      //   9. `[]` System program.
       { publicKey: getSplSystemProgramId(context), isWritable: false },
-      //   10. `[]` Sysvar instructions account.
       { publicKey: getSysvar('instructions'), isWritable: false },
-      //   11. `[]` SPL Associated Token Account program.
       { publicKey: getSplAssociatedTokenProgramId(context), isWritable: false },
-    ]
-  );
-
-  if (!isProgrammable(args.tokenStandard)) {
-    return { data, remainingAccounts };
-  }
-
-  remainingAccounts.push(
-    ...[
-      //   12. `[]` Owner token record account.
       { publicKey: nftAtaTokenRecord, isWritable: false },
-      //   13. `[]` Freeze PDA token record account.
       { publicKey: nftFreezeAtaTokenRecord, isWritable: false },
-      //   14. `[]` Token Authorization Rules program.
-      { publicKey: tokenAuthRulesProgram, isWritable: false },
     ]
   );
 
-  if (args.ruleSet) {
-    //   15. `[]` Token Authorization Rules account.
-    remainingAccounts.push({ publicKey: args.ruleSet, isWritable: false });
+  if (args.nftRuleSet) {
+    remainingAccounts.push(
+      ...[
+        { publicKey: tokenAuthRulesProgram, isWritable: false },
+        { publicKey: args.nftRuleSet, isWritable: false },
+      ]
+    );
   }
 
   return { data, remainingAccounts };

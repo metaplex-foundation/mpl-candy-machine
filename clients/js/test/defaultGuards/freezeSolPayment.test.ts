@@ -854,9 +854,8 @@ const thawNft = async (
       path: 'thaw',
       nftMint,
       nftOwner: nftOwner ?? umi.identity.publicKey,
+      nftTokenStandard: candyMachineAccount.tokenStandard,
       destination,
-      candyMachineVersion: candyMachineAccount.version,
-      tokenStandard: candyMachineAccount.tokenStandard,
     },
   }).sendAndConfirm(umi);
 };

@@ -1,6 +1,7 @@
 import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-essentials';
 import {
   findTokenRecordPda,
+  isProgrammable,
   TokenStandard,
 } from '@metaplex-foundation/mpl-token-metadata';
 import {
@@ -69,16 +70,17 @@ export function mintV2<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
   const prefix = context.serializer.u32().serialize(data.length);
 
   // Default token Record value.
-  const defaultTokenRecord =
-    input.tokenStandard === TokenStandard.ProgrammableNonFungible
-      ? findTokenRecordPda(context, {
+  const defaultTokenRecord = isProgrammable(
+    input.tokenStandard ?? TokenStandard.NonFungible
+  )
+    ? findTokenRecordPda(context, {
+        mint: publicKey(input.nftMint),
+        token: findAssociatedTokenPda(context, {
           mint: publicKey(input.nftMint),
-          token: findAssociatedTokenPda(context, {
-            mint: publicKey(input.nftMint),
-            owner: publicKey(input.minter ?? context.identity),
-          }),
-        })
-      : undefined;
+          owner: publicKey(input.minter ?? context.identity),
+        }),
+      })
+    : undefined;
 
   const ix = baseMintV2(context, {
     ...rest,

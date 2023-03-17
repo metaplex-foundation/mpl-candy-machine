@@ -30,6 +30,7 @@ import {
 import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
 import test, { Assertions } from 'ava';
 import {
+  fetchCandyMachine,
   fetchFreezeEscrow,
   findCandyGuardPda,
   findFreezeEscrowPda,
@@ -844,21 +845,20 @@ const thawNft = async (
   group?: string,
   nftOwner?: PublicKey
 ) => {
-  await transactionBuilder()
-    .add(
-      route(umi, {
-        candyMachine,
-        guard: 'freezeSolPayment',
-        group: group ? some(group) : none(),
-        routeArgs: {
-          path: 'thaw',
-          nftMint,
-          nftOwner: nftOwner ?? umi.identity.publicKey,
-          destination,
-        },
-      })
-    )
-    .sendAndConfirm(umi);
+  const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
+  await route(umi, {
+    candyMachine,
+    guard: 'freezeSolPayment',
+    group: group ? some(group) : none(),
+    routeArgs: {
+      path: 'thaw',
+      nftMint,
+      nftOwner: nftOwner ?? umi.identity.publicKey,
+      destination,
+      candyMachineVersion: candyMachineAccount.version,
+      tokenStandard: candyMachineAccount.tokenStandard,
+    },
+  }).sendAndConfirm(umi);
 };
 
 const unlockFunds = async (
@@ -868,18 +868,14 @@ const unlockFunds = async (
   group?: string,
   candyGuardAuthority?: Signer
 ) => {
-  await transactionBuilder()
-    .add(
-      route(umi, {
-        candyMachine,
-        guard: 'freezeSolPayment',
-        group: group ? some(group) : none(),
-        routeArgs: {
-          path: 'unlockFunds',
-          candyGuardAuthority: candyGuardAuthority ?? umi.identity,
-          destination,
-        },
-      })
-    )
-    .sendAndConfirm(umi);
+  await route(umi, {
+    candyMachine,
+    guard: 'freezeSolPayment',
+    group: group ? some(group) : none(),
+    routeArgs: {
+      path: 'unlockFunds',
+      candyGuardAuthority: candyGuardAuthority ?? umi.identity,
+      destination,
+    },
+  }).sendAndConfirm(umi);
 };

@@ -932,22 +932,18 @@ const thawNft = async (
   group?: string,
   nftOwner?: PublicKey
 ) => {
-  await transactionBuilder()
-    .add(
-      route(umi, {
-        candyMachine,
-        guard: 'freezeTokenPayment',
-        group: group ? some(group) : none(),
-        routeArgs: {
-          path: 'thaw',
-          nftMint,
-          nftOwner: nftOwner ?? umi.identity.publicKey,
-          mint: publicKey(tokenMint),
-          destinationAta,
-        },
-      })
-    )
-    .sendAndConfirm(umi);
+  await route(umi, {
+    candyMachine,
+    guard: 'freezeTokenPayment',
+    group: group ? some(group) : none(),
+    routeArgs: {
+      path: 'thaw',
+      nftMint,
+      nftOwner: nftOwner ?? umi.identity.publicKey,
+      mint: publicKey(tokenMint),
+      destinationAta,
+    },
+  }).sendAndConfirm(umi);
 };
 
 const unlockFunds = async (
@@ -958,19 +954,15 @@ const unlockFunds = async (
   group?: string,
   candyGuardAuthority?: Signer
 ) => {
-  await transactionBuilder()
-    .add(
-      route(umi, {
-        candyMachine,
-        guard: 'freezeTokenPayment',
-        group: group ? some(group) : none(),
-        routeArgs: {
-          path: 'unlockFunds',
-          candyGuardAuthority: candyGuardAuthority ?? umi.identity,
-          mint: publicKey(tokenMint),
-          destinationAta,
-        },
-      })
-    )
-    .sendAndConfirm(umi);
+  await route(umi, {
+    candyMachine,
+    guard: 'freezeTokenPayment',
+    group: group ? some(group) : none(),
+    routeArgs: {
+      path: 'unlockFunds',
+      candyGuardAuthority: candyGuardAuthority ?? umi.identity,
+      mint: publicKey(tokenMint),
+      destinationAta,
+    },
+  }).sendAndConfirm(umi);
 };

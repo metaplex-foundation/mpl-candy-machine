@@ -1,16 +1,23 @@
 import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-essentials';
-import { findMasterEditionPda } from '@metaplex-foundation/mpl-token-metadata';
-import { PublicKey, Signer } from '@metaplex-foundation/umi';
+import {
+  findMasterEditionPda,
+  findMetadataPda,
+  findTokenRecordPda,
+  isProgrammable,
+  TokenStandard,
+} from '@metaplex-foundation/mpl-token-metadata';
+import { publicKey, PublicKey, Signer } from '@metaplex-foundation/umi';
 import { UnrecognizePathForRouteInstructionError } from '../errors';
 import {
+  AccountVersion,
   findFreezeEscrowPda,
+  FreezeInstruction,
   FreezeSolPayment,
   FreezeSolPaymentArgs,
   getFreezeInstructionSerializer,
   getFreezeSolPaymentSerializer,
-  FreezeInstruction,
 } from '../generated';
-import { GuardManifest, RouteParser } from '../guards';
+import { GuardManifest, GuardRemainingAccount, RouteParser } from '../guards';
 
 /**
  * The freezeSolPayment guard allows minting frozen NFTs by charging
@@ -130,6 +137,8 @@ export type FreezeSolPaymentRouteArgsInitialize = Omit<
  *     path: 'thaw',
  *     nftMint: nftToThaw.address,
  *     nftOwner: nftToThaw.token.ownerAddress,
+ *     candyMachineVersion: AccountVersion.V2,
+ *     tokenStandard: TokenStandard.NonFungible,
  *   },
  * });
  * ```
@@ -146,6 +155,15 @@ export type FreezeSolPaymentRouteArgsThaw = Omit<
 
   /** The owner address of the NFT to thaw. */
   nftOwner: PublicKey;
+
+  /** The version of the Candy Machine account. */
+  candyMachineVersion: AccountVersion;
+
+  /** The token standard of assets being minted. */
+  tokenStandard: TokenStandard;
+
+  /** The Candy Machine's ruleSet if any. */
+  ruleSet?: PublicKey;
 };
 
 /**
@@ -212,33 +230,100 @@ const thawRouteInstruction: RouteParser<FreezeSolPaymentRouteArgsThaw> = (
     candyMachine: routeContext.candyMachine,
     candyGuard: routeContext.candyGuard,
   });
+  const nftFreezeAta = findAssociatedTokenPda(context, {
+    mint: args.nftMint,
+    owner: freezeEscrow,
+  });
   const nftAta = findAssociatedTokenPda(context, {
     mint: args.nftMint,
     owner: args.nftOwner,
   });
+  const nftMetadata = findMetadataPda(context, { mint: args.nftMint });
   const nftEdition = findMasterEditionPda(context, { mint: args.nftMint });
+  const nftAtaTokenRecord = findTokenRecordPda(context, {
+    mint: args.nftMint,
+    token: nftAta,
+  });
+  const nftFreezeAtaTokenRecord = findTokenRecordPda(context, {
+    mint: args.nftMint,
+    token: nftAta,
+  });
+  const systemProgram = context.programs.getPublicKey(
+    'splSystem',
+    '11111111111111111111111111111111'
+  );
   const tokenProgram = context.programs.getPublicKey(
     'splToken',
     'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
+  );
+  const associatedTokenProgram = context.programs.getPublicKey(
+    'splAssociatedToken',
+    'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'
   );
   const tokenMetadataProgram = context.programs.getPublicKey(
     'mplTokenMetadata',
     'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'
   );
-  return {
-    data: getFreezeInstructionSerializer(context).serialize(
-      FreezeInstruction.Thaw
-    ),
-    remainingAccounts: [
-      { publicKey: freezeEscrow, isWritable: true },
-      { publicKey: args.nftMint, isWritable: false },
-      { publicKey: args.nftOwner, isWritable: false },
-      { publicKey: nftAta, isWritable: true },
-      { publicKey: nftEdition, isWritable: false },
-      { publicKey: tokenProgram, isWritable: false },
-      { publicKey: tokenMetadataProgram, isWritable: false },
-    ],
-  };
+  const tokenAuthRulesProgram = context.programs.getPublicKey(
+    'mplTokenAuthRules',
+    'auth9SigNpDKz4sJJ1DfCTuZrZNSAgh9sFD3rboVmgg'
+  );
+  const data = getFreezeInstructionSerializer(context).serialize(
+    FreezeInstruction.Thaw
+  );
+  const remainingAccounts: GuardRemainingAccount[] = [
+    { publicKey: freezeEscrow, isWritable: true },
+    { publicKey: args.nftMint, isWritable: false },
+    { publicKey: args.nftOwner, isWritable: false },
+    { publicKey: nftAta, isWritable: true },
+    { publicKey: nftEdition, isWritable: false },
+    { publicKey: tokenProgram, isWritable: false },
+    { publicKey: tokenMetadataProgram, isWritable: false },
+  ];
+
+  if (args.candyMachineVersion === AccountVersion.V1) {
+    return { data, remainingAccounts };
+  }
+
+  remainingAccounts.push(
+    ...[
+      //   7. `[]` Metadata account of the NFT.
+      { publicKey: nftMetadata, isWritable: false },
+      //   8. `[]` Freeze PDA associated token account of the NFT.
+      { publicKey: nftFreezeAta, isWritable: false },
+      //   9. `[]` System program.
+      { publicKey: systemProgram, isWritable: false },
+      //   10. `[]` Sysvar instructions account.
+      {
+        publicKey: publicKey('Sysvar1nstructions1111111111111111111111111'),
+        isWritable: false,
+      },
+      //   11. `[]` SPL Associated Token Account program.
+      { publicKey: associatedTokenProgram, isWritable: false },
+    ]
+  );
+
+  if (!isProgrammable(args.tokenStandard)) {
+    return { data, remainingAccounts };
+  }
+
+  remainingAccounts.push(
+    ...[
+      //   12. `[]` Owner token record account.
+      { publicKey: nftAtaTokenRecord, isWritable: false },
+      //   13. `[]` Freeze PDA token record account.
+      { publicKey: nftFreezeAtaTokenRecord, isWritable: false },
+      //   14. `[]` Token Authorization Rules program.
+      { publicKey: tokenAuthRulesProgram, isWritable: false },
+    ]
+  );
+
+  if (args.ruleSet) {
+    //   15. `[]` Token Authorization Rules account.
+    remainingAccounts.push({ publicKey: args.ruleSet, isWritable: false });
+  }
+
+  return { data, remainingAccounts };
 };
 
 const unlockFundsRouteInstruction: RouteParser<

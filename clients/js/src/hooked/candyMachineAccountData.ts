@@ -1,4 +1,4 @@
-import { TokenStandard } from '@metaplex-foundation/mpl-token-metadata';
+import { isProgrammable } from '@metaplex-foundation/mpl-token-metadata';
 import {
   bitArray,
   Context,
@@ -72,9 +72,7 @@ export function getCandyMachineAccountDataSerializer(
         ruleBytes: Uint8Array,
         ruleOffset = 0
       ): [Option<PublicKey>, number] => {
-        if (base.tokenStandard !== TokenStandard.ProgrammableNonFungible) {
-          return [none(), ruleOffset];
-        }
+        if (!isProgrammable(base.tokenStandard)) return [none(), ruleOffset];
         return s
           .option(s.publicKey(), { fixed: true })
           .deserialize(ruleBytes, ruleOffset);

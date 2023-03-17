@@ -34,7 +34,7 @@ use crate::{
 ///   2. `[writable]` Token account holding the required amount.
 ///   3. `[writable]` Associate token account of the Freeze PDA (seeds `[freeze PDA
 ///                   pubkey, token program pubkey, nft mint pubkey]`).
-///   4. `[optional]` Authrotization rule set for the minted pNFT.
+///   4. `[optional]` Authorization rule set for the minted pNFT.
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug)]
 pub struct FreezeTokenPayment {
     pub amount: u64,
@@ -353,6 +353,7 @@ impl Condition for FreezeTokenPayment {
             ctx,
             ctx.indices["freeze_token_payment"],
             &self.destination_ata,
+            4,
         )
     }
 }

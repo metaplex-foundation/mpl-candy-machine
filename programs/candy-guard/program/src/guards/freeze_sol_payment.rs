@@ -272,7 +272,7 @@ impl Condition for FreezeSolPayment {
         _mint_args: &[u8],
     ) -> Result<()> {
         // freezes the nft
-        freeze_nft(ctx, ctx.indices["freeze_sol_payment"], &self.destination)
+        freeze_nft(ctx, ctx.indices["freeze_sol_payment"], &self.destination, 2)
     }
 }
 
@@ -297,7 +297,7 @@ pub struct FreezeEscrow {
     /// allowed to thaw after this.
     pub freeze_period: i64,
 
-    /// The destination address for the frozed fund to go to.
+    /// The destination address for the frozen fund to go to.
     pub destination: Pubkey,
 
     /// The authority that initialized the freeze. This will be the only
@@ -366,6 +366,7 @@ pub fn freeze_nft(
     ctx: &EvaluationContext,
     account_index: usize,
     destination: &Pubkey,
+    rule_set_offset: usize,
 ) -> Result<()> {
     let freeze_pda = try_get_account_info(ctx.accounts.remaining, account_index)?;
 
@@ -443,7 +444,8 @@ pub fn freeze_nft(
             .token_record
             .as_ref()
             .map(|token_record| token_record.to_account_info());
-        let authorization_rules = get_account_info(ctx.accounts.remaining, account_index + 2);
+        let authorization_rules =
+            get_account_info(ctx.accounts.remaining, account_index + rule_set_offset);
 
         // if we have a token account, it must match the 'nft_ata'
         if let Some(ref token_info) = ctx.accounts.token {

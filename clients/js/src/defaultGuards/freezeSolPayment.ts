@@ -3,6 +3,7 @@ import {
   getSplAssociatedTokenProgramId,
   getSplSystemProgramId,
   getSplTokenProgramId,
+  getSysvar,
 } from '@metaplex-foundation/mpl-essentials';
 import {
   findMasterEditionPda,
@@ -12,7 +13,7 @@ import {
   isProgrammable,
   TokenStandard,
 } from '@metaplex-foundation/mpl-token-metadata';
-import { publicKey, PublicKey, Signer } from '@metaplex-foundation/umi';
+import { PublicKey, Signer } from '@metaplex-foundation/umi';
 import { UnrecognizePathForRouteInstructionError } from '../errors';
 import {
   AccountVersion,
@@ -280,10 +281,7 @@ const thawRouteInstruction: RouteParser<FreezeSolPaymentRouteArgsThaw> = (
       //   9. `[]` System program.
       { publicKey: getSplSystemProgramId(context), isWritable: false },
       //   10. `[]` Sysvar instructions account.
-      {
-        publicKey: publicKey('Sysvar1nstructions1111111111111111111111111'),
-        isWritable: false,
-      },
+      { publicKey: getSysvar('instructions'), isWritable: false },
       //   11. `[]` SPL Associated Token Account program.
       { publicKey: getSplAssociatedTokenProgramId(context), isWritable: false },
     ]

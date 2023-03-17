@@ -1,4 +1,4 @@
-import { createLut } from '@metaplex-foundation/mpl-essentials';
+import { createLut, getSysvar } from '@metaplex-foundation/mpl-essentials';
 import {
   findCollectionAuthorityRecordPda,
   findMasterEditionPda,
@@ -9,7 +9,6 @@ import {
 import {
   AddressLookupTableInput,
   Context,
-  publicKey,
   PublicKey,
   Signer,
   TransactionBuilder,
@@ -77,7 +76,7 @@ export const getLutAddressesForCandyMachine = async (
     candyMachineAccount.version === AccountVersion.V1
       ? delegateRecordV1
       : delegateRecordV2,
-    publicKey('Sysvar1nstructions1111111111111111111111111'),
-    publicKey('SysvarS1otHashes111111111111111111111111111'),
+    getSysvar('instructions'),
+    getSysvar('slotHashes'),
   ]);
 };

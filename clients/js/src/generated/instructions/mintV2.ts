@@ -249,7 +249,7 @@ export function mintV2(
   keys.push({
     pubkey: minterAccount.publicKey,
     isSigner: true,
-    isWritable: isWritable(minterAccount, false),
+    isWritable: isWritable(minterAccount, true),
   });
 
   // Nft Mint.

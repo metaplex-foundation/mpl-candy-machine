@@ -65,7 +65,7 @@ test('it burns a specific NFT to allow minting', async (t) => {
   await assertBurnedNft(t, umi, nftToBurn, umi.identity);
 });
 
-test.skip('it allows minting even when the payer is different from the minter', async (t) => {
+test('it allows minting even when the payer is different from the minter', async (t) => {
   // Given a separate minter owns an NFT from a certain collection.
   const umi = await createUmi();
   const minter = generateSigner(umi);

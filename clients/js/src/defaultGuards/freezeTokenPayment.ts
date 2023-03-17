@@ -71,6 +71,9 @@ export const freezeTokenPaymentGuardManifest: GuardManifest<
         { publicKey: nftAta, isWritable: false },
         { publicKey: tokenAddress, isWritable: true },
         { publicKey: freezeAta, isWritable: true },
+        ...(args.nftRuleSet
+          ? [{ publicKey: args.nftRuleSet, isWritable: false }]
+          : []),
       ],
     };
   },
@@ -92,7 +95,13 @@ export const freezeTokenPaymentGuardManifest: GuardManifest<
   },
 };
 
-export type FreezeTokenPaymentMintArgs = Omit<FreezeTokenPaymentArgs, 'amount'>;
+export type FreezeTokenPaymentMintArgs = Omit<
+  FreezeTokenPaymentArgs,
+  'amount'
+> & {
+  /** The ruleSet of the minted NFT, if any. */
+  nftRuleSet?: PublicKey;
+};
 
 /**
  * The settings for the freezeTokenPayment guard that should be provided

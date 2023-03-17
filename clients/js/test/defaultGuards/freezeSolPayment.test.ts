@@ -749,7 +749,7 @@ test('it transfers SOL to an escrow account and locks the Programmable NFT', asy
   );
 });
 
-test('it can thaw an Programmable NFT once all NFTs are minted', async (t) => {
+test('it can thaw a Programmable NFT once all NFTs are minted', async (t) => {
   // Given a loaded Candy Machine with a ruleSet and an initialized
   // freezeSolPayment guard with only one item.
   const umi = await createUmi();

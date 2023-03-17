@@ -885,10 +885,10 @@ pub fn thaw_nft<'info>(
                 mint: nft_mint.key(),
                 metadata: nft_metadata.key(),
                 edition: Some(nft_master_edition.key()),
-                owner_token_record: owner_token_record
+                owner_token_record: escrow_token_record
                     .as_ref()
                     .map(|token_record| token_record.key()),
-                destination_token_record: escrow_token_record
+                destination_token_record: owner_token_record
                     .as_ref()
                     .map(|token_record| token_record.key()),
                 authority: freeze_escrow.key(),

@@ -121,15 +121,15 @@ impl Guard for FreezeSolPayment {
             //
             // Remaining accounts required for Programmable NFTs:
             //
-            //   7. `[]` Metadata account of the NFT.
-            //   8. `[]` Freeze PDA associated token account of the NFT.
+            //   7. `[writable]` Metadata account of the NFT.
+            //   8. `[writable]` Freeze PDA associated token account of the NFT.
             //   9. `[]` System program.
             //   10. `[]` Sysvar instructions account.
             //   11. `[]` SPL Associated Token Account program.
-            //   12. `[]` Owner token record account.
-            //   13. `[]` Freeze PDA token record account.
-            //   14. `[]` Token Authorization Rules program.
-            //   15. `[]` Token Authorization Rules account.
+            //   12. `[optional, writable]` Owner token record account.
+            //   13. `[optional, writable]` Freeze PDA token record account.
+            //   14. `[optional]` Token Authorization Rules program.
+            //   15. `[optional]` Token Authorization Rules account.
             FreezeInstruction::Thaw => {
                 msg!("Instruction: Thaw (FreezeSolPayment guard)");
                 thaw_nft(ctx, route_context, data)
@@ -454,7 +454,7 @@ pub fn freeze_nft(
 
         let (escrow_ata, _) = Pubkey::find_program_address(
             &[
-                freeze_escrow.destination.as_ref(),
+                freeze_escrow.key().as_ref(),
                 spl_token::id().as_ref(),
                 ctx.accounts.nft_mint.key.as_ref(),
             ],
@@ -733,7 +733,7 @@ pub fn thaw_nft<'info>(
 
         let (escrow_ata, _) = Pubkey::find_program_address(
             &[
-                freeze_escrow.destination.as_ref(),
+                freeze_escrow.key().as_ref(),
                 spl_token::id().as_ref(),
                 nft_mint.key.as_ref(),
             ],

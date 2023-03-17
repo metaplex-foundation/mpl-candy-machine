@@ -832,7 +832,8 @@
         "0. `[writable]` Freeze PDA to receive the funds (seeds `[\"freeze_escrow\",",
         "destination pubkey, candy guard pubkey, candy machine pubkey]`).",
         "1. `[]` Associate token account of the NFT (seeds `[payer pubkey, token",
-        "program pubkey, nft mint pubkey]`)."
+        "program pubkey, nft mint pubkey]`).",
+        "2. `[optional]` Authorization rule set for the minted pNFT."
       ],
       "type": {
         "kind": "struct",

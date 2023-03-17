@@ -61,7 +61,9 @@ export const freezeSolPaymentGuardManifest: GuardManifest<
       remainingAccounts: [
         { publicKey: freezeEscrow, isWritable: true },
         { publicKey: nftAta, isWritable: false },
-        // { publicKey: args.nftRuleSet, isWritable: false },
+        ...(args.nftRuleSet
+          ? [{ publicKey: args.nftRuleSet, isWritable: false }]
+          : []),
       ],
     };
   },
@@ -274,23 +276,21 @@ const thawRouteInstruction: RouteParser<FreezeSolPaymentRouteArgsThaw> = (
 
   remainingAccounts.push(
     ...[
-      { publicKey: nftMetadata, isWritable: false },
-      { publicKey: nftFreezeAta, isWritable: false },
+      { publicKey: nftMetadata, isWritable: true },
+      { publicKey: nftFreezeAta, isWritable: true },
       { publicKey: getSplSystemProgramId(context), isWritable: false },
       { publicKey: getSysvar('instructions'), isWritable: false },
       { publicKey: getSplAssociatedTokenProgramId(context), isWritable: false },
-      { publicKey: nftAtaTokenRecord, isWritable: false },
-      { publicKey: nftFreezeAtaTokenRecord, isWritable: false },
+      { publicKey: nftAtaTokenRecord, isWritable: true },
+      { publicKey: nftFreezeAtaTokenRecord, isWritable: true },
     ]
   );
 
   if (args.nftRuleSet) {
+    const tokenAuthRules = getMplTokenAuthRulesProgramId(context);
     remainingAccounts.push(
       ...[
-        {
-          publicKey: getMplTokenAuthRulesProgramId(context),
-          isWritable: false,
-        },
+        { publicKey: tokenAuthRules, isWritable: false },
         { publicKey: args.nftRuleSet, isWritable: false },
       ]
     );

@@ -255,7 +255,7 @@ const thawRouteInstruction: RouteParser<FreezeSolPaymentRouteArgsThaw> = (
   });
   const nftFreezeAtaTokenRecord = findTokenRecordPda(context, {
     mint: args.nftMint,
-    token: nftAta,
+    token: nftFreezeAta,
   });
   const data = getFreezeInstructionSerializer(context).serialize(
     FreezeInstruction.Thaw

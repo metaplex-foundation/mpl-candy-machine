@@ -749,6 +749,79 @@ test('it transfers SOL to an escrow account and locks the Programmable NFT', asy
   );
 });
 
+test('it can thaw an Programmable NFT once all NFTs are minted', async (t) => {
+  // Given a loaded Candy Machine with a ruleSet and an initialized
+  // freezeSolPayment guard with only one item.
+  const umi = await createUmi();
+  const destination = generateSigner(umi).publicKey;
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const { publicKey: candyMachine } = await createV2(umi, {
+    collectionMint,
+    tokenStandard: TokenStandard.ProgrammableNonFungible,
+    ruleSet: METAPLEX_DEFAULT_RULESET,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {
+      freezeSolPayment: some({ lamports: sol(1), destination }),
+    },
+  });
+  await initFreezeEscrow(umi, candyMachine, destination);
+
+  // And given we minted the only PNFT from that candy machine.
+  const mint = generateSigner(umi);
+  await transactionBuilder()
+    .add(setComputeUnitLimit(umi, { units: 800_000 }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        nftMint: mint,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        mintArgs: {
+          freezeSolPayment: some({
+            destination,
+            nftRuleSet: METAPLEX_DEFAULT_RULESET,
+          }),
+        },
+        tokenStandard: TokenStandard.ProgrammableNonFungible,
+        authorizationRulesProgram: getMplTokenAuthRulesProgramId(umi),
+      })
+    )
+    .sendAndConfirm(umi);
+
+  // And that is it locked.
+  const tokenRecord = findTokenRecordPda(umi, {
+    mint: mint.publicKey,
+    token: findAssociatedTokenPda(umi, {
+      mint: mint.publicKey,
+      owner: umi.identity.publicKey,
+    }),
+  });
+  let tokenRecordAccount = await fetchTokenRecord(umi, tokenRecord);
+  t.is(tokenRecordAccount.state, MetadataTokenState.Locked);
+
+  // When we thaw the locked PNFT.
+  await setComputeUnitLimit(umi, { units: 600_000 })
+    .add(
+      route(umi, {
+        candyMachine,
+        guard: 'freezeSolPayment',
+        routeArgs: {
+          path: 'thaw',
+          nftMint: mint.publicKey,
+          nftOwner: umi.identity.publicKey,
+          nftTokenStandard: TokenStandard.ProgrammableNonFungible,
+          destination,
+          nftRuleSet: METAPLEX_DEFAULT_RULESET,
+        },
+      })
+    )
+    .sendAndConfirm(umi);
+
+  // Then the PNFT is unlocked.
+  tokenRecordAccount = await fetchTokenRecord(umi, tokenRecord);
+  t.is(tokenRecordAccount.state, MetadataTokenState.Unlocked);
+});
+
 const getFreezeEscrow = (
   umi: Umi,
   candyMachine: PublicKey,

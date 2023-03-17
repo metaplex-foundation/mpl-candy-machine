@@ -132,7 +132,6 @@ impl Guard for FreezeSolPayment {
             //   13. `[]` Freeze PDA token record account.
             //   14. `[]` Token Authorization Rules program.
             //   15. `[]` Token Authorization Rules account.
-            //   16. `[]` Metaplex Token Metadata program ID.
             FreezeInstruction::Thaw => {
                 msg!("Instruction: Thaw (FreezeSolPayment guard)");
                 thaw_nft(ctx, route_context, data)
@@ -901,7 +900,7 @@ pub fn thaw_nft<'info>(
 
             invoke_signed(&transfer_in_ix, &transfer_accounts, &[&signer])?;
 
-            // decreases the freeze (locked) counter
+            // decreases the freeze (lock) counter
             freeze_escrow.frozen_count = freeze_escrow.frozen_count.saturating_sub(1);
         } else {
             msg!("Token account is unlocked");

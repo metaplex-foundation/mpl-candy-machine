@@ -32,6 +32,11 @@ module.exports = {
         deployPath: getExternalProgram("mpl_token_metadata.so"),
       },
       {
+        label: "Token Auth Rules",
+        programId: "auth9SigNpDKz4sJJ1DfCTuZrZNSAgh9sFD3rboVmgg",
+        deployPath: getExternalProgram("mpl_token_auth_rules.so"),
+      },
+      {
         label: "System Extras",
         programId: "SysExL2WDyJi9aRZrXorrjHJut3JwHQ7R9bTyctbNNG",
         deployPath: getExternalProgram("mpl_system_extras.so"),

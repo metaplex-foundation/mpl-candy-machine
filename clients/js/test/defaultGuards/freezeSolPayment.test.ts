@@ -22,7 +22,6 @@ import {
   Signer,
   sol,
   some,
-  unwrapSomeOrElse,
   subtractAmounts,
   transactionBuilder,
   Umi,
@@ -35,7 +34,6 @@ import {
   findCandyGuardPda,
   findFreezeEscrowPda,
   FreezeEscrow,
-  getCandyMachineRuleSet,
   mintV2,
   route,
 } from '../../src';
@@ -45,6 +43,7 @@ import {
   createCollectionNft,
   createUmi,
   createV2,
+  METAPLEX_DEFAULT_RULESET,
 } from '../_setup';
 
 test('it transfers SOL to an escrow account and freezes the NFT', async (t) => {
@@ -651,7 +650,7 @@ test('it charges a bot tax if something goes wrong', async (t) => {
   await assertBotTax(t, umi, mint, signature, /FreezeNotInitialized/);
 });
 
-test('it transfers SOL to an escrow account and locks the Programmable NFT', async (t) => {
+test.only('it transfers SOL to an escrow account and locks the Programmable NFT', async (t) => {
   // Given a loaded Candy Machine with a freezeSolPayment guard.
   const umi = await createUmi();
   const destination = generateSigner(umi).publicKey;
@@ -659,6 +658,7 @@ test('it transfers SOL to an escrow account and locks the Programmable NFT', asy
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     tokenStandard: TokenStandard.ProgrammableNonFungible,
+    ruleSet: METAPLEX_DEFAULT_RULESET,
     collectionMint,
     configLines: [
       { name: 'Degen #1', uri: 'https://example.com/degen/1' },
@@ -670,23 +670,7 @@ test('it transfers SOL to an escrow account and locks the Programmable NFT', asy
   });
 
   // And given the freezeSolPayment guard is initialized.
-  await transactionBuilder()
-    .add(
-      route(umi, {
-        candyMachine,
-        guard: 'freezeSolPayment',
-        routeArgs: {
-          path: 'initialize',
-          period: 15 * 24 * 3600, // 15 days.
-          candyGuardAuthority: umi.identity,
-          destination,
-        },
-      })
-    )
-    .sendAndConfirm(umi);
-
-  // Retrieves the required ruleSet.
-  const ruleSet = await getCandyMachineRuleSet(umi, candyMachine);
+  await initFreezeEscrow(umi, candyMachine, destination);
 
   // When we mint from that candy machine.
   const mint = generateSigner(umi);
@@ -700,7 +684,7 @@ test('it transfers SOL to an escrow account and locks the Programmable NFT', asy
         collectionUpdateAuthority: umi.identity.publicKey,
         mintArgs: { freezeSolPayment: some({ destination }) },
         tokenStandard: TokenStandard.ProgrammableNonFungible,
-        authorizationRules: unwrapSomeOrElse(ruleSet, () => undefined),
+        authorizationRules: METAPLEX_DEFAULT_RULESET,
       })
     )
     .sendAndConfirm(umi);

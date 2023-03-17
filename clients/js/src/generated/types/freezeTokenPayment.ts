@@ -20,7 +20,7 @@ import { Context, PublicKey, Serializer } from '@metaplex-foundation/umi';
  * 2. `[writable]` Token account holding the required amount.
  * 3. `[writable]` Associate token account of the Freeze PDA (seeds `[freeze PDA
  * pubkey, token program pubkey, nft mint pubkey]`).
- * 4. `[optional]` Authrotization rule set for the minted pNFT.
+ * 4. `[optional]` Authorization rule set for the minted pNFT.
  */
 
 export type FreezeTokenPayment = {

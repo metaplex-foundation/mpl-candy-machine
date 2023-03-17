@@ -818,7 +818,7 @@ test('it charges a bot tax if something goes wrong', async (t) => {
   await assertBotTax(t, umi, mint, signature, /FreezeNotInitialized/);
 });
 
-test.only('it transfers tokens to an escrow account and locks the Programmable NFT', async (t) => {
+test('it transfers tokens to an escrow account and locks the Programmable NFT', async (t) => {
   // Given a token mint with holders such that the identity has 10 tokens.
   const umi = await createUmi();
   const destination = generateSigner(umi);
@@ -916,7 +916,7 @@ test.only('it transfers tokens to an escrow account and locks the Programmable N
     candyGuard: publicKey(findCandyGuardPda(umi, { base: candyMachine })),
     frozenCount: 1n,
     freezePeriod: BigInt(15 * 24 * 3600),
-    destination: publicKey(destination),
+    destination: publicKey(destinationAta),
     authority: publicKey(umi.identity),
   });
 
@@ -925,7 +925,7 @@ test.only('it transfers tokens to an escrow account and locks the Programmable N
   t.is(payerBalance, 9, 'payer lost tokens');
 });
 
-test.skip('it can thaw a Programmable NFT once all NFTs are minted', async (t) => {
+test('it can thaw a Programmable NFT once all NFTs are minted', async (t) => {
   // Given a token mint with holders such that the identity has 10 tokens.
   const umi = await createUmi();
   const destination = generateSigner(umi);

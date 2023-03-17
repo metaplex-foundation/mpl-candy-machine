@@ -14,6 +14,7 @@ import {
   TokenStandard,
 } from '@metaplex-foundation/mpl-token-metadata';
 import { PublicKey, Signer } from '@metaplex-foundation/umi';
+import { getMplTokenAuthRulesProgramId } from '../programs';
 import { UnrecognizePathForRouteInstructionError } from '../errors';
 import {
   findFreezeEscrowPda,
@@ -60,6 +61,7 @@ export const freezeSolPaymentGuardManifest: GuardManifest<
       remainingAccounts: [
         { publicKey: freezeEscrow, isWritable: true },
         { publicKey: nftAta, isWritable: false },
+        // { publicKey: args.nftRuleSet, isWritable: false },
       ],
     };
   },
@@ -81,7 +83,13 @@ export const freezeSolPaymentGuardManifest: GuardManifest<
   },
 };
 
-export type FreezeSolPaymentMintArgs = Omit<FreezeSolPaymentArgs, 'lamports'>;
+export type FreezeSolPaymentMintArgs = Omit<
+  FreezeSolPaymentArgs,
+  'lamports'
+> & {
+  /** The ruleSet of the minted NFT, if any. */
+  nftRuleSet?: PublicKey;
+};
 
 /**
  * The settings for the freezeSolPayment guard that should be provided
@@ -247,10 +255,6 @@ const thawRouteInstruction: RouteParser<FreezeSolPaymentRouteArgsThaw> = (
     mint: args.nftMint,
     token: nftAta,
   });
-  const tokenAuthRulesProgram = context.programs.getPublicKey(
-    'mplTokenAuthRules',
-    'auth9SigNpDKz4sJJ1DfCTuZrZNSAgh9sFD3rboVmgg'
-  );
   const data = getFreezeInstructionSerializer(context).serialize(
     FreezeInstruction.Thaw
   );
@@ -283,7 +287,10 @@ const thawRouteInstruction: RouteParser<FreezeSolPaymentRouteArgsThaw> = (
   if (args.nftRuleSet) {
     remainingAccounts.push(
       ...[
-        { publicKey: tokenAuthRulesProgram, isWritable: false },
+        {
+          publicKey: getMplTokenAuthRulesProgramId(context),
+          isWritable: false,
+        },
         { publicKey: args.nftRuleSet, isWritable: false },
       ]
     );

@@ -684,7 +684,6 @@ test.only('it transfers SOL to an escrow account and locks the Programmable NFT'
         collectionUpdateAuthority: umi.identity.publicKey,
         mintArgs: { freezeSolPayment: some({ destination }) },
         tokenStandard: TokenStandard.ProgrammableNonFungible,
-        authorizationRules: METAPLEX_DEFAULT_RULESET,
       })
     )
     .sendAndConfirm(umi);

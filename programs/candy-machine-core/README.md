@@ -137,7 +137,7 @@ CandyMachine account has been created with the expected size before executing th
 | `candy_machine`               |    ✅    |        | The `CandyMachine` account.                                          |
 | `authority_pda`               |    ✅    |        | Authority PDA key (seeds `["candy_machine", candy_machine pubkey]`). |
 | `authority`                   |          |        | Public key of the candy machine authority.                           |
-| `payer`                       |          |   ✅   | Payer of the transaction.                                            |
+| `payer`                       |    ✅    |   ✅   | Payer of the transaction.                                            |
 | `collection_metadata`         |          |        | Metadata account of the collection.                                  |
 | `collection_mint`             |          |        | Mint account of the collection.                                      |
 | `collection_master_edition`   |          |        | Master Edition account of the collection.                            |
@@ -170,7 +170,7 @@ instruction will have its `AccountVersion` set to `V2`.
 | `candy_machine`               |    ✅    |        | The `CandyMachine` account.                                          |
 | `authority_pda`               |    ✅    |        | Authority PDA key (seeds `["candy_machine", candy_machine pubkey]`). |
 | `authority`                   |          |        | Public key of the candy machine authority.                           |
-| `payer`                       |          |   ✅   | Payer of the transaction.                                            |
+| `payer`                       |    ✅    |   ✅   | Payer of the transaction.                                            |
 | `rule_set`                    |          |        | (optional) Rule set to be added to newly minted NFTs.                |
 | `collection_metadata`         |          |        | Metadata account of the collection.                                  |
 | `collection_mint`             |          |        | Mint account of the collection.                                      |
@@ -310,7 +310,7 @@ changed if no NFTs have been minted.
 | `candy_machine`                   |    ✅    |        | The `CandyMachine` account.                                          |
 | `authority`                       |          |   ✅   | Public key of the candy machine authority.                           |
 | `authority_pda`                   |    ✅    |        | Authority PDA key (seeds `["candy_machine", candy_machine pubkey]`). |
-| `payer`                           |          |   ✅   | Payer of the transaction.                                            |
+| `payer`                           |    ✅    |   ✅   | Payer of the transaction.                                            |
 | `collection_mint`                 |          |        | Mint account of the current collection.                              |
 | `collection_metadata`             |          |        | Metadata account of the current collection.                          |
 | `collection_authority_record`     |    ✅    |        | Authority Record PDA of the current collection.                      |
@@ -343,7 +343,7 @@ changed if no (p)NFTs have been minted.
 | `candy_machine`                   |    ✅    |        | The `CandyMachine` account.                                          |
 | `authority`                       |          |   ✅   | Public key of the candy machine authority.                           |
 | `authority_pda`                   |    ✅    |        | Authority PDA key (seeds `["candy_machine", candy_machine pubkey]`). |
-| `payer`                           |          |   ✅   | Payer of the transaction.                                            |
+| `payer`                           |    ✅    |   ✅   | Payer of the transaction.                                            |
 | `collection_update_authority`     |          |        | Update authority account of the current collection.                  |
 | `collection_mint`                 |          |        | Mint account of the current collection.                              |
 | `collection_metadata`             |          |        | Metadata account of the current collection.                          |

@@ -182,7 +182,7 @@ fn cpi_mint(ctx: &EvaluationContext) -> Result<()> {
         spl_token_program: ctx.accounts.spl_token_program.clone(),
         spl_ata_program: ctx.accounts.spl_ata_program.clone(),
         system_program: ctx.accounts.system_program.clone(),
-        sysvar_instructions: Some(ctx.accounts.sysvar_instructions.to_owned()),
+        sysvar_instructions: ctx.accounts.sysvar_instructions.to_owned(),
         recent_slothashes: ctx.accounts.recent_slothashes.clone(),
         authorization_rules_program: ctx.accounts.authorization_rules_program.clone(),
         authorization_rules: ctx.accounts.authorization_rules.clone(),

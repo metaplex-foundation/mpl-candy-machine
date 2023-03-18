@@ -247,7 +247,7 @@ export function initializeCandyMachineV2(
   keys.push({
     pubkey: payerAccount.publicKey,
     isSigner: true,
-    isWritable: isWritable(payerAccount, false),
+    isWritable: isWritable(payerAccount, true),
   });
 
   // Rule Set.

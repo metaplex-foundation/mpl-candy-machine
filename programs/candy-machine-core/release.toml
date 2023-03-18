@@ -1,0 +1,2 @@
+consolidate-commits = false
+pre-release-commit-message = "(cargo-release) {{crate_name}} v{{version}}"

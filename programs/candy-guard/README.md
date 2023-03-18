@@ -2,7 +2,7 @@
 ---
 
 ### 💡 Update:
-Candy Guard v0.2.0 updated the serialization logic for the arguments of the `initialize` and `update` instructions. Instead of using a typed struct as the argument, these instructions expect a `[u8]` represeting the custom serialized struct. This is to ensure adding new guards in the future does not affect clients.
+From Candy Guard v0.2.0, the serialization logic for the arguments of the `initialize` and `update` instructions expect a `[u8]` represeting the custom serialized struct. This is to ensure adding new guards in the future does not affect clients.
 
 If you are using the `mpl-candy-guard` npm package, you can serialize the `CandyMachineData` object using:
 ```typescript
@@ -123,7 +123,7 @@ This instruction creates and initializes a new `CandyGuard` account.
 The instruction uses a [custom serialization](https://docs.rs/mpl-candy-guard/0.1.1/mpl_candy_guard/state/candy_guard/struct.CandyGuardData.html#method.save) in order to maintain backwards compatibility with previous versions of the `CandyGuardData` struct.
 </details>
 
-### 📄 `mint`
+### 📄 `mint` (deprecated)
 
 This instruction mints an NFT from a Candy Machine "wrapped" by a Candy Guard. Only when the transaction is succesfully validated, it is forwarded to the Candy Machine.
 
@@ -152,6 +152,53 @@ This instruction mints an NFT from a Candy Machine "wrapped" by a Candy Guard. O
 | `rent`                        |          |        | `Rent` account.                                                                                     |
 | `recent_slothashes`           |          |        | `SlotHashes` account.                                                                               |
 | `instruction_sysvar_account`  |          |        | `Sysvar1nstructions` account.                                                                       |
+| _remaining accounts_          |          |        | (optional) A list of optional accounts required by individual guards.                               |
+
+</details>
+
+<details>
+  <summary>Arguments</summary>
+  
+| Argument        | Offset | Size | Description               |
+| --------------- | ------ | ---- | ------------------------- |
+| `mint_args`     | 0      | ~    | `[u8]` representing arguments for guards; an empty `[u8]` if there are no arguments. |
+| `label`         | ~      | 6    | (optional) `string` representing the group label to use for validation of guards. |
+</details>
+
+### 📄 `mint_v2`
+
+This instruction mints both `NFT` or `pNFT` from a Candy Machine "wrapped" by a Candy Guard. Only when the transaction is succesfully validated, it is forwarded to the Candy Machine. 
+
+<details>
+  <summary>Accounts</summary>
+
+| Name                          | Writable | Signer | Description                                                                                         |
+| ----------------------------- | :------: | :----: | --------------------------------------------------------------------------------------------------- |
+| `candy_guard`                 |          |        | The `CandyGuard` account PDA key. The PDA is derived using the seed `["candy_guard", base pubkey]`. |
+| `candy_machine_program`       |          |        | `CandyMachine` program ID.                                                                          |
+| `candy_machine`               |    ✅    |        | The `CandyMachine` account.                                                                         |
+| `candy_machine_authority_pda` |    ✅    |        | Authority PDA key (seeds `["candy_machine", candy_machine pubkey]`).                                |
+| `payer`                       |    ✅    |   ✅   | Payer of the transaction.                                                                           |
+| `minter`                      |    ✅    |   ✅   | Minter (owner) of the NFT.                                                                           |
+| `nft_mint`                    |    ✅    |        | Mint account for the NFT. The account should be created before executing the instruction.           |
+| `nft_mint_authority`          |          |   ✅   | Mint authority of the NFT.                                                                          |
+| `nft_metadata`                |    ✅    |        | Metadata account of the NFT.                                                                        |
+| `nft_master_edition`          |    ✅    |        | Master Edition account of the NFT.                                                                  |
+| `token`                       |    ✅    |       | (optional) NFT token account.                                                 |
+| `token_record`                |    ✅    |       | (optional) Metadata `TokenRecord` account (required for `pNFT`)               |
+| `collection_delegate_record`  |          |        | Metadata Delegate Record of the collection.   |
+| `collection_mint`             |          |        | Mint account of the collection.                                                                     |
+| `collection_metadata`         |    ✅    |        | Metadata account of the collection.                                                                 |
+| `collection_master_edition`   |          |        | Master Edition account of the collection.                                                           |
+| `collection_update_authority` |          |        | Update authority of the collection.                                                                 |
+| `token_metadata_program`      |          |        | Metaplex `TokenMetadata` program ID.                                                                |
+| `spl_token_program`           |          |        | `spl-token` program ID.                                                                             |
+| `spl_ata_program`             |          |        | (optional) `spl` associated token program.            |
+| `system_program`              |          |        | `SystemProgram` account.                                                                            |
+| `sysvar_instructions`         |          |        | `sysvar::instructions` account.                                      |
+| `recent_slothashes`           |          |        | SlotHashes sysvar cluster data.                                      |
+| `authorization_rules_program` |          |        | (optional) Token Authorization Rules program.                                   |
+| `authorization_rules`         |          |        | (optional) Token Authorization Rules account.                                   |
 | _remaining accounts_          |          |        | (optional) A list of optional accounts required by individual guards.                               |
 
 </details>
@@ -370,6 +417,7 @@ The merkle proof validation needs to be completed before the mint transaction. T
 | ---------------- | :------: | :----: | -------------------------------------------------------------------------------------------------------------------------------- |
 | `proof_pda`      |    ✅    |        | PDA to represent the merkle proof (seed `["allow_list", merke tree root, payer key, candy guard pubkey, candy machine pubkey]`). |
 | `system_program` |          |        | System program account.                                                                                                          |
+| `minter`         |          |   ✅   | (optional) Minter account to validate. |
 
 </details>
 <details>
@@ -428,6 +476,7 @@ The `FreezeSolPayment` guard is used to charge an amount in SOL (lamports) for t
 | ------------ | :------: | :----: | ---------------------------------------------------------------------------------------------------------------------- |
 | `freeze_pda` |    ✅    |        | Freeze PDA to receive the funds (seeds `["freeze_escrow", destination pubkey, candy guard pubkey, candy machine pubkey]`). |
 | `nft_ata` |          |        | Associate token account of the NFT (seeds `[payer pubkey, token program pubkey, nft mint pubkey]`). |
+| `rule_set` |          |        | (optional) Authorization rule set for the minted pNFT. |
 
 </details>
 
@@ -462,16 +511,25 @@ The `FreezeSolPayment` guard is used to charge an amount in SOL (lamports) for t
 <details>
   <summary>Accounts</summary>
 
-| Name                     | Writable | Signer | Description                                                                                                                      |
-| ------------------------ | :------: | :----: | -------------------------------------------------------------------------------------------------------------------------------- |
-| `freeze_pda`             |    ✅    |        | Freeze PDA to receive the funds (seeds `["freeze_escrow", destination pubkey, candy guard pubkey, candy machine pubkey]`).         |
-| `nft_mint`               |          |        | Mint account for the NFT. |
-| `owner`                  |          |        | Address of the owner of the NFT. |
-| `nft_ata`                |    ✅    |        | Associate token account of the NFT (seeds `[owner pubkey, token program pubkey, nft mint pubkey]`). |
-| `nft_master_edition`     |          |        | Master Edition account of the NFT. |
-| `token_program`          |          |        | `spl-token` program ID.                                                                             |
-| `token_metadata_program` |          |        | Metaplex `TokenMetadata` program ID.                                                                |
-
+| Name                     | Writable | Signer | Description                                                                                                                       |
+| ------------------------- | :------: | :----: | --------------------------------------------------------------------------------------------------------------------------------  |
+| `freeze_pda`              |    ✅    |        | Freeze PDA to receive the funds (seeds `["freeze_escrow", destination pubkey, candy guard pubkey, candy machine pubkey]`).         |
+| `nft_mint`                |          |        | Mint account for the NFT. |
+| `owner`                   |          |        | Address of the owner of the NFT. |
+| `nft_ata`                 |    ✅    |        | Associate token account of the NFT (seeds `[owner pubkey, token program pubkey, nft mint pubkey]`). |
+| `nft_master_edition`      |          |        | Master Edition account of the NFT. |
+| `token_program`           |          |        | `spl-token` program ID.                                                                             |
+| `token_metadata_program`  |          |        | Metaplex `TokenMetadata` program.  |
+|                           |          |        | _Below are accounts required for pNFTs:_  |
+| `nft_metadata`            |    ✅    |        | Metadata account of the NFT.  |
+| `freeze_pda_ata`          |    ✅    |        | Freeze PDA associated token account of the NFT.  |
+| `system_program`          |          |        | System program.  |
+| `sysvar_instructions`     |          |        | Sysvar instructions account.  |
+| `spl_ata_program`         |          |        | SPL Associated Token Account program.  |
+| `owner_token_record`      |    ✅    |        | Owner token record account.  |
+| `freeze_pda_token_record` |    ✅    |        | Freeze PDA token record account.  |
+| `authorization_rules_program` |      |        | (optional) Token Authorization Rules program.  |
+| `authorization_rules`     |          |        | (optional) Token Authorization Rules account.  |
 </details>
 <details>
   <summary>Arguments</summary>
@@ -534,6 +592,7 @@ The `FreezeTokenPayment` guard is used to charge an amount in a specified spl-to
 | `nft_ata`       |          |        | Associate token account of the NFT (seeds `[payer pubkey, token program pubkey, nft mint pubkey]`). |
 | `token_account` |    ✅    |        | Token account holding the required amount (seeds `[payer pubkey, token program pubkey, mint pubkey]`). |
 | `freeze_ata`    |    ✅    |        | Associate token account of the Freeze PDA (seeds `[freeze PDA pubkey, token program pubkey, nft mint pubkey]`).
+| `rule_set` |          |        | (optional) Authorization rule set for the minted pNFT. |
 
 </details>
 
@@ -582,7 +641,16 @@ The `FreezeTokenPayment` guard is used to charge an amount in a specified spl-to
 | `nft_master_edition` |          |        | Master Edition account of the NFT. |
 | `token_program`      |          |        | `spl-token` program ID.                                                                             |
 | `system_program`     |          |        | `SystemProgram` account.                                                                            |
-
+|                           |          |        | _Below are accounts required for pNFTs:_  |
+| `nft_metadata`            |    ✅    |        | Metadata account of the NFT.  |
+| `freeze_pda_ata`          |    ✅    |        | Freeze PDA associated token account of the NFT.  |
+| `system_program`          |          |        | System program.  |
+| `sysvar_instructions`     |          |        | Sysvar instructions account.  |
+| `spl_ata_program`         |          |        | SPL Associated Token Account program.  |
+| `owner_token_record`      |    ✅    |        | Owner token record account.  |
+| `freeze_pda_token_record` |    ✅    |        | Freeze PDA token record account.  |
+| `authorization_rules_program` |      |        | (optional) Token Authorization Rules program.  |
+| `authorization_rules`     |          |        | (optional) Token Authorization Rules account.  |
 </details>
 <details>
   <summary>Arguments</summary>
@@ -685,6 +753,7 @@ The `NftBurn` guard restricts the mint to holders of another NFT (token), requir
 | `nft_edition`                  |    ✅    |        | Master Edition account of the NFT.      |
 | `nft_mint_account`             |    ✅    |        | Mint account of the NFT.                |
 | `nft_mint_collection_metadata` |    ✅    |        | Collection metadata account of the NFT. |
+| `nft_token_record`             |    ✅    |        | (optional) Token Record of the NFT (pNFT). |
 
 </details>
 
@@ -729,7 +798,11 @@ The `NftPayment` guard is a payment guard that charges another NFT (token) from 
 | `nft_mint_account` |          |        | Mint account of the NFT.                                                               |
 | `destination`      |          |        | Account to receive the NFT.                                                            |
 | `destination_ata`  |    ✅    |        | Destination PDA key (seeds `[destination pubkey, token program id, nft_mint pubkey]`). |
-| `atoken_progam`    |          |        | `spl-associate-token` program ID.                                                      |
+| `atoken_progam`    |          |        | `spl-associate-token` program.                  |
+| `owner_token_record`       |    ✅    |        | (optional) Owner token record account (pNFT).  |
+| `destination_token_record` |    ✅    |        | (optional) Freeze PDA token record account (pNFT).  |
+| `authorization_rules_program` |      |        | (optional) Token Authorization Rules program (pNFT).  |
+| `authorization_rules`     |          |        | (optional) Token Authorization Rules account (pNFT).  |
 
 </details>
 

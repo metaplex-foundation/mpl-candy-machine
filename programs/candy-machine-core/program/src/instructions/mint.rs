@@ -5,7 +5,7 @@ use super::mint_v2::{process_mint, MintAccounts};
 use crate::{constants::AUTHORITY_SEED, utils::*, AccountVersion, CandyError, CandyMachine};
 
 pub fn mint<'info>(ctx: Context<'_, '_, '_, 'info, Mint<'info>>) -> Result<()> {
-    msg!("(Deprecated as of 0.2.0) Use MintV2 instead");
+    msg!("(Deprecated as of 1.0.0) Use MintV2 instead");
 
     if !matches!(ctx.accounts.candy_machine.version, AccountVersion::V1) {
         return err!(CandyError::InvalidAccountVersion);

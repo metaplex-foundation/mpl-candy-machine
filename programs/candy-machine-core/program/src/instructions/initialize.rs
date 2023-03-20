@@ -10,7 +10,7 @@ use crate::{
 };
 
 pub fn initialize(ctx: Context<Initialize>, data: CandyMachineData) -> Result<()> {
-    msg!("(Deprecated as of 0.2.0) Use InitializeV2 instead");
+    msg!("(Deprecated as of 1.0.0) Use InitializeV2 instead");
 
     let candy_machine_account = &mut ctx.accounts.candy_machine;
 

@@ -7,7 +7,7 @@ use crate::{
 };
 
 pub fn set_collection(ctx: Context<SetCollection>) -> Result<()> {
-    msg!("(Deprecated as of 0.2.0) Use SetCollectionV2 instead");
+    msg!("(Deprecated as of 1.0.0) Use SetCollectionV2 instead");
 
     let accounts = ctx.accounts;
     let candy_machine = &mut accounts.candy_machine;

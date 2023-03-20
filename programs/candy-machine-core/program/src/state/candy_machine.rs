@@ -47,6 +47,10 @@ impl CandyMachine {
     ) -> Result<Option<Pubkey>> {
         let required_length = self.data.get_space_for_candy()?;
 
+        if account_data.len() <= required_length {
+            return Ok(None);
+        }
+
         if account_data[required_length] == SET {
             let index = required_length + 1;
 

@@ -987,7 +987,7 @@ dependencies = [
 
 [[package]]
 name = "mpl-candy-guard"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anchor-lang",
  "arrayref",

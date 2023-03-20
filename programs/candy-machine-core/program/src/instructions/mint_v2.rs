@@ -62,11 +62,7 @@ pub fn mint_v2<'info>(ctx: Context<'_, '_, '_, 'info, MintV2<'info>>) -> Result<
         payer: ctx.accounts.payer.to_account_info(),
         recent_slothashes: ctx.accounts.recent_slothashes.to_account_info(),
         system_program: ctx.accounts.system_program.to_account_info(),
-        sysvar_instructions: ctx
-            .accounts
-            .sysvar_instructions
-            .as_ref()
-            .map(|sysvar_instructions| sysvar_instructions.to_account_info()),
+        sysvar_instructions: Some(ctx.accounts.sysvar_instructions.to_account_info()),
         token: ctx
             .accounts
             .token
@@ -748,7 +744,7 @@ pub struct MintV2<'info> {
     ///
     /// CHECK: account constraints checked in account trait
     #[account(address = sysvar::instructions::id())]
-    sysvar_instructions: Option<UncheckedAccount<'info>>,
+    sysvar_instructions: UncheckedAccount<'info>,
 
     /// SlotHashes sysvar cluster data.
     ///

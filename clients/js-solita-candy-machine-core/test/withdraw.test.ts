@@ -43,13 +43,13 @@ test('withdraw', async (t) => {
   await transaction.assertSuccess(t);
 
   let accountInfo = await connection.getAccountInfo(payerPair.publicKey);
-  const balance = accountInfo.lamports;
+  const balance = accountInfo!.lamports;
 
   const { tx: withdrawTransaction } = await API.withdraw(t, address, payerPair, fstTxHandler);
   await withdrawTransaction.assertSuccess(t);
 
   accountInfo = await connection.getAccountInfo(payerPair.publicKey);
-  const updatedBalance = accountInfo.lamports;
+  const updatedBalance = accountInfo!.lamports;
 
   t.true(updatedBalance > balance, 'balance after withdraw must be greater');
 });

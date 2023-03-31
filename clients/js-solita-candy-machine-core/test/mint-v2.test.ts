@@ -3,7 +3,7 @@ import { InitTransactions, killStuckProcess, METAPLEX_RULE_SET } from './setup';
 import spok from 'spok';
 import { AccountVersion, CandyMachine, CandyMachineData, ConfigLine } from '../src/generated';
 import { TokenStandard } from '@metaplex-foundation/mpl-token-metadata';
-import { keypairIdentity, Metaplex } from '@metaplex-foundation/js';
+import { keypairIdentity, Metaplex, Nft } from '@metaplex-foundation/js';
 import { getAccount } from '@solana/spl-token';
 import { spokSamePubkey } from './utils';
 
@@ -202,7 +202,7 @@ test('mintV2: Programmable NFT with rule set', async (t) => {
     programmableConfig: {
       ruleSet: spokSamePubkey(METAPLEX_RULE_SET),
     },
-  });
+  } as Nft);
 });
 
 test('mintV2: NFT', async (t) => {
@@ -411,5 +411,5 @@ test('mintV2: mint from existing candy machine', async (t) => {
       __kind: 'V1',
       ruleSet: spokSamePubkey(METAPLEX_RULE_SET),
     },
-  });
+  } as Nft);
 });

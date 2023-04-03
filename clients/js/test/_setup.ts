@@ -116,6 +116,33 @@ export const createVerifiedNft = async (
   return mint;
 };
 
+export const createVerifiedProgrammableNft = async (
+  umi: Umi,
+  input: Partial<Parameters<typeof baseCreateNft>[1]> & {
+    collectionMint: PublicKey;
+    collectionAuthority?: Signer;
+  }
+): Promise<Signer> => {
+  const { collectionMint, collectionAuthority = umi.identity, ...rest } = input;
+  const mint = await createProgrammableNft(umi, {
+    ...rest,
+    collection: some({ verified: false, key: collectionMint }),
+  });
+  const effectiveMint = publicKey(rest.mint ?? mint.publicKey);
+
+  await transactionBuilder()
+    .add(
+      verifyCollectionV1(umi, {
+        authority: collectionAuthority,
+        collectionMint,
+        metadata: findMetadataPda(umi, { mint: effectiveMint }),
+      })
+    )
+    .sendAndConfirm(umi);
+
+  return mint;
+};
+
 export const createMintWithHolders = async (
   umi: Umi,
   input: Partial<Omit<Parameters<typeof createMint>[1], 'mintAuthority'>> & {

@@ -2,14 +2,21 @@ import {
   findAssociatedTokenPda,
   getSplAssociatedTokenProgramId,
 } from '@metaplex-foundation/mpl-essentials';
-import { findMetadataPda } from '@metaplex-foundation/mpl-token-metadata';
+import {
+  findMasterEditionPda,
+  findMetadataPda,
+  findTokenRecordPda,
+  isProgrammable,
+  TokenStandard,
+} from '@metaplex-foundation/mpl-token-metadata';
 import { PublicKey } from '@metaplex-foundation/umi';
+import { getMplTokenAuthRulesProgramId } from '../programs';
 import {
   getNftPaymentSerializer,
   NftPayment,
   NftPaymentArgs,
 } from '../generated';
-import { GuardManifest, noopParser } from '../guards';
+import { GuardManifest, GuardRemainingAccount, noopParser } from '../guards';
 
 /**
  * The nftPayment guard allows minting by charging the
@@ -40,20 +47,51 @@ export const nftPaymentGuardManifest: GuardManifest<
       mint: args.mint,
       owner: args.destination,
     });
-    return {
-      data: new Uint8Array(),
-      remainingAccounts: [
-        { publicKey: nftTokenAccount, isWritable: true },
-        { publicKey: nftMetadata, isWritable: true },
-        { publicKey: args.mint, isWritable: false },
-        { publicKey: args.destination, isWritable: false },
-        { publicKey: destinationAta, isWritable: true },
-        {
-          publicKey: getSplAssociatedTokenProgramId(context),
-          isWritable: false,
-        },
-      ],
-    };
+
+    const remainingAccounts: GuardRemainingAccount[] = [
+      { publicKey: nftTokenAccount, isWritable: true },
+      { publicKey: nftMetadata, isWritable: true },
+      { publicKey: args.mint, isWritable: false },
+      { publicKey: args.destination, isWritable: false },
+      { publicKey: destinationAta, isWritable: true },
+      {
+        publicKey: getSplAssociatedTokenProgramId(context),
+        isWritable: false,
+      },
+    ];
+
+    if (isProgrammable(args.tokenStandard)) {
+      const nftMasterEdition = findMasterEditionPda(context, {
+        mint: args.mint,
+      });
+      const ownerTokenRecord = findTokenRecordPda(context, {
+        mint: args.mint,
+        token: nftTokenAccount,
+      });
+      const destinationTokenRecord = findTokenRecordPda(context, {
+        mint: args.mint,
+        token: destinationAta,
+      });
+      const tokenAuthRules = getMplTokenAuthRulesProgramId(context);
+      remainingAccounts.push(
+        ...[
+          { publicKey: nftMasterEdition, isWritable: false },
+          { publicKey: ownerTokenRecord, isWritable: true },
+          { publicKey: destinationTokenRecord, isWritable: true },
+        ]
+      );
+
+      if (args.ruleSet) {
+        remainingAccounts.push(
+          ...[
+            { publicKey: tokenAuthRules, isWritable: false },
+            { publicKey: args.ruleSet, isWritable: false },
+          ]
+        );
+      }
+    }
+
+    return { data: new Uint8Array(), remainingAccounts };
   },
   routeParser: noopParser,
 };
@@ -65,6 +103,18 @@ export type NftPaymentMintArgs = Omit<NftPaymentArgs, 'requiredCollection'> & {
    * belong to the payer.
    */
   mint: PublicKey;
+
+  /**
+   * The token standard of the NFT used to pay.
+   */
+  tokenStandard: TokenStandard;
+
+  /**
+   * The ruleSet of the PNFT used to pay, if any.
+   *
+   * @defaultValue Default to not using a ruleSet.
+   */
+  ruleSet?: PublicKey;
 
   /**
    * The token account linking the NFT with its owner.

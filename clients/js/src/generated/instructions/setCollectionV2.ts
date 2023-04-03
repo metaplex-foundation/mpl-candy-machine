@@ -7,21 +7,21 @@
  */
 
 import {
+  MetadataDelegateRole,
   findMasterEditionPda,
   findMetadataDelegateRecordPda,
   findMetadataPda,
-  MetadataDelegateRole,
 } from '@metaplex-foundation/mpl-token-metadata';
 import {
   AccountMeta,
-  checkForIsWritableOverride as isWritable,
   Context,
-  mapSerializer,
   PublicKey,
-  publicKey,
   Serializer,
   Signer,
   TransactionBuilder,
+  checkForIsWritableOverride as isWritable,
+  mapSerializer,
+  publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import { findCandyMachineAuthorityPda } from '../../hooked';
@@ -212,7 +212,7 @@ export function setCollectionV2(
   keys.push({
     pubkey: collectionMetadataAccount,
     isSigner: false,
-    isWritable: isWritable(collectionMetadataAccount, false),
+    isWritable: isWritable(collectionMetadataAccount, true),
   });
 
   // Collection Delegate Record.
@@ -241,7 +241,7 @@ export function setCollectionV2(
   keys.push({
     pubkey: newCollectionMetadataAccount,
     isSigner: false,
-    isWritable: isWritable(newCollectionMetadataAccount, false),
+    isWritable: isWritable(newCollectionMetadataAccount, true),
   });
 
   // New Collection Master Edition.

@@ -116,6 +116,7 @@ pub struct SetCollectionV2<'info> {
     /// Metadata account of the collection.
     ///
     /// CHECK: account checked in CPI
+    #[account(mut)]
     collection_metadata: UncheckedAccount<'info>,
 
     /// Collection authority or metadata delegate record.
@@ -135,6 +136,7 @@ pub struct SetCollectionV2<'info> {
     /// New collection metadata.
     ///
     /// CHECK: account checked in CPI
+    #[account(mut)]
     new_collection_metadata: UncheckedAccount<'info>,
 
     /// New collection master edition.

@@ -1855,6 +1855,11 @@
       "code": 6050,
       "name": "InstructionBuilderFailed",
       "msg": "Instruction could not be created"
+    },
+    {
+      "code": 6051,
+      "name": "InvalidAccountVersion",
+      "msg": "Invalid account version"
     }
   ],
   "metadata": {

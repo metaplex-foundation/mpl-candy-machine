@@ -6,6 +6,7 @@ import {
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import test from 'ava';
+import { TokenStandard } from '@metaplex-foundation/mpl-token-metadata';
 import { mintV2 } from '../../src';
 import {
   assertBotTax,
@@ -18,7 +19,6 @@ import {
   createVerifiedNft,
   createVerifiedProgrammableNft,
 } from '../_setup';
-import { TokenStandard } from '@metaplex-foundation/mpl-token-metadata';
 
 test('it burns a specific NFT to allow minting', async (t) => {
   // Given the identity owns an NFT from a certain collection.

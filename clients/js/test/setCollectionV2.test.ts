@@ -7,15 +7,10 @@ import test from 'ava';
 import {
   CandyMachine,
   fetchCandyMachine,
-  findCandyMachineAuthorityPda,
   setCollection,
   setCollectionV2,
 } from '../src';
-import { createV1, createCollectionNft, createUmi, createV2 } from './_setup';
-import {
-  MetadataDelegateRole,
-  findMetadataDelegateRecordPda,
-} from '@metaplex-foundation/mpl-token-metadata';
+import { createCollectionNft, createUmi, createV1, createV2 } from './_setup';
 
 test.only('it can update the collection of a candy machine v2', async (t) => {
   // Given a Candy Machine associated with Collection A.
@@ -29,33 +24,18 @@ test.only('it can update the collection of a candy machine v2', async (t) => {
     collectionUpdateAuthority: collectionUpdateAuthorityA,
   });
 
-  const authorityPdaAccount = findCandyMachineAuthorityPda(umi, {
-    candyMachine: candyMachine.publicKey,
-  });
-
   // When we update its collection to Collection B.
   const collectionUpdateAuthorityB = generateSigner(umi);
   const collectionB = await createCollectionNft(umi, {
     authority: collectionUpdateAuthorityB,
   });
-  await transactionBuilder()
-    .add(
-      setCollectionV2(umi, {
-        candyMachine: candyMachine.publicKey,
-        authorityPda: publicKey(authorityPdaAccount),
-        collectionMint: collectionA.publicKey,
-        collectionUpdateAuthority: collectionUpdateAuthorityA.publicKey,
-        newCollectionMint: collectionB.publicKey,
-        newCollectionUpdateAuthority: collectionUpdateAuthorityB,
-        newCollectionDelegateRecord: findMetadataDelegateRecordPda(umi, {
-          mint: collectionB.publicKey,
-          delegateRole: MetadataDelegateRole.Collection,
-          updateAuthority: collectionUpdateAuthorityB.publicKey,
-          delegate: authorityPdaAccount,
-        }),
-      })
-    )
-    .sendAndConfirm(umi);
+  await setCollectionV2(umi, {
+    candyMachine: candyMachine.publicKey,
+    collectionMint: collectionA.publicKey,
+    collectionUpdateAuthority: collectionUpdateAuthorityA.publicKey,
+    newCollectionMint: collectionB.publicKey,
+    newCollectionUpdateAuthority: collectionUpdateAuthorityB,
+  }).sendAndConfirm(umi);
 
   // Then the Candy Machine's collection was updated accordingly.
   const candyMachineAccount = await fetchCandyMachine(

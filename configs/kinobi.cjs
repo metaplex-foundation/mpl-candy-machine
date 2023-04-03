@@ -23,8 +23,6 @@ const {
   vEnum,
   UseCustomAccountSerializerVisitor,
   UpdateDefinedTypesVisitor,
-  TypeOptionNode,
-  TypeStringNode,
 } = require("@metaplex-foundation/kinobi");
 
 // Paths.
@@ -425,6 +423,18 @@ kinobi.update(
       args: { label: "group" },
       accounts: {
         candyGuard: { defaultsTo: defaultsToCandyGuardPda("candyMachine") },
+      },
+    },
+    "mplCandyMachineCore.setCollectionV2": {
+      accounts: {
+        newCollectionDelegateRecord: {
+          defaultsTo: defaultsToMetadataDelegateRecordPda(
+            "collection",
+            "newCollectionMint",
+            "newCollectionUpdateAuthority",
+            "authorityPda"
+          ),
+        },
       },
     },
     "mplCandyMachineCore.SetAuthority": { name: "SetCandyMachineAuthority" },

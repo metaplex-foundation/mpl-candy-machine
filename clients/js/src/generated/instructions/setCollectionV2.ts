@@ -7,21 +7,21 @@
  */
 
 import {
-  MetadataDelegateRole,
   findMasterEditionPda,
   findMetadataDelegateRecordPda,
   findMetadataPda,
+  MetadataDelegateRole,
 } from '@metaplex-foundation/mpl-token-metadata';
 import {
   AccountMeta,
+  checkForIsWritableOverride as isWritable,
   Context,
+  mapSerializer,
   PublicKey,
+  publicKey,
   Serializer,
   Signer,
   TransactionBuilder,
-  checkForIsWritableOverride as isWritable,
-  mapSerializer,
-  publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import { findCandyMachineAuthorityPda } from '../../hooked';
@@ -40,7 +40,7 @@ export type SetCollectionV2InstructionAccounts = {
   newCollectionMint: PublicKey;
   newCollectionMetadata?: PublicKey;
   newCollectionMasterEdition?: PublicKey;
-  newCollectionDelegateRecord: PublicKey;
+  newCollectionDelegateRecord?: PublicKey;
   tokenMetadataProgram?: PublicKey;
   systemProgram?: PublicKey;
   sysvarInstructions?: PublicKey;
@@ -130,7 +130,14 @@ export function setCollectionV2(
     findMasterEditionPda(context, {
       mint: publicKey(newCollectionMintAccount),
     });
-  const newCollectionDelegateRecordAccount = input.newCollectionDelegateRecord;
+  const newCollectionDelegateRecordAccount =
+    input.newCollectionDelegateRecord ??
+    findMetadataDelegateRecordPda(context, {
+      mint: publicKey(newCollectionMintAccount),
+      delegateRole: MetadataDelegateRole.Collection,
+      updateAuthority: publicKey(newCollectionUpdateAuthorityAccount),
+      delegate: publicKey(authorityPdaAccount),
+    });
   const tokenMetadataProgramAccount = input.tokenMetadataProgram ?? {
     ...context.programs.getPublicKey(
       'mplTokenMetadata',

@@ -1,6 +1,10 @@
 import { generateSigner, transactionBuilder } from '@metaplex-foundation/umi';
 import test from 'ava';
 import {
+  TokenStandard,
+  findCollectionAuthorityRecordPda,
+} from '@metaplex-foundation/mpl-token-metadata';
+import {
   AccountVersion,
   CandyMachine,
   fetchCandyMachine,
@@ -8,10 +12,6 @@ import {
   setTokenStandard,
 } from '../src';
 import { createV1, createCollectionNft, createUmi, createV2 } from './_setup';
-import {
-  TokenStandard,
-  findCollectionAuthorityRecordPda,
-} from '@metaplex-foundation/mpl-token-metadata';
 
 test('it can change token standard from NFT to pNFT', async (t) => {
   // Given a Candy Machine with NFT token standard.
@@ -22,7 +22,7 @@ test('it can change token standard from NFT to pNFT', async (t) => {
   });
   const candyMachine = await createV1(umi, {
     collectionMint: collection.publicKey,
-    collectionUpdateAuthority: collectionUpdateAuthority,
+    collectionUpdateAuthority,
   });
 
   // Then the Candy Machine's token standard is NFT.
@@ -42,7 +42,7 @@ test('it can change token standard from NFT to pNFT', async (t) => {
       setTokenStandard(umi, {
         candyMachine: candyMachine.publicKey,
         collectionMint: collection.publicKey,
-        collectionUpdateAuthority: collectionUpdateAuthority,
+        collectionUpdateAuthority,
         collectionAuthorityRecord: findCollectionAuthorityRecordPda(umi, {
           mint: collection.publicKey,
           collectionAuthority: findCandyMachineAuthorityPda(umi, {
@@ -72,7 +72,7 @@ test('it can change token standard from pNFT to NFT', async (t) => {
   });
   const candyMachine = await createV2(umi, {
     collectionMint: collection.publicKey,
-    collectionUpdateAuthority: collectionUpdateAuthority,
+    collectionUpdateAuthority,
     tokenStandard: TokenStandard.ProgrammableNonFungible,
   });
 
@@ -93,7 +93,7 @@ test('it can change token standard from pNFT to NFT', async (t) => {
       setTokenStandard(umi, {
         candyMachine: candyMachine.publicKey,
         collectionMint: collection.publicKey,
-        collectionUpdateAuthority: collectionUpdateAuthority,
+        collectionUpdateAuthority,
         tokenStandard: TokenStandard.NonFungible,
       })
     )
@@ -117,7 +117,7 @@ test('it can change token standard from NFT to pNFT and then back to NFT', async
   });
   const candyMachine = await createV1(umi, {
     collectionMint: collection.publicKey,
-    collectionUpdateAuthority: collectionUpdateAuthority,
+    collectionUpdateAuthority,
   });
 
   // Then the Candy Machine's token standard is NFT.
@@ -137,7 +137,7 @@ test('it can change token standard from NFT to pNFT and then back to NFT', async
       setTokenStandard(umi, {
         candyMachine: candyMachine.publicKey,
         collectionMint: collection.publicKey,
-        collectionUpdateAuthority: collectionUpdateAuthority,
+        collectionUpdateAuthority,
         collectionAuthorityRecord: findCollectionAuthorityRecordPda(umi, {
           mint: collection.publicKey,
           collectionAuthority: findCandyMachineAuthorityPda(umi, {
@@ -163,7 +163,7 @@ test('it can change token standard from NFT to pNFT and then back to NFT', async
       setTokenStandard(umi, {
         candyMachine: candyMachine.publicKey,
         collectionMint: collection.publicKey,
-        collectionUpdateAuthority: collectionUpdateAuthority,
+        collectionUpdateAuthority,
         tokenStandard: TokenStandard.NonFungible,
       })
     )

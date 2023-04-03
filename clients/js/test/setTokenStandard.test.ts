@@ -1,6 +1,7 @@
 import { generateSigner, transactionBuilder } from '@metaplex-foundation/umi';
 import test from 'ava';
 import {
+  AccountVersion,
   CandyMachine,
   fetchCandyMachine,
   findCandyMachineAuthorityPda,
@@ -32,6 +33,7 @@ test('it can change token standard from NFT to pNFT', async (t) => {
 
   t.like(candyMachineAccount, <CandyMachine>{
     tokenStandard: TokenStandard.NonFungible,
+    version: AccountVersion.V1,
   });
 
   // When we update its token standard to pNFT
@@ -57,6 +59,7 @@ test('it can change token standard from NFT to pNFT', async (t) => {
 
   t.like(candyMachineAccount, <CandyMachine>{
     tokenStandard: TokenStandard.ProgrammableNonFungible,
+    version: AccountVersion.V2,
   });
 });
 
@@ -81,6 +84,7 @@ test('it can change token standard from pNFT to NFT', async (t) => {
 
   t.like(candyMachineAccount, <CandyMachine>{
     tokenStandard: TokenStandard.ProgrammableNonFungible,
+    version: AccountVersion.V2,
   });
 
   // When we update its token standard to NFT
@@ -100,6 +104,7 @@ test('it can change token standard from pNFT to NFT', async (t) => {
 
   t.like(candyMachineAccount, <CandyMachine>{
     tokenStandard: TokenStandard.NonFungible,
+    version: AccountVersion.V2,
   });
 });
 
@@ -123,6 +128,7 @@ test('it can change token standard from NFT to pNFT and then back to NFT', async
 
   t.like(candyMachineAccount, <CandyMachine>{
     tokenStandard: TokenStandard.NonFungible,
+    version: AccountVersion.V1,
   });
 
   // When we update its token standard to pNFT
@@ -148,6 +154,7 @@ test('it can change token standard from NFT to pNFT and then back to NFT', async
 
   t.like(candyMachineAccount, <CandyMachine>{
     tokenStandard: TokenStandard.ProgrammableNonFungible,
+    version: AccountVersion.V2,
   });
 
   // When we update its token standard to NFT
@@ -167,5 +174,6 @@ test('it can change token standard from NFT to pNFT and then back to NFT', async
 
   t.like(candyMachineAccount, <CandyMachine>{
     tokenStandard: TokenStandard.NonFungible,
+    version: AccountVersion.V2,
   });
 });

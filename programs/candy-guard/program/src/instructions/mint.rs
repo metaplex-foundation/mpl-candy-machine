@@ -2,10 +2,10 @@ use std::collections::BTreeMap;
 
 use anchor_lang::{prelude::*, solana_program::sysvar};
 
-use mpl_candy_machine_core::CandyMachine;
+use mpl_candy_machine_core::{AccountVersion, CandyMachine};
 
 use crate::{
-    guards::EvaluationContext,
+    guards::{CandyGuardError, EvaluationContext},
     state::{CandyGuard, SEED},
 };
 
@@ -17,6 +17,10 @@ pub fn mint<'info>(
     label: Option<String>,
 ) -> Result<()> {
     msg!("(Deprecated as of 1.0.0) Use MintV2 instead");
+
+    if !matches!(ctx.accounts.candy_machine.version, AccountVersion::V1) {
+        return err!(CandyGuardError::InvalidAccountVersion);
+    }
 
     let accounts = MintAccounts {
         candy_guard: &ctx.accounts.candy_guard,

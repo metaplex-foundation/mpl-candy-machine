@@ -154,4 +154,7 @@ pub enum CandyGuardError {
 
     #[msg("Instruction could not be created")]
     InstructionBuilderFailed,
+
+    #[msg("Invalid account version")]
+    InvalidAccountVersion,
 }

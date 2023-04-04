@@ -718,6 +718,19 @@ export class CgInstructionBuilderFailedError extends ProgramError {
 codeToErrorMap.set(0x17a2, CgInstructionBuilderFailedError);
 nameToErrorMap.set('InstructionBuilderFailed', CgInstructionBuilderFailedError);
 
+/** InvalidAccountVersion: 'Invalid account version' */
+export class CgInvalidAccountVersionError extends ProgramError {
+  readonly name: string = 'InvalidAccountVersion';
+
+  readonly code: number = 0x17a3; // 6051
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid account version', program, cause);
+  }
+}
+codeToErrorMap.set(0x17a3, CgInvalidAccountVersionError);
+nameToErrorMap.set('InvalidAccountVersion', CgInvalidAccountVersionError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

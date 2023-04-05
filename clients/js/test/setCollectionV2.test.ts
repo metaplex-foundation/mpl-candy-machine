@@ -66,6 +66,8 @@ test('it can update the collection of a candy machine v1', async (t) => {
     candyMachine: candyMachine.publicKey,
     collectionMint: collectionA.publicKey,
     collectionUpdateAuthority: collectionUpdateAuthorityA.publicKey,
+    // We have to explicitly provide the collection authority record
+    // because v2 defaults to the new way of deriving delegate records.
     collectionDelegateRecord: findCollectionAuthorityRecordPda(umi, {
       mint: collectionA.publicKey,
       collectionAuthority: findCandyMachineAuthorityPda(umi, {

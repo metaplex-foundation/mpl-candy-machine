@@ -566,7 +566,7 @@ test('it can mint from a candy machine sequentially', async (t) => {
   });
 
   // When we mint from it.
-  const minted = await drain(umi, candyMachine, collectionMint, 10);
+  const minted = await drain(umi, candyMachine, collectionMint, indices.length);
 
   // Then the mints are sequential.
   t.deepEqual(indices, minted);
@@ -595,7 +595,7 @@ test('it can mint from a candy machine in a random order', async (t) => {
   });
 
   // When we mint from it.
-  const minted = await drain(umi, candyMachine, collectionMint, 10);
+  const minted = await drain(umi, candyMachine, collectionMint, indices.length);
 
   // Then the mints are not sequential.
   t.notDeepEqual(indices, minted);
@@ -654,7 +654,6 @@ const drain = async (
   const indices: number[] = [];
 
   for (let i = 0; i < available; i++) {
-    // When we mint from it.
     const mint = generateSigner(umi);
     const minter = generateSigner(umi);
     await transactionBuilder()

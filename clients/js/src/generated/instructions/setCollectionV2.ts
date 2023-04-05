@@ -183,7 +183,7 @@ export function setCollectionV2(
   keys.push({
     pubkey: authorityPdaAccount,
     isSigner: false,
-    isWritable: isWritable(authorityPdaAccount, false),
+    isWritable: isWritable(authorityPdaAccount, true),
   });
 
   // Payer.

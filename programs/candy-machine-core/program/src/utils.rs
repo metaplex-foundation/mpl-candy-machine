@@ -318,7 +318,11 @@ pub fn approve_metadata_delegate(accounts: ApproveMetadataDelegateHelperAccounts
     invoke(&delegate_ix, &delegate_infos).map_err(|error| error.into())
 }
 
-pub fn revoke_metadata_delegate(accounts: RevokeMetadataDelegateHelperAccounts) -> Result<()> {
+pub fn revoke_metadata_delegate(
+    accounts: RevokeMetadataDelegateHelperAccounts,
+    candy_machine: Pubkey,
+    signer_bump: u8,
+) -> Result<()> {
     let mut revoke_builder = RevokeBuilder::new();
     revoke_builder
         .delegate_record(accounts.delegate_record.key())
@@ -326,7 +330,7 @@ pub fn revoke_metadata_delegate(accounts: RevokeMetadataDelegateHelperAccounts) 
         .mint(accounts.collection_mint.key())
         .metadata(accounts.collection_metadata.key())
         .payer(accounts.payer.key())
-        .authority(accounts.collection_update_authority.key());
+        .authority(accounts.authority_pda.key());
 
     let mut revoke_infos = vec![
         accounts.delegate_record.to_account_info(),
@@ -354,7 +358,13 @@ pub fn revoke_metadata_delegate(accounts: RevokeMetadataDelegateHelperAccounts) 
         .map_err(|_| CandyError::InstructionBuilderFailed)?
         .instruction();
 
-    invoke(&revoke_ix, &revoke_infos).map_err(|error| error.into())
+    let authority_seeds = [
+        AUTHORITY_SEED.as_bytes(),
+        candy_machine.as_ref(),
+        &[signer_bump],
+    ];
+
+    invoke_signed(&revoke_ix, &revoke_infos, &[&authority_seeds]).map_err(|error| error.into())
 }
 
 pub fn assert_token_standard(token_standard: u8) -> Result<()> {

@@ -1,18 +1,16 @@
-import {
-  generateSigner,
-  publicKey,
-  transactionBuilder,
-} from '@metaplex-foundation/umi';
+import { generateSigner, publicKey } from '@metaplex-foundation/umi';
 import test from 'ava';
 import {
+  AccountVersion,
   CandyMachine,
   fetchCandyMachine,
-  setCollection,
+  findCandyMachineAuthorityPda,
   setCollectionV2,
 } from '../src';
 import { createCollectionNft, createUmi, createV1, createV2 } from './_setup';
+import { findCollectionAuthorityRecordPda } from '@metaplex-foundation/mpl-token-metadata';
 
-test.only('it can update the collection of a candy machine v2', async (t) => {
+test('it can update the collection of a candy machine v2', async (t) => {
   // Given a Candy Machine associated with Collection A.
   const umi = await createUmi();
   const collectionUpdateAuthorityA = generateSigner(umi);
@@ -47,8 +45,8 @@ test.only('it can update the collection of a candy machine v2', async (t) => {
   });
 });
 
-test('it cannot update the collection of a candy machine v1', async (t) => {
-  // Given a Candy Machine v2 associated with Collection A.
+test('it can update the collection of a candy machine v1', async (t) => {
+  // Given a Candy Machine associated with Collection A.
   const umi = await createUmi();
   const collectionUpdateAuthorityA = generateSigner(umi);
   const collectionA = await createCollectionNft(umi, {
@@ -59,24 +57,33 @@ test('it cannot update the collection of a candy machine v1', async (t) => {
     collectionUpdateAuthority: collectionUpdateAuthorityA,
   });
 
-  // When we try to update its collection using the setCollection v1 instruction.
+  // When we update its collection to Collection B from a V1 Candy Machine.
   const collectionUpdateAuthorityB = generateSigner(umi);
   const collectionB = await createCollectionNft(umi, {
     authority: collectionUpdateAuthorityB,
   });
-  const promise = transactionBuilder()
-    .add(
-      setCollection(umi, {
+  await setCollectionV2(umi, {
+    candyMachine: candyMachine.publicKey,
+    collectionMint: collectionA.publicKey,
+    collectionUpdateAuthority: collectionUpdateAuthorityA.publicKey,
+    collectionDelegateRecord: findCollectionAuthorityRecordPda(umi, {
+      mint: collectionA.publicKey,
+      collectionAuthority: findCandyMachineAuthorityPda(umi, {
         candyMachine: candyMachine.publicKey,
-        collectionMint: collectionA.publicKey,
-        newCollectionMint: collectionB.publicKey,
-        newCollectionUpdateAuthority: collectionUpdateAuthorityB,
-      })
-    )
-    .sendAndConfirm(umi);
+      }),
+    }),
+    newCollectionMint: collectionB.publicKey,
+    newCollectionUpdateAuthority: collectionUpdateAuthorityB,
+  }).sendAndConfirm(umi);
 
-  // Then we expect a program error.
-  await t.throwsAsync(promise, {
-    message: /it cannot update the collection of a candy machine v1/,
+  // Then the Candy Machine's collection was updated accordingly and
+  // the version was upgraded to V2.
+  const candyMachineAccount = await fetchCandyMachine(
+    umi,
+    candyMachine.publicKey
+  );
+  t.like(candyMachineAccount, <CandyMachine>{
+    collectionMint: publicKey(collectionB.publicKey),
+    version: AccountVersion.V2,
   });
 });

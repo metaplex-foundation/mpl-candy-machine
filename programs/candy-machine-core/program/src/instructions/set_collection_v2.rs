@@ -35,7 +35,11 @@ pub fn set_collection_v2(ctx: Context<SetCollectionV2>) -> Result<()> {
             authorization_rules: None,
         };
 
-        revoke_metadata_delegate(revoke_accounts)?;
+        revoke_metadata_delegate(
+            revoke_accounts,
+            candy_machine.key(),
+            *ctx.bumps.get("authority_pda").unwrap(),
+        )?;
     } else {
         // revoking the existing collection authority
 
@@ -94,6 +98,7 @@ pub struct SetCollectionV2<'info> {
     ///
     /// CHECK: account checked in seeds constraint
     #[account(
+        mut,
         seeds = [AUTHORITY_SEED.as_bytes(), candy_machine.to_account_info().key.as_ref()],
         bump
     )]

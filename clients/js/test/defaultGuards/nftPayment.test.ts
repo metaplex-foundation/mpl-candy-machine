@@ -394,7 +394,7 @@ test('it transfers a Programmable NFT from the payer to the destination', async 
   // When the payer mints from it using its NFT to pay.
   const mint = generateSigner(umi);
   await transactionBuilder()
-    .add(setComputeUnitLimit(umi, { units: 650_000 }))
+    .add(setComputeUnitLimit(umi, { units: 800_000 }))
     .add(
       mintV2(umi, {
         candyMachine,

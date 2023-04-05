@@ -40,7 +40,7 @@ export type SetCollectionV2InstructionAccounts = {
   newCollectionMint: PublicKey;
   newCollectionMetadata?: PublicKey;
   newCollectionMasterEdition?: PublicKey;
-  newCollectionDelegateRecord: PublicKey;
+  newCollectionDelegateRecord?: PublicKey;
   tokenMetadataProgram?: PublicKey;
   systemProgram?: PublicKey;
   sysvarInstructions?: PublicKey;
@@ -130,7 +130,14 @@ export function setCollectionV2(
     findMasterEditionPda(context, {
       mint: publicKey(newCollectionMintAccount),
     });
-  const newCollectionDelegateRecordAccount = input.newCollectionDelegateRecord;
+  const newCollectionDelegateRecordAccount =
+    input.newCollectionDelegateRecord ??
+    findMetadataDelegateRecordPda(context, {
+      mint: publicKey(newCollectionMintAccount),
+      delegateRole: MetadataDelegateRole.Collection,
+      updateAuthority: publicKey(newCollectionUpdateAuthorityAccount),
+      delegate: publicKey(authorityPdaAccount),
+    });
   const tokenMetadataProgramAccount = input.tokenMetadataProgram ?? {
     ...context.programs.getPublicKey(
       'mplTokenMetadata',
@@ -176,7 +183,7 @@ export function setCollectionV2(
   keys.push({
     pubkey: authorityPdaAccount,
     isSigner: false,
-    isWritable: isWritable(authorityPdaAccount, false),
+    isWritable: isWritable(authorityPdaAccount, true),
   });
 
   // Payer.
@@ -205,7 +212,7 @@ export function setCollectionV2(
   keys.push({
     pubkey: collectionMetadataAccount,
     isSigner: false,
-    isWritable: isWritable(collectionMetadataAccount, false),
+    isWritable: isWritable(collectionMetadataAccount, true),
   });
 
   // Collection Delegate Record.
@@ -234,7 +241,7 @@ export function setCollectionV2(
   keys.push({
     pubkey: newCollectionMetadataAccount,
     isSigner: false,
-    isWritable: isWritable(newCollectionMetadataAccount, false),
+    isWritable: isWritable(newCollectionMetadataAccount, true),
   });
 
   // New Collection Master Edition.

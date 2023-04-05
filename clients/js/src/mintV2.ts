@@ -1,10 +1,19 @@
-import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-essentials';
+import {
+  findAssociatedTokenPda,
+  getMintSize,
+  getTokenSize,
+} from '@metaplex-foundation/mpl-essentials';
 import {
   findTokenRecordPda,
+  getMasterEditionSize,
+  getMetadataSize,
+  getTokenRecordSize,
   isProgrammable,
   TokenStandard,
 } from '@metaplex-foundation/mpl-token-metadata';
 import {
+  ACCOUNT_HEADER_SIZE,
+  isSigner,
   mergeBytes,
   none,
   Option,
@@ -70,9 +79,8 @@ export function mintV2<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
   const prefix = context.serializer.u32().serialize(data.length);
 
   // Default token Record value.
-  const defaultTokenRecord = isProgrammable(
-    input.tokenStandard ?? TokenStandard.NonFungible
-  )
+  const tokenStandard = input.tokenStandard ?? TokenStandard.NonFungible;
+  const defaultTokenRecord = isProgrammable(tokenStandard)
     ? findTokenRecordPda(context, {
         mint: publicKey(input.nftMint),
         token: findAssociatedTokenPda(context, {
@@ -92,6 +100,17 @@ export function mintV2<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
   const [keys, signers] = parseGuardRemainingAccounts(remainingAccounts);
   ix.instruction.keys.push(...keys);
   ix.signers.push(...signers);
+  ix.bytesCreatedOnChain =
+    getMetadataSize() + getMasterEditionSize() + 2 * ACCOUNT_HEADER_SIZE;
+
+  if (isSigner(input.nftMint)) {
+    ix.bytesCreatedOnChain +=
+      getMintSize() + getTokenSize() + 2 * ACCOUNT_HEADER_SIZE;
+  }
+
+  if (isProgrammable(tokenStandard)) {
+    ix.bytesCreatedOnChain += getTokenRecordSize() + ACCOUNT_HEADER_SIZE;
+  }
 
   return transactionBuilder([ix]);
 }

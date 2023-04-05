@@ -35,7 +35,11 @@ pub fn set_collection_v2(ctx: Context<SetCollectionV2>) -> Result<()> {
             authorization_rules: None,
         };
 
-        revoke_metadata_delegate(revoke_accounts)?;
+        revoke_metadata_delegate(
+            revoke_accounts,
+            candy_machine.key(),
+            *ctx.bumps.get("authority_pda").unwrap(),
+        )?;
     } else {
         // revoking the existing collection authority
 
@@ -94,6 +98,7 @@ pub struct SetCollectionV2<'info> {
     ///
     /// CHECK: account checked in seeds constraint
     #[account(
+        mut,
         seeds = [AUTHORITY_SEED.as_bytes(), candy_machine.to_account_info().key.as_ref()],
         bump
     )]
@@ -116,6 +121,7 @@ pub struct SetCollectionV2<'info> {
     /// Metadata account of the collection.
     ///
     /// CHECK: account checked in CPI
+    #[account(mut)]
     collection_metadata: UncheckedAccount<'info>,
 
     /// Collection authority or metadata delegate record.
@@ -135,6 +141,7 @@ pub struct SetCollectionV2<'info> {
     /// New collection metadata.
     ///
     /// CHECK: account checked in CPI
+    #[account(mut)]
     new_collection_metadata: UncheckedAccount<'info>,
 
     /// New collection master edition.

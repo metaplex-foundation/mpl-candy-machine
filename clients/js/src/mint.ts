@@ -1,4 +1,9 @@
 import {
+  getMasterEditionSize,
+  getMetadataSize,
+} from '@metaplex-foundation/mpl-token-metadata';
+import {
+  ACCOUNT_HEADER_SIZE,
   mergeBytes,
   none,
   Option,
@@ -64,6 +69,8 @@ export function mint<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
   const [keys, signers] = parseGuardRemainingAccounts(remainingAccounts);
   ix.instruction.keys.push(...keys);
   ix.signers.push(...signers);
+  ix.bytesCreatedOnChain =
+    getMetadataSize() + getMasterEditionSize() + 2 * ACCOUNT_HEADER_SIZE;
 
   return transactionBuilder([ix]);
 }

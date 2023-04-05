@@ -5,10 +5,13 @@ import {
   setComputeUnitLimit,
 } from '@metaplex-foundation/mpl-essentials';
 import {
+  fetchDigitalAsset,
   findCollectionAuthorityRecordPda,
   TokenStandard,
 } from '@metaplex-foundation/mpl-token-metadata';
 import {
+  PublicKey,
+  Umi,
   generateSigner,
   isEqualToAmount,
   none,
@@ -544,13 +547,14 @@ test('it can mint from a candy machine sequentially', async (t) => {
   // Given a candy machine with sequential config line settings.
   const umi = await createUmi();
   const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const indices = Array.from({ length: 10 }, (x, i) => i + 1);
+  const configLines = indices.map((index) => ({
+    name: `${index}`,
+    uri: `https://example.com/degen/${index}`,
+  }));
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
-    configLines: [
-      { name: 'Degen #1', uri: 'https://example.com/degen/1' },
-      { name: 'Degen #2', uri: 'https://example.com/degen/2' },
-      { name: 'Degen #3', uri: 'https://example.com/degen/3' },
-    ],
+    configLines,
     configLineSettings: some({
       prefixName: '',
       nameLength: 32,
@@ -562,41 +566,24 @@ test('it can mint from a candy machine sequentially', async (t) => {
   });
 
   // When we mint from it.
-  const mint = generateSigner(umi);
-  const minter = generateSigner(umi);
-  await transactionBuilder()
-    .add(setComputeUnitLimit(umi, { units: 600_000 }))
-    .add(
-      mintV2(umi, {
-        candyMachine,
-        minter,
-        nftMint: mint,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
-      })
-    )
-    .sendAndConfirm(umi);
+  const minted = await drain(umi, candyMachine, collectionMint, indices.length);
 
-  // Then the mint was successful and we got the first item.
-  await assertSuccessfulMint(t, umi, {
-    mint,
-    owner: minter,
-    name: 'Degen #1',
-    uri: 'https://example.com/degen/1',
-  });
+  // Then the mints are sequential.
+  t.deepEqual(indices, minted);
 });
 
 test('it can mint from a candy machine in a random order', async (t) => {
   // Given a candy machine with non-sequential config line settings.
   const umi = await createUmi();
   const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const indices = Array.from({ length: 10 }, (x, i) => i + 1);
+  const configLines = indices.map((index) => ({
+    name: `${index}`,
+    uri: `https://example.com/degen/${index}`,
+  }));
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
-    configLines: [
-      { name: 'Degen #1', uri: 'https://example.com/degen/1' },
-      { name: 'Degen #2', uri: 'https://example.com/degen/2' },
-      { name: 'Degen #3', uri: 'https://example.com/degen/3' },
-    ],
+    configLines,
     configLineSettings: some({
       prefixName: '',
       nameLength: 32,
@@ -608,23 +595,14 @@ test('it can mint from a candy machine in a random order', async (t) => {
   });
 
   // When we mint from it.
-  const mint = generateSigner(umi);
-  const minter = generateSigner(umi);
-  await transactionBuilder()
-    .add(setComputeUnitLimit(umi, { units: 600_000 }))
-    .add(
-      mintV2(umi, {
-        candyMachine,
-        minter,
-        nftMint: mint,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
-      })
-    )
-    .sendAndConfirm(umi);
+  const minted = await drain(umi, candyMachine, collectionMint, indices.length);
 
-  // Then the mint was successful and we got any item.
-  await assertSuccessfulMint(t, umi, { mint, owner: minter });
+  // Then the mints are not sequential.
+  t.notDeepEqual(indices, minted);
+
+  // And the mints are unique.
+  minted.sort((a, b) => a - b);
+  t.deepEqual(indices, minted);
 });
 
 test('it can mint a programmable NFT', async (t) => {
@@ -666,3 +644,34 @@ test('it can mint a programmable NFT', async (t) => {
   const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
   t.like(candyMachineAccount, <CandyMachine>{ itemsRedeemed: 1n });
 });
+
+const drain = async (
+  umi: Umi,
+  candyMachine: PublicKey,
+  collectionMint: PublicKey,
+  available: number
+) => {
+  const indices: number[] = [];
+
+  for (let i = 0; i < available; i++) {
+    const mint = generateSigner(umi);
+    const minter = generateSigner(umi);
+    await transactionBuilder()
+      .add(setComputeUnitLimit(umi, { units: 600_000 }))
+      .add(
+        mintV2(umi, {
+          candyMachine,
+          minter,
+          nftMint: mint,
+          collectionMint,
+          collectionUpdateAuthority: umi.identity.publicKey,
+        })
+      )
+      .sendAndConfirm(umi);
+
+    const asset = await fetchDigitalAsset(umi, mint.publicKey);
+    indices.push(parseInt(asset.metadata.name));
+  }
+
+  return indices;
+};

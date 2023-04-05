@@ -2,10 +2,13 @@ import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-essentials';
 import {
   findMasterEditionPda,
   findMetadataPda,
+  findTokenRecordPda,
+  isProgrammable,
+  TokenStandard,
 } from '@metaplex-foundation/mpl-token-metadata';
 import { PublicKey } from '@metaplex-foundation/umi';
 import { getNftBurnSerializer, NftBurn, NftBurnArgs } from '../generated';
-import { GuardManifest, noopParser } from '../guards';
+import { GuardManifest, GuardRemainingAccount, noopParser } from '../guards';
 
 /**
  * The nftBurn guard restricts the mint to holders of a predefined
@@ -35,16 +38,24 @@ export const nftBurnGuardManifest: GuardManifest<
     const collectionMetadata = findMetadataPda(context, {
       mint: args.requiredCollection,
     });
-    return {
-      data: new Uint8Array(),
-      remainingAccounts: [
-        { publicKey: nftTokenAccount, isWritable: true },
-        { publicKey: nftMetadata, isWritable: true },
-        { publicKey: nftMasterEdition, isWritable: true },
-        { publicKey: args.mint, isWritable: true },
-        { publicKey: collectionMetadata, isWritable: true },
-      ],
-    };
+
+    const remainingAccounts: GuardRemainingAccount[] = [
+      { publicKey: nftTokenAccount, isWritable: true },
+      { publicKey: nftMetadata, isWritable: true },
+      { publicKey: nftMasterEdition, isWritable: true },
+      { publicKey: args.mint, isWritable: true },
+      { publicKey: collectionMetadata, isWritable: true },
+    ];
+
+    if (isProgrammable(args.tokenStandard)) {
+      const nftTokenRecord = findTokenRecordPda(context, {
+        mint: args.mint,
+        token: nftTokenAccount,
+      });
+      remainingAccounts.push({ publicKey: nftTokenRecord, isWritable: true });
+    }
+
+    return { data: new Uint8Array(), remainingAccounts };
   },
   routeParser: noopParser,
 };
@@ -56,6 +67,11 @@ export type NftBurnMintArgs = NftBurnArgs & {
    * belong to the payer.
    */
   mint: PublicKey;
+
+  /**
+   * The token standard of the NFT to burn.
+   */
+  tokenStandard: TokenStandard;
 
   /**
    * The token account linking the NFT with its owner.

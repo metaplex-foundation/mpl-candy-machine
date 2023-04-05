@@ -1071,6 +1071,26 @@ createErrorFromNameLookup.set(
 );
 
 /**
+ * InvalidAccountVersion: 'Invalid account version'
+ *
+ * @category Errors
+ * @category generated
+ */
+export class InvalidAccountVersionError extends Error {
+  readonly code: number = 0x17a3;
+  readonly name: string = 'InvalidAccountVersion';
+  constructor() {
+    super('Invalid account version');
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, InvalidAccountVersionError);
+    }
+  }
+}
+
+createErrorFromCodeLookup.set(0x17a3, () => new InvalidAccountVersionError());
+createErrorFromNameLookup.set('InvalidAccountVersion', () => new InvalidAccountVersionError());
+
+/**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors
  * @category generated

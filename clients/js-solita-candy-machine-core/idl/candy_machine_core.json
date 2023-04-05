@@ -1014,7 +1014,7 @@
         },
         {
           "name": "authorityPda",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false,
           "docs": [
             "Authority PDA.",
@@ -1049,7 +1049,7 @@
         },
         {
           "name": "collectionMetadata",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false,
           "docs": [
             "Metadata account of the collection.",
@@ -1084,7 +1084,7 @@
         },
         {
           "name": "newCollectionMetadata",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false,
           "docs": [
             "New collection metadata.",

@@ -24,15 +24,15 @@ export const setCollectionV2Struct = new beet.BeetArgsStruct<{
  *
  * @property [_writable_] candyMachine
  * @property [**signer**] authority
- * @property [] authorityPda
+ * @property [_writable_] authorityPda
  * @property [_writable_, **signer**] payer
  * @property [] collectionUpdateAuthority
  * @property [] collectionMint
- * @property [] collectionMetadata
+ * @property [_writable_] collectionMetadata
  * @property [_writable_] collectionDelegateRecord
  * @property [**signer**] newCollectionUpdateAuthority
  * @property [] newCollectionMint
- * @property [] newCollectionMetadata
+ * @property [_writable_] newCollectionMetadata
  * @property [] newCollectionMasterEdition
  * @property [_writable_] newCollectionDelegateRecord
  * @property [] tokenMetadataProgram
@@ -98,7 +98,7 @@ export function createSetCollectionV2Instruction(
     },
     {
       pubkey: accounts.authorityPda,
-      isWritable: false,
+      isWritable: true,
       isSigner: false,
     },
     {
@@ -118,7 +118,7 @@ export function createSetCollectionV2Instruction(
     },
     {
       pubkey: accounts.collectionMetadata,
-      isWritable: false,
+      isWritable: true,
       isSigner: false,
     },
     {
@@ -138,7 +138,7 @@ export function createSetCollectionV2Instruction(
     },
     {
       pubkey: accounts.newCollectionMetadata,
-      isWritable: false,
+      isWritable: true,
       isSigner: false,
     },
     {

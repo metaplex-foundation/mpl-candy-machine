@@ -1,5 +1,6 @@
 import { generateSigner, publicKey } from '@metaplex-foundation/umi';
 import test from 'ava';
+import { findCollectionAuthorityRecordPda } from '@metaplex-foundation/mpl-token-metadata';
 import {
   AccountVersion,
   CandyMachine,
@@ -8,7 +9,6 @@ import {
   setCollectionV2,
 } from '../src';
 import { createCollectionNft, createUmi, createV1, createV2 } from './_setup';
-import { findCollectionAuthorityRecordPda } from '@metaplex-foundation/mpl-token-metadata';
 
 test('it can update the collection of a candy machine v2', async (t) => {
   // Given a Candy Machine associated with Collection A.

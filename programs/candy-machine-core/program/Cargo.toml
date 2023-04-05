@@ -1,9 +1,9 @@
 [package]
 name = "mpl-candy-machine-core"
-version = "1.0.1"
+version = "1.0.2"
 description = "NFT Candy Machine Core: programmatic and trustless NFT drops."
 authors = ["Metaplex Developers <dev@metaplex.com>"]
-repository = "https://github.com/metaplex-foundation/metaplex-program-library"
+repository = "https://github.com/metaplex-foundation/mpl-candy-machine"
 license-file = "../../../LICENSE"
 edition = "2021"
 readme = "../README.md"

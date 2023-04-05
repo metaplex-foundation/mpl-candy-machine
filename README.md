@@ -1,9 +1,5 @@
 # Mpl Candy Machine
 
-Client library for Candy Machine related programs
+The Metaplex Protocol Candy Machine is the leading minting and distribution program for fair NFT collection launches on Solana. It allows creators to bring their digital assets on-chain in a secure and customisable way.
 
-```shell
-npm install @metaplex-foundation/mpl-candy-machine@alpha
-```
-
-[See typedoc documentation](https://mpl-candy-machine-js-docs.vercel.app/).
+You can [**read more about Candy Machines in the official Metaplex documentation**](https://docs.metaplex.com/programs/candy-machine/overview).

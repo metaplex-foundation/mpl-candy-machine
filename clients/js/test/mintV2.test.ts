@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import {
   createAssociatedToken,
   createMint,
@@ -653,7 +654,7 @@ const drain = async (
 ) => {
   const indices: number[] = [];
 
-  for (let i = 0; i < available; i++) {
+  for (let i = 0; i < available; i += 1) {
     const mint = generateSigner(umi);
     const minter = generateSigner(umi);
     await transactionBuilder()
@@ -670,7 +671,7 @@ const drain = async (
       .sendAndConfirm(umi);
 
     const asset = await fetchDigitalAsset(umi, mint.publicKey);
-    indices.push(parseInt(asset.metadata.name));
+    indices.push(parseInt(asset.metadata.name, 10));
   }
 
   return indices;

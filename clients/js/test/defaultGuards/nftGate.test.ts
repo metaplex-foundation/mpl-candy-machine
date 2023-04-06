@@ -58,7 +58,7 @@ test('it allows minting when the payer owns an NFT from a certain collection', a
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
         mintArgs: {
-          nftGate: some({ requiredCollection, mint: nftToVerify.publicKey }),
+          nftGate: some({ mint: nftToVerify.publicKey }),
         },
       })
     )
@@ -104,7 +104,7 @@ test('it allows minting even when the payer is different from the minter', async
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
         mintArgs: {
-          nftGate: some({ requiredCollection, mint: nftToVerify.publicKey }),
+          nftGate: some({ mint: nftToVerify.publicKey }),
         },
       })
     )
@@ -163,7 +163,6 @@ test('it allows minting when the NFT is not on an associated token account', asy
         collectionUpdateAuthority: umi.identity.publicKey,
         mintArgs: {
           nftGate: some({
-            requiredCollection,
             mint: nftToVerify.publicKey,
             tokenAccount: nftToVerifyToken.publicKey,
           }),
@@ -230,7 +229,7 @@ test('it forbids minting when the payer does not own an NFT from a certain colle
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
         mintArgs: {
-          nftGate: some({ requiredCollection, mint: nftToVerify }),
+          nftGate: some({ mint: nftToVerify }),
         },
       })
     )
@@ -278,10 +277,7 @@ test('it forbids minting when the payer tries to provide an NFT from the wrong c
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
         mintArgs: {
-          nftGate: some({
-            requiredCollection: requiredCollectionB,
-            mint: nftToVerify,
-          }),
+          nftGate: some({ mint: nftToVerify }),
         },
       })
     )
@@ -323,7 +319,7 @@ test('it forbids minting when the payer tries to provide an NFT from an unverifi
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
         mintArgs: {
-          nftGate: some({ requiredCollection, mint: nftToVerify }),
+          nftGate: some({ mint: nftToVerify }),
         },
       })
     )
@@ -359,7 +355,7 @@ test('it charges a bot tax when trying to mint without owning the right NFT', as
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
         mintArgs: {
-          nftGate: some({ requiredCollection, mint: wrongNft.publicKey }),
+          nftGate: some({ mint: wrongNft.publicKey }),
         },
       })
     )

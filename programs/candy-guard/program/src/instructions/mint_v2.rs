@@ -82,8 +82,7 @@ pub fn process_mint<'info>(
     mint_args: Vec<u8>,
     label: Option<String>,
 ) -> Result<()> {
-    let candy_guard = &ctx.accounts.candy_guard;
-    let account_info = &candy_guard.to_account_info();
+    let account_info = ctx.accounts.candy_guard.to_account_info();
     let account_data = account_info.data.borrow();
     // loads the active guard set
     let guard_set = match CandyGuardData::active_set(&account_data[DATA_OFFSET..], label) {
@@ -91,8 +90,8 @@ pub fn process_mint<'info>(
         Err(error) => {
             // load the default guard set to look for the bot_tax since errors only occur
             // when trying to load guard set groups
-            let (default, _) = GuardSet::from_data(&account_data[DATA_OFFSET..])?;
-            return process_error(ctx, &default, error);
+            let guard_set = CandyGuardData::load(&account_data[DATA_OFFSET..])?;
+            return process_error(ctx, &guard_set.default, error);
         }
     };
 

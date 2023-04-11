@@ -119,11 +119,12 @@ export type FreezeTokenPaymentRouteArgs =
  *
  * ```ts
  * route(umi, {
- *   candyMachine,
- *   candyGuard,
+ *   // ...
  *   guard: 'freezeTokenPayment',
- *   args: {
+ *   routeArgs: {
  *     path: 'initialize',
+ *     mint: tokenMint.publicKey,
+ *     destinationAta,
  *     period: 15 * 24 * 60 * 60, // 15 days.
  *     candyGuardAuthority,
  *   },
@@ -156,14 +157,15 @@ export type FreezeTokenPaymentRouteArgsInitialize = Omit<
  *
  * ```ts
  * route(umi, {
- *   candyMachine,
- *   candyGuard,
+ *   // ...
  *   guard: 'freezeTokenPayment',
- *   args: {
+ *   routeArgs: {
  *     path: 'thaw',
+ *     mint: tokenMint.publicKey,
+ *     destinationAta,
  *     nftMint,
  *     nftOwner,
- *     nftTokenStandard: TokenStandard.NonFungible,
+ *     nftTokenStandard: candyMachine.tokenStandard,
  *   },
  * });
  * ```
@@ -194,11 +196,12 @@ export type FreezeTokenPaymentRouteArgsThaw = Omit<
  *
  * ```ts
  * route(umi, {
- *   candyMachine,
- *   candyGuard,
+ *   // ...
  *   guard: 'freezeTokenPayment',
- *   args: {
+ *   routeArgs: {
  *     path: 'unlockFunds',
+ *     mint: tokenMint.publicKey,
+ *     destinationAta,
  *     candyGuardAuthority,
  *   },
  * });

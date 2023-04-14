@@ -151,7 +151,7 @@ test('it can mint whilst creating only the mint account beforehand', async (t) =
   t.like(candyMachineAccount, <CandyMachine>{ itemsRedeemed: 1n });
 });
 
-test.skip('it can mint to an explicit public key that is not the payer nor the minter', async (t) => {
+test('it can mint to an explicit public key that is not the payer nor the minter', async (t) => {
   // Given a candy machine with a candy guard.
   const umi = await createUmi();
   const collectionMint = (await createCollectionNft(umi)).publicKey;
@@ -167,9 +167,9 @@ test.skip('it can mint to an explicit public key that is not the payer nor the m
   // Using an explicit owner that is not the payer nor the minter.
   const mint = generateSigner(umi);
   const minter = generateSigner(umi);
-  const owner = generateSigner(umi);
+  const owner = generateSigner(umi).publicKey;
   await transactionBuilder()
-    .add(createMintWithAssociatedToken(umi, { mint, owner: owner.publicKey }))
+    .add(createMintWithAssociatedToken(umi, { mint, owner }))
     .add(
       mintV2(umi, {
         candyMachine,
@@ -178,10 +178,7 @@ test.skip('it can mint to an explicit public key that is not the payer nor the m
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
         tokenStandard: TokenStandard.ProgrammableNonFungible,
-        token: findAssociatedTokenPda(umi, {
-          mint: mint.publicKey,
-          owner: owner.publicKey,
-        }),
+        token: findAssociatedTokenPda(umi, { mint: mint.publicKey, owner }),
       })
     )
     .sendAndConfirm(umi);

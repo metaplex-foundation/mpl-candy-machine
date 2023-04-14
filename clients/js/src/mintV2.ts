@@ -83,10 +83,12 @@ export function mintV2<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
   const defaultTokenRecord = isProgrammable(tokenStandard)
     ? findTokenRecordPda(context, {
         mint: publicKey(input.nftMint),
-        token: findAssociatedTokenPda(context, {
-          mint: publicKey(input.nftMint),
-          owner: publicKey(input.minter ?? context.identity),
-        }),
+        token:
+          input.token ??
+          findAssociatedTokenPda(context, {
+            mint: publicKey(input.nftMint),
+            owner: publicKey(input.minter ?? context.identity),
+          }),
       })
     : undefined;
 

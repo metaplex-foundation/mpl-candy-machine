@@ -346,6 +346,7 @@ export const assertSuccessfulMint = async (
       publicKey: publicKey(token),
       mint: publicKey(mint),
       owner: publicKey(owner),
+      amount: 1n,
     },
     edition: {
       isOriginal: true,

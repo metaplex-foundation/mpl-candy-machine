@@ -38,9 +38,6 @@ jobs:
     name: Programs
     uses: ./.github/workflows/build-programs.yml
     secrets: inherit
-    with:
-      rust: ${{ env.RUST_VERSION }}
-      solana: ${{ env.SOLANA_VERSION }}
 
   test_js:
     name: JS client
@@ -55,6 +52,7 @@ jobs:
     permissions:
       contents: write
     steps:
+      - run: cat ./.github/.env >> $GITHUB_ENV
       - name: Git checkout
         uses: actions/checkout@v3
 
@@ -115,6 +113,7 @@ jobs:
       name: js-client-documentation
       url: ${{ steps.deploy.outputs.url }}
     steps:
+      - run: cat ./.github/.env >> $GITHUB_ENV
       - name: Git checkout
         uses: actions/checkout@v3
         with:

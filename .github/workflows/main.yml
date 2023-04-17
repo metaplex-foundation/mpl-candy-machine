@@ -20,7 +20,9 @@ jobs:
     steps:
       - name: Git checkout
         uses: actions/checkout@v3
-      - run: cat .github/.env >> $GITHUB_ENV
+
+      - name: Load environment variables
+        run: cat .github/.env >> $GITHUB_ENV
 
       - name: Detect changes
         uses: dorny/paths-filter@v2
@@ -65,7 +67,9 @@ jobs:
     steps:
       - name: Git checkout
         uses: actions/checkout@v3
-      - run: cat .github/.env >> $GITHUB_ENV
+
+      - name: Load environment variables
+        run: cat .github/.env >> $GITHUB_ENV
 
       - name: Install Linux Build Deps
         run: sudo apt-get update && sudo apt-get install -y pkg-config build-essential libudev-dev

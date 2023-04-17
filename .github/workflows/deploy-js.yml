@@ -29,6 +29,11 @@ on:
 
 env:
   CACHE: true
+  CARGO_TERM_COLOR: always
+  NODE_VERSION: 16.x
+  PROGRAMS: ["candy-machine-core", "candy-guard"]
+  RUST_VERSION: 1.65.0
+  SOLANA_VERSION: 1.14.13
 
 jobs:
   build_programs:
@@ -55,7 +60,7 @@ jobs:
       - name: Install Node.js
         uses: metaplex-foundation/actions/install-node-with-pnpm@v1
         with:
-          version: ${{ vars.NODE_VERSION }}
+          version: ${{ env.NODE_VERSION }}
           cache: ${{ env.CACHE }}
 
       - name: Install dependencies

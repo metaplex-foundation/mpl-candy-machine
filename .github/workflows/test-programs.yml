@@ -4,10 +4,10 @@ on:
   workflow_call:
     inputs:
       rust:
-        default: ${{ vars.RUST_VERSION }}
+        default: ${{ env.RUST_VERSION }}
         type: string
       solana:
-        default: ${{ vars.SOLANA_VERSION }}
+        default: ${{ env.SOLANA_VERSION }}
         type: string
       program_matrix:
         type: string
@@ -15,17 +15,22 @@ on:
     inputs:
       rust:
         description: Rust version
-        default: 1.65.0
+        default: ${{ env.RUST_VERSION }}
         required: true
         type: string
       solana:
         description: Solana version
-        default: 1.14.13
+        default: ${{ env.SOLANA_VERSION }}
         required: true
         type: string
 
 env:
   CACHE: true
+  CARGO_TERM_COLOR: always
+  NODE_VERSION: 16.x
+  PROGRAMS: ["candy-machine-core", "candy-guard"]
+  RUST_VERSION: 1.65.0
+  SOLANA_VERSION: 1.14.13
 
 jobs:
   test_programs:
@@ -33,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        program: ${{ fromJson(inputs.program_matrix || vars.PROGRAMS) }}
+        program: ${{ fromJson(inputs.program_matrix || env.PROGRAMS) }}
     steps:
       - name: Git checkout
         uses: actions/checkout@v3

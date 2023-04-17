@@ -18,7 +18,7 @@ jobs:
       programs: ${{ steps.changes.outputs.programs }}
       program_matrix: ${{ steps.program_matrix.outputs.matrix }}
     steps:
-      - run: cat .github/.env >> $GITHUB_ENV
+      - run: cat main/.github/.env >> $GITHUB_ENV
       - name: Git checkout
         uses: actions/checkout@v3
 

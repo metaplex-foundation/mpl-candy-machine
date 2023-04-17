@@ -3,6 +3,7 @@ import {
   createAssociatedToken,
   createMint,
   createMintWithAssociatedToken,
+  findAssociatedTokenPda,
   setComputeUnitLimit,
 } from '@metaplex-foundation/mpl-essentials';
 import {
@@ -148,6 +149,42 @@ test('it can mint whilst creating only the mint account beforehand', async (t) =
   // And the candy machine was updated.
   const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
   t.like(candyMachineAccount, <CandyMachine>{ itemsRedeemed: 1n });
+});
+
+test('it can mint to an explicit public key that is not the payer nor the minter', async (t) => {
+  // Given a candy machine with a candy guard.
+  const umi = await createUmi();
+  const collectionMint = (await createCollectionNft(umi)).publicKey;
+  const candyMachineSigner = await createV2(umi, {
+    collectionMint,
+    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    guards: {},
+    tokenStandard: TokenStandard.ProgrammableNonFungible,
+  });
+  const candyMachine = candyMachineSigner.publicKey;
+
+  // When we create a new mint and token account before minting
+  // Using an explicit owner that is not the payer nor the minter.
+  const mint = generateSigner(umi);
+  const minter = generateSigner(umi);
+  const owner = generateSigner(umi).publicKey;
+  await transactionBuilder()
+    .add(createMintWithAssociatedToken(umi, { mint, owner }))
+    .add(
+      mintV2(umi, {
+        candyMachine,
+        minter,
+        nftMint: mint.publicKey,
+        collectionMint,
+        collectionUpdateAuthority: umi.identity.publicKey,
+        tokenStandard: TokenStandard.ProgrammableNonFungible,
+        token: findAssociatedTokenPda(umi, { mint: mint.publicKey, owner }),
+      })
+    )
+    .sendAndConfirm(umi);
+
+  // Then the mint was successful.
+  await assertSuccessfulMint(t, umi, { mint, owner, name: 'Degen #1' });
 });
 
 test('it can mint from a candy guard attached to a candy machine v1', async (t) => {

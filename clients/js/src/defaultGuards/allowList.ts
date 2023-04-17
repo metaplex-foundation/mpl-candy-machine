@@ -24,7 +24,7 @@ import { GuardManifest } from '../guards';
  * Here is an example.
  *
  * ```ts
- * import { getMerkleProof, getMerkleRoot } from '@metaplex-foundation/js';
+ * import { getMerkleProof, getMerkleRoot } from '@metaplex-foundation/mpl-candy-machine';
  * const allowList = [
  *   'Ur1CbWSGsXCdedknRbJsEk7urwAvu1uddmQv51nAnXB',
  *   'GjwcWFQYzemBtpUoN5fMAP2FZviTtMRWCmrppGuTthJS',
@@ -97,12 +97,13 @@ export type AllowListMintArgs = AllowListArgs;
  * that the wallet has been allowed to mint.
  *
  * ```ts
- * await metaplex.candyMachines().callGuardRoute({
- *   candyMachine,
+ * route(umi, {
+ *   // ...
  *   guard: 'allowList',
- *   settings: {
+ *   routeArgs: {
  *     path: 'proof',
- *     merkleProof: getMerkleProof(allowedWallets, metaplex.identity().publicKey.toBase58()),
+ * .   merkleRoot: getMerkleRoot(allowList),
+ *     merkleProof: getMerkleProof(allowList, base58PublicKey(umi.identity)),
  *   },
  * });
  *

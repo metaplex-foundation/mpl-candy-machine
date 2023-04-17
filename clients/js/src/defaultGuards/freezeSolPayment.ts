@@ -109,11 +109,11 @@ export type FreezeSolPaymentRouteArgs =
  *
  * ```ts
  * route(umi, {
- *   candyMachine,
- *   candyGuard,
+ *   // ...
  *   guard: 'freezeSolPayment',
- *   args: {
+ *   routeArgs: {
  *     path: 'initialize',
+ *     destination,
  *     period: 15 * 24 * 60 * 60, // 15 days.
  *     candyGuardAuthority,
  *   },
@@ -146,14 +146,14 @@ export type FreezeSolPaymentRouteArgsInitialize = Omit<
  *
  * ```ts
  * route(umi, {
- *   candyMachine,
- *   candyGuard,
+ *   // ...
  *   guard: 'freezeSolPayment',
- *   args: {
+ *   routeArgs: {
  *     path: 'thaw',
+ *     destination,
  *     nftMint,
  *     nftOwner,
- *     tokenStandard: TokenStandard.NonFungible,
+ *     nftTokenStandard: candyMachine.tokenStandard,
  *   },
  * });
  * ```
@@ -184,11 +184,11 @@ export type FreezeSolPaymentRouteArgsThaw = Omit<
  *
  * ```ts
  * route(umi, {
- *   candyMachine,
- *   candyGuard,
+ *   // ...
  *   guard: 'freezeSolPayment',
- *   args: {
+ *   routeArgs: {
  *     path: 'unlockFunds',
+ *     destination,
  *     candyGuardAuthority,
  *   },
  * });

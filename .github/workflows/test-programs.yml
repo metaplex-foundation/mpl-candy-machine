@@ -4,10 +4,8 @@ on:
   workflow_call:
     inputs:
       rust:
-        default: ${{ env.RUST_VERSION }}
         type: string
       solana:
-        default: ${{ env.SOLANA_VERSION }}
         type: string
       program_matrix:
         type: string
@@ -15,12 +13,12 @@ on:
     inputs:
       rust:
         description: Rust version
-        default: ${{ env.RUST_VERSION }}
+        default: 1.65.0
         required: true
         type: string
       solana:
         description: Solana version
-        default: ${{ env.SOLANA_VERSION }}
+        default: 1.14.13
         required: true
         type: string
 
@@ -29,8 +27,6 @@ env:
   CARGO_TERM_COLOR: always
   NODE_VERSION: 16.x
   PROGRAMS: '["candy-machine-core", "candy-guard"]'
-  RUST_VERSION: 1.65.0
-  SOLANA_VERSION: 1.14.13
 
 jobs:
   test_programs:

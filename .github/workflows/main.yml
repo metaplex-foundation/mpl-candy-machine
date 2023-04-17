@@ -46,6 +46,9 @@ jobs:
     needs: changes
     uses: ./.github/workflows/build-programs.yml
     secrets: inherit
+    with:
+      rust: ${{ env.RUST_VERSION }}
+      solana: ${{ env.SOLANA_VERSION }}
 
   test_programs:
     name: Programs
@@ -54,6 +57,8 @@ jobs:
     uses: ./.github/workflows/test-programs.yml
     secrets: inherit
     with:
+      rust: ${{ env.RUST_VERSION }}
+      solana: ${{ env.SOLANA_VERSION }}
       program_matrix: ${{ needs.changes.outputs.program_matrix }}
 
   generate_clients:

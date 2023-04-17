@@ -29,9 +29,7 @@ on:
 
 env:
   CACHE: true
-  CARGO_TERM_COLOR: always
   NODE_VERSION: 16.x
-  PROGRAMS: '["candy-machine-core", "candy-guard"]'
   RUST_VERSION: 1.65.0
   SOLANA_VERSION: 1.14.13
 
@@ -40,6 +38,9 @@ jobs:
     name: Programs
     uses: ./.github/workflows/build-programs.yml
     secrets: inherit
+    with:
+      rust: ${{ env.RUST_VERSION }}
+      solana: ${{ env.SOLANA_VERSION }}
 
   test_js:
     name: JS client

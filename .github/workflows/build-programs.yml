@@ -28,9 +28,9 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - run: cat .github/.env >> $GITHUB_ENV
       - name: Git checkout
         uses: actions/checkout@v3
+      - run: cat .github/.env >> $GITHUB_ENV
 
       - name: Install Rust
         uses: metaplex-foundation/actions/install-rust@v1

@@ -49,9 +49,9 @@ jobs:
     permissions:
       contents: write
     steps:
-      - run: cat .github/.env >> $GITHUB_ENV
       - name: Git checkout
         uses: actions/checkout@v3
+      - run: cat .github/.env >> $GITHUB_ENV
 
       - name: Install Node.js
         uses: metaplex-foundation/actions/install-node-with-pnpm@v1
@@ -110,11 +110,11 @@ jobs:
       name: js-client-documentation
       url: ${{ steps.deploy.outputs.url }}
     steps:
-      - run: cat .github/.env >> $GITHUB_ENV
       - name: Git checkout
         uses: actions/checkout@v3
         with:
           ref: ${{ github.ref }}
+      - run: cat .github/.env >> $GITHUB_ENV
 
       - name: Deploy to Vercel
         id: deploy

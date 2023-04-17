@@ -14,9 +14,9 @@ jobs:
       matrix:
         node: ["16.x", "18.x"]
     steps:
-      - run: cat .github/.env >> $GITHUB_ENV
       - name: Git checkout
         uses: actions/checkout@v3
+      - run: cat .github/.env >> $GITHUB_ENV
 
       - name: Start validator
         uses: metaplex-foundation/actions/start-validator@v1
@@ -44,9 +44,9 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - run: cat .github/.env >> $GITHUB_ENV
       - name: Git checkout
         uses: actions/checkout@v3
+      - run: cat .github/.env >> $GITHUB_ENV
 
       - name: Install Node.js
         uses: metaplex-foundation/actions/install-node-with-pnpm@v1

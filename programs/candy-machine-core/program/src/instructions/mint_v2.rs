@@ -426,7 +426,7 @@ fn create_and_mint<'info>(
         rule_set,
         ..
     } = &mut update_args;
-    // set the update authority to the authority of the candy machine
+    // set the update authority to the update authority of the collection NFT
     *new_update_authority = Some(collection_metadata.update_authority);
 
     if candy_machine.token_standard == TokenStandard::ProgrammableNonFungible as u8 {

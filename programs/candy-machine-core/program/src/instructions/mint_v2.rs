@@ -427,7 +427,7 @@ fn create_and_mint<'info>(
         ..
     } = &mut update_args;
     // set the update authority to the authority of the candy machine
-    *new_update_authority = Some(candy_machine.authority);
+    *new_update_authority = Some(collection_metadata.update_authority);
 
     if candy_machine.token_standard == TokenStandard::ProgrammableNonFungible as u8 {
         let candy_machine_info = candy_machine.to_account_info();

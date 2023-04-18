@@ -1018,7 +1018,7 @@ dependencies = [
 
 [[package]]
 name = "mpl-candy-machine-core"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "anchor-lang",
  "arrayref",

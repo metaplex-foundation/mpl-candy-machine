@@ -13,13 +13,12 @@ crate-type = ["cdylib", "lib"]
 
 [features]
 no-entrypoint = []
-no-idl = []
 test-bpf = []
 cpi = ["no-entrypoint"]
 default = []
 
 [dependencies]
-anchor-lang = "0.26.0"
+anchor-lang = "0.27.0"
 arrayref = "0.3.6"
 mpl-candy-guard-derive = { path = "../macro", version = "0.2.0" }
 mpl-candy-machine-core = { path = "../../candy-machine-core/program", version = "1.0.2", features = ["cpi"] }

@@ -13,7 +13,6 @@ crate-type = ["cdylib", "lib"]
 
 [features]
 no-entrypoint = []
-no-idl = []
 cpi = ["no-entrypoint"]
 default = []
 

@@ -46,7 +46,7 @@ jobs:
     secrets: inherit
 
   test_programs:
-    name: Programs
+    name: Test programs
     if: ${{ needs.changes.outputs.programs == 'true' }}
     needs: changes
     uses: ./.github/workflows/test-programs.yml
@@ -115,8 +115,8 @@ jobs:
           filters: .github/file-filters.yml
 
   test_js:
-    if: needs.generate_clients.outputs.js_changed == 'true'
-    name: JS Client
+    if: ${{ needs.generate_clients.outputs.js_changed == 'true' || needs.changes.outputs.programs == 'true' }}
+    name: Test JS client
     needs: generate_clients
     uses: ./.github/workflows/test-js.yml
     secrets: inherit

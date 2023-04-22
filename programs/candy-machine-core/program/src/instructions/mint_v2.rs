@@ -299,7 +299,6 @@ fn create_and_mint<'info>(
         candy_machine.data.symbol.to_string(),
         config_line.uri,
     );
-    asset_data.primary_sale_happened = true;
     asset_data.seller_fee_basis_points = candy_machine.data.seller_fee_basis_points;
     asset_data.is_mutable = candy_machine.data.is_mutable;
     asset_data.creators = Some(creators);
@@ -418,16 +417,19 @@ fn create_and_mint<'info>(
 
     invoke_signed(&mint_ix, &mint_infos, &[&authority_seeds])?;
 
-    // changes the update authority and authorization rules
+    // changes the update authority, primary sale happened, authorization rules
 
     let mut update_args = UpdateArgs::default();
     let UpdateArgs::V1 {
         new_update_authority,
+        primary_sale_happened,
         rule_set,
         ..
     } = &mut update_args;
     // set the update authority to the update authority of the collection NFT
     *new_update_authority = Some(collection_metadata.update_authority);
+    // set primary sale happened to true
+    *primary_sale_happened = Some(true);
 
     if candy_machine.token_standard == TokenStandard::ProgrammableNonFungible as u8 {
         let candy_machine_info = candy_machine.to_account_info();

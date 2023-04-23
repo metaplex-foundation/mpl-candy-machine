@@ -1,4 +1,4 @@
-name: Deploy JS Client
+name: Deploy Program
 
 on:
   workflow_dispatch:

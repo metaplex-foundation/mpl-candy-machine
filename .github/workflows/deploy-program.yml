@@ -6,6 +6,7 @@ on:
       bump:
         description: Program
         required: true
+        default: candy-machine-core
         type: choice
         options:
           - candy-machine-core

@@ -3,7 +3,7 @@ name: Deploy Program
 on:
   workflow_dispatch:
     inputs:
-      bump:
+      program:
         description: Program
         required: true
         default: candy-machine-core

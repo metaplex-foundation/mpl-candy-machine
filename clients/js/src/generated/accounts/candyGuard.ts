@@ -52,7 +52,7 @@ export function getCandyGuardAccountDataSerializer(
         ['bump', s.u8()],
         ['authority', s.publicKey()],
       ],
-      { description: 'CandyGuard' }
+      { description: 'CandyGuardAccountData' }
     ),
     (value) =>
       ({

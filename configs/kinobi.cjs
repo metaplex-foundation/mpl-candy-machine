@@ -155,9 +155,13 @@ const defaultsToAssociatedTokenPda = (mint = "mint", owner = "owner") =>
     seeds: { mint: k.accountDefault(mint), owner: k.accountDefault(owner) },
   });
 const defaultsToCandyGuardPda = (base = "base") =>
-  k.pdaDefault("candyGuard", { seeds: { base: k.accountDefault(base) } });
+  k.pdaDefault("candyGuard", {
+    importFrom: "hooked",
+    seeds: { base: k.accountDefault(base) },
+  });
 const defaultsToCandyMachineAuthorityPda = (candyMachine = "candyMachine") =>
   k.pdaDefault("candyMachineAuthority", {
+    importFrom: "hooked",
     seeds: { candyMachine: k.accountDefault(candyMachine) },
   });
 const defaultsToMetadataPda = (mint = "mint") =>

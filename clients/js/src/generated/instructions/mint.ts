@@ -19,12 +19,12 @@ import {
   Serializer,
   Signer,
   TransactionBuilder,
-  checkForIsWritableOverride as isWritable,
   mapSerializer,
   publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import { findCandyGuardPda, findCandyMachineAuthorityPda } from '../../hooked';
+import { addObjectProperty, isWritable } from '../shared';
 
 // Accounts.
 export type MintInstructionAccounts = {
@@ -49,7 +49,7 @@ export type MintInstructionAccounts = {
   instructionSysvarAccount?: PublicKey;
 };
 
-// Arguments.
+// Data.
 export type MintInstructionData = {
   discriminator: Array<number>;
   mintArgs: Uint8Array;
@@ -86,228 +86,284 @@ export function getMintInstructionDataSerializer(
   ) as Serializer<MintInstructionDataArgs, MintInstructionData>;
 }
 
+// Args.
+export type MintInstructionArgs = MintInstructionDataArgs;
+
 // Instruction.
 export function mint(
   context: Pick<
     Context,
     'serializer' | 'programs' | 'eddsa' | 'identity' | 'payer'
   >,
-  input: MintInstructionAccounts & MintInstructionDataArgs
+  input: MintInstructionAccounts & MintInstructionArgs
 ): TransactionBuilder {
   const signers: Signer[] = [];
   const keys: AccountMeta[] = [];
 
   // Program ID.
-  const programId = context.programs.getPublicKey(
-    'mplCandyGuard',
-    'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
-  );
+  const programId = {
+    ...context.programs.getPublicKey(
+      'mplCandyGuard',
+      'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
+    ),
+    isWritable: false,
+  };
 
-  // Resolved accounts.
-  const candyMachineAccount = input.candyMachine;
-  const candyGuardAccount =
+  // Resolved inputs.
+  const resolvingAccounts = {};
+  const resolvingArgs = {};
+  addObjectProperty(
+    resolvingAccounts,
+    'candyGuard',
     input.candyGuard ??
-    findCandyGuardPda(context, { base: publicKey(candyMachineAccount) });
-  const candyMachineProgramAccount = input.candyMachineProgram ?? {
-    ...context.programs.getPublicKey(
-      'mplCandyMachine',
-      'CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR'
-    ),
-    isWritable: false,
-  };
-  const candyMachineAuthorityPdaAccount =
+      findCandyGuardPda(context, { base: publicKey(input.candyMachine) })
+  );
+  addObjectProperty(
+    resolvingAccounts,
+    'candyMachineProgram',
+    input.candyMachineProgram ?? {
+      ...context.programs.getPublicKey(
+        'mplCandyMachine',
+        'CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR'
+      ),
+      isWritable: false,
+    }
+  );
+  addObjectProperty(
+    resolvingAccounts,
+    'candyMachineAuthorityPda',
     input.candyMachineAuthorityPda ??
-    findCandyMachineAuthorityPda(context, {
-      candyMachine: publicKey(candyMachineAccount),
-    });
-  const payerAccount = input.payer ?? context.payer;
-  const nftMintAccount = input.nftMint;
-  const nftMetadataAccount =
+      findCandyMachineAuthorityPda(context, {
+        candyMachine: publicKey(input.candyMachine),
+      })
+  );
+  addObjectProperty(resolvingAccounts, 'payer', input.payer ?? context.payer);
+  addObjectProperty(
+    resolvingAccounts,
+    'nftMetadata',
     input.nftMetadata ??
-    findMetadataPda(context, { mint: publicKey(nftMintAccount) });
-  const nftMintAuthorityAccount = input.nftMintAuthority ?? context.identity;
-  const nftMasterEditionAccount =
+      findMetadataPda(context, { mint: publicKey(input.nftMint) })
+  );
+  addObjectProperty(
+    resolvingAccounts,
+    'nftMintAuthority',
+    input.nftMintAuthority ?? context.identity
+  );
+  addObjectProperty(
+    resolvingAccounts,
+    'nftMasterEdition',
     input.nftMasterEdition ??
-    findMasterEditionPda(context, { mint: publicKey(nftMintAccount) });
-  const collectionMintAccount = input.collectionMint;
-  const collectionAuthorityRecordAccount =
+      findMasterEditionPda(context, { mint: publicKey(input.nftMint) })
+  );
+  addObjectProperty(
+    resolvingAccounts,
+    'collectionAuthorityRecord',
     input.collectionAuthorityRecord ??
-    findCollectionAuthorityRecordPda(context, {
-      mint: publicKey(collectionMintAccount),
-      collectionAuthority: publicKey(candyMachineAuthorityPdaAccount),
-    });
-  const collectionMetadataAccount =
+      findCollectionAuthorityRecordPda(context, {
+        mint: publicKey(input.collectionMint),
+        collectionAuthority: publicKey(
+          resolvingAccounts.candyMachineAuthorityPda
+        ),
+      })
+  );
+  addObjectProperty(
+    resolvingAccounts,
+    'collectionMetadata',
     input.collectionMetadata ??
-    findMetadataPda(context, { mint: publicKey(collectionMintAccount) });
-  const collectionMasterEditionAccount =
+      findMetadataPda(context, { mint: publicKey(input.collectionMint) })
+  );
+  addObjectProperty(
+    resolvingAccounts,
+    'collectionMasterEdition',
     input.collectionMasterEdition ??
-    findMasterEditionPda(context, { mint: publicKey(collectionMintAccount) });
-  const collectionUpdateAuthorityAccount = input.collectionUpdateAuthority;
-  const tokenMetadataProgramAccount = input.tokenMetadataProgram ?? {
-    ...context.programs.getPublicKey(
-      'mplTokenMetadata',
-      'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'
-    ),
-    isWritable: false,
-  };
-  const tokenProgramAccount = input.tokenProgram ?? {
-    ...context.programs.getPublicKey(
-      'splToken',
-      'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
-    ),
-    isWritable: false,
-  };
-  const systemProgramAccount = input.systemProgram ?? {
-    ...context.programs.getPublicKey(
-      'splSystem',
-      '11111111111111111111111111111111'
-    ),
-    isWritable: false,
-  };
-  const recentSlothashesAccount =
+      findMasterEditionPda(context, { mint: publicKey(input.collectionMint) })
+  );
+  addObjectProperty(
+    resolvingAccounts,
+    'tokenMetadataProgram',
+    input.tokenMetadataProgram ?? {
+      ...context.programs.getPublicKey(
+        'mplTokenMetadata',
+        'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'
+      ),
+      isWritable: false,
+    }
+  );
+  addObjectProperty(
+    resolvingAccounts,
+    'tokenProgram',
+    input.tokenProgram ?? {
+      ...context.programs.getPublicKey(
+        'splToken',
+        'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
+      ),
+      isWritable: false,
+    }
+  );
+  addObjectProperty(
+    resolvingAccounts,
+    'systemProgram',
+    input.systemProgram ?? {
+      ...context.programs.getPublicKey(
+        'splSystem',
+        '11111111111111111111111111111111'
+      ),
+      isWritable: false,
+    }
+  );
+  addObjectProperty(
+    resolvingAccounts,
+    'recentSlothashes',
     input.recentSlothashes ??
-    publicKey('SysvarS1otHashes111111111111111111111111111');
-  const instructionSysvarAccountAccount =
+      publicKey('SysvarS1otHashes111111111111111111111111111')
+  );
+  addObjectProperty(
+    resolvingAccounts,
+    'instructionSysvarAccount',
     input.instructionSysvarAccount ??
-    publicKey('Sysvar1nstructions1111111111111111111111111');
+      publicKey('Sysvar1nstructions1111111111111111111111111')
+  );
+  const resolvedAccounts = { ...input, ...resolvingAccounts };
+  const resolvedArgs = { ...input, ...resolvingArgs };
 
   // Candy Guard.
   keys.push({
-    pubkey: candyGuardAccount,
+    pubkey: resolvedAccounts.candyGuard,
     isSigner: false,
-    isWritable: isWritable(candyGuardAccount, false),
+    isWritable: isWritable(resolvedAccounts.candyGuard, false),
   });
 
   // Candy Machine Program.
   keys.push({
-    pubkey: candyMachineProgramAccount,
+    pubkey: resolvedAccounts.candyMachineProgram,
     isSigner: false,
-    isWritable: isWritable(candyMachineProgramAccount, false),
+    isWritable: isWritable(resolvedAccounts.candyMachineProgram, false),
   });
 
   // Candy Machine.
   keys.push({
-    pubkey: candyMachineAccount,
+    pubkey: resolvedAccounts.candyMachine,
     isSigner: false,
-    isWritable: isWritable(candyMachineAccount, true),
+    isWritable: isWritable(resolvedAccounts.candyMachine, true),
   });
 
   // Candy Machine Authority Pda.
   keys.push({
-    pubkey: candyMachineAuthorityPdaAccount,
+    pubkey: resolvedAccounts.candyMachineAuthorityPda,
     isSigner: false,
-    isWritable: isWritable(candyMachineAuthorityPdaAccount, true),
+    isWritable: isWritable(resolvedAccounts.candyMachineAuthorityPda, true),
   });
 
   // Payer.
-  signers.push(payerAccount);
+  signers.push(resolvedAccounts.payer);
   keys.push({
-    pubkey: payerAccount.publicKey,
+    pubkey: resolvedAccounts.payer.publicKey,
     isSigner: true,
-    isWritable: isWritable(payerAccount, true),
+    isWritable: isWritable(resolvedAccounts.payer, true),
   });
 
   // Nft Metadata.
   keys.push({
-    pubkey: nftMetadataAccount,
+    pubkey: resolvedAccounts.nftMetadata,
     isSigner: false,
-    isWritable: isWritable(nftMetadataAccount, true),
+    isWritable: isWritable(resolvedAccounts.nftMetadata, true),
   });
 
   // Nft Mint.
   keys.push({
-    pubkey: nftMintAccount,
+    pubkey: resolvedAccounts.nftMint,
     isSigner: false,
-    isWritable: isWritable(nftMintAccount, true),
+    isWritable: isWritable(resolvedAccounts.nftMint, true),
   });
 
   // Nft Mint Authority.
-  signers.push(nftMintAuthorityAccount);
+  signers.push(resolvedAccounts.nftMintAuthority);
   keys.push({
-    pubkey: nftMintAuthorityAccount.publicKey,
+    pubkey: resolvedAccounts.nftMintAuthority.publicKey,
     isSigner: true,
-    isWritable: isWritable(nftMintAuthorityAccount, false),
+    isWritable: isWritable(resolvedAccounts.nftMintAuthority, false),
   });
 
   // Nft Master Edition.
   keys.push({
-    pubkey: nftMasterEditionAccount,
+    pubkey: resolvedAccounts.nftMasterEdition,
     isSigner: false,
-    isWritable: isWritable(nftMasterEditionAccount, true),
+    isWritable: isWritable(resolvedAccounts.nftMasterEdition, true),
   });
 
   // Collection Authority Record.
   keys.push({
-    pubkey: collectionAuthorityRecordAccount,
+    pubkey: resolvedAccounts.collectionAuthorityRecord,
     isSigner: false,
-    isWritable: isWritable(collectionAuthorityRecordAccount, false),
+    isWritable: isWritable(resolvedAccounts.collectionAuthorityRecord, false),
   });
 
   // Collection Mint.
   keys.push({
-    pubkey: collectionMintAccount,
+    pubkey: resolvedAccounts.collectionMint,
     isSigner: false,
-    isWritable: isWritable(collectionMintAccount, false),
+    isWritable: isWritable(resolvedAccounts.collectionMint, false),
   });
 
   // Collection Metadata.
   keys.push({
-    pubkey: collectionMetadataAccount,
+    pubkey: resolvedAccounts.collectionMetadata,
     isSigner: false,
-    isWritable: isWritable(collectionMetadataAccount, true),
+    isWritable: isWritable(resolvedAccounts.collectionMetadata, true),
   });
 
   // Collection Master Edition.
   keys.push({
-    pubkey: collectionMasterEditionAccount,
+    pubkey: resolvedAccounts.collectionMasterEdition,
     isSigner: false,
-    isWritable: isWritable(collectionMasterEditionAccount, false),
+    isWritable: isWritable(resolvedAccounts.collectionMasterEdition, false),
   });
 
   // Collection Update Authority.
   keys.push({
-    pubkey: collectionUpdateAuthorityAccount,
+    pubkey: resolvedAccounts.collectionUpdateAuthority,
     isSigner: false,
-    isWritable: isWritable(collectionUpdateAuthorityAccount, false),
+    isWritable: isWritable(resolvedAccounts.collectionUpdateAuthority, false),
   });
 
   // Token Metadata Program.
   keys.push({
-    pubkey: tokenMetadataProgramAccount,
+    pubkey: resolvedAccounts.tokenMetadataProgram,
     isSigner: false,
-    isWritable: isWritable(tokenMetadataProgramAccount, false),
+    isWritable: isWritable(resolvedAccounts.tokenMetadataProgram, false),
   });
 
   // Token Program.
   keys.push({
-    pubkey: tokenProgramAccount,
+    pubkey: resolvedAccounts.tokenProgram,
     isSigner: false,
-    isWritable: isWritable(tokenProgramAccount, false),
+    isWritable: isWritable(resolvedAccounts.tokenProgram, false),
   });
 
   // System Program.
   keys.push({
-    pubkey: systemProgramAccount,
+    pubkey: resolvedAccounts.systemProgram,
     isSigner: false,
-    isWritable: isWritable(systemProgramAccount, false),
+    isWritable: isWritable(resolvedAccounts.systemProgram, false),
   });
 
   // Recent Slothashes.
   keys.push({
-    pubkey: recentSlothashesAccount,
+    pubkey: resolvedAccounts.recentSlothashes,
     isSigner: false,
-    isWritable: isWritable(recentSlothashesAccount, false),
+    isWritable: isWritable(resolvedAccounts.recentSlothashes, false),
   });
 
   // Instruction Sysvar Account.
   keys.push({
-    pubkey: instructionSysvarAccountAccount,
+    pubkey: resolvedAccounts.instructionSysvarAccount,
     isSigner: false,
-    isWritable: isWritable(instructionSysvarAccountAccount, false),
+    isWritable: isWritable(resolvedAccounts.instructionSysvarAccount, false),
   });
 
   // Data.
-  const data = getMintInstructionDataSerializer(context).serialize(input);
+  const data =
+    getMintInstructionDataSerializer(context).serialize(resolvedArgs);
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

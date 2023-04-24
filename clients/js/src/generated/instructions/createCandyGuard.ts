@@ -13,12 +13,12 @@ import {
   Serializer,
   Signer,
   TransactionBuilder,
-  checkForIsWritableOverride as isWritable,
   mapSerializer,
   publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import { findCandyGuardPda } from '../../hooked';
+import { addObjectProperty, isWritable } from '../shared';
 
 // Accounts.
 export type CreateCandyGuardInstructionAccounts = {
@@ -29,7 +29,7 @@ export type CreateCandyGuardInstructionAccounts = {
   systemProgram?: PublicKey;
 };
 
-// Arguments.
+// Data.
 export type CreateCandyGuardInstructionData = {
   discriminator: Array<number>;
   data: Uint8Array;
@@ -67,79 +67,101 @@ export function getCreateCandyGuardInstructionDataSerializer(
   >;
 }
 
+// Args.
+export type CreateCandyGuardInstructionArgs =
+  CreateCandyGuardInstructionDataArgs;
+
 // Instruction.
 export function createCandyGuard(
   context: Pick<
     Context,
     'serializer' | 'programs' | 'eddsa' | 'identity' | 'payer'
   >,
-  input: CreateCandyGuardInstructionAccounts &
-    CreateCandyGuardInstructionDataArgs
+  input: CreateCandyGuardInstructionAccounts & CreateCandyGuardInstructionArgs
 ): TransactionBuilder {
   const signers: Signer[] = [];
   const keys: AccountMeta[] = [];
 
   // Program ID.
-  const programId = context.programs.getPublicKey(
-    'mplCandyGuard',
-    'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
-  );
-
-  // Resolved accounts.
-  const baseAccount = input.base;
-  const candyGuardAccount =
-    input.candyGuard ??
-    findCandyGuardPda(context, { base: publicKey(baseAccount) });
-  const authorityAccount = input.authority ?? context.identity.publicKey;
-  const payerAccount = input.payer ?? context.payer;
-  const systemProgramAccount = input.systemProgram ?? {
+  const programId = {
     ...context.programs.getPublicKey(
-      'splSystem',
-      '11111111111111111111111111111111'
+      'mplCandyGuard',
+      'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
     ),
     isWritable: false,
   };
 
+  // Resolved inputs.
+  const resolvingAccounts = {};
+  const resolvingArgs = {};
+  addObjectProperty(
+    resolvingAccounts,
+    'candyGuard',
+    input.candyGuard ??
+      findCandyGuardPda(context, { base: publicKey(input.base) })
+  );
+  addObjectProperty(
+    resolvingAccounts,
+    'authority',
+    input.authority ?? context.identity.publicKey
+  );
+  addObjectProperty(resolvingAccounts, 'payer', input.payer ?? context.payer);
+  addObjectProperty(
+    resolvingAccounts,
+    'systemProgram',
+    input.systemProgram ?? {
+      ...context.programs.getPublicKey(
+        'splSystem',
+        '11111111111111111111111111111111'
+      ),
+      isWritable: false,
+    }
+  );
+  const resolvedAccounts = { ...input, ...resolvingAccounts };
+  const resolvedArgs = { ...input, ...resolvingArgs };
+
   // Candy Guard.
   keys.push({
-    pubkey: candyGuardAccount,
+    pubkey: resolvedAccounts.candyGuard,
     isSigner: false,
-    isWritable: isWritable(candyGuardAccount, true),
+    isWritable: isWritable(resolvedAccounts.candyGuard, true),
   });
 
   // Base.
-  signers.push(baseAccount);
+  signers.push(resolvedAccounts.base);
   keys.push({
-    pubkey: baseAccount.publicKey,
+    pubkey: resolvedAccounts.base.publicKey,
     isSigner: true,
-    isWritable: isWritable(baseAccount, false),
+    isWritable: isWritable(resolvedAccounts.base, false),
   });
 
   // Authority.
   keys.push({
-    pubkey: authorityAccount,
+    pubkey: resolvedAccounts.authority,
     isSigner: false,
-    isWritable: isWritable(authorityAccount, false),
+    isWritable: isWritable(resolvedAccounts.authority, false),
   });
 
   // Payer.
-  signers.push(payerAccount);
+  signers.push(resolvedAccounts.payer);
   keys.push({
-    pubkey: payerAccount.publicKey,
+    pubkey: resolvedAccounts.payer.publicKey,
     isSigner: true,
-    isWritable: isWritable(payerAccount, true),
+    isWritable: isWritable(resolvedAccounts.payer, true),
   });
 
   // System Program.
   keys.push({
-    pubkey: systemProgramAccount,
+    pubkey: resolvedAccounts.systemProgram,
     isSigner: false,
-    isWritable: isWritable(systemProgramAccount, false),
+    isWritable: isWritable(resolvedAccounts.systemProgram, false),
   });
 
   // Data.
   const data =
-    getCreateCandyGuardInstructionDataSerializer(context).serialize(input);
+    getCreateCandyGuardInstructionDataSerializer(context).serialize(
+      resolvedArgs
+    );
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

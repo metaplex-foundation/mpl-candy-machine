@@ -1,43 +1,19 @@
 const path = require("path");
-const {
-  Kinobi,
-  RenderJavaScriptVisitor,
-  SetNumberWrappersVisitor,
-  UpdateAccountsVisitor,
-  UpdateInstructionsVisitor,
-  UpdateProgramsVisitor,
-  SetStructDefaultValuesVisitor,
-  TypeNumberNode,
-  TypePublicKeyNode,
-  TypeBytesNode,
-  SetInstructionAccountDefaultValuesVisitor,
-  TransformNodesVisitor,
-  TransformDefinedTypesIntoAccountsVisitor,
-  AutoSetAccountGpaFieldsVisitor,
-  FlattenInstructionArgsStructVisitor,
-  UnwrapTypeDefinedLinksVisitor,
-  vScalar,
-  vNone,
-  TypeStructFieldNode,
-  TypeDefinedLinkNode,
-  vEnum,
-  UseCustomAccountSerializerVisitor,
-  UpdateDefinedTypesVisitor,
-} = require("@metaplex-foundation/kinobi");
+const k = require("@metaplex-foundation/kinobi");
 
 // Paths.
 const clientDir = path.join(__dirname, "..", "clients");
 const idlDir = path.join(__dirname, "..", "idls");
 
 // Instanciate Kinobi.
-const kinobi = new Kinobi([
+const kinobi = k.createFromIdls([
   path.join(idlDir, "candy_machine_core.json"),
   path.join(idlDir, "candy_guard.json"),
 ]);
 
 // Update programs.
 kinobi.update(
-  new UpdateProgramsVisitor({
+  new k.UpdateProgramsVisitor({
     candyGuard: { name: "mplCandyGuard", prefix: "Cg" },
     candyMachineCore: { name: "mplCandyMachineCore", prefix: "Cm" },
   })
@@ -45,60 +21,49 @@ kinobi.update(
 
 // Transform some defined types into accounts.
 kinobi.update(
-  new TransformDefinedTypesIntoAccountsVisitor([
+  new k.TransformDefinedTypesIntoAccountsVisitor([
     "mintCounter",
     "allowListProof",
   ])
 );
 
 // Reusable seeds.
-const candyGuardSeed = {
-  kind: "variable",
-  name: "candyGuard",
-  description: "The address of the Candy Guard account",
-  type: new TypePublicKeyNode(),
-};
-const candyMachineSeed = {
-  kind: "variable",
-  name: "candyMachine",
-  description: "The address of the Candy Machine account",
-  type: new TypePublicKeyNode(),
-};
-const userSeed = {
-  kind: "variable",
-  name: "user",
-  description: "The address of the wallet trying to mint",
-  type: new TypePublicKeyNode(),
-};
+const candyGuardSeed = k.publicKeySeed(
+  "candyGuard",
+  "The address of the Candy Guard account"
+);
+const candyMachineSeed = k.publicKeySeed(
+  "candyMachine",
+  "The address of the Candy Machine account"
+);
+const userSeed = k.publicKeySeed(
+  "user",
+  "The address of the wallet trying to mint"
+);
 
 // Update accounts.
 kinobi.update(
-  new UpdateAccountsVisitor({
+  new k.UpdateAccountsVisitor({
     candyGuard: {
       internal: true,
       seeds: [
-        { kind: "literal", value: "candy_guard" },
-        {
-          kind: "variable",
-          name: "base",
-          description:
-            "The base address which the Candy Guard PDA derives from",
-          type: new TypePublicKeyNode(),
-        },
+        k.literalSeed("candy_guard"),
+        k.publicKeySeed(
+          "base",
+          "The base address which the Candy Guard PDA derives from"
+        ),
       ],
     },
     mintCounter: {
       size: 2,
-      discriminator: { kind: "size" },
+      discriminator: k.sizeAccountDiscriminator(),
       seeds: [
-        { kind: "literal", value: "mint_limit" },
-        {
-          kind: "variable",
-          name: "id",
-          description:
-            "A unique identifier in the context of a Candy Machine/Candy Guard combo",
-          type: new TypeNumberNode("u8"),
-        },
+        k.literalSeed("mint_limit"),
+        k.variableSeed(
+          "id",
+          k.numberTypeNode("u8"),
+          "A unique identifier in the context of a Candy Machine/Candy Guard combo"
+        ),
         userSeed,
         candyGuardSeed,
         candyMachineSeed,
@@ -106,15 +71,14 @@ kinobi.update(
     },
     allowListProof: {
       size: 4,
-      discriminator: { kind: "size" },
+      discriminator: k.sizeAccountDiscriminator(),
       seeds: [
-        { kind: "literal", value: "allow_list" },
-        {
-          kind: "variable",
-          name: "merkleRoot",
-          description: "The Merkle Root used when verifying the user",
-          type: new TypeBytesNode({ size: { kind: "fixed", bytes: 32 } }),
-        },
+        k.literalSeed("allow_list"),
+        k.variableSeed(
+          "merkleRoot",
+          k.bytesTypeNode(k.fixedSize(32)),
+          "The Merkle Root used when verifying the user"
+        ),
         userSeed,
         candyGuardSeed,
         candyMachineSeed,
@@ -122,13 +86,11 @@ kinobi.update(
     },
     freezeEscrow: {
       seeds: [
-        { kind: "literal", value: "freeze_escrow" },
-        {
-          kind: "variable",
-          name: "destination",
-          description: "The wallet that will eventually receive the funds",
-          type: new TypePublicKeyNode(),
-        },
+        k.literalSeed("freeze_escrow"),
+        k.publicKeySeed(
+          "destination",
+          "The wallet that will eventually receive the funds"
+        ),
         candyGuardSeed,
         candyMachineSeed,
       ],
@@ -138,7 +100,7 @@ kinobi.update(
 
 // Update defined types.
 kinobi.update(
-  new UpdateDefinedTypesVisitor({
+  new k.UpdateDefinedTypesVisitor({
     candyGuardData: { delete: true },
     guardSet: { delete: true },
     group: { delete: true },
@@ -147,132 +109,115 @@ kinobi.update(
 
 // Update fields.
 kinobi.update(
-  new TransformNodesVisitor([
+  new k.TransformNodesVisitor([
     {
-      selector: { type: "TypeStructFieldNode", name: "tokenStandard" },
+      selector: { kind: "structFieldTypeNode", name: "tokenStandard" },
       transformer: (node) => {
-        return new TypeStructFieldNode(
-          node.metadata,
-          new TypeDefinedLinkNode("tokenStandard", {
-            dependency: "mplTokenMetadata",
-          })
-        );
+        return k.structFieldTypeNode({
+          ...node,
+          child: k.linkTypeNode("tokenStandard", {
+            importFrom: "mplTokenMetadata",
+          }),
+        });
       },
     },
     {
-      selector: { type: "TypeStructFieldNode", name: "maxSupply" },
+      selector: { type: "structFieldTypeNode", name: "maxSupply" },
       transformer: (node) => {
-        return new TypeStructFieldNode(
-          { ...node.metadata, name: "maxEditionSupply" },
-          node.type
-        );
+        return k.structFieldTypeNode({ ...node, name: "maxEditionSupply" });
       },
     },
     {
-      selector: { type: "TypeStructFieldNode", name: "hash" },
+      selector: { type: "structFieldTypeNode", name: "hash" },
       transformer: (node) => {
-        return new TypeStructFieldNode(
-          node.metadata,
-          new TypeBytesNode({ size: { kind: "fixed", bytes: 32 } })
-        );
+        return k.structFieldTypeNode({
+          ...node,
+          child: k.bytesTypeNode(k.fixedSize(32)),
+        });
       },
     },
     {
-      selector: { type: "TypeStructFieldNode", name: "merkleRoot" },
+      selector: { type: "structFieldTypeNode", name: "merkleRoot" },
       transformer: (node) => {
-        return new TypeStructFieldNode(
-          node.metadata,
-          new TypeBytesNode({ size: { kind: "fixed", bytes: 32 } })
-        );
+        return k.structFieldTypeNode({
+          ...node,
+          child: k.bytesTypeNode(k.fixedSize(32)),
+        });
       },
     },
   ])
 );
 
 // Reusable PDA defaults.
-const defaultsToAssociatedTokenPda = (mint = "mint", owner = "owner") => ({
-  kind: "pda",
-  pdaAccount: "associatedToken",
-  dependency: "mplEssentials",
-  seeds: {
-    mint: { kind: "account", name: mint },
-    owner: { kind: "account", name: owner },
-  },
-});
-const defaultsToCandyGuardPda = (base = "base") => ({
-  kind: "pda",
-  pdaAccount: "candyGuard",
-  dependency: "hooked",
-  seeds: { base: { kind: "account", name: base } },
-});
-const defaultsToCandyMachineAuthorityPda = (candyMachine = "candyMachine") => ({
-  kind: "pda",
-  pdaAccount: "candyMachineAuthority",
-  dependency: "hooked",
-  seeds: { candyMachine: { kind: "account", name: candyMachine } },
-});
-const defaultsToMetadataPda = (mint = "mint") => ({
-  kind: "pda",
-  pdaAccount: "metadata",
-  dependency: "mplTokenMetadata",
-  seeds: { mint: { kind: "account", name: mint } },
-});
-const defaultsToMasterEditionPda = (mint = "mint") => ({
-  kind: "pda",
-  pdaAccount: "masterEdition",
-  dependency: "mplTokenMetadata",
-  seeds: { mint: { kind: "account", name: mint } },
-});
+const defaultsToAssociatedTokenPda = (mint = "mint", owner = "owner") =>
+  k.pdaDefault("associatedToken", {
+    importFrom: "mplEssentials",
+    seeds: { mint: k.accountDefault(mint), owner: k.accountDefault(owner) },
+  });
+const defaultsToCandyGuardPda = (base = "base") =>
+  k.pdaDefault("candyGuard", {
+    importFrom: "hooked",
+    seeds: { base: k.accountDefault(base) },
+  });
+const defaultsToCandyMachineAuthorityPda = (candyMachine = "candyMachine") =>
+  k.pdaDefault("candyMachineAuthority", {
+    importFrom: "hooked",
+    seeds: { candyMachine: k.accountDefault(candyMachine) },
+  });
+const defaultsToMetadataPda = (mint = "mint") =>
+  k.pdaDefault("metadata", {
+    importFrom: "mplTokenMetadata",
+    seeds: { mint: k.accountDefault(mint) },
+  });
+const defaultsToMasterEditionPda = (mint = "mint") =>
+  k.pdaDefault("masterEdition", {
+    importFrom: "mplTokenMetadata",
+    seeds: { mint: k.accountDefault(mint) },
+  });
 const defaultsToCollectionAuthorityRecordPda = (
   mint = "mint",
   collectionAuthority = "collectionAuthority"
-) => ({
-  kind: "pda",
-  pdaAccount: "collectionAuthorityRecord",
-  dependency: "mplTokenMetadata",
-  seeds: {
-    mint: { kind: "account", name: mint },
-    collectionAuthority: { kind: "account", name: collectionAuthority },
-  },
-});
+) =>
+  k.pdaDefault("collectionAuthorityRecord", {
+    importFrom: "mplTokenMetadata",
+    seeds: {
+      mint: k.accountDefault(mint),
+      collectionAuthority: k.accountDefault(collectionAuthority),
+    },
+  });
 const defaultsToMetadataDelegateRecordPda = (
   role = "Collection",
   mint = "mint",
   updateAuthority = "updateAuthority",
   delegate = "delegate"
-) => ({
-  kind: "pda",
-  pdaAccount: "metadataDelegateRecord",
-  dependency: "mplTokenMetadata",
-  seeds: {
-    mint: { kind: "account", name: mint },
-    delegateRole: {
-      kind: "value",
-      value: vEnum("metadataDelegateRole", role, null, "mplTokenMetadata"),
+) =>
+  k.pdaDefault("metadataDelegateRecord", {
+    importFrom: "mplTokenMetadata",
+    seeds: {
+      mint: k.accountDefault(mint),
+      delegateRole: k.valueDefault(
+        k.vEnum("metadataDelegateRole", role, null, "mplTokenMetadata")
+      ),
+      updateAuthority: k.accountDefault(updateAuthority),
+      delegate: k.accountDefault(delegate),
     },
-    updateAuthority: { kind: "account", name: updateAuthority },
-    delegate: { kind: "account", name: delegate },
-  },
-});
-const defaultsToSplAssociatedTokenProgram = () => ({
-  kind: "program",
-  program: {
-    name: "splAssociatedToken",
-    publicKey: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
-  },
-});
+  });
+const defaultsToSplAssociatedTokenProgram = () =>
+  k.programDefault(
+    "splAssociatedToken",
+    "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+  );
 
 // Automatically recognize account default values.
 kinobi.update(
-  new SetInstructionAccountDefaultValuesVisitor([
+  new k.SetInstructionAccountDefaultValuesVisitor([
     {
-      kind: "publicKey",
+      ...k.publicKeyDefault("SysvarS1otHashes111111111111111111111111111"),
       account: /^recentSlothashes$/,
-      publicKey: "SysvarS1otHashes111111111111111111111111111",
       ignoreIfOptional: true,
     },
     {
-      kind: "identity",
+      ...k.identityDefault(),
       account: "candyMachineAuthority",
       ignoreIfOptional: true,
     },
@@ -347,7 +292,7 @@ kinobi.update(
 
 // Update instructions.
 kinobi.update(
-  new UpdateInstructionsVisitor({
+  new k.UpdateInstructionsVisitor({
     "mplCandyMachineCore.initialize": {
       name: "initializeCandyMachine",
     },
@@ -355,39 +300,42 @@ kinobi.update(
       name: "createCandyGuard",
       internal: true,
       accounts: {
-        candyGuard: { defaultsTo: { kind: "pda", dependency: "hooked" } },
+        candyGuard: {
+          defaultsTo: k.pdaDefault("candyGuard", { importFrom: "hooked" }),
+        },
       },
     },
     "mplCandyMachineCore.initializeV2": { name: "initializeCandyMachineV2" },
     "mplCandyMachineCore.mint": {
       name: "mintFromCandyMachine",
       accounts: {
-        nftMintAuthority: { defaultsTo: { kind: "identity" } },
+        nftMintAuthority: { defaultsTo: k.identityDefault() },
       },
     },
     "mplCandyMachineCore.mintV2": {
       name: "mintFromCandyMachineV2",
       accounts: {
         nftMint: { isSigner: "either" },
-        nftMintAuthority: { defaultsTo: { kind: "identity" } },
+        nftMintAuthority: { defaultsTo: k.identityDefault() },
         token: {
           defaultsTo: defaultsToAssociatedTokenPda("nftMint", "nftOwner"),
         },
         sysvarInstructions: {
-          defaultsTo: {
-            kind: "publicKey",
-            publicKey: "Sysvar1nstructions1111111111111111111111111",
-          },
+          defaultsTo: k.publicKeyDefault(
+            "Sysvar1nstructions1111111111111111111111111"
+          ),
         },
         splAtaProgram: { defaultsTo: defaultsToSplAssociatedTokenProgram() },
       },
     },
     "mplCandyGuard.mint": {
       internal: true,
-      args: { label: "group" },
+      args: {
+        label: { name: "group" },
+      },
       accounts: {
         candyGuard: { defaultsTo: defaultsToCandyGuardPda("candyMachine") },
-        nftMintAuthority: { defaultsTo: { kind: "identity" } },
+        nftMintAuthority: { defaultsTo: k.identityDefault() },
         collectionAuthorityRecord: {
           defaultsTo: defaultsToCollectionAuthorityRecordPda(
             "collectionMint",
@@ -398,12 +346,14 @@ kinobi.update(
     },
     "mplCandyGuard.mintV2": {
       internal: true,
-      args: { label: "group" },
+      args: {
+        label: { name: "group" },
+      },
       accounts: {
         candyGuard: { defaultsTo: defaultsToCandyGuardPda("candyMachine") },
         nftMint: { isSigner: "either" },
-        nftMintAuthority: { defaultsTo: { kind: "identity" } },
-        minter: { defaultsTo: { kind: "identity" } },
+        nftMintAuthority: { defaultsTo: k.identityDefault() },
+        minter: { defaultsTo: k.identityDefault() },
         token: {
           defaultsTo: defaultsToAssociatedTokenPda("nftMint", "minter"),
         },
@@ -420,7 +370,9 @@ kinobi.update(
     },
     "mplCandyGuard.route": {
       internal: true,
-      args: { label: "group" },
+      args: {
+        label: { name: "group" },
+      },
       accounts: {
         candyGuard: { defaultsTo: defaultsToCandyGuardPda("candyMachine") },
       },
@@ -448,23 +400,23 @@ kinobi.update(
 
 // Unwrap candyMachineData defined type but only for initialize instructions.
 kinobi.update(
-  new UnwrapTypeDefinedLinksVisitor([
+  new k.UnwrapTypeDefinedLinksVisitor([
     "initializeCandyMachine.candyMachineData",
     "initializeCandyMachineV2.candyMachineData",
   ])
 );
-kinobi.update(new FlattenInstructionArgsStructVisitor());
+kinobi.update(new k.FlattenInstructionArgsStructVisitor());
 
 // Set struct default values.
 const defaultInitialCandyMachineData = {
-  symbol: vScalar(""),
-  maxEditionSupply: vScalar(0),
-  isMutable: vScalar(true),
-  configLineSettings: vNone(),
-  hiddenSettings: vNone(),
+  symbol: k.vScalar(""),
+  maxEditionSupply: k.vScalar(0),
+  isMutable: k.vScalar(true),
+  configLineSettings: k.vNone(),
+  hiddenSettings: k.vNone(),
 };
 kinobi.update(
-  new SetStructDefaultValuesVisitor({
+  new k.SetStructDefaultValuesVisitor({
     initializeCandyMachineInstructionData: defaultInitialCandyMachineData,
     initializeCandyMachineV2InstructionData: defaultInitialCandyMachineData,
   })
@@ -473,7 +425,7 @@ kinobi.update(
 // Wrap numbers.
 const percentAmount = { kind: "Amount", identifier: "%", decimals: 2 };
 kinobi.update(
-  new SetNumberWrappersVisitor({
+  new k.SetNumberWrappersVisitor({
     "candyMachineData.sellerFeeBasisPoints": percentAmount,
     "initializeCandyMachineInstructionData.sellerFeeBasisPoints": percentAmount,
     "initializeCandyMachineV2InstructionData.sellerFeeBasisPoints":
@@ -487,9 +439,8 @@ kinobi.update(
 );
 
 // Custom serializers.
-kinobi.update(new AutoSetAccountGpaFieldsVisitor({ override: true }));
 kinobi.update(
-  new UseCustomAccountSerializerVisitor({
+  new k.UseCustomAccountSerializerVisitor({
     candyMachine: { extract: true },
   })
 );
@@ -497,7 +448,7 @@ kinobi.update(
 // Render JavaScript.
 const jsDir = path.join(clientDir, "js", "src", "generated");
 kinobi.accept(
-  new RenderJavaScriptVisitor(jsDir, {
+  new k.RenderJavaScriptVisitor(jsDir, {
     prettier: require(path.join(clientDir, "js", ".prettierrc.json")),
     dependencyMap: {
       mplTokenMetadata: "@metaplex-foundation/mpl-token-metadata",

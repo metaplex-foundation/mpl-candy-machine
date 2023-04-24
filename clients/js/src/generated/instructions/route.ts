@@ -14,12 +14,12 @@ import {
   Serializer,
   Signer,
   TransactionBuilder,
-  checkForIsWritableOverride as isWritable,
   mapSerializer,
   publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import { findCandyGuardPda } from '../../hooked';
+import { addObjectProperty, isWritable } from '../shared';
 import { GuardType, GuardTypeArgs, getGuardTypeSerializer } from '../types';
 
 // Accounts.
@@ -29,7 +29,7 @@ export type RouteInstructionAccounts = {
   payer?: Signer;
 };
 
-// Arguments.
+// Data.
 export type RouteInstructionData = {
   discriminator: Array<number>;
   /** The target guard type. */
@@ -73,51 +73,64 @@ export function getRouteInstructionDataSerializer(
   ) as Serializer<RouteInstructionDataArgs, RouteInstructionData>;
 }
 
+// Args.
+export type RouteInstructionArgs = RouteInstructionDataArgs;
+
 // Instruction.
 export function route(
   context: Pick<Context, 'serializer' | 'programs' | 'eddsa' | 'payer'>,
-  input: RouteInstructionAccounts & RouteInstructionDataArgs
+  input: RouteInstructionAccounts & RouteInstructionArgs
 ): TransactionBuilder {
   const signers: Signer[] = [];
   const keys: AccountMeta[] = [];
 
   // Program ID.
-  const programId = context.programs.getPublicKey(
-    'mplCandyGuard',
-    'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
-  );
+  const programId = {
+    ...context.programs.getPublicKey(
+      'mplCandyGuard',
+      'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
+    ),
+    isWritable: false,
+  };
 
-  // Resolved accounts.
-  const candyMachineAccount = input.candyMachine;
-  const candyGuardAccount =
+  // Resolved inputs.
+  const resolvingAccounts = {};
+  const resolvingArgs = {};
+  addObjectProperty(
+    resolvingAccounts,
+    'candyGuard',
     input.candyGuard ??
-    findCandyGuardPda(context, { base: publicKey(candyMachineAccount) });
-  const payerAccount = input.payer ?? context.payer;
+      findCandyGuardPda(context, { base: publicKey(input.candyMachine) })
+  );
+  addObjectProperty(resolvingAccounts, 'payer', input.payer ?? context.payer);
+  const resolvedAccounts = { ...input, ...resolvingAccounts };
+  const resolvedArgs = { ...input, ...resolvingArgs };
 
   // Candy Guard.
   keys.push({
-    pubkey: candyGuardAccount,
+    pubkey: resolvedAccounts.candyGuard,
     isSigner: false,
-    isWritable: isWritable(candyGuardAccount, false),
+    isWritable: isWritable(resolvedAccounts.candyGuard, false),
   });
 
   // Candy Machine.
   keys.push({
-    pubkey: candyMachineAccount,
+    pubkey: resolvedAccounts.candyMachine,
     isSigner: false,
-    isWritable: isWritable(candyMachineAccount, true),
+    isWritable: isWritable(resolvedAccounts.candyMachine, true),
   });
 
   // Payer.
-  signers.push(payerAccount);
+  signers.push(resolvedAccounts.payer);
   keys.push({
-    pubkey: payerAccount.publicKey,
+    pubkey: resolvedAccounts.payer.publicKey,
     isSigner: true,
-    isWritable: isWritable(payerAccount, true),
+    isWritable: isWritable(resolvedAccounts.payer, true),
   });
 
   // Data.
-  const data = getRouteInstructionDataSerializer(context).serialize(input);
+  const data =
+    getRouteInstructionDataSerializer(context).serialize(resolvedArgs);
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

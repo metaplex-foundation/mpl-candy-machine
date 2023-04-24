@@ -32,6 +32,7 @@ import {
   getCandyMachineDataSerializer,
 } from '../types';
 
+/** Candy machine state and config data. */
 export type CandyMachine = Account<CandyMachineAccountData>;
 
 export function deserializeCandyMachine(

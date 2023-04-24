@@ -20,6 +20,7 @@ import {
   gpaBuilder,
 } from '@metaplex-foundation/umi';
 
+/** PDA to track the number of mints for an individual address. */
 export type MintCounter = Account<MintCounterAccountData>;
 
 export type MintCounterAccountData = { count: number };
@@ -31,7 +32,7 @@ export function getMintCounterAccountDataSerializer(
 ): Serializer<MintCounterAccountDataArgs, MintCounterAccountData> {
   const s = context.serializer;
   return s.struct<MintCounterAccountData>([['count', s.u16()]], {
-    description: 'MintCounter',
+    description: 'MintCounterAccountData',
   }) as Serializer<MintCounterAccountDataArgs, MintCounterAccountData>;
 }
 

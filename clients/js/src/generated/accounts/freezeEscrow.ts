@@ -22,6 +22,7 @@ import {
   mapSerializer,
 } from '@metaplex-foundation/umi';
 
+/** PDA to store the frozen funds. */
 export type FreezeEscrow = Account<FreezeEscrowAccountData>;
 
 export type FreezeEscrowAccountData = {
@@ -99,7 +100,7 @@ export function getFreezeEscrowAccountDataSerializer(
         ['destination', s.publicKey()],
         ['authority', s.publicKey()],
       ],
-      { description: 'FreezeEscrow' }
+      { description: 'FreezeEscrowAccountData' }
     ),
     (value) =>
       ({

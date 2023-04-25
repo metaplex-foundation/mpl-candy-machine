@@ -353,6 +353,7 @@ export const assertSuccessfulMint = async (
     },
     metadata: {
       tokenStandard: { __option: 'Some' },
+      primarySaleHappened: true,
     },
   });
 

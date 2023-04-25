@@ -6,11 +6,24 @@ on:
       program:
         description: Program
         required: true
-        default: candy-machine-core
+        default: candy-guard
         type: choice
         options:
-          - candy-machine-core
           - candy-guard
+          - candy-machine-core
+      cluster:
+        description: Cluster environment
+        required: true
+        default: devnet
+        type: choice
+        options:
+          - devnet
+          - mainnet-beta
+      publish_crate:
+        description: Release cargo crate
+        required: true
+        type: boolean
+        default: true
       bump:
         description: Version bump
         required: true
@@ -20,11 +33,6 @@ on:
           - patch
           - minor
           - major
-      create_release:
-        description: Release cargo create
-        required: true
-        type: boolean
-        default: true
 
 env:
   CACHE: true
@@ -57,12 +65,12 @@ jobs:
       - name: Install Rust
         uses: metaplex-foundation/actions/install-rust@v1
         with:
-          toolchain: ${{ inputs.rust || env.RUST_VERSION }}
+          toolchain: ${{ env.RUST_VERSION }}
 
       - name: Install Solana
         uses: metaplex-foundation/actions/install-solana@v1
         with:
-          version: ${{ inputs.solana || env.SOLANA_VERSION }}
+          version: ${{ env.SOLANA_VERSION }}
           cache: ${{ env.CACHE }}
 
       - name: Install Anchor CLI
@@ -71,45 +79,59 @@ jobs:
           version: ${{ env.ANCHOR_VERSION }}
           cache: ${{ env.CACHE }}
 
-      - name: Install dependencies
-        uses: metaplex-foundation/actions/install-node-dependencies@v1
-        with:
-          folder: ./clients/js
-          cache: ${{ env.CACHE }}
-          key: clients-js
-
-      - name: Build
-        working-directory: ./clients/js
-        run: pnpm build
-
-      - name: Bump
-        id: bump
-        working-directory: ./clients/js
+      - name: Set RPC
         run: |
-          if [ "${{ startsWith(inputs.bump, 'pre') }}" == "true" ]; then
-            pnpm version ${{ inputs.bump }} --preid ${{ inputs.tag }} --no-git-tag-version
+          if [ "${{ inputs.cluster }}" == "devnet" ]; then
+            echo RPC=${{ secrets.DEVNET_RPC }} >> $GITHUB_ENV
           else
-            pnpm version ${{ inputs.bump }} --no-git-tag-version
+            echo RPC=${{ secrets.MAINNET_RPC }} >> $GITHUB_ENV
           fi
-          echo "new_version=$(pnpm pkg get version | sed 's/"//g')" >> $GITHUB_OUTPUT
 
-      - name: Set publishing config
-        run: pnpm config set '//registry.npmjs.org/:_authToken' "${NODE_AUTH_TOKEN}"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Identify Program
+        run: |
+          if [ "${{ inputs.program }}" == "candy-guard" ]; then
+            echo DEPLOY_KEY=${{ secrets.CANDY_GUARD_DEPLOY_KEY }} >> $GITHUB_ENV
+            echo PROGRAM_ID=${{ secrets.CANDY_GUARD_ID }} >> $GITHUB_ENV
+            echo PROGRAM_NAME="mpl_candy_guard" >> $GITHUB_ENV
+          else
+            echo DEPLOY_KEY=${{ secrets.CANDY_MACHINE_CORE_DEPLOY_KEY }} >> $GITHUB_ENV
+            echo PROGRAM_ID=${{ secrets.CANDY_MACHINE_CORE_ID }} >> $GITHUB_ENV
+            echo PROGRA_NAME="mpl_candy_machine_core" >> $GITHUB_ENV
+          fi
 
-      - name: Publish
-        working-directory: ./clients/js
-        run: pnpm publish --no-git-checks --tag ${{ inputs.tag }}
+      - name: Download program builds
+        uses: actions/download-artifact@v3
 
-      - name: Commit and tag new version
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: Deploy JS client v${{ steps.bump.outputs.new_version }}
-          tagging_message: js@v${{ steps.bump.outputs.new_version }}
+      - name: Deploy Program
+        run: |
+          echo "Deploying ${{ inputs.program }} to ${{ inputs.cluster }}"
 
-      - name: Create GitHub release
-        if: github.event.inputs.create_release == 'true'
-        uses: ncipollo/release-action@v1
-        with:
-          tag: js@v${{ steps.bump.outputs.new_version }}
+          echo ${{ env.DEPLOY_KEY }} > ./deploy-key.json
+          echo ${{ env.PROGRAM_ID }} > ./program-id.json
+
+          solana -v program deploy ./program-builds/programs/${{ inputs.program }}/target/deploy/${{ env.PROGRAM_NAME }}.so \
+            -u ${{ env.RPC }} \
+            --program-id ./program-id.json \
+            -k ./deploy-key.json
+
+      - name: Upgrade IDL
+        working-directory: ./programs/${{ inputs.program }}
+        run: |
+          anchor build --no-docs
+
+          jq 'del(.. | .docs?)' ./target/idl/`echo "${{ inputs.program }}" | tr - _`.json > ./idl.json
+          echo ${{ env.DEPLOY_KEY }} > ./deploy-key.json
+          echo ${{ env.PROGRAM_ID }} > ./program-id.json
+
+          anchor idl upgrade -f ./idl.json \
+            --provider.cluster ${{ env.RPC }} \
+            --provider.wallet ./deploy-key.json \
+            `solana address -k ./program-id.json`
+
+      - name: Publish crate
+        working-directory: ./programs/${{ inputs.program }}/program
+        if: github.event.inputs.publish_crate == 'true'
+        run: |
+          cargo install cargo-release
+          cargo login ${{ secrets.CRATES_TOKEN }}
+          cargo release ${{ inputs.bump }} --execute

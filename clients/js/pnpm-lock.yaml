@@ -2,11 +2,11 @@ lockfileVersion: '6.0'
 
 dependencies:
   '@metaplex-foundation/mpl-essentials':
-    specifier: ^0.5.7
-    version: 0.5.7(@metaplex-foundation/umi@0.7.2)
+    specifier: ^0.5.8
+    version: 0.5.8(@metaplex-foundation/umi@0.7.2)
   '@metaplex-foundation/mpl-token-metadata':
-    specifier: 3.0.0-alpha.17
-    version: 3.0.0-alpha.17(@metaplex-foundation/umi@0.7.2)
+    specifier: 3.0.0-alpha.18
+    version: 3.0.0-alpha.18(@metaplex-foundation/umi@0.7.2)
   '@noble/hashes':
     specifier: ^1.2.0
     version: 1.2.0
@@ -1683,8 +1683,8 @@ packages:
     resolution: {integrity: sha512-S9RulC2fFCFOQraz61bij+5YCHhSO9llJegK8c8Y6731fSi6snUSQJdCUqYS8AIgR0TKbQvdvgSyIIdbDFZbBA==}
     dev: true
 
-  /@metaplex-foundation/mpl-essentials@0.5.7(@metaplex-foundation/umi@0.7.2):
-    resolution: {integrity: sha512-//LOSNoXMOeH/0+WWZCOmspRj4tdl7isL6U47yF6CzmNgjnLDQiNhcsrCmaYpyE/dNAjmeR3IDdA/7gCGvsKIg==}
+  /@metaplex-foundation/mpl-essentials@0.5.8(@metaplex-foundation/umi@0.7.2):
+    resolution: {integrity: sha512-bPer6uIhMkqcaKqF9PyIuOR2+chAxX5bIsJNplTGZM8ROwvkzwdgN65BVDkkevsPNCKiQt1L8HWMtLWxxwJnYg==}
     peerDependencies:
       '@metaplex-foundation/umi': 0.6 - 0.7
     dependencies:
@@ -1706,12 +1706,12 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@metaplex-foundation/mpl-token-metadata@3.0.0-alpha.17(@metaplex-foundation/umi@0.7.2):
-    resolution: {integrity: sha512-EUD704ZQIYo/Ih1GaEoN11igy/VcuJVmkSxoyN2eVgunXdP2R9Q2i2pceN42t3BInYqcxDIk/OyU0TvkeWj0qA==}
+  /@metaplex-foundation/mpl-token-metadata@3.0.0-alpha.18(@metaplex-foundation/umi@0.7.2):
+    resolution: {integrity: sha512-8nCi4q+jmr5z8AHApKwPHtMeahQB+TZZzhrgaxI4F2J0y99pdmbYHgcN9czBEG0neF0oNpcyDT7r08kfYTaF9g==}
     peerDependencies:
       '@metaplex-foundation/umi': 0.6 - 0.7
     dependencies:
-      '@metaplex-foundation/mpl-essentials': 0.5.7(@metaplex-foundation/umi@0.7.2)
+      '@metaplex-foundation/mpl-essentials': 0.5.8(@metaplex-foundation/umi@0.7.2)
       '@metaplex-foundation/umi': 0.7.2
     dev: false
 

@@ -62,18 +62,14 @@ export function getSetCollectionV2InstructionDataSerializer(
   const s = context.serializer;
   return mapSerializer<
     SetCollectionV2InstructionDataArgs,
-    SetCollectionV2InstructionData,
+    any,
     SetCollectionV2InstructionData
   >(
     s.struct<SetCollectionV2InstructionData>(
       [['discriminator', s.array(s.u8(), { size: 8 })]],
       { description: 'SetCollectionV2InstructionData' }
     ),
-    (value) =>
-      ({
-        ...value,
-        discriminator: [229, 35, 61, 91, 15, 14, 99, 160],
-      } as SetCollectionV2InstructionData)
+    (value) => ({ ...value, discriminator: [229, 35, 61, 91, 15, 14, 99, 160] })
   ) as Serializer<
     SetCollectionV2InstructionDataArgs,
     SetCollectionV2InstructionData

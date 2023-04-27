@@ -40,18 +40,17 @@ export function getDeleteCandyMachineInstructionDataSerializer(
   const s = context.serializer;
   return mapSerializer<
     DeleteCandyMachineInstructionDataArgs,
-    DeleteCandyMachineInstructionData,
+    any,
     DeleteCandyMachineInstructionData
   >(
     s.struct<DeleteCandyMachineInstructionData>(
       [['discriminator', s.array(s.u8(), { size: 8 })]],
       { description: 'DeleteCandyMachineInstructionData' }
     ),
-    (value) =>
-      ({
-        ...value,
-        discriminator: [183, 18, 70, 156, 148, 109, 161, 34],
-      } as DeleteCandyMachineInstructionData)
+    (value) => ({
+      ...value,
+      discriminator: [183, 18, 70, 156, 148, 109, 161, 34],
+    })
   ) as Serializer<
     DeleteCandyMachineInstructionDataArgs,
     DeleteCandyMachineInstructionData

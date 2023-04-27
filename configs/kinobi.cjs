@@ -47,7 +47,7 @@ kinobi.update(
     candyGuard: {
       internal: true,
       seeds: [
-        k.literalSeed("candy_guard"),
+        k.stringConstantSeed("candy_guard"),
         k.publicKeySeed(
           "base",
           "The base address which the Candy Guard PDA derives from"
@@ -58,7 +58,7 @@ kinobi.update(
       size: 2,
       discriminator: k.sizeAccountDiscriminator(),
       seeds: [
-        k.literalSeed("mint_limit"),
+        k.stringConstantSeed("mint_limit"),
         k.variableSeed(
           "id",
           k.numberTypeNode("u8"),
@@ -73,7 +73,7 @@ kinobi.update(
       size: 4,
       discriminator: k.sizeAccountDiscriminator(),
       seeds: [
-        k.literalSeed("allow_list"),
+        k.stringConstantSeed("allow_list"),
         k.variableSeed(
           "merkleRoot",
           k.bytesTypeNode(k.fixedSize(32)),
@@ -86,7 +86,7 @@ kinobi.update(
     },
     freezeEscrow: {
       seeds: [
-        k.literalSeed("freeze_escrow"),
+        k.stringConstantSeed("freeze_escrow"),
         k.publicKeySeed(
           "destination",
           "The wallet that will eventually receive the funds"

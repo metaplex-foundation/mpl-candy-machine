@@ -43,7 +43,7 @@ export function getSetCandyMachineAuthorityInstructionDataSerializer(
   const s = context.serializer;
   return mapSerializer<
     SetCandyMachineAuthorityInstructionDataArgs,
-    SetCandyMachineAuthorityInstructionData,
+    any,
     SetCandyMachineAuthorityInstructionData
   >(
     s.struct<SetCandyMachineAuthorityInstructionData>(
@@ -53,11 +53,10 @@ export function getSetCandyMachineAuthorityInstructionDataSerializer(
       ],
       { description: 'SetCandyMachineAuthorityInstructionData' }
     ),
-    (value) =>
-      ({
-        ...value,
-        discriminator: [133, 250, 37, 21, 110, 163, 26, 121],
-      } as SetCandyMachineAuthorityInstructionData)
+    (value) => ({
+      ...value,
+      discriminator: [133, 250, 37, 21, 110, 163, 26, 121],
+    })
   ) as Serializer<
     SetCandyMachineAuthorityInstructionDataArgs,
     SetCandyMachineAuthorityInstructionData

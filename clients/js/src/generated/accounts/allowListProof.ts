@@ -138,3 +138,27 @@ export function findAllowListProofPda(
     s.publicKey().serialize(seeds.candyMachine),
   ]);
 }
+
+export async function fetchAllowListProofFromSeeds(
+  context: Pick<Context, 'eddsa' | 'programs' | 'rpc' | 'serializer'>,
+  seeds: Parameters<typeof findAllowListProofPda>[1],
+  options?: RpcGetAccountOptions
+): Promise<AllowListProof> {
+  return fetchAllowListProof(
+    context,
+    findAllowListProofPda(context, seeds),
+    options
+  );
+}
+
+export async function safeFetchAllowListProofFromSeeds(
+  context: Pick<Context, 'eddsa' | 'programs' | 'rpc' | 'serializer'>,
+  seeds: Parameters<typeof findAllowListProofPda>[1],
+  options?: RpcGetAccountOptions
+): Promise<AllowListProof | null> {
+  return safeFetchAllowListProof(
+    context,
+    findAllowListProofPda(context, seeds),
+    options
+  );
+}

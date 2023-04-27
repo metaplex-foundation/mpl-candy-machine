@@ -51,11 +51,7 @@ export function getRouteInstructionDataSerializer(
   context: Pick<Context, 'serializer'>
 ): Serializer<RouteInstructionDataArgs, RouteInstructionData> {
   const s = context.serializer;
-  return mapSerializer<
-    RouteInstructionDataArgs,
-    RouteInstructionData,
-    RouteInstructionData
-  >(
+  return mapSerializer<RouteInstructionDataArgs, any, RouteInstructionData>(
     s.struct<RouteInstructionData>(
       [
         ['discriminator', s.array(s.u8(), { size: 8 })],
@@ -65,11 +61,10 @@ export function getRouteInstructionDataSerializer(
       ],
       { description: 'RouteInstructionData' }
     ),
-    (value) =>
-      ({
-        ...value,
-        discriminator: [229, 23, 203, 151, 122, 227, 173, 42],
-      } as RouteInstructionData)
+    (value) => ({
+      ...value,
+      discriminator: [229, 23, 203, 151, 122, 227, 173, 42],
+    })
   ) as Serializer<RouteInstructionDataArgs, RouteInstructionData>;
 }
 

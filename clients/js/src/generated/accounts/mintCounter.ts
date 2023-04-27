@@ -138,3 +138,23 @@ export function findMintCounterPda(
     s.publicKey().serialize(seeds.candyMachine),
   ]);
 }
+
+export async function fetchMintCounterFromSeeds(
+  context: Pick<Context, 'eddsa' | 'programs' | 'rpc' | 'serializer'>,
+  seeds: Parameters<typeof findMintCounterPda>[1],
+  options?: RpcGetAccountOptions
+): Promise<MintCounter> {
+  return fetchMintCounter(context, findMintCounterPda(context, seeds), options);
+}
+
+export async function safeFetchMintCounterFromSeeds(
+  context: Pick<Context, 'eddsa' | 'programs' | 'rpc' | 'serializer'>,
+  seeds: Parameters<typeof findMintCounterPda>[1],
+  options?: RpcGetAccountOptions
+): Promise<MintCounter | null> {
+  return safeFetchMintCounter(
+    context,
+    findMintCounterPda(context, seeds),
+    options
+  );
+}

@@ -66,7 +66,7 @@ export function getSetTokenStandardInstructionDataSerializer(
   const s = context.serializer;
   return mapSerializer<
     SetTokenStandardInstructionDataArgs,
-    SetTokenStandardInstructionData,
+    any,
     SetTokenStandardInstructionData
   >(
     s.struct<SetTokenStandardInstructionData>(
@@ -76,11 +76,10 @@ export function getSetTokenStandardInstructionDataSerializer(
       ],
       { description: 'SetTokenStandardInstructionData' }
     ),
-    (value) =>
-      ({
-        ...value,
-        discriminator: [147, 212, 106, 195, 30, 170, 209, 128],
-      } as SetTokenStandardInstructionData)
+    (value) => ({
+      ...value,
+      discriminator: [147, 212, 106, 195, 30, 170, 209, 128],
+    })
   ) as Serializer<
     SetTokenStandardInstructionDataArgs,
     SetTokenStandardInstructionData

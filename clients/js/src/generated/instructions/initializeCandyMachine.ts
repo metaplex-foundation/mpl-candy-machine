@@ -104,7 +104,7 @@ export function getInitializeCandyMachineInstructionDataSerializer(
   const s = context.serializer;
   return mapSerializer<
     InitializeCandyMachineInstructionDataArgs,
-    InitializeCandyMachineInstructionData,
+    any,
     InitializeCandyMachineInstructionData
   >(
     s.struct<InitializeCandyMachineInstructionData>(
@@ -124,16 +124,15 @@ export function getInitializeCandyMachineInstructionDataSerializer(
       ],
       { description: 'InitializeCandyMachineInstructionData' }
     ),
-    (value) =>
-      ({
-        ...value,
-        discriminator: [175, 175, 109, 31, 13, 152, 155, 237],
-        symbol: value.symbol ?? '',
-        maxEditionSupply: value.maxEditionSupply ?? 0,
-        isMutable: value.isMutable ?? true,
-        configLineSettings: value.configLineSettings ?? none(),
-        hiddenSettings: value.hiddenSettings ?? none(),
-      } as InitializeCandyMachineInstructionData)
+    (value) => ({
+      ...value,
+      discriminator: [175, 175, 109, 31, 13, 152, 155, 237],
+      symbol: value.symbol ?? '',
+      maxEditionSupply: value.maxEditionSupply ?? 0,
+      isMutable: value.isMutable ?? true,
+      configLineSettings: value.configLineSettings ?? none(),
+      hiddenSettings: value.hiddenSettings ?? none(),
+    })
   ) as Serializer<
     InitializeCandyMachineInstructionDataArgs,
     InitializeCandyMachineInstructionData

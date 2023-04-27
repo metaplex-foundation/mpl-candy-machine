@@ -74,11 +74,7 @@ export function getMintV2InstructionDataSerializer(
   context: Pick<Context, 'serializer'>
 ): Serializer<MintV2InstructionDataArgs, MintV2InstructionData> {
   const s = context.serializer;
-  return mapSerializer<
-    MintV2InstructionDataArgs,
-    MintV2InstructionData,
-    MintV2InstructionData
-  >(
+  return mapSerializer<MintV2InstructionDataArgs, any, MintV2InstructionData>(
     s.struct<MintV2InstructionData>(
       [
         ['discriminator', s.array(s.u8(), { size: 8 })],
@@ -87,11 +83,10 @@ export function getMintV2InstructionDataSerializer(
       ],
       { description: 'MintV2InstructionData' }
     ),
-    (value) =>
-      ({
-        ...value,
-        discriminator: [120, 121, 23, 146, 173, 110, 199, 205],
-      } as MintV2InstructionData)
+    (value) => ({
+      ...value,
+      discriminator: [120, 121, 23, 146, 173, 110, 199, 205],
+    })
   ) as Serializer<MintV2InstructionDataArgs, MintV2InstructionData>;
 }
 

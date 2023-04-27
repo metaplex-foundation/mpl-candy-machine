@@ -36,20 +36,15 @@ export function getWrapInstructionDataSerializer(
   context: Pick<Context, 'serializer'>
 ): Serializer<WrapInstructionDataArgs, WrapInstructionData> {
   const s = context.serializer;
-  return mapSerializer<
-    WrapInstructionDataArgs,
-    WrapInstructionData,
-    WrapInstructionData
-  >(
+  return mapSerializer<WrapInstructionDataArgs, any, WrapInstructionData>(
     s.struct<WrapInstructionData>(
       [['discriminator', s.array(s.u8(), { size: 8 })]],
       { description: 'WrapInstructionData' }
     ),
-    (value) =>
-      ({
-        ...value,
-        discriminator: [178, 40, 10, 189, 228, 129, 186, 140],
-      } as WrapInstructionData)
+    (value) => ({
+      ...value,
+      discriminator: [178, 40, 10, 189, 228, 129, 186, 140],
+    })
   ) as Serializer<WrapInstructionDataArgs, WrapInstructionData>;
 }
 

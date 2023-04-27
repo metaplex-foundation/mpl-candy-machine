@@ -36,20 +36,15 @@ export function getUnwrapInstructionDataSerializer(
   context: Pick<Context, 'serializer'>
 ): Serializer<UnwrapInstructionDataArgs, UnwrapInstructionData> {
   const s = context.serializer;
-  return mapSerializer<
-    UnwrapInstructionDataArgs,
-    UnwrapInstructionData,
-    UnwrapInstructionData
-  >(
+  return mapSerializer<UnwrapInstructionDataArgs, any, UnwrapInstructionData>(
     s.struct<UnwrapInstructionData>(
       [['discriminator', s.array(s.u8(), { size: 8 })]],
       { description: 'UnwrapInstructionData' }
     ),
-    (value) =>
-      ({
-        ...value,
-        discriminator: [126, 175, 198, 14, 212, 69, 50, 44],
-      } as UnwrapInstructionData)
+    (value) => ({
+      ...value,
+      discriminator: [126, 175, 198, 14, 212, 69, 50, 44],
+    })
   ) as Serializer<UnwrapInstructionDataArgs, UnwrapInstructionData>;
 }
 

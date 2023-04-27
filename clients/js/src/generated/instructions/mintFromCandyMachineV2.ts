@@ -72,18 +72,17 @@ export function getMintFromCandyMachineV2InstructionDataSerializer(
   const s = context.serializer;
   return mapSerializer<
     MintFromCandyMachineV2InstructionDataArgs,
-    MintFromCandyMachineV2InstructionData,
+    any,
     MintFromCandyMachineV2InstructionData
   >(
     s.struct<MintFromCandyMachineV2InstructionData>(
       [['discriminator', s.array(s.u8(), { size: 8 })]],
       { description: 'MintFromCandyMachineV2InstructionData' }
     ),
-    (value) =>
-      ({
-        ...value,
-        discriminator: [120, 121, 23, 146, 173, 110, 199, 205],
-      } as MintFromCandyMachineV2InstructionData)
+    (value) => ({
+      ...value,
+      discriminator: [120, 121, 23, 146, 173, 110, 199, 205],
+    })
   ) as Serializer<
     MintFromCandyMachineV2InstructionDataArgs,
     MintFromCandyMachineV2InstructionData

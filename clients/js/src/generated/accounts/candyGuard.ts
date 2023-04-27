@@ -40,11 +40,7 @@ export function getCandyGuardAccountDataSerializer(
   context: Pick<Context, 'serializer'>
 ): Serializer<CandyGuardAccountDataArgs, CandyGuardAccountData> {
   const s = context.serializer;
-  return mapSerializer<
-    CandyGuardAccountDataArgs,
-    CandyGuardAccountData,
-    CandyGuardAccountData
-  >(
+  return mapSerializer<CandyGuardAccountDataArgs, any, CandyGuardAccountData>(
     s.struct<CandyGuardAccountData>(
       [
         ['discriminator', s.array(s.u8(), { size: 8 })],
@@ -54,11 +50,10 @@ export function getCandyGuardAccountDataSerializer(
       ],
       { description: 'CandyGuardAccountData' }
     ),
-    (value) =>
-      ({
-        ...value,
-        discriminator: [95, 25, 33, 117, 164, 206, 9, 250],
-      } as CandyGuardAccountData)
+    (value) => ({
+      ...value,
+      discriminator: [95, 25, 33, 117, 164, 206, 9, 250],
+    })
   ) as Serializer<CandyGuardAccountDataArgs, CandyGuardAccountData>;
 }
 
@@ -164,4 +159,24 @@ export function findCandyGuardPda(
     s.string({ size: 'variable' }).serialize('candy_guard'),
     s.publicKey().serialize(seeds.base),
   ]);
+}
+
+export async function fetchCandyGuardFromSeeds(
+  context: Pick<Context, 'eddsa' | 'programs' | 'rpc' | 'serializer'>,
+  seeds: Parameters<typeof findCandyGuardPda>[1],
+  options?: RpcGetAccountOptions
+): Promise<CandyGuard> {
+  return fetchCandyGuard(context, findCandyGuardPda(context, seeds), options);
+}
+
+export async function safeFetchCandyGuardFromSeeds(
+  context: Pick<Context, 'eddsa' | 'programs' | 'rpc' | 'serializer'>,
+  seeds: Parameters<typeof findCandyGuardPda>[1],
+  options?: RpcGetAccountOptions
+): Promise<CandyGuard | null> {
+  return safeFetchCandyGuard(
+    context,
+    findCandyGuardPda(context, seeds),
+    options
+  );
 }

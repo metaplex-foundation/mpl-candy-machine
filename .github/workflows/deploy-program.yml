@@ -133,7 +133,7 @@ jobs:
         working-directory: ./programs/${{ inputs.program }}
         run: |
           jq 'del(.metadata?) | del(.. | .docs?)' ../../idls/`echo "${{ inputs.program }}" | tr - _`.json > ./idl.json
-          jq '.version = "${{ env.PROGRAM_VERSION"' ./idl.json > ./versioned-idl.json
+          jq '.version = "${{ env.PROGRAM_VERSION }}"' ./idl.json > ./versioned-idl.json
 
           anchor idl upgrade -f ./idl.json \
             --provider.cluster ${{ env.RPC }} \

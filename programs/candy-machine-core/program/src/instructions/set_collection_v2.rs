@@ -1,4 +1,5 @@
 use anchor_lang::{prelude::*, solana_program::sysvar};
+use mpl_token_metadata::state::{Metadata, TokenMetadataAccount};
 
 use crate::{
     approve_metadata_delegate, cmp_pubkeys, constants::AUTHORITY_SEED,
@@ -41,6 +42,10 @@ pub fn set_collection_v2(ctx: Context<SetCollectionV2>) -> Result<()> {
             *ctx.bumps.get("authority_pda").unwrap(),
         )?;
     } else {
+        let collection_metadata_info = &accounts.collection_metadata;
+        let collection_metadata: Metadata =
+            Metadata::from_account_info(&collection_metadata_info.to_account_info())?;
+
         // revoking the existing collection authority
 
         let revoke_accounts = RevokeCollectionAuthorityHelperAccounts {
@@ -55,6 +60,7 @@ pub fn set_collection_v2(ctx: Context<SetCollectionV2>) -> Result<()> {
             revoke_accounts,
             candy_machine.key(),
             *ctx.bumps.get("authority_pda").unwrap(),
+            collection_metadata.token_standard,
         )?;
         // bump the version of the account since we are setting a metadata delegate
         candy_machine.version = AccountVersion::V2;

@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use mpl_token_metadata::state::{Metadata, TokenMetadataAccount};
 
 use crate::{
     approve_collection_authority_helper, cmp_pubkeys, constants::AUTHORITY_SEED,
@@ -22,6 +23,10 @@ pub fn set_collection(ctx: Context<SetCollection>) -> Result<()> {
         return err!(CandyError::MintMismatch);
     }
 
+    let collection_metadata_info = &accounts.collection_metadata;
+    let collection_metadata: Metadata =
+        Metadata::from_account_info(&collection_metadata_info.to_account_info())?;
+
     // revoking the existing collection authority
 
     let revoke_accounts = RevokeCollectionAuthorityHelperAccounts {
@@ -36,6 +41,7 @@ pub fn set_collection(ctx: Context<SetCollection>) -> Result<()> {
         revoke_accounts,
         candy_machine.key(),
         *ctx.bumps.get("authority_pda").unwrap(),
+        collection_metadata.token_standard,
     )?;
 
     // approving the new collection authority

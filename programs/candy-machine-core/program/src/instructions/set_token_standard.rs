@@ -42,6 +42,7 @@ pub fn set_token_standard(ctx: Context<SetTokenStandard>, token_standard: u8) ->
             revoke_accounts,
             candy_machine.key(),
             *ctx.bumps.get("authority_pda").unwrap(),
+            collection_metadata.token_standard,
         )?;
 
         // approve a new metadata delegate

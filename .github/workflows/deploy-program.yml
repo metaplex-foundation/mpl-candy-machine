@@ -98,6 +98,22 @@ jobs:
             echo ${{ secrets.CANDY_MACHINE_CORE_ID }} > ./program-id.json
             echo PROGRAM_NAME="mpl_candy_machine_core" >> $GITHUB_ENV
           fi
+          
+          IDL_FILE=`echo "${{ inputs.program }}" | tr - _`
+          VERSION=`jq '.version' .idls/${IDL_FILE}.json | sed 's/"//g'`
+          MAJOR=`echo ${VERSION} | cut -d. -f1`
+          MINOR=`echo ${VERSION} | cut -d. -f2`
+          PATCH=`echo ${VERSION} | cut -d. -f3`
+          
+          if [ "${{ inputs.bump }}" == "major" ]; then
+             MAJOR=$((MAJOR + 1))
+          elif [ "${{ inputs.bump }}" == "minor" ]; then
+             MINOR=$((MINOR + 1))
+          else
+             PATCH=$((PATCH + 1))
+          fi
+          
+          echo PROGRAM_VERSION="${MAJOR}.${MINOR}.${PATCH}" >> $GITHUB_ENV
 
       - name: Download program builds
         uses: actions/download-artifact@v3
@@ -117,6 +133,7 @@ jobs:
         working-directory: ./programs/${{ inputs.program }}
         run: |
           jq 'del(.metadata?) | del(.. | .docs?)' ../../idls/`echo "${{ inputs.program }}" | tr - _`.json > ./idl.json
+          jq '.version = "${{ env.PROGRAM_VERSION"' ./idl.json > ./versioned-idl.json
 
           anchor idl upgrade -f ./idl.json \
             --provider.cluster ${{ env.RPC }} \
@@ -126,6 +143,7 @@ jobs:
           rm ../../deploy-key.json
           rm ../../program-id.json
           rm ./idl.json
+          rm ./versioned-idl.json
 
       - name: Publish crate
         working-directory: ./programs/${{ inputs.program }}/program

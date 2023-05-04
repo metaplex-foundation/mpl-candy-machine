@@ -248,33 +248,43 @@ pub fn revoke_collection_authority_helper(
     accounts: RevokeCollectionAuthorityHelperAccounts,
     candy_machine: Pubkey,
     signer_bump: u8,
+    token_standard: Option<TokenStandard>,
 ) -> Result<()> {
-    let revoke_collection_infos = vec![
-        accounts.collection_authority_record.to_account_info(),
-        accounts.authority_pda.to_account_info(),
-        accounts.collection_metadata.to_account_info(),
-        accounts.collection_mint.to_account_info(),
-    ];
+    if matches!(token_standard, Some(TokenStandard::ProgrammableNonFungible)) {
+        // pNFTs do not have a "legacy" collection authority, so we do not try to revoke
+        // it. This would happen when the migration is completed and the candy machine
+        // account version is still V1 - in any case, the "legacy" collection authority
+        // is invalid since it does not apply to pNFTs and it will be replace by a
+        // metadata delegate.
+        Ok(())
+    } else {
+        let revoke_collection_infos = vec![
+            accounts.collection_authority_record.to_account_info(),
+            accounts.authority_pda.to_account_info(),
+            accounts.collection_metadata.to_account_info(),
+            accounts.collection_mint.to_account_info(),
+        ];
 
-    let authority_seeds = [
-        AUTHORITY_SEED.as_bytes(),
-        candy_machine.as_ref(),
-        &[signer_bump],
-    ];
+        let authority_seeds = [
+            AUTHORITY_SEED.as_bytes(),
+            candy_machine.as_ref(),
+            &[signer_bump],
+        ];
 
-    invoke_signed(
-        &revoke_collection_authority(
-            accounts.token_metadata_program.key(),
-            accounts.collection_authority_record.key(),
-            accounts.authority_pda.key(),
-            accounts.authority_pda.key(),
-            accounts.collection_metadata.key(),
-            accounts.collection_mint.key(),
-        ),
-        revoke_collection_infos.as_slice(),
-        &[&authority_seeds],
-    )
-    .map_err(|error| error.into())
+        invoke_signed(
+            &revoke_collection_authority(
+                accounts.token_metadata_program.key(),
+                accounts.collection_authority_record.key(),
+                accounts.authority_pda.key(),
+                accounts.authority_pda.key(),
+                accounts.collection_metadata.key(),
+                accounts.collection_mint.key(),
+            ),
+            revoke_collection_infos.as_slice(),
+            &[&authority_seeds],
+        )
+        .map_err(|error| error.into())
+    }
 }
 
 pub fn approve_metadata_delegate(accounts: ApproveMetadataDelegateHelperAccounts) -> Result<()> {

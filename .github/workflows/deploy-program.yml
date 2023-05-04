@@ -122,12 +122,15 @@ jobs:
             --provider.cluster ${{ env.RPC }} \
             --provider.wallet ../../deploy-key.json \
             `solana address -k ../../program-id.json`
+            
+          rm ../../deploy-key.json
+          rm ../../program-id.json
+          rm ./idl.json
 
       - name: Publish crate
         working-directory: ./programs/${{ inputs.program }}/program
         if: github.event.inputs.publish_crate == 'true'
         run: |
-          git clean -fd
           cargo install cargo-release
           cargo login ${{ secrets.CRATES_TOKEN }}
           cargo release ${{ inputs.bump }} --execute

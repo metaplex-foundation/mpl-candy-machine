@@ -23,7 +23,7 @@ on:
         description: Release cargo crate
         required: true
         type: boolean
-        default: true
+        default: false
       bump:
         description: Version bump
         required: true
@@ -122,6 +122,9 @@ jobs:
             --provider.cluster ${{ env.RPC }} \
             --provider.wallet ../../deploy-key.json \
             `solana address -k ../../program-id.json`
+
+          rm ../../deploy-key.json
+          rm ../../program-id.json
 
       - name: Publish crate
         working-directory: ./programs/${{ inputs.program }}/program

@@ -100,7 +100,7 @@ jobs:
           fi
           
           IDL_FILE=`echo "${{ inputs.program }}" | tr - _`
-          VERSION=`jq '.version' .idls/${IDL_FILE}.json | sed 's/"//g'`
+          VERSION=`jq '.version' ./idls/${IDL_FILE}.json | sed 's/"//g'`
           MAJOR=`echo ${VERSION} | cut -d. -f1`
           MINOR=`echo ${VERSION} | cut -d. -f2`
           PATCH=`echo ${VERSION} | cut -d. -f3`

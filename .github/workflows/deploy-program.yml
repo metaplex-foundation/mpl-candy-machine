@@ -133,4 +133,4 @@ jobs:
         run: |
           cargo install cargo-release
           cargo login ${{ secrets.CRATES_TOKEN }}
-          cargo release ${{ inputs.bump }} --execute
+          cargo release ${{ inputs.bump }} --no-confirm --execute

@@ -1,0 +1,134 @@
+name: Deploy Program
+
+on:
+  workflow_dispatch:
+    inputs:
+      program:
+        description: Program
+        required: true
+        default: candy-guard
+        type: choice
+        options:
+          - candy-guard
+          - candy-machine-core
+      cluster:
+        description: Cluster environment
+        required: true
+        default: devnet
+        type: choice
+        options:
+          - devnet
+          - mainnet-beta
+      publish_crate:
+        description: Release cargo crate
+        required: true
+        type: boolean
+        default: true
+      bump:
+        description: Version bump
+        required: true
+        default: patch
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+env:
+  CACHE: true
+
+jobs:
+  build_programs:
+    name: Programs
+    uses: ./.github/workflows/build-programs.yml
+    secrets: inherit
+
+  test_js:
+    name: JS client
+    needs: build_programs
+    uses: ./.github/workflows/test-js.yml
+    secrets: inherit
+
+  deploy_program:
+    name: Program / Deploy
+    runs-on: ubuntu-latest
+    needs: test_js
+    permissions:
+      contents: write
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+
+      - name: Load environment variables
+        run: cat .github/.env >> $GITHUB_ENV
+
+      - name: Install Rust
+        uses: metaplex-foundation/actions/install-rust@v1
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+
+      - name: Install Solana
+        uses: metaplex-foundation/actions/install-solana@v1
+        with:
+          version: ${{ env.SOLANA_VERSION }}
+          cache: ${{ env.CACHE }}
+
+      - name: Install Anchor CLI
+        uses: metaplex-foundation/actions/install-anchor-cli@v1
+        with:
+          version: ${{ env.ANCHOR_VERSION }}
+          cache: ${{ env.CACHE }}
+
+      - name: Set RPC
+        run: |
+          if [ "${{ inputs.cluster }}" == "devnet" ]; then
+            echo RPC=${{ secrets.DEVNET_RPC }} >> $GITHUB_ENV
+          else
+            echo RPC=${{ secrets.MAINNET_RPC }} >> $GITHUB_ENV
+          fi
+
+      - name: Identify Program
+        run: |
+          if [ "${{ inputs.program }}" == "candy-guard" ]; then
+            echo ${{ secrets.CANDY_GUARD_DEPLOY_KEY }} > ./deploy-key.json 
+            echo ${{ secrets.CANDY_GUARD_ID }} > ./program-id.json
+            echo PROGRAM_NAME="mpl_candy_guard" >> $GITHUB_ENV
+          else
+            echo ${{ secrets.CANDY_MACHINE_CORE_DEPLOY_KEY }} > ./deploy-key.json
+            echo ${{ secrets.CANDY_MACHINE_CORE_ID }} > ./program-id.json
+            echo PROGRA_NAME="mpl_candy_machine_core" >> $GITHUB_ENV
+          fi
+
+      - name: Download program builds
+        uses: actions/download-artifact@v3
+        with:
+          name: program-builds
+
+      - name: Deploy Program
+        run: |
+          echo "Deploying ${{ inputs.program }} to ${{ inputs.cluster }}"
+
+          solana -v program deploy ./programs/${{ inputs.program }}/target/deploy/${{ env.PROGRAM_NAME }}.so \
+            -u ${{ env.RPC }} \
+            --program-id ./program-id.json \
+            -k ./deploy-key.json
+
+      - name: Upgrade IDL
+        working-directory: ./programs/${{ inputs.program }}
+        run: |
+          anchor build --no-docs
+
+          jq 'del(.. | .docs?)' ./target/idl/`echo "${{ inputs.program }}" | tr - _`.json > ./idl.json
+
+          anchor idl upgrade -f ./idl.json \
+            --provider.cluster ${{ env.RPC }} \
+            --provider.wallet ./deploy-key.json \
+            `solana address -k ./program-id.json`
+
+      - name: Publish crate
+        working-directory: ./programs/${{ inputs.program }}/program
+        if: github.event.inputs.publish_crate == 'true'
+        run: |
+          cargo install cargo-release
+          cargo login ${{ secrets.CRATES_TOKEN }}
+          cargo release ${{ inputs.bump }} --execute

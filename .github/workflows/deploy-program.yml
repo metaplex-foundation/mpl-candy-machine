@@ -114,13 +114,14 @@ jobs:
             -k ./deploy-key.json
 
       - name: Upgrade IDL
+        working-directory: ./programs/${{ inputs.program }}
         run: |
-          jq 'del(.metadata?) | del(.. | .docs?)' ./idls/`echo "${{ inputs.program }}" | tr - _`.json > ./idl.json
+          jq 'del(.metadata?) | del(.. | .docs?)' ../../idls/`echo "${{ inputs.program }}" | tr - _`.json > ./idl.json
 
           anchor idl upgrade -f ./idl.json \
             --provider.cluster ${{ env.RPC }} \
-            --provider.wallet ./deploy-key.json \
-            `solana address -k ./program-id.json`
+            --provider.wallet ../../deploy-key.json \
+            `solana address -k ../../program-id.json`
 
       - name: Publish crate
         working-directory: ./programs/${{ inputs.program }}/program

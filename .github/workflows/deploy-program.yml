@@ -107,9 +107,6 @@ jobs:
       - name: Deploy Program
         run: |
           echo "Deploying ${{ inputs.program }} to ${{ inputs.cluster }}"
-          
-          ls -l .
-          ls -l ./programs/${{ inputs.program }}/target/deploy
 
           solana -v program deploy ./programs/${{ inputs.program }}/target/deploy/${{ env.PROGRAM_NAME }}.so \
             -u ${{ env.RPC }} \
@@ -117,11 +114,8 @@ jobs:
             -k ./deploy-key.json
 
       - name: Upgrade IDL
-        working-directory: ./programs/${{ inputs.program }}
         run: |
-          anchor build --no-docs
-
-          jq 'del(.. | .docs?)' ./target/idl/`echo "${{ inputs.program }}" | tr - _`.json > ./idl.json
+          jq 'del(.metadata?) | del(.. | .docs?)' ./idls/`echo "${{ inputs.program }}" | tr - _`.json > ./idl.json
 
           anchor idl upgrade -f ./idl.json \
             --provider.cluster ${{ env.RPC }} \

@@ -165,8 +165,12 @@ jobs:
         if: github.event.inputs.publish_crate == 'true'
         run: |
           git stash
+          git config user.name "${{ env.COMMIT_USER_NAME }}"
+          git config user.email "${{ env.COMMIT_USER_EMAIL }}"
+          
           cargo login ${{ secrets.CRATES_TOKEN }}
           cargo release ${{ inputs.bump }} --no-confirm --no-push --no-tag --execute
+
           git stash pop
           
       - name: Commit and tag new version

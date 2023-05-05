@@ -1,5 +1,5 @@
 {
-  "version": "1.0.3",
+  "version": "${PROGRAM_VERSION}",
   "name": "candy_machine_core",
   "instructions": [
     {

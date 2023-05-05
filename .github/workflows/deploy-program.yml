@@ -149,7 +149,7 @@ jobs:
         run: |
           jq 'del(.metadata?) | del(.. | .docs?)' ../../idls/`echo "${{ inputs.program }}" | tr - _`.json > ./idl.json
 
-          anchor idl upgrade -f ./versioned-idl.json \
+          anchor idl upgrade -f ./idl.json \
             --provider.cluster ${{ env.RPC }} \
             --provider.wallet ../../deploy-key.json \
             `solana address -k ../../program-id.json`

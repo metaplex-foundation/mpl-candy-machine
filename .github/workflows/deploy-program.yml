@@ -127,7 +127,7 @@ jobs:
           PROGRAM_VERSION="${MAJOR}.${MINOR}.${PATCH}"
 
           cp ./idls/${IDL_NAME}.json ./idls/${IDL_NAME}-previous.json
-          jq '.version = "${PROGRAM_VERSION}"' ./idls/${IDL_NAME}-previous.json > ./idls/${IDL_NAME}.json
+          jq ".version = \"${PROGRAM_VERSION}\"" ./idls/${IDL_NAME}-previous.json > ./idls/${IDL_NAME}.json
           rm ./idls/${IDL_NAME}-previous.json
 
           echo PROGRAM_VERSION="${PROGRAM_VERSION}" >> $GITHUB_ENV
@@ -162,7 +162,7 @@ jobs:
 
       - name: Publish crate
         working-directory: ./programs/${{ inputs.program }}/program
-        if: github.event.inputs.publish_crate == 'true'
+        if: github.event.inputs.publish_crate == 'true' && github.event.inputs.cluster == 'mainnet-beta'
         run: |
           git stash
           git config user.name "${{ env.COMMIT_USER_NAME }}"
@@ -175,7 +175,7 @@ jobs:
           
       - name: Commit and tag new version
         uses: stefanzweifel/git-auto-commit-action@v4
-        if: github.event.inputs.publish_crate == 'true'
+        if: github.event.inputs.publish_crate == 'true' && github.event.inputs.cluster == 'mainnet-beta'
         with:
           commit_message: Deploy mpl-${{ inputs.program }} program v${{ env.PROGRAM_VERSION }}
           tagging_message: mpl-${{ inputs.program }}@v${{ env.PROGRAM_VERSION }}

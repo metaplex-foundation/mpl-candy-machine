@@ -1,5 +1,5 @@
 import { getSplSystemProgramId } from '@metaplex-foundation/mpl-essentials';
-import { publicKey, Signer } from '@metaplex-foundation/umi';
+import { PublicKey, publicKey } from '@metaplex-foundation/umi';
 import {
   AllowList,
   AllowListArgs,
@@ -78,7 +78,7 @@ export const allowListGuardManifest: GuardManifest<
       },
       { isWritable: false, publicKey: getSplSystemProgramId(context) },
       ...(args.minter !== undefined
-        ? [{ signer: args.minter, isWritable: false }]
+        ? [{ isWritable: false, publicKey: publicKey(args.minter) }]
         : []),
     ],
   }),
@@ -122,5 +122,5 @@ export type AllowListRouteArgs = AllowListArgs & {
   merkleProof: Uint8Array[];
 
   /** The minter account as a signer if it is not the payer. */
-  minter?: Signer;
+  minter?: PublicKey;
 };

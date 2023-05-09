@@ -2,6 +2,7 @@ import {
   base58PublicKey,
   generateSigner,
   none,
+  publicKey,
   sol,
   some,
   transactionBuilder,
@@ -38,7 +39,12 @@ test('it can call the route instruction of a specific guard', async (t) => {
       route(umi, {
         candyMachine,
         guard: 'allowList',
-        routeArgs: { path: 'proof', merkleRoot, merkleProof, minter },
+        routeArgs: {
+          path: 'proof',
+          merkleRoot,
+          merkleProof,
+          minter: publicKey(minter),
+        },
       })
     )
     .sendAndConfirm(umi);

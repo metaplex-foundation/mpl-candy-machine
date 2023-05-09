@@ -56,9 +56,9 @@ impl Guard for AllowList {
     /// List of accounts required:
     ///
     ///   0. `[writable]` Pda to represent the merkle proof (seeds `["allow_list", merke tree root,
-    ///                   payer key, candy guard pubkey, candy machine pubkey]`).
+    ///                   payer/minter key, candy guard pubkey, candy machine pubkey]`).
     ///   1. `[]` System program account.
-    ///   2. `[optional, signer]` Minter account.
+    ///   2. `[optional]` Minter account.
     fn instruction<'info>(
         ctx: &Context<'_, '_, '_, 'info, Route<'info>>,
         route_context: RouteContext<'info>,
@@ -86,11 +86,6 @@ impl Guard for AllowList {
         assert_keys_equal(system_program_info.key, &system_program::ID)?;
 
         let minter = if let Some(minter) = get_account_info(ctx.remaining_accounts, 2) {
-            if !minter.is_signer {
-                msg!("Minter is not a signer");
-                return err!(CandyGuardError::MissingRequiredSignature);
-            }
-
             minter.key()
         } else {
             ctx.accounts.payer.key()

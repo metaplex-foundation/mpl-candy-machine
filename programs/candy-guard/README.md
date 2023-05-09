@@ -402,7 +402,7 @@ The `AllowList` guard validates the payer's address against a merkle tree-based 
 
 | Name        | Writable | Signer | Description                                                                                                            |
 | ----------- | :------: | :----: | ---------------------------------------------------------------------------------------------------------------------- |
-| `proof_pda` |          |        | PDA of the merkle proof (seed `["allow_list", merke tree root, payer key, candy guard pubkey, candy machine pubkey]`). |
+| `proof_pda` |          |        | PDA of the merkle proof (seed `["allow_list", merkle tree root, minter key, candy guard pubkey, candy machine pubkey]`). |
 
 </details>
 
@@ -415,9 +415,9 @@ The merkle proof validation needs to be completed before the mint transaction. T
 
 | Name             | Writable | Signer | Description                                                                                                                      |
 | ---------------- | :------: | :----: | -------------------------------------------------------------------------------------------------------------------------------- |
-| `proof_pda`      |    ✅    |        | PDA to represent the merkle proof (seed `["allow_list", merke tree root, payer key, candy guard pubkey, candy machine pubkey]`). |
+| `proof_pda`      |    ✅    |        | PDA to represent the merkle proof (seed `["allow_list", merkle tree root, payer/minter key, candy guard pubkey, candy machine pubkey]`). |
 | `system_program` |          |        | System program account.                                                                                                          |
-| `minter`         |          |   ✅   | (optional) Minter account to validate. |
+| `minter`         |          |        | (optional) Minter account to validate. |
 
 </details>
 <details>

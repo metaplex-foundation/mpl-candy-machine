@@ -360,9 +360,9 @@ test('it charges a bot tax when trying to mint whilst not verified', async (t) =
 });
 
 test('it creates a proof for a minter even when the minter is not a signer', async (t) => {
-  // Given a separate minter that is part of an allow list.
+  // Given a separate minter that is part of an allow list and not a signer.
   const umi = await createUmi();
-  const minter = generateSigner(umi);
+  const minter = generateSigner(umi).publicKey;
   const allowList = [
     base58PublicKey(minter),
     'Ur1CbWSGsXCdedknRbJsEk7urwAvu1uddmQv51nAnXB',
@@ -393,33 +393,33 @@ test('it creates a proof for a minter even when the minter is not a signer', asy
           path: 'proof',
           merkleRoot,
           merkleProof: getMerkleProof(allowList, base58PublicKey(minter)),
-          minter: publicKey(minter), // <-- We need to tell the route instruction who the minter is.
+          minter, // <-- We need to tell the route instruction who the minter is.
         },
       })
     )
     .sendAndConfirm(umi);
 
+  // Then a proof has been created for the minter.
   const candyGuard = findCandyGuardPda(umi, { base: candyMachine });
-  // Then a proof should have been created for the minter.
   t.true(
     await umi.rpc.accountExists(
       findAllowListProofPda(umi, {
         candyGuard,
         candyMachine,
         merkleRoot,
-        user: publicKey(minter),
+        user: minter,
       })
     )
   );
 
-  // And there should not be a proof for the payer.
+  // But no proof has been created for the payer.
   t.false(
     await umi.rpc.accountExists(
       findAllowListProofPda(umi, {
         candyGuard,
         candyMachine,
         merkleRoot,
-        user: publicKey(umi.identity),
+        user: publicKey(umi.payer),
       })
     )
   );
@@ -429,7 +429,7 @@ test('it creates a proof for the payer when the minter is not present', async (t
   // Given the payer that is part of an allow list.
   const umi = await createUmi();
   const allowList = [
-    base58PublicKey(umi.identity),
+    base58PublicKey(umi.payer),
     'Ur1CbWSGsXCdedknRbJsEk7urwAvu1uddmQv51nAnXB',
     'GjwcWFQYzemBtpUoN5fMAP2FZviTtMRWCmrppGuTthJS',
     '2vjCrmEFiN9CLLhiqy8u1JPh48av8Zpzp3kNkdTtirYG',
@@ -457,21 +457,21 @@ test('it creates a proof for the payer when the minter is not present', async (t
         routeArgs: {
           path: 'proof',
           merkleRoot,
-          merkleProof: getMerkleProof(allowList, base58PublicKey(umi.identity)),
+          merkleProof: getMerkleProof(allowList, base58PublicKey(umi.payer)),
         },
       })
     )
     .sendAndConfirm(umi);
 
+  // Then a proof has been created for the payer.
   const candyGuard = findCandyGuardPda(umi, { base: candyMachine });
-  // Then a proof should have been created for the payer.
   t.true(
     await umi.rpc.accountExists(
       findAllowListProofPda(umi, {
         candyGuard,
         candyMachine,
         merkleRoot,
-        user: publicKey(umi.identity),
+        user: publicKey(umi.payer),
       })
     )
   );

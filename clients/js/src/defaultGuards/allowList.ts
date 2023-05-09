@@ -1,5 +1,5 @@
 import { getSplSystemProgramId } from '@metaplex-foundation/mpl-essentials';
-import { PublicKey, publicKey } from '@metaplex-foundation/umi';
+import { PublicKey, Signer, publicKey } from '@metaplex-foundation/umi';
 import {
   AllowList,
   AllowListArgs,
@@ -121,6 +121,10 @@ export type AllowListRouteArgs = AllowListArgs & {
    */
   merkleProof: Uint8Array[];
 
-  /** The minter account as a signer if it is not the payer. */
-  minter?: PublicKey;
+  /**
+   * The address of the minter to validate if it is not the payer.
+   * Here, we allow it to be a Signer for backwards compatibility
+   * but the account will not be used as a signer.
+   */
+  minter?: PublicKey | Signer;
 };

@@ -2,7 +2,6 @@ import {
   base58PublicKey,
   generateSigner,
   none,
-  publicKey,
   sol,
   some,
   transactionBuilder,
@@ -20,7 +19,7 @@ import { createUmi, createV1, createV2 } from './_setup';
 test('it can call the route instruction of a specific guard', async (t) => {
   // Given a candy machine with an allow list guard.
   const umi = await createUmi();
-  const minter = generateSigner(umi);
+  const minter = generateSigner(umi).publicKey;
   const allowedWallets = [
     base58PublicKey(minter),
     'Ur1CbWSGsXCdedknRbJsEk7urwAvu1uddmQv51nAnXB',
@@ -39,12 +38,7 @@ test('it can call the route instruction of a specific guard', async (t) => {
       route(umi, {
         candyMachine,
         guard: 'allowList',
-        routeArgs: {
-          path: 'proof',
-          merkleRoot,
-          merkleProof,
-          minter: publicKey(minter),
-        },
+        routeArgs: { path: 'proof', merkleRoot, merkleProof, minter },
       })
     )
     .sendAndConfirm(umi);
@@ -52,7 +46,7 @@ test('it can call the route instruction of a specific guard', async (t) => {
   // Then the allow list proof PDA was created.
   const allowListProofPda = findAllowListProofPda(umi, {
     merkleRoot,
-    user: minter.publicKey,
+    user: minter,
     candyMachine,
     candyGuard: findCandyGuardPda(umi, { base: candyMachine }),
   });

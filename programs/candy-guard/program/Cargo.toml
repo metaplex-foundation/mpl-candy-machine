@@ -1,6 +1,6 @@
 [package]
 name = "mpl-candy-guard"
-version = "1.0.2"
+version = "1.0.3"
 description = "Metaplex Candy Guard: programmatic access control for Candy Machine."
 authors = ["Metaplex Developers <dev@metaplex.com>"]
 repository = "https://github.com/metaplex-foundation/mpl-candy-machine"

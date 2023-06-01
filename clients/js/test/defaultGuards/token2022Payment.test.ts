@@ -81,7 +81,7 @@ test('it transfers Token2022 tokens from the payer to the destination', async (t
     undefined,
     SPL_TOKEN_2022
   );
-// minter ATA
+  // minter ATA
   const minterAta = await getOrCreateAssociatedTokenAccount(
     connection,
     destinationPayer,
@@ -137,7 +137,7 @@ test('it transfers Token2022 tokens from the payer to the destination', async (t
         },
       })
     )
-    .sendAndConfirm(umi, { send: { skipPreflight: true }});
+    .sendAndConfirm(umi, { send: { skipPreflight: true } });
 
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });

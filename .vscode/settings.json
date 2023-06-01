@@ -1,0 +1,6 @@
+{
+    "rust-analyzer.linkedProjects": [
+        "./programs/candy-guard/Cargo.toml",
+        "./programs/candy-machine-core/Cargo.toml"
+    ]
+}

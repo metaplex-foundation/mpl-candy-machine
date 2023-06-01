@@ -16,7 +16,7 @@ import { Context, PublicKey, Serializer } from '@metaplex-foundation/umi';
  * 0. `[writable]` Token account holding the required amount.
  * 1. `[writable]` Address of the ATA to receive the tokens.
  * 2. `[]` Mint account.
- * 3. `[]` SPL token2022 program account.
+ * 3. `[]` SPL Token-2022 program account.
  */
 
 export type Token2022Payment = {

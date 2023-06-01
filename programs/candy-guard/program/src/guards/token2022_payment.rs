@@ -15,7 +15,7 @@ use crate::{
 ///   0. `[writable]` Token account holding the required amount.
 ///   1. `[writable]` Address of the ATA to receive the tokens.
 ///   2. `[]` Mint account.
-///   3. `[]` SPL token2022 program account.
+///   3. `[]` SPL Token-2022 program account.
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug)]
 pub struct Token2022Payment {
     pub amount: u64,

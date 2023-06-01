@@ -64,6 +64,7 @@ import { ThirdPartySignerMintArgs } from './thirdPartySigner';
 import { TokenBurnMintArgs } from './tokenBurn';
 import { TokenGateMintArgs } from './tokenGate';
 import { TokenPaymentMintArgs } from './tokenPayment';
+import { Token2022PaymentMintArgs } from './token2022Payment';
 
 /**
  * The arguments for all default Candy Machine guards.
@@ -88,6 +89,7 @@ export type DefaultGuardSetArgs = GuardSetArgs & {
   freezeSolPayment: Option<FreezeSolPaymentArgs>;
   freezeTokenPayment: Option<FreezeTokenPaymentArgs>;
   programGate: Option<ProgramGateArgs>;
+  token2022Payment: Option<Token2022PaymentMintArgs>;
 };
 
 /**
@@ -113,6 +115,7 @@ export type DefaultGuardSet = GuardSet & {
   freezeSolPayment: Option<FreezeSolPayment>;
   freezeTokenPayment: Option<FreezeTokenPayment>;
   programGate: Option<ProgramGate>;
+  token2022Payment: Option<Token2022Payment>;
 };
 
 /**
@@ -138,6 +141,7 @@ export type DefaultGuardSetMintArgs = GuardSetMintArgs & {
   freezeSolPayment: Option<FreezeSolPaymentMintArgs>;
   freezeTokenPayment: Option<FreezeTokenPaymentMintArgs>;
   // programGate: no mint settings
+  token2022Payment: Option<Token2022PaymentMintArgs>;
 };
 
 /**
@@ -163,6 +167,7 @@ export type DefaultGuardSetRouteArgs = GuardSetRouteArgs & {
   freezeSolPayment: FreezeSolPaymentRouteArgs;
   freezeTokenPayment: FreezeTokenPaymentRouteArgs;
   // programGate: no route settings
+  // token2022Payment: no route settings
 };
 
 /** @internal */
@@ -186,6 +191,7 @@ export const defaultCandyGuardNames: string[] = [
   'freezeSolPayment',
   'freezeTokenPayment',
   'programGate',
+  'token2022Payment',
 ];
 
 /** @internal */

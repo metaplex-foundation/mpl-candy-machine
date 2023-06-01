@@ -261,7 +261,7 @@ export const createV2 = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
       .add(wrap(umi, { candyMachine: candyMachine.publicKey, candyGuard }));
   }
 
-  await builder.sendAndConfirm(umi);
+  await builder.sendAndConfirm(umi, { send: { skipPreflight: true }});
   return candyMachine;
 };
 

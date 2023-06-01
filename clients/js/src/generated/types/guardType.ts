@@ -29,7 +29,6 @@ export enum GuardType {
   FreezeSolPayment,
   FreezeTokenPayment,
   ProgramGate,
-  Allocation,
   Token2022Payment,
 }
 

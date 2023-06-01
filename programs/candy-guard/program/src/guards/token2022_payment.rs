@@ -1,11 +1,15 @@
-use solana_program::{program::invoke, program_pack::Pack};
+use solana_program::program::invoke;
+use spl_token_2022::{
+    extension::StateWithExtensions,
+    state::{Account, Mint},
+};
 
 use super::*;
 
 use crate::{
     errors::CandyGuardError,
     state::GuardType,
-    utils::{assert_initialized, assert_keys_equal, assert_owned_by},
+    utils::{assert_keys_equal, assert_owned_by},
 };
 
 /// Guard that charges an amount in a specified spl-token as payment for the mint.
@@ -54,16 +58,18 @@ impl Condition for Token2022Payment {
 
         // destination
         assert_keys_equal(destination_ata.key, &self.destination_ata)?;
-        let ata_account: spl_token_2022::state::Account = assert_initialized(destination_ata)?;
-        assert_keys_equal(&ata_account.mint, &self.mint)?;
+        let binding = destination_ata.data.borrow();
+        let ata_account = StateWithExtensions::<Account>::unpack(&binding)?;
+        assert_keys_equal(&ata_account.base.mint, &self.mint)?;
 
         // token
-        assert_owned_by(token_account_info, &spl_token_2022::id())?;
-        let token_account: spl_token_2022::state::Account = assert_initialized(token_account_info)?;
-        assert_keys_equal(&token_account.owner, ctx.accounts.minter.key)?;
-        assert_keys_equal(&token_account.mint, &self.mint)?;
+        assert_owned_by(token_account_info, &spl_token_2022::ID)?;
+        let binding = token_account_info.data.borrow();
+        let token_account = StateWithExtensions::<Account>::unpack(&binding)?;
+        assert_keys_equal(&token_account.base.owner, ctx.accounts.minter.key)?;
+        assert_keys_equal(&token_account.base.mint, &self.mint)?;
 
-        if token_account.amount < self.amount {
+        if token_account.base.amount < self.amount {
             return err!(CandyGuardError::NotEnoughTokens);
         }
 
@@ -92,7 +98,8 @@ impl Condition for Token2022Payment {
         let mint_info = try_get_account_info(ctx.accounts.remaining, index + 2)?;
         let spl_token_2022_program = try_get_account_info(ctx.accounts.remaining, index + 3)?;
 
-        let mint = spl_token_2022::state::Mint::unpack(&mint_info.data.borrow())?;
+        let binding = mint_info.data.borrow();
+        let mint = StateWithExtensions::<Mint>::unpack(&binding)?;
 
         invoke(
             &spl_token_2022::instruction::transfer_checked(
@@ -103,7 +110,7 @@ impl Condition for Token2022Payment {
                 ctx.accounts.minter.key,
                 &[],
                 self.amount,
-                mint.decimals,
+                mint.base.decimals,
             )?,
             &[
                 token_account_info.clone(),

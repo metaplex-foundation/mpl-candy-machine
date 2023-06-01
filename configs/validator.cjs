@@ -51,6 +51,11 @@ module.exports = {
         programId: "gatem74V238djXdzWnJf94Wo1DcnuGkfijbf3AuBhfs",
         deployPath: getExternalProgram("civic_gateway.so"),
       },
+      {
+        label: "SPL Token 2022",
+        programId: "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+        deployPath: getExternalProgram("spl_token_2022.so"),
+      },
     ],
     accounts: [
       {

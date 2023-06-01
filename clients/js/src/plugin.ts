@@ -18,6 +18,7 @@ import {
   solPaymentGuardManifest,
   startDateGuardManifest,
   thirdPartySignerGuardManifest,
+  token2022PaymentGuardManifest,
   tokenBurnGuardManifest,
   tokenGateGuardManifest,
   tokenPaymentGuardManifest,
@@ -73,7 +74,8 @@ export const mplCandyMachine = (): UmiPlugin => ({
       tokenBurnGuardManifest,
       freezeSolPaymentGuardManifest,
       freezeTokenPaymentGuardManifest,
-      programGateGuardManifest
+      programGateGuardManifest,
+      token2022PaymentGuardManifest
     );
   },
 });

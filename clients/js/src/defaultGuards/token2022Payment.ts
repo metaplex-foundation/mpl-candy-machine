@@ -1,10 +1,14 @@
-import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-essentials';
 import {
   getToken2022PaymentSerializer,
   Token2022Payment,
   Token2022PaymentArgs,
 } from '../generated';
 import { GuardManifest, noopParser } from '../guards';
+import { publicKey } from '@metaplex-foundation/umi';
+
+const SPL_TOKEN_2022_PROGRAM_ID = publicKey(
+  'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb'
+);
 
 /**
  * The token2022Payment guard allows minting by charging the
@@ -24,15 +28,22 @@ export const token2022PaymentGuardManifest: GuardManifest<
   name: 'token2022Payment',
   serializer: getToken2022PaymentSerializer,
   mintParser: (context, mintContext, args) => {
-    const sourceAta = findAssociatedTokenPda(context, {
-      mint: args.mint,
-      owner: mintContext.minter.publicKey,
-    });
+    const s = context.serializer;
+    const associatedTokenProgramId =
+      context.programs.get('splAssociatedToken').publicKey;
+    const sourceAta = context.eddsa.findPda(associatedTokenProgramId, [
+      s.publicKey().serialize(mintContext.minter.publicKey),
+      SPL_TOKEN_2022_PROGRAM_ID.bytes,
+      s.publicKey().serialize(args.mint),
+    ]);
+
     return {
       data: new Uint8Array(),
       remainingAccounts: [
         { publicKey: sourceAta, isWritable: true },
         { publicKey: args.destinationAta, isWritable: true },
+        { publicKey: args.mint, isWritable: false },
+        { publicKey: SPL_TOKEN_2022_PROGRAM_ID, isWritable: false },
       ],
     };
   },

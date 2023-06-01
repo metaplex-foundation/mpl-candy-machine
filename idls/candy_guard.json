@@ -694,52 +694,6 @@
       }
     },
     {
-      "name": "Allocation",
-      "docs": [
-        "Gaurd to specify the maximum number of mints in a guard set.",
-        "",
-        "List of accounts required:",
-        "",
-        "0. `[writable]` Mint tracker PDA. The PDA is derived",
-        "using the seed `[\"allocation\", allocation id,",
-        "candy guard pubkey, candy machine pubkey]`."
-      ],
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "id",
-            "docs": [
-              "Unique identifier of the allocation."
-            ],
-            "type": "u8"
-          },
-          {
-            "name": "size",
-            "docs": [
-              "The size of the allocation."
-            ],
-            "type": "u32"
-          }
-        ]
-      }
-    },
-    {
-      "name": "MintTracker",
-      "docs": [
-        "PDA to track the number of mints."
-      ],
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "count",
-            "type": "u32"
-          }
-        ]
-      }
-    },
-    {
       "name": "AllowList",
       "docs": [
         "Guard that uses a merkle tree to specify the addresses allowed to mint.",
@@ -1528,19 +1482,9 @@
             }
           },
           {
-            "name": "allocation",
-            "docs": [
-              "Allocation guard (specify the maximum number of mints in a group)."
-            ],
-            "type": {
-              "option": {
-                "defined": "Allocation"
-              }
-            }
-          },
-          {
             "name": "token2022Payment",
             "docs": [
+              "Allocation guard (specify the maximum number of mints in a group).",
               "Token2022 payment guard (set the price for the mint in spl-token-2022 amount)."
             ],
             "type": {
@@ -1633,9 +1577,6 @@
           },
           {
             "name": "ProgramGate"
-          },
-          {
-            "name": "Allocation"
           },
           {
             "name": "Token2022Payment"

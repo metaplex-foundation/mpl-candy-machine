@@ -32,6 +32,7 @@ import {
   StartDateArgs,
   ThirdPartySigner,
   ThirdPartySignerArgs,
+  Token2022Payment,
   TokenBurn,
   TokenBurnArgs,
   TokenGate,

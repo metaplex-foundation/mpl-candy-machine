@@ -1,10 +1,10 @@
+import { publicKey } from '@metaplex-foundation/umi';
 import {
   getToken2022PaymentSerializer,
   Token2022Payment,
   Token2022PaymentArgs,
 } from '../generated';
 import { GuardManifest, noopParser } from '../guards';
-import { publicKey } from '@metaplex-foundation/umi';
 
 const SPL_TOKEN_2022_PROGRAM_ID = publicKey(
   'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb'

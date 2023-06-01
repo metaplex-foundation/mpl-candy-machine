@@ -137,7 +137,7 @@ test('it transfers Token2022 tokens from the payer to the destination', async (t
         },
       })
     )
-    .sendAndConfirm(umi, { send: { skipPreflight: true } });
+    .sendAndConfirm(umi);
 
   // Then minting was successful.
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });

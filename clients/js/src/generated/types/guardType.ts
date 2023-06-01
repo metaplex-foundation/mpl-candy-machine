@@ -30,6 +30,7 @@ export enum GuardType {
   FreezeTokenPayment,
   ProgramGate,
   Allocation,
+  Token2022Payment,
 }
 
 export type GuardTypeArgs = GuardType;

@@ -1132,6 +1132,36 @@
       }
     },
     {
+      "name": "Token2022Payment",
+      "docs": [
+        "Guard that charges an amount in a specified spl-token as payment for the mint.",
+        "",
+        "List of accounts required:",
+        "",
+        "0. `[writable]` Token account holding the required amount.",
+        "1. `[writable]` Address of the ATA to receive the tokens.",
+        "2. `[]` Mint account.",
+        "3. `[]` SPL token2022 program account."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "mint",
+            "type": "publicKey"
+          },
+          {
+            "name": "destinationAta",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
       "name": "TokenBurn",
       "docs": [
         "Guard that requires addresses that hold an amount of a specified spl-token",
@@ -1507,6 +1537,17 @@
                 "defined": "Allocation"
               }
             }
+          },
+          {
+            "name": "token2022Payment",
+            "docs": [
+              "Token2022 payment guard (set the price for the mint in spl-token-2022 amount)."
+            ],
+            "type": {
+              "option": {
+                "defined": "Token2022Payment"
+              }
+            }
           }
         ]
       }
@@ -1595,6 +1636,9 @@
           },
           {
             "name": "Allocation"
+          },
+          {
+            "name": "Token2022Payment"
           }
         ]
       }

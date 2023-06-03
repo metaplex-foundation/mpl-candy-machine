@@ -24,6 +24,7 @@ kinobi.update(
   new k.TransformDefinedTypesIntoAccountsVisitor([
     "mintCounter",
     "allowListProof",
+    "mintTracker",
   ])
 );
 
@@ -90,6 +91,20 @@ kinobi.update(
         k.publicKeySeed(
           "destination",
           "The wallet that will eventually receive the funds"
+        ),
+        candyGuardSeed,
+        candyMachineSeed,
+      ],
+    },
+    mintTracker: {
+      size: 4,
+      discriminator: k.sizeAccountDiscriminator(),
+      seeds: [
+        k.stringConstantSeed("allocation"),
+        k.variableSeed(
+          "id",
+          k.numberTypeNode("u8"),
+          "Unique identifier of the allocation"
         ),
         candyGuardSeed,
         candyMachineSeed,

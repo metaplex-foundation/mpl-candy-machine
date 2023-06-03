@@ -35,6 +35,7 @@ import {
   createCivicGatewayProgram,
   createMplTokenAuthRulesProgram,
 } from './programs';
+import { allocationGuardManifest } from './defaultGuards/allocation';
 
 export const mplCandyMachine = (): UmiPlugin => ({
   install(umi) {
@@ -73,7 +74,8 @@ export const mplCandyMachine = (): UmiPlugin => ({
       tokenBurnGuardManifest,
       freezeSolPaymentGuardManifest,
       freezeTokenPaymentGuardManifest,
-      programGateGuardManifest
+      programGateGuardManifest,
+      allocationGuardManifest
     );
   },
 });

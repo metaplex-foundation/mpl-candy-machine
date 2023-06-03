@@ -13,7 +13,7 @@ import { Context, Serializer } from '@metaplex-foundation/umi';
  *
  * List of accounts required:
  *
- * 0. `[writable]` Mint tracker PDA. The PDA is derived
+ * 0. `[writable]` Allocation tracker PDA. The PDA is derived
  * using the seed `["allocation", allocation id,
  * candy guard pubkey, candy machine pubkey]`.
  */
@@ -21,8 +21,8 @@ import { Context, Serializer } from '@metaplex-foundation/umi';
 export type Allocation = {
   /** Unique identifier of the allocation. */
   id: number;
-  /** The size of the allocation. */
-  size: number;
+  /** The limit of the allocation. */
+  limit: number;
 };
 
 export type AllocationArgs = Allocation;
@@ -34,7 +34,7 @@ export function getAllocationSerializer(
   return s.struct<Allocation>(
     [
       ['id', s.u8()],
-      ['size', s.u32()],
+      ['limit', s.u32()],
     ],
     { description: 'Allocation' }
   ) as Serializer<AllocationArgs, Allocation>;

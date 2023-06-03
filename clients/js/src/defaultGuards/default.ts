@@ -2,6 +2,8 @@ import { none, Option } from '@metaplex-foundation/umi';
 import {
   AddressGate,
   AddressGateArgs,
+  Allocation,
+  AllocationArgs,
   AllowList,
   AllowListArgs,
   BotTax,
@@ -64,6 +66,7 @@ import { ThirdPartySignerMintArgs } from './thirdPartySigner';
 import { TokenBurnMintArgs } from './tokenBurn';
 import { TokenGateMintArgs } from './tokenGate';
 import { TokenPaymentMintArgs } from './tokenPayment';
+import { AllocationMintArgs, AllocationRouteArgs } from './allocation';
 
 /**
  * The arguments for all default Candy Machine guards.
@@ -88,6 +91,7 @@ export type DefaultGuardSetArgs = GuardSetArgs & {
   freezeSolPayment: Option<FreezeSolPaymentArgs>;
   freezeTokenPayment: Option<FreezeTokenPaymentArgs>;
   programGate: Option<ProgramGateArgs>;
+  allocation: Option<AllocationArgs>;
 };
 
 /**
@@ -113,6 +117,7 @@ export type DefaultGuardSet = GuardSet & {
   freezeSolPayment: Option<FreezeSolPayment>;
   freezeTokenPayment: Option<FreezeTokenPayment>;
   programGate: Option<ProgramGate>;
+  allocation: Option<Allocation>;
 };
 
 /**
@@ -138,6 +143,7 @@ export type DefaultGuardSetMintArgs = GuardSetMintArgs & {
   freezeSolPayment: Option<FreezeSolPaymentMintArgs>;
   freezeTokenPayment: Option<FreezeTokenPaymentMintArgs>;
   // programGate: no mint settings
+  allocation: Option<AllocationMintArgs>;
 };
 
 /**
@@ -163,6 +169,7 @@ export type DefaultGuardSetRouteArgs = GuardSetRouteArgs & {
   freezeSolPayment: FreezeSolPaymentRouteArgs;
   freezeTokenPayment: FreezeTokenPaymentRouteArgs;
   // programGate: no route settings
+  allocation: AllocationRouteArgs;
 };
 
 /** @internal */
@@ -186,6 +193,7 @@ export const defaultCandyGuardNames: string[] = [
   'freezeSolPayment',
   'freezeTokenPayment',
   'programGate',
+  'allocation',
 ];
 
 /** @internal */

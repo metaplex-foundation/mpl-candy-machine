@@ -23,7 +23,6 @@ export * from './gatekeeper';
 export * from './guardType';
 export * from './hiddenSettings';
 export * from './mintLimit';
-export * from './mintTracker';
 export * from './nftBurn';
 export * from './nftGate';
 export * from './nftPayment';

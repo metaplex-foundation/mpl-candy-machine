@@ -2,6 +2,8 @@ import { none, Option } from '@metaplex-foundation/umi';
 import {
   AddressGate,
   AddressGateArgs,
+  Allocation,
+  AllocationArgs,
   AllowList,
   AllowListArgs,
   BotTax,
@@ -46,6 +48,7 @@ import {
   GuardSetMintArgs,
   GuardSetRouteArgs,
 } from '../guards/guardSet';
+import { AllocationMintArgs, AllocationRouteArgs } from './allocation';
 import { AllowListMintArgs, AllowListRouteArgs } from './allowList';
 import {
   FreezeSolPaymentMintArgs,
@@ -65,6 +68,7 @@ import { ThirdPartySignerMintArgs } from './thirdPartySigner';
 import { TokenBurnMintArgs } from './tokenBurn';
 import { TokenGateMintArgs } from './tokenGate';
 import { TokenPaymentMintArgs } from './tokenPayment';
+
 import { Token2022PaymentMintArgs } from './token2022Payment';
 
 /**
@@ -90,6 +94,7 @@ export type DefaultGuardSetArgs = GuardSetArgs & {
   freezeSolPayment: Option<FreezeSolPaymentArgs>;
   freezeTokenPayment: Option<FreezeTokenPaymentArgs>;
   programGate: Option<ProgramGateArgs>;
+  allocation: Option<AllocationArgs>;
   token2022Payment: Option<Token2022PaymentMintArgs>;
 };
 
@@ -116,6 +121,7 @@ export type DefaultGuardSet = GuardSet & {
   freezeSolPayment: Option<FreezeSolPayment>;
   freezeTokenPayment: Option<FreezeTokenPayment>;
   programGate: Option<ProgramGate>;
+  allocation: Option<Allocation>;
   token2022Payment: Option<Token2022Payment>;
 };
 
@@ -142,6 +148,7 @@ export type DefaultGuardSetMintArgs = GuardSetMintArgs & {
   freezeSolPayment: Option<FreezeSolPaymentMintArgs>;
   freezeTokenPayment: Option<FreezeTokenPaymentMintArgs>;
   // programGate: no mint settings
+  allocation: Option<AllocationMintArgs>;
   token2022Payment: Option<Token2022PaymentMintArgs>;
 };
 
@@ -168,6 +175,7 @@ export type DefaultGuardSetRouteArgs = GuardSetRouteArgs & {
   freezeSolPayment: FreezeSolPaymentRouteArgs;
   freezeTokenPayment: FreezeTokenPaymentRouteArgs;
   // programGate: no route settings
+  allocation: AllocationRouteArgs;
   // token2022Payment: no route settings
 };
 
@@ -192,6 +200,7 @@ export const defaultCandyGuardNames: string[] = [
   'freezeSolPayment',
   'freezeTokenPayment',
   'programGate',
+  'allocation',
   'token2022Payment',
 ];
 

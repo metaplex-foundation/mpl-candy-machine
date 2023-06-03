@@ -3,6 +3,7 @@ import { UmiPlugin } from '@metaplex-foundation/umi';
 import {
   addressGateGuardManifest,
   allowListGuardManifest,
+  allocationGuardManifest,
   botTaxGuardManifest,
   defaultCandyGuardNames,
   endDateGuardManifest,
@@ -75,6 +76,7 @@ export const mplCandyMachine = (): UmiPlugin => ({
       freezeSolPaymentGuardManifest,
       freezeTokenPaymentGuardManifest,
       programGateGuardManifest,
+      allocationGuardManifest,
       token2022PaymentGuardManifest
     );
   },

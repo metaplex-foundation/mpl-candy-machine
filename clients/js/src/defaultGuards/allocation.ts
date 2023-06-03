@@ -1,4 +1,5 @@
 import { getSplSystemProgramId } from '@metaplex-foundation/mpl-essentials';
+import { Signer } from '@metaplex-foundation/umi';
 import {
   findAllocationTrackerPda,
   getAllocationSerializer,
@@ -6,7 +7,6 @@ import {
   AllocationArgs,
 } from '../generated';
 import { GuardManifest } from '../guards';
-import { Signer } from '@metaplex-foundation/umi';
 
 /**
  * Guard to specify the maximum number of mints in a guard set.

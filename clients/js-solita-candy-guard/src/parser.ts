@@ -2,30 +2,31 @@ import { BN } from 'bn.js';
 import * as beet from '@metaplex-foundation/beet';
 import { logDebug } from './utils/log';
 import {
+  addressGateBeet,
   allocationBeet,
   allowListBeet,
   botTaxBeet,
   CandyGuardData,
+  endDateBeet,
   freezeSolPaymentBeet,
   freezeTokenPaymentBeet,
   gatekeeperBeet,
   Group,
   GuardSet,
   mintLimitBeet,
+  nftBurnBeet,
+  nftGateBeet,
   nftPaymentBeet,
   programGateBeet,
+  redeemedAmountBeet,
   startDateBeet,
   thirdPartySignerBeet,
+  token2022PaymentBeet,
+  tokenBurnBeet,
   tokenGateBeet,
+  solPaymentBeet,
+  tokenPaymentBeet,
 } from './generated';
-import { solPaymentBeet } from './generated/types/SolPayment';
-import { tokenPaymentBeet } from './generated/types/TokenPayment';
-import { endDateBeet } from './generated/types/EndDate';
-import { redeemedAmountBeet } from './generated/types/RedeemedAmount';
-import { addressGateBeet } from './generated/types/AddressGate';
-import { nftGateBeet } from './generated/types/NftGate';
-import { nftBurnBeet } from './generated/types/NftBurn';
-import { tokenBurnBeet } from './generated/types/TokenBurn';
 import { u32, u64 } from '@metaplex-foundation/beet';
 
 type Guards = {
@@ -49,6 +50,7 @@ type Guards = {
   /* 18 */ freezeTokenPaymentEnabled: boolean;
   /* 19 */ programGateEnabled: boolean;
   /* 20 */ allocationEnabled: boolean;
+  /* 21 */ token2022PaymentEnabled: boolean;
 };
 
 const GUARDS_SIZE = {
@@ -72,6 +74,7 @@ const GUARDS_SIZE = {
   /* 18 */ freezeTokenPayment: 72,
   /* 19 */ programGate: 164,
   /* 20 */ allocation: 5,
+  /* 21 */ token2022Payment: 72,
 };
 
 const GUARDS_NAME = [
@@ -95,6 +98,7 @@ const GUARDS_NAME = [
   /* 18 */ 'freezeTokenPayment',
   /* 19 */ 'programGate',
   /* 20 */ 'allocation',
+  /* 21 */ 'token2022Payment',
 ];
 
 const GUARDS_COUNT = GUARDS_NAME.length;
@@ -137,6 +141,7 @@ function guardsFromData(buffer: Buffer): Guards {
     freezeTokenPaymentEnabled,
     programGateEnabled,
     allocationEnabled,
+    token2022PaymentEnabled,
   ] = guards;
 
   return {
@@ -160,6 +165,7 @@ function guardsFromData(buffer: Buffer): Guards {
     freezeTokenPaymentEnabled,
     programGateEnabled,
     allocationEnabled,
+    token2022PaymentEnabled,
   };
 }
 
@@ -305,6 +311,7 @@ function deserializeGuardSet(buffer: Buffer): { guardSet: GuardSet; offset: numb
     freezeTokenPaymentEnabled,
     programGateEnabled,
     allocationEnabled,
+    token2022PaymentEnabled,
   } = guards;
   logDebug('Guards: %O', guards);
 
@@ -433,6 +440,12 @@ function deserializeGuardSet(buffer: Buffer): { guardSet: GuardSet; offset: numb
     cursor += GUARDS_SIZE.allocation;
   }
 
+  if (token2022PaymentEnabled) {
+    const [token2022Payment] = token2022PaymentBeet.deserialize(buffer, cursor);
+    data.token2022Payment = token2022Payment;
+    cursor += GUARDS_SIZE.token2022Payment;
+  }
+
   return {
     guardSet: {
       botTax: data.botTax ?? null,
@@ -455,6 +468,7 @@ function deserializeGuardSet(buffer: Buffer): { guardSet: GuardSet; offset: numb
       freezeTokenPayment: data.freezeTokenPayment ?? null,
       programGate: data.programGate ?? null,
       allocation: data.allocation ?? null,
+      token2022Payment: data.token2022Payment ?? null,
     },
     offset: cursor,
   };
@@ -623,6 +637,13 @@ function serializeGuardSet(buffer: Buffer, offset: number, guardSet: GuardSet): 
   if (guardSet.allocation) {
     allocationBeet.write(buffer, offset, guardSet.allocation);
     offset += GUARDS_SIZE.allocation;
+    features |= 1 << index;
+  }
+  index++;
+
+  if (guardSet.token2022Payment) {
+    token2022PaymentBeet.write(buffer, offset, guardSet.token2022Payment);
+    offset += GUARDS_SIZE.token2022Payment;
     features |= 1 << index;
   }
   index++;

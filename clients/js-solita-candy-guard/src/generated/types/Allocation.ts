@@ -8,7 +8,7 @@
 import * as beet from '@metaplex-foundation/beet';
 export type Allocation = {
   id: number;
-  size: number;
+  limit: number;
 };
 
 /**
@@ -18,7 +18,7 @@ export type Allocation = {
 export const allocationBeet = new beet.BeetArgsStruct<Allocation>(
   [
     ['id', beet.u8],
-    ['size', beet.u32],
+    ['limit', beet.u32],
   ],
   'Allocation',
 );

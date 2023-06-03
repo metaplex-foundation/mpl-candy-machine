@@ -8,6 +8,7 @@
 
 export * from './accountVersion';
 export * from './addressGate';
+export * from './allocation';
 export * from './allowList';
 export * from './botTax';
 export * from './candyMachineData';

@@ -1528,9 +1528,19 @@
             }
           },
           {
+            "name": "allocation",
+            "docs": [
+              "Allocation guard (specify the maximum number of mints in a group)."
+            ],
+            "type": {
+              "option": {
+                "defined": "Allocation"
+              }
+            }
+          },
+          {
             "name": "token2022Payment",
             "docs": [
-              "Allocation guard (specify the maximum number of mints in a group).",
               "Token2022 payment guard (set the price for the mint in spl-token-2022 amount)."
             ],
             "type": {
@@ -1623,6 +1633,9 @@
           },
           {
             "name": "ProgramGate"
+          },
+          {
+            "name": "Allocation"
           },
           {
             "name": "Token2022Payment"

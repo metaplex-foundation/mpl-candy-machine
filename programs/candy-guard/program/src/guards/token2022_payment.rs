@@ -58,14 +58,14 @@ impl Condition for Token2022Payment {
 
         // destination
         assert_keys_equal(destination_ata.key, &self.destination_ata)?;
-        let binding = destination_ata.data.borrow();
-        let ata_account = StateWithExtensions::<Account>::unpack(&binding)?;
+        let data = destination_ata.data.borrow();
+        let ata_account = StateWithExtensions::<Account>::unpack(&data)?;
         assert_keys_equal(&ata_account.base.mint, &self.mint)?;
 
         // token
         assert_owned_by(token_account_info, &spl_token_2022::ID)?;
-        let binding = token_account_info.data.borrow();
-        let token_account = StateWithExtensions::<Account>::unpack(&binding)?;
+        let data = token_account_info.data.borrow();
+        let token_account = StateWithExtensions::<Account>::unpack(&data)?;
         assert_keys_equal(&token_account.base.owner, ctx.accounts.minter.key)?;
         assert_keys_equal(&token_account.base.mint, &self.mint)?;
 
@@ -80,7 +80,7 @@ impl Condition for Token2022Payment {
         assert_keys_equal(spl_token_2022_program.key, &spl_token_2022::ID)?;
 
         ctx.indices
-            .insert("token_payment_index", token_account_index);
+            .insert("token2022_payment_index", token_account_index);
 
         Ok(())
     }
@@ -91,15 +91,15 @@ impl Condition for Token2022Payment {
         _guard_set: &GuardSet,
         _mint_args: &[u8],
     ) -> Result<()> {
-        let index = ctx.indices["token_payment_index"];
+        let index = ctx.indices["token2022_payment_index"];
         // the accounts have already been validated
         let token_account_info = try_get_account_info(ctx.accounts.remaining, index)?;
         let destination_ata = try_get_account_info(ctx.accounts.remaining, index + 1)?;
         let mint_info = try_get_account_info(ctx.accounts.remaining, index + 2)?;
         let spl_token_2022_program = try_get_account_info(ctx.accounts.remaining, index + 3)?;
 
-        let binding = mint_info.data.borrow();
-        let mint = StateWithExtensions::<Mint>::unpack(&binding)?;
+        let data = mint_info.data.borrow();
+        let mint = StateWithExtensions::<Mint>::unpack(&data)?;
 
         invoke(
             &spl_token_2022::instruction::transfer_checked(

@@ -113,7 +113,7 @@ pub struct GuardSet {
     /// Program gate guard (restricts the programs that can be in a mint transaction).
     pub program_gate: Option<ProgramGate>,
     /// Allocation guard (specify the maximum number of mints in a group).
-    //pub allocation: Option<Allocation>,
+    pub allocation: Option<Allocation>,
     /// Token2022 payment guard (set the price for the mint in spl-token-2022 amount).
     pub token2022_payment: Option<Token2022Payment>,
 }
@@ -140,7 +140,7 @@ pub enum GuardType {
     FreezeSolPayment,
     FreezeTokenPayment,
     ProgramGate,
-    //Allocation,
+    Allocation,
     Token2022Payment,
 }
 

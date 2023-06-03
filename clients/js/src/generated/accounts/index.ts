@@ -6,8 +6,8 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+export * from './allocationTracker';
 export * from './allowListProof';
 export * from './candyMachine';
 export * from './freezeEscrow';
 export * from './mintCounter';
-export * from './mintTracker';

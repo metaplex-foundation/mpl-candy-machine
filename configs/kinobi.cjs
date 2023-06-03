@@ -24,7 +24,7 @@ kinobi.update(
   new k.TransformDefinedTypesIntoAccountsVisitor([
     "mintCounter",
     "allowListProof",
-    "mintTracker",
+    "allocationTracker",
   ])
 );
 
@@ -96,7 +96,7 @@ kinobi.update(
         candyMachineSeed,
       ],
     },
-    mintTracker: {
+    allocationTracker: {
       size: 4,
       discriminator: k.sizeAccountDiscriminator(),
       seeds: [

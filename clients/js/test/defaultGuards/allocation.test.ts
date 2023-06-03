@@ -7,9 +7,9 @@ import {
 } from '@metaplex-foundation/umi';
 import test from 'ava';
 import {
-  fetchMintTracker,
+  fetchAllocationTracker,
   findCandyGuardPda,
-  findMintTrackerPda,
+  findAllocationTrackerPda,
   mintV2,
   route,
 } from '../../src';
@@ -32,7 +32,7 @@ test('it allows minting when the allocation limit is not reached', async (t) => 
       { name: 'Degen #2', uri: 'https://example.com/degen/2' },
     ],
     guards: {
-      allocation: some({ id: 1, size: 5 }),
+      allocation: some({ id: 1, limit: 5 }),
     },
   });
 
@@ -69,12 +69,12 @@ test('it allows minting when the allocation limit is not reached', async (t) => 
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
 
   // And the mint tracker PDA was incremented.
-  const trackerPda = findMintTrackerPda(umi, {
+  const trackerPda = findAllocationTrackerPda(umi, {
     id: 1,
     candyMachine,
     candyGuard: findCandyGuardPda(umi, { base: candyMachine }),
   });
-  const trackerPdaAccount = await fetchMintTracker(umi, trackerPda);
+  const trackerPdaAccount = await fetchAllocationTracker(umi, trackerPda);
   t.is(trackerPdaAccount.count, 1);
 });
 
@@ -89,7 +89,7 @@ test('it forbids minting when the allocation limit is reached', async (t) => {
       { name: 'Degen #2', uri: 'https://example.com/degen/2' },
     ],
     guards: {
-      allocation: some({ id: 1, size: 1 }),
+      allocation: some({ id: 1, limit: 1 }),
     },
   });
 
@@ -155,13 +155,13 @@ test('the allocation limit is local to each id', async (t) => {
       {
         label: 'GROUPA',
         guards: {
-          allocation: some({ id: 1, size: 1 }),
+          allocation: some({ id: 1, limit: 1 }),
         },
       },
       {
         label: 'GROUPB',
         guards: {
-          allocation: some({ id: 2, size: 1 }),
+          allocation: some({ id: 2, limit: 1 }),
         },
       },
     ],
@@ -246,7 +246,7 @@ test('it charges a bot tax when trying to mint after the limit', async (t) => {
     ],
     guards: {
       botTax: some({ lamports: sol(0.1), lastInstruction: true }),
-      allocation: some({ id: 1, size: 1 }),
+      allocation: some({ id: 1, limit: 1 }),
     },
   });
 

@@ -700,7 +700,7 @@
         "",
         "List of accounts required:",
         "",
-        "0. `[writable]` Mint tracker PDA. The PDA is derived",
+        "0. `[writable]` Allocation tracker PDA. The PDA is derived",
         "using the seed `[\"allocation\", allocation id,",
         "candy guard pubkey, candy machine pubkey]`."
       ],
@@ -715,9 +715,9 @@
             "type": "u8"
           },
           {
-            "name": "size",
+            "name": "limit",
             "docs": [
-              "The size of the allocation."
+              "The limit of the allocation."
             ],
             "type": "u32"
           }
@@ -725,7 +725,7 @@
       }
     },
     {
-      "name": "MintTracker",
+      "name": "AllocationTracker",
       "docs": [
         "PDA to track the number of mints."
       ],

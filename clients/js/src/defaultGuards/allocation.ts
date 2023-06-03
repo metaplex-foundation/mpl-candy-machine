@@ -1,6 +1,6 @@
 import { getSplSystemProgramId } from '@metaplex-foundation/mpl-essentials';
 import {
-  findMintTrackerPda,
+  findAllocationTrackerPda,
   getAllocationSerializer,
   Allocation,
   AllocationArgs,
@@ -24,7 +24,7 @@ export const allocationGuardManifest: GuardManifest<
     data: new Uint8Array(),
     remainingAccounts: [
       {
-        publicKey: findMintTrackerPda(context, {
+        publicKey: findAllocationTrackerPda(context, {
           id: args.id,
           candyMachine: mintContext.candyMachine,
           candyGuard: mintContext.candyGuard,
@@ -38,7 +38,7 @@ export const allocationGuardManifest: GuardManifest<
     remainingAccounts: [
       {
         isWritable: true,
-        publicKey: findMintTrackerPda(context, {
+        publicKey: findAllocationTrackerPda(context, {
           id: args.id,
           candyMachine: routeContext.candyMachine,
           candyGuard: routeContext.candyGuard,
@@ -50,13 +50,13 @@ export const allocationGuardManifest: GuardManifest<
   }),
 };
 
-export type AllocationMintArgs = Omit<AllocationArgs, 'size'>;
+export type AllocationMintArgs = Omit<AllocationArgs, 'limit'>;
 
 /**
  * The allocation guard arguments that should be provided
  * when accessing the guard's special "route" instruction.
  */
-export type AllocationRouteArgs = Omit<AllocationArgs, 'size'> & {
+export type AllocationRouteArgs = Omit<AllocationArgs, 'limit'> & {
   /** The authority of the Candy Guard as a Signer. */
   candyGuardAuthority: Signer;
 };

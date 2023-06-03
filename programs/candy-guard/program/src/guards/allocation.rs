@@ -10,20 +10,20 @@ use crate::{
 ///
 /// List of accounts required:
 ///
-///   0. `[writable]` Mint tracker PDA. The PDA is derived
+///   0. `[writable]` Allocation tracker PDA. The PDA is derived
 ///                   using the seed `["allocation", allocation id,
 ///                   candy guard pubkey, candy machine pubkey]`.
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug)]
 pub struct Allocation {
     /// Unique identifier of the allocation.
     pub id: u8,
-    /// The size of the allocation.
-    pub size: u32,
+    /// The limit of the allocation.
+    pub limit: u32,
 }
 
 /// PDA to track the number of mints.
 #[derive(AnchorDeserialize, AnchorSerialize)]
-pub struct MintTracker {
+pub struct AllocationTracker {
     pub count: u32,
 }
 
@@ -129,7 +129,7 @@ impl Guard for Allocation {
         }
 
         let mut account_data = allocation.try_borrow_mut_data()?;
-        let mut mint_tracker = MintTracker::try_from_slice(&account_data)?;
+        let mut mint_tracker = AllocationTracker::try_from_slice(&account_data)?;
         // initial count is always zero
         mint_tracker.count = 0;
         // saves the changes back to the pda
@@ -173,9 +173,9 @@ impl Condition for Allocation {
         }
 
         let account_data = allocation.try_borrow_data()?;
-        let mint_tracker = MintTracker::try_from_slice(&account_data)?;
+        let mint_tracker = AllocationTracker::try_from_slice(&account_data)?;
 
-        if mint_tracker.count >= self.size {
+        if mint_tracker.count >= self.limit {
             return err!(CandyGuardError::AllocationLimitReached);
         }
 
@@ -191,7 +191,7 @@ impl Condition for Allocation {
         let allocation =
             try_get_account_info(ctx.accounts.remaining, ctx.indices["allocation_index"])?;
         let mut account_data = allocation.try_borrow_mut_data()?;
-        let mut mint_tracker = MintTracker::try_from_slice(&account_data)?;
+        let mut mint_tracker = AllocationTracker::try_from_slice(&account_data)?;
 
         mint_tracker.count += 1;
         // saves the changes back to the pda

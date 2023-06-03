@@ -21,78 +21,81 @@ import {
 } from '@metaplex-foundation/umi';
 
 /** PDA to track the number of mints. */
-export type MintTracker = Account<MintTrackerAccountData>;
+export type AllocationTracker = Account<AllocationTrackerAccountData>;
 
-export type MintTrackerAccountData = { count: number };
+export type AllocationTrackerAccountData = { count: number };
 
-export type MintTrackerAccountDataArgs = MintTrackerAccountData;
+export type AllocationTrackerAccountDataArgs = AllocationTrackerAccountData;
 
-export function getMintTrackerAccountDataSerializer(
+export function getAllocationTrackerAccountDataSerializer(
   context: Pick<Context, 'serializer'>
-): Serializer<MintTrackerAccountDataArgs, MintTrackerAccountData> {
+): Serializer<AllocationTrackerAccountDataArgs, AllocationTrackerAccountData> {
   const s = context.serializer;
-  return s.struct<MintTrackerAccountData>([['count', s.u32()]], {
-    description: 'MintTrackerAccountData',
-  }) as Serializer<MintTrackerAccountDataArgs, MintTrackerAccountData>;
+  return s.struct<AllocationTrackerAccountData>([['count', s.u32()]], {
+    description: 'AllocationTrackerAccountData',
+  }) as Serializer<
+    AllocationTrackerAccountDataArgs,
+    AllocationTrackerAccountData
+  >;
 }
 
-export function deserializeMintTracker(
+export function deserializeAllocationTracker(
   context: Pick<Context, 'serializer'>,
   rawAccount: RpcAccount
-): MintTracker {
+): AllocationTracker {
   return deserializeAccount(
     rawAccount,
-    getMintTrackerAccountDataSerializer(context)
+    getAllocationTrackerAccountDataSerializer(context)
   );
 }
 
-export async function fetchMintTracker(
+export async function fetchAllocationTracker(
   context: Pick<Context, 'rpc' | 'serializer'>,
   publicKey: PublicKey,
   options?: RpcGetAccountOptions
-): Promise<MintTracker> {
+): Promise<AllocationTracker> {
   const maybeAccount = await context.rpc.getAccount(publicKey, options);
-  assertAccountExists(maybeAccount, 'MintTracker');
-  return deserializeMintTracker(context, maybeAccount);
+  assertAccountExists(maybeAccount, 'AllocationTracker');
+  return deserializeAllocationTracker(context, maybeAccount);
 }
 
-export async function safeFetchMintTracker(
+export async function safeFetchAllocationTracker(
   context: Pick<Context, 'rpc' | 'serializer'>,
   publicKey: PublicKey,
   options?: RpcGetAccountOptions
-): Promise<MintTracker | null> {
+): Promise<AllocationTracker | null> {
   const maybeAccount = await context.rpc.getAccount(publicKey, options);
   return maybeAccount.exists
-    ? deserializeMintTracker(context, maybeAccount)
+    ? deserializeAllocationTracker(context, maybeAccount)
     : null;
 }
 
-export async function fetchAllMintTracker(
+export async function fetchAllAllocationTracker(
   context: Pick<Context, 'rpc' | 'serializer'>,
   publicKeys: PublicKey[],
   options?: RpcGetAccountsOptions
-): Promise<MintTracker[]> {
+): Promise<AllocationTracker[]> {
   const maybeAccounts = await context.rpc.getAccounts(publicKeys, options);
   return maybeAccounts.map((maybeAccount) => {
-    assertAccountExists(maybeAccount, 'MintTracker');
-    return deserializeMintTracker(context, maybeAccount);
+    assertAccountExists(maybeAccount, 'AllocationTracker');
+    return deserializeAllocationTracker(context, maybeAccount);
   });
 }
 
-export async function safeFetchAllMintTracker(
+export async function safeFetchAllAllocationTracker(
   context: Pick<Context, 'rpc' | 'serializer'>,
   publicKeys: PublicKey[],
   options?: RpcGetAccountsOptions
-): Promise<MintTracker[]> {
+): Promise<AllocationTracker[]> {
   const maybeAccounts = await context.rpc.getAccounts(publicKeys, options);
   return maybeAccounts
     .filter((maybeAccount) => maybeAccount.exists)
     .map((maybeAccount) =>
-      deserializeMintTracker(context, maybeAccount as RpcAccount)
+      deserializeAllocationTracker(context, maybeAccount as RpcAccount)
     );
 }
 
-export function getMintTrackerGpaBuilder(
+export function getAllocationTrackerGpaBuilder(
   context: Pick<Context, 'rpc' | 'serializer' | 'programs'>
 ) {
   const s = context.serializer;
@@ -102,17 +105,17 @@ export function getMintTrackerGpaBuilder(
   );
   return gpaBuilder(context, programId)
     .registerFields<{ count: number }>({ count: [0, s.u32()] })
-    .deserializeUsing<MintTracker>((account) =>
-      deserializeMintTracker(context, account)
+    .deserializeUsing<AllocationTracker>((account) =>
+      deserializeAllocationTracker(context, account)
     )
     .whereSize(4);
 }
 
-export function getMintTrackerSize(): number {
+export function getAllocationTrackerSize(): number {
   return 4;
 }
 
-export function findMintTrackerPda(
+export function findAllocationTrackerPda(
   context: Pick<Context, 'eddsa' | 'programs' | 'serializer'>,
   seeds: {
     /** Unique identifier of the allocation */
@@ -136,22 +139,26 @@ export function findMintTrackerPda(
   ]);
 }
 
-export async function fetchMintTrackerFromSeeds(
+export async function fetchAllocationTrackerFromSeeds(
   context: Pick<Context, 'eddsa' | 'programs' | 'rpc' | 'serializer'>,
-  seeds: Parameters<typeof findMintTrackerPda>[1],
+  seeds: Parameters<typeof findAllocationTrackerPda>[1],
   options?: RpcGetAccountOptions
-): Promise<MintTracker> {
-  return fetchMintTracker(context, findMintTrackerPda(context, seeds), options);
+): Promise<AllocationTracker> {
+  return fetchAllocationTracker(
+    context,
+    findAllocationTrackerPda(context, seeds),
+    options
+  );
 }
 
-export async function safeFetchMintTrackerFromSeeds(
+export async function safeFetchAllocationTrackerFromSeeds(
   context: Pick<Context, 'eddsa' | 'programs' | 'rpc' | 'serializer'>,
-  seeds: Parameters<typeof findMintTrackerPda>[1],
+  seeds: Parameters<typeof findAllocationTrackerPda>[1],
   options?: RpcGetAccountOptions
-): Promise<MintTracker | null> {
-  return safeFetchMintTracker(
+): Promise<AllocationTracker | null> {
+  return safeFetchAllocationTracker(
     context,
-    findMintTrackerPda(context, seeds),
+    findAllocationTrackerPda(context, seeds),
     options
   );
 }

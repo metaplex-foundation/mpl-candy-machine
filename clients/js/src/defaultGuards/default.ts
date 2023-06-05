@@ -35,6 +35,7 @@ import {
   ThirdPartySigner,
   ThirdPartySignerArgs,
   Token2022Payment,
+  Token2022PaymentArgs,
   TokenBurn,
   TokenBurnArgs,
   TokenGate,
@@ -95,7 +96,7 @@ export type DefaultGuardSetArgs = GuardSetArgs & {
   freezeTokenPayment: Option<FreezeTokenPaymentArgs>;
   programGate: Option<ProgramGateArgs>;
   allocation: Option<AllocationArgs>;
-  token2022Payment: Option<Token2022PaymentMintArgs>;
+  token2022Payment: Option<Token2022PaymentArgs>;
 };
 
 /**

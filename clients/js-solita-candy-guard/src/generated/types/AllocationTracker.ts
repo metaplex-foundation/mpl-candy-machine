@@ -6,7 +6,7 @@
  */
 
 import * as beet from '@metaplex-foundation/beet';
-export type MintTracker = {
+export type AllocationTracker = {
   count: number;
 };
 
@@ -14,7 +14,7 @@ export type MintTracker = {
  * @category userTypes
  * @category generated
  */
-export const mintTrackerBeet = new beet.BeetArgsStruct<MintTracker>(
+export const allocationTrackerBeet = new beet.BeetArgsStruct<AllocationTracker>(
   [['count', beet.u32]],
-  'MintTracker',
+  'AllocationTracker',
 );

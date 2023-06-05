@@ -1,5 +1,5 @@
 {
-  "version": "1.0.1",
+  "version": "1.0.3",
   "name": "candy_guard",
   "instructions": [
     {
@@ -709,7 +709,7 @@
         "",
         "List of accounts required:",
         "",
-        "0. `[writable]` Mint tracker PDA. The PDA is derived",
+        "0. `[writable]` Allocation tracker PDA. The PDA is derived",
         "using the seed `[\"allocation\", allocation id,",
         "candy guard pubkey, candy machine pubkey]`."
       ],
@@ -724,9 +724,9 @@
             "type": "u8"
           },
           {
-            "name": "size",
+            "name": "limit",
             "docs": [
-              "The size of the allocation."
+              "The limit of the allocation."
             ],
             "type": "u32"
           }
@@ -734,7 +734,7 @@
       }
     },
     {
-      "name": "MintTracker",
+      "name": "AllocationTracker",
       "docs": [
         "PDA to track the number of mints."
       ],
@@ -1141,6 +1141,36 @@
       }
     },
     {
+      "name": "Token2022Payment",
+      "docs": [
+        "Guard that charges an amount in a specified spl-token as payment for the mint.",
+        "",
+        "List of accounts required:",
+        "",
+        "0. `[writable]` Token account holding the required amount.",
+        "1. `[writable]` Address of the ATA to receive the tokens.",
+        "2. `[]` Mint account.",
+        "3. `[]` SPL Token-2022 program account."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "mint",
+            "type": "publicKey"
+          },
+          {
+            "name": "destinationAta",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
       "name": "TokenBurn",
       "docs": [
         "Guard that requires addresses that hold an amount of a specified spl-token",
@@ -1516,6 +1546,17 @@
                 "defined": "Allocation"
               }
             }
+          },
+          {
+            "name": "token2022Payment",
+            "docs": [
+              "Token2022 payment guard (set the price for the mint in spl-token-2022 amount)."
+            ],
+            "type": {
+              "option": {
+                "defined": "Token2022Payment"
+              }
+            }
           }
         ]
       }
@@ -1604,6 +1645,9 @@
           },
           {
             "name": "Allocation"
+          },
+          {
+            "name": "Token2022Payment"
           }
         ]
       }
@@ -1874,7 +1918,7 @@
   "metadata": {
     "address": "Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g",
     "origin": "anchor",
-    "binaryVersion": "0.26.0",
-    "libVersion": "0.26.0"
+    "binaryVersion": "0.27.0",
+    "libVersion": "0.27.0"
   }
 }

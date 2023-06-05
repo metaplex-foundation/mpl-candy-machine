@@ -35,6 +35,7 @@ export function newGuardSet(): GuardSet {
     freezeTokenPayment: null,
     programGate: null,
     allocation: null,
+    token2022Payment: null,
   };
 }
 

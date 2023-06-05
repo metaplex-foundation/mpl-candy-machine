@@ -22,7 +22,7 @@ test('Allocation', async (t) => {
   const data = newCandyGuardData();
   data.default.allocation = {
     id: 0,
-    size: 4,
+    limit: 4,
   };
 
   const { candyGuard, candyMachine } = await API.deploy(
@@ -139,7 +139,7 @@ test('Allocation: not initialized', async (t) => {
   const data = newCandyGuardData();
   data.default.allocation = {
     id: 0,
-    size: 4,
+    limit: 4,
   };
 
   const { candyGuard, candyMachine } = await API.deploy(
@@ -191,7 +191,7 @@ test('Allocation: missing PDA', async (t) => {
   const data = newCandyGuardData();
   data.default.allocation = {
     id: 0,
-    size: 4,
+    limit: 4,
   };
 
   const { candyGuard, candyMachine } = await API.deploy(

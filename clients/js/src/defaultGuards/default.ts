@@ -34,6 +34,8 @@ import {
   StartDateArgs,
   ThirdPartySigner,
   ThirdPartySignerArgs,
+  Token2022Payment,
+  Token2022PaymentArgs,
   TokenBurn,
   TokenBurnArgs,
   TokenGate,
@@ -47,6 +49,7 @@ import {
   GuardSetMintArgs,
   GuardSetRouteArgs,
 } from '../guards/guardSet';
+import { AllocationMintArgs, AllocationRouteArgs } from './allocation';
 import { AllowListMintArgs, AllowListRouteArgs } from './allowList';
 import {
   FreezeSolPaymentMintArgs,
@@ -66,7 +69,8 @@ import { ThirdPartySignerMintArgs } from './thirdPartySigner';
 import { TokenBurnMintArgs } from './tokenBurn';
 import { TokenGateMintArgs } from './tokenGate';
 import { TokenPaymentMintArgs } from './tokenPayment';
-import { AllocationMintArgs, AllocationRouteArgs } from './allocation';
+
+import { Token2022PaymentMintArgs } from './token2022Payment';
 
 /**
  * The arguments for all default Candy Machine guards.
@@ -92,6 +96,7 @@ export type DefaultGuardSetArgs = GuardSetArgs & {
   freezeTokenPayment: Option<FreezeTokenPaymentArgs>;
   programGate: Option<ProgramGateArgs>;
   allocation: Option<AllocationArgs>;
+  token2022Payment: Option<Token2022PaymentArgs>;
 };
 
 /**
@@ -118,6 +123,7 @@ export type DefaultGuardSet = GuardSet & {
   freezeTokenPayment: Option<FreezeTokenPayment>;
   programGate: Option<ProgramGate>;
   allocation: Option<Allocation>;
+  token2022Payment: Option<Token2022Payment>;
 };
 
 /**
@@ -144,6 +150,7 @@ export type DefaultGuardSetMintArgs = GuardSetMintArgs & {
   freezeTokenPayment: Option<FreezeTokenPaymentMintArgs>;
   // programGate: no mint settings
   allocation: Option<AllocationMintArgs>;
+  token2022Payment: Option<Token2022PaymentMintArgs>;
 };
 
 /**
@@ -170,6 +177,7 @@ export type DefaultGuardSetRouteArgs = GuardSetRouteArgs & {
   freezeTokenPayment: FreezeTokenPaymentRouteArgs;
   // programGate: no route settings
   allocation: AllocationRouteArgs;
+  // token2022Payment: no route settings
 };
 
 /** @internal */
@@ -194,6 +202,7 @@ export const defaultCandyGuardNames: string[] = [
   'freezeTokenPayment',
   'programGate',
   'allocation',
+  'token2022Payment',
 ];
 
 /** @internal */

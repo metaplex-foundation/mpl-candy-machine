@@ -2,8 +2,8 @@ lockfileVersion: '6.0'
 
 dependencies:
   '@metaplex-foundation/mpl-token-metadata':
-    specifier: 3.0.0-alpha.18
-    version: 3.0.0-alpha.18(@metaplex-foundation/umi@0.7.2)
+    specifier: 3.0.0-alpha.22
+    version: 3.0.0-alpha.22(@metaplex-foundation/umi@0.7.2)
   '@metaplex-foundation/mpl-toolbox':
     specifier: ^0.6.1
     version: 0.6.1(@metaplex-foundation/umi@0.7.2)
@@ -1683,14 +1683,6 @@ packages:
     resolution: {integrity: sha512-S9RulC2fFCFOQraz61bij+5YCHhSO9llJegK8c8Y6731fSi6snUSQJdCUqYS8AIgR0TKbQvdvgSyIIdbDFZbBA==}
     dev: true
 
-  /@metaplex-foundation/mpl-essentials@0.5.8(@metaplex-foundation/umi@0.7.2):
-    resolution: {integrity: sha512-bPer6uIhMkqcaKqF9PyIuOR2+chAxX5bIsJNplTGZM8ROwvkzwdgN65BVDkkevsPNCKiQt1L8HWMtLWxxwJnYg==}
-    peerDependencies:
-      '@metaplex-foundation/umi': 0.6 - 0.7
-    dependencies:
-      '@metaplex-foundation/umi': 0.7.2
-    dev: false
-
   /@metaplex-foundation/mpl-token-auth-rules@1.2.0:
     resolution: {integrity: sha512-UkfBkYEdenefIKxE2L15j9ZHUJYYRQoDqNqDawh5DxdemmVV3GLnIlbMilr/HLXyXb2eMAOUdl5XgZFwKYN5EA==}
     dependencies:
@@ -1706,12 +1698,12 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@metaplex-foundation/mpl-token-metadata@3.0.0-alpha.18(@metaplex-foundation/umi@0.7.2):
-    resolution: {integrity: sha512-8nCi4q+jmr5z8AHApKwPHtMeahQB+TZZzhrgaxI4F2J0y99pdmbYHgcN9czBEG0neF0oNpcyDT7r08kfYTaF9g==}
+  /@metaplex-foundation/mpl-token-metadata@3.0.0-alpha.22(@metaplex-foundation/umi@0.7.2):
+    resolution: {integrity: sha512-yQnJn5XynZ2ZIdHUPtrPAgrgdBXy7ZwMx2The0UCV6XUdR/zxxbvRZ+6ilGb68FDVUCraYyBmc7AnZiqsaxURA==}
     peerDependencies:
       '@metaplex-foundation/umi': 0.6 - 0.7
     dependencies:
-      '@metaplex-foundation/mpl-essentials': 0.5.8(@metaplex-foundation/umi@0.7.2)
+      '@metaplex-foundation/mpl-toolbox': 0.6.1(@metaplex-foundation/umi@0.7.2)
       '@metaplex-foundation/umi': 0.7.2
     dev: false
 

@@ -4,8 +4,6 @@ import {
 } from '@metaplex-foundation/mpl-toolbox';
 import {
   generateSigner,
-  publicKey,
-  signerIdentity,
   some,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
@@ -22,20 +20,15 @@ import {
 test('it transfers Token2022 tokens from the payer to the destination', async (t) => {
   // Given a Umi instance using the SPL Token 2022 program.
   const umi = await createUmi();
-  const umiWithToken2022 = (await createUmi()).use(
-    signerIdentity(umi.identity)
-  );
-  umiWithToken2022.programs.add({
-    ...umi.programs.get('splToken'),
-    publicKey: publicKey('TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb'),
-  });
+  const programsWithToken22 = umi.programs.clone();
+  programsWithToken22.bind('splToken', 'splToken2022');
 
   // And a mint account such that:
   // - The destination treasury has 100 tokens.
   // - The payer has 12 tokens.
   const destination = generateSigner(umi).publicKey;
   const [tokenMint, destinationAta, identityAta] = await createMintWithHolders(
-    umiWithToken2022,
+    { ...umi, programs: programsWithToken22 },
     {
       holders: [
         { owner: destination, amount: 100 },

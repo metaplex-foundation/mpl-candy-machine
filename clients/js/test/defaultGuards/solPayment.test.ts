@@ -7,7 +7,7 @@ import {
 } from '@metaplex-foundation/umi';
 import test from 'ava';
 import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
-import { setComputeUnitLimit } from '@metaplex-foundation/mpl-essentials';
+import { setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
 import {
   assertBotTax,
   assertSuccessfulMint,

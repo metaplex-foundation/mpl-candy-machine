@@ -1,4 +1,4 @@
-import { getSplSystemProgramId } from '@metaplex-foundation/mpl-essentials';
+import { getSplSystemProgramId } from '@metaplex-foundation/mpl-toolbox';
 import { PublicKey, Signer, publicKey } from '@metaplex-foundation/umi';
 import {
   AllowList,

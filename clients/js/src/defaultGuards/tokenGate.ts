@@ -1,4 +1,4 @@
-import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-essentials';
+import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-toolbox';
 import { getTokenGateSerializer, TokenGate, TokenGateArgs } from '../generated';
 import { GuardManifest, noopParser } from '../guards';
 

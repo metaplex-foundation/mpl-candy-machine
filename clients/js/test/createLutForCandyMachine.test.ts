@@ -2,7 +2,7 @@
 import {
   getSysvar,
   setComputeUnitLimit,
-} from '@metaplex-foundation/mpl-essentials';
+} from '@metaplex-foundation/mpl-toolbox';
 import {
   findCollectionAuthorityRecordPda,
   findMasterEditionPda,

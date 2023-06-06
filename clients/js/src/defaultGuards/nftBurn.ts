@@ -1,4 +1,4 @@
-import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-essentials';
+import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-toolbox';
 import {
   findMasterEditionPda,
   findMetadataPda,

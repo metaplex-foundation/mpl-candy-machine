@@ -2,7 +2,7 @@ import {
   findAssociatedTokenPda,
   getMintSize,
   getTokenSize,
-} from '@metaplex-foundation/mpl-essentials';
+} from '@metaplex-foundation/mpl-toolbox';
 import {
   findTokenRecordPda,
   getMasterEditionSize,

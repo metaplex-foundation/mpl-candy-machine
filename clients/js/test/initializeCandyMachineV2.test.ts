@@ -1,4 +1,4 @@
-import { createAccountWithRent } from '@metaplex-foundation/mpl-essentials';
+import { createAccountWithRent } from '@metaplex-foundation/mpl-toolbox';
 import { TokenStandard } from '@metaplex-foundation/mpl-token-metadata';
 import {
   generateSigner,

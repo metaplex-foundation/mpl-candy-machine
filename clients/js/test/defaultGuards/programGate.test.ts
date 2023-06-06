@@ -2,7 +2,7 @@ import {
   addMemo,
   getSplMemoProgramId,
   setComputeUnitLimit,
-} from '@metaplex-foundation/mpl-essentials';
+} from '@metaplex-foundation/mpl-toolbox';
 import {
   generateSigner,
   sol,

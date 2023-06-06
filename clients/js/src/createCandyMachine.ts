@@ -1,4 +1,4 @@
-import { createAccount } from '@metaplex-foundation/mpl-essentials';
+import { createAccount } from '@metaplex-foundation/mpl-toolbox';
 import {
   Context,
   none,

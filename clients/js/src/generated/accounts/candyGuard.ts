@@ -52,7 +52,7 @@ export function getCandyGuardAccountDataSerializer(
     ),
     (value) => ({
       ...value,
-      discriminator: [95, 25, 33, 117, 164, 206, 9, 250],
+      discriminator: [44, 207, 199, 184, 112, 103, 34, 181],
     })
   ) as Serializer<CandyGuardAccountDataArgs, CandyGuardAccountData>;
 }
@@ -136,7 +136,7 @@ export function getCandyGuardGpaBuilder(
     .deserializeUsing<CandyGuard>((account) =>
       deserializeCandyGuard(context, account)
     )
-    .whereField('discriminator', [95, 25, 33, 117, 164, 206, 9, 250]);
+    .whereField('discriminator', [44, 207, 199, 184, 112, 103, 34, 181]);
 }
 
 export function getCandyGuardSize(): number {

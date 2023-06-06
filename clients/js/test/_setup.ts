@@ -4,7 +4,7 @@ import {
   createMint,
   findAssociatedTokenPda,
   mintTokensTo,
-} from '@metaplex-foundation/mpl-essentials';
+} from '@metaplex-foundation/mpl-toolbox';
 import {
   createNft as baseCreateNft,
   createProgrammableNft as baseCreateProgrammableNft,

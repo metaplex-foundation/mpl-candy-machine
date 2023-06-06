@@ -1,4 +1,4 @@
-import { setComputeUnitLimit } from '@metaplex-foundation/mpl-essentials';
+import { setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
 import {
   base58PublicKey,
   generateSigner,

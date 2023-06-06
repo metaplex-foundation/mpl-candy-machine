@@ -1,4 +1,4 @@
-import { createLut, getSysvar } from '@metaplex-foundation/mpl-essentials';
+import { createLut, getSysvar } from '@metaplex-foundation/mpl-toolbox';
 import {
   findCollectionAuthorityRecordPda,
   findMasterEditionPda,

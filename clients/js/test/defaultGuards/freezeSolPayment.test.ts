@@ -5,7 +5,7 @@ import {
   setComputeUnitLimit,
   Token,
   TokenState,
-} from '@metaplex-foundation/mpl-essentials';
+} from '@metaplex-foundation/mpl-toolbox';
 import {
   fetchTokenRecord,
   findTokenRecordPda,

@@ -6,7 +6,7 @@ import {
   NetworkFeature,
   UserTokenExpiry,
 } from '@identity.com/solana-gateway-ts';
-import { setComputeUnitLimit } from '@metaplex-foundation/mpl-essentials';
+import { setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
 import {
   assertAccountExists,
   dateTime,

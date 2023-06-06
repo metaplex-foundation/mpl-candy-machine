@@ -1,4 +1,4 @@
-import { createMintWithAssociatedToken } from '@metaplex-foundation/mpl-essentials';
+import { createMintWithAssociatedToken } from '@metaplex-foundation/mpl-toolbox';
 import {
   generateSigner,
   isEqualToAmount,

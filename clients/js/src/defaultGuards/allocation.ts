@@ -1,4 +1,4 @@
-import { getSplSystemProgramId } from '@metaplex-foundation/mpl-essentials';
+import { getSplSystemProgramId } from '@metaplex-foundation/mpl-toolbox';
 import { Signer } from '@metaplex-foundation/umi';
 import {
   findAllocationTrackerPda,

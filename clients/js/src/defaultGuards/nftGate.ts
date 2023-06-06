@@ -1,4 +1,4 @@
-import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-essentials';
+import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-toolbox';
 import { findMetadataPda } from '@metaplex-foundation/mpl-token-metadata';
 import { PublicKey } from '@metaplex-foundation/umi';
 import { getNftGateSerializer, NftGate, NftGateArgs } from '../generated';

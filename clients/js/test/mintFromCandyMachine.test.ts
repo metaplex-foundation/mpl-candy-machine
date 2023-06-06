@@ -1,4 +1,4 @@
-import { createMintWithAssociatedToken } from '@metaplex-foundation/mpl-essentials';
+import { createMintWithAssociatedToken } from '@metaplex-foundation/mpl-toolbox';
 import { generateSigner, transactionBuilder } from '@metaplex-foundation/umi';
 import test from 'ava';
 import { CandyMachine, fetchCandyMachine, mintFromCandyMachine } from '../src';

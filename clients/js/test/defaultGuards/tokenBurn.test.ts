@@ -10,7 +10,7 @@ import {
   fetchToken,
   findAssociatedTokenPda,
   setComputeUnitLimit,
-} from '@metaplex-foundation/mpl-essentials';
+} from '@metaplex-foundation/mpl-toolbox';
 import {
   assertBotTax,
   assertSuccessfulMint,

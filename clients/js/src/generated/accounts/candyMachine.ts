@@ -124,5 +124,5 @@ export function getCandyMachineGpaBuilder(
     .deserializeUsing<CandyMachine>((account) =>
       deserializeCandyMachine(context, account)
     )
-    .whereField('discriminator', [115, 157, 18, 166, 35, 44, 221, 13]);
+    .whereField('discriminator', [51, 173, 177, 113, 25, 241, 109, 189]);
 }

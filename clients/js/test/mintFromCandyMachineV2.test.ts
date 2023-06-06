@@ -3,7 +3,7 @@ import {
   createMint,
   createMintWithAssociatedToken,
   setComputeUnitLimit,
-} from '@metaplex-foundation/mpl-essentials';
+} from '@metaplex-foundation/mpl-toolbox';
 import { findCollectionAuthorityRecordPda } from '@metaplex-foundation/mpl-token-metadata';
 import { generateSigner, transactionBuilder } from '@metaplex-foundation/umi';
 import test from 'ava';

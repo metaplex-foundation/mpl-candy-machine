@@ -104,7 +104,7 @@ export function getFreezeEscrowAccountDataSerializer(
     ),
     (value) => ({
       ...value,
-      discriminator: [100, 4, 61, 102, 0, 123, 141, 187],
+      discriminator: [227, 186, 40, 152, 7, 174, 131, 184],
     })
   ) as Serializer<FreezeEscrowAccountDataArgs, FreezeEscrowAccountData>;
 }
@@ -196,7 +196,7 @@ export function getFreezeEscrowGpaBuilder(
     .deserializeUsing<FreezeEscrow>((account) =>
       deserializeFreezeEscrow(context, account)
     )
-    .whereField('discriminator', [100, 4, 61, 102, 0, 123, 141, 187]);
+    .whereField('discriminator', [227, 186, 40, 152, 7, 174, 131, 184]);
 }
 
 export function findFreezeEscrowPda(

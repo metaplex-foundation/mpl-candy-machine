@@ -6,13 +6,13 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-essentials';
 import {
   MetadataDelegateRole,
   findMasterEditionPda,
   findMetadataDelegateRecordPda,
   findMetadataPda,
 } from '@metaplex-foundation/mpl-token-metadata';
+import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-toolbox';
 import {
   AccountMeta,
   Context,

@@ -1,7 +1,4 @@
-import {
-  addMemo,
-  setComputeUnitLimit,
-} from '@metaplex-foundation/mpl-toolbox';
+import { addMemo, setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
 import {
   generateSigner,
   sol,

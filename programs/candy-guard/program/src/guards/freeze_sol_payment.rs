@@ -911,6 +911,24 @@ pub fn thaw_nft<'info>(
 
             invoke_signed(&transfer_in_ix, &transfer_accounts, &[&signer])?;
 
+            // closes the freeze escrow ATA
+
+            invoke_signed(
+                &spl_token::instruction::close_account(
+                    token_program.key,
+                    escrow_ata.key,
+                    ctx.accounts.payer.key,
+                    freeze_pda.key,
+                    &[],
+                )?,
+                &[
+                    escrow_ata.clone(),
+                    ctx.accounts.payer.to_account_info(),
+                    freeze_pda.clone(),
+                ],
+                &[&signer],
+            )?;
+
             // decreases the freeze (lock) counter
             freeze_escrow.frozen_count = freeze_escrow.frozen_count.saturating_sub(1);
         } else {

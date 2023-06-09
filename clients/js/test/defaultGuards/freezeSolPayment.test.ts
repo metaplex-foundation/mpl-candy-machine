@@ -820,6 +820,20 @@ test('it can thaw a Programmable NFT once all NFTs are minted', async (t) => {
   // Then the PNFT is unlocked.
   tokenRecordAccount = await fetchTokenRecord(umi, tokenRecord);
   t.is(tokenRecordAccount.state, MetadataTokenState.Unlocked);
+
+  // And the freeze escrow ATA account is closed.
+  t.false(
+    await umi.rpc.accountExists(
+      findAssociatedTokenPda(umi, {
+        mint: mint.publicKey,
+        owner: findFreezeEscrowPda(umi, {
+          destination,
+          candyMachine,
+          candyGuard: findCandyGuardPda(umi, { base: candyMachine }),
+        }),
+      })
+    )
+  );
 });
 
 const getFreezeEscrow = (

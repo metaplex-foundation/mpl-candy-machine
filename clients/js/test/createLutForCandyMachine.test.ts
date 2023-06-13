@@ -27,7 +27,7 @@ import {
   createV2,
 } from './_setup';
 
-test.only('it can create a LUT for a candy machine v2', async (t) => {
+test('it can create a LUT for a candy machine v2', async (t) => {
   // Given a candy machine with a candy guard.
   const umi = await createUmi();
   const collectionMint = (await createCollectionNft(umi)).publicKey;
@@ -64,7 +64,7 @@ test.only('it can create a LUT for a candy machine v2', async (t) => {
     candyMachine,
   });
   t.deepEqual(
-    lut.addresses.sort(),
+    [...lut.addresses].sort(),
     [
       candyMachine,
       findCandyGuardPda(umi, { base: candyMachine })[0],
@@ -98,10 +98,6 @@ test.only('it can create a LUT for a candy machine v2', async (t) => {
   // And we can use the builder with LUT to mint an NFT
   // providing we wait a little bit for the LUT to become active.
   await new Promise((resolve) => setTimeout(resolve, 1000));
-  const tx1 = await builderWithoutLut.buildWithLatestBlockhash(umi);
-  const tx2 = await builderWithLut.buildWithLatestBlockhash(umi);
-  console.log('tx1', tx1.message.accounts, tx1.message.addressLookupTables);
-  console.log('tx2', tx2.message.accounts, tx2.message.addressLookupTables);
   await builderWithLut.sendAndConfirm(umi);
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
 });

@@ -12,7 +12,7 @@ import {
   PublicKey,
   Signer,
   TransactionBuilder,
-  uniqueBy,
+  uniquePublicKeys,
 } from '@metaplex-foundation/umi';
 import { AccountVersion, fetchCandyMachine } from './generated';
 import { findCandyMachineAuthorityPda } from './hooked';
@@ -65,21 +65,18 @@ export const getLutAddressesForCandyMachine = async (
     delegate: collectionAuthorityPda,
   });
 
-  return uniqueBy(
-    [
-      candyMachine,
-      mintAuthority,
-      collectionMint,
-      findMetadataPda(context, { mint: collectionMint })[0],
-      findMasterEditionPda(context, { mint: collectionMint })[0],
-      collectionUpdateAuthority,
-      findCandyMachineAuthorityPda(context, { candyMachine })[0],
-      candyMachineAccount.version === AccountVersion.V1
-        ? delegateRecordV1
-        : delegateRecordV2,
-      getSysvar('instructions'),
-      getSysvar('slotHashes'),
-    ],
-    (a, b) => a === b
-  );
+  return uniquePublicKeys([
+    candyMachine,
+    mintAuthority,
+    collectionMint,
+    findMetadataPda(context, { mint: collectionMint })[0],
+    findMasterEditionPda(context, { mint: collectionMint })[0],
+    collectionUpdateAuthority,
+    findCandyMachineAuthorityPda(context, { candyMachine })[0],
+    candyMachineAccount.version === AccountVersion.V1
+      ? delegateRecordV1
+      : delegateRecordV2,
+    getSysvar('instructions'),
+    getSysvar('slotHashes'),
+  ]);
 };

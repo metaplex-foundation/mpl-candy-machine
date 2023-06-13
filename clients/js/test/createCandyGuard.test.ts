@@ -263,7 +263,7 @@ test('it can create a candy guard with an explicit payer', async (t) => {
   await builder.sendAndConfirm(umi);
 
   // Then the Candy Guard was created successfully.
-  const candyGuard = findCandyGuardPda(umi, { base: base.publicKey });
+  const [candyGuard] = findCandyGuardPda(umi, { base: base.publicKey });
   t.true(await umi.rpc.accountExists(candyGuard));
 
   // And the payer paid for the rent.

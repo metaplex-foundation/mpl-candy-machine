@@ -111,7 +111,7 @@ test('it transfers SOL to an escrow account and freezes the NFT', async (t) => {
   await t.throwsAsync(promise, { message: /ThawNotEnabled/ });
 
   // And the treasury escrow received SOLs.
-  const treasuryEscrow = getFreezeEscrow(umi, candyMachine, destination);
+  const [treasuryEscrow] = getFreezeEscrow(umi, candyMachine, destination);
   const treasuryEscrowBalance = await umi.rpc.getBalance(treasuryEscrow);
   t.true(
     isEqualToAmount(treasuryEscrowBalance, sol(1), sol(0.1)),
@@ -299,7 +299,7 @@ test('it can unlock funds once all NFTs have been thawed', async (t) => {
   );
 
   // And the treasury escrow has been emptied.
-  const treasuryEscrow = getFreezeEscrow(umi, candyMachine, destination);
+  const [treasuryEscrow] = getFreezeEscrow(umi, candyMachine, destination);
   const treasuryEscrowBalance = await umi.rpc.getBalance(treasuryEscrow);
   t.true(
     isEqualToAmount(treasuryEscrowBalance, sol(0)),
@@ -457,8 +457,8 @@ test('it can have multiple freeze escrow and reuse the same ones', async (t) => 
   t.is(tokenD.state, TokenState.Initialized, 'NFT D is not frozen');
 
   // And the treasury escrow received SOLs.
-  const treasuryEscrowAB = getFreezeEscrow(umi, candyMachine, destinationAB);
-  const treasuryEscrowC = getFreezeEscrow(umi, candyMachine, destinationC);
+  const [treasuryEscrowAB] = getFreezeEscrow(umi, candyMachine, destinationAB);
+  const [treasuryEscrowC] = getFreezeEscrow(umi, candyMachine, destinationC);
   const treasuryEscrowBalanceAB = await umi.rpc.getBalance(treasuryEscrowAB);
   const treasuryEscrowBalanceC = await umi.rpc.getBalance(treasuryEscrowC);
   t.true(
@@ -699,7 +699,7 @@ test('it transfers SOL to an escrow account and locks the Programmable NFT', asy
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
 
   // And the pNFT is frozen.
-  const ata = findAssociatedTokenPda(umi, {
+  const [ata] = findAssociatedTokenPda(umi, {
     mint: mint.publicKey,
     owner: umi.identity.publicKey,
   });
@@ -707,7 +707,7 @@ test('it transfers SOL to an escrow account and locks the Programmable NFT', asy
   t.is(tokenAccount.state, TokenState.Frozen);
 
   // And the token record is locked.
-  const tokenRecord = findTokenRecordPda(umi, {
+  const [tokenRecord] = findTokenRecordPda(umi, {
     mint: mint.publicKey,
     token: ata,
   });
@@ -719,7 +719,7 @@ test('it transfers SOL to an escrow account and locks the Programmable NFT', asy
   await t.throwsAsync(promise, { message: /ThawNotEnabled/ });
 
   // And the treasury escrow received SOLs.
-  const treasuryEscrow = getFreezeEscrow(umi, candyMachine, destination);
+  const [treasuryEscrow] = getFreezeEscrow(umi, candyMachine, destination);
   const treasuryEscrowBalance = await umi.rpc.getBalance(treasuryEscrow);
   t.true(
     isEqualToAmount(treasuryEscrowBalance, sol(1), sol(0.1)),
@@ -789,12 +789,12 @@ test('it can thaw a Programmable NFT once all NFTs are minted', async (t) => {
     .sendAndConfirm(umi);
 
   // And that is it locked.
-  const tokenRecord = findTokenRecordPda(umi, {
+  const [tokenRecord] = findTokenRecordPda(umi, {
     mint: mint.publicKey,
     token: findAssociatedTokenPda(umi, {
       mint: mint.publicKey,
       owner: umi.identity.publicKey,
-    }),
+    })[0],
   });
   let tokenRecordAccount = await fetchTokenRecord(umi, tokenRecord);
   t.is(tokenRecordAccount.state, MetadataTokenState.Locked);
@@ -829,9 +829,9 @@ test('it can thaw a Programmable NFT once all NFTs are minted', async (t) => {
         owner: findFreezeEscrowPda(umi, {
           destination,
           candyMachine,
-          candyGuard: findCandyGuardPda(umi, { base: candyMachine }),
-        }),
-      })
+          candyGuard: findCandyGuardPda(umi, { base: candyMachine })[0],
+        })[0],
+      })[0]
     )
   );
 });
@@ -843,7 +843,7 @@ const getFreezeEscrow = (
 ) =>
   findFreezeEscrowPda(umi, {
     candyMachine,
-    candyGuard: findCandyGuardPda(umi, { base: candyMachine }),
+    candyGuard: findCandyGuardPda(umi, { base: candyMachine })[0],
     destination: publicKey(destination),
   });
 

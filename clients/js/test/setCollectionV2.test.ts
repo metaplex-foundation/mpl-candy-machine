@@ -72,7 +72,7 @@ test('it can update the collection of a candy machine v1', async (t) => {
       mint: collectionA.publicKey,
       collectionAuthority: findCandyMachineAuthorityPda(umi, {
         candyMachine: candyMachine.publicKey,
-      }),
+      })[0],
     }),
     newCollectionMint: collectionB.publicKey,
     newCollectionUpdateAuthority: collectionUpdateAuthorityB,

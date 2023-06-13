@@ -1,25 +1,27 @@
 import {
   Account,
-  assertAccountExists,
   Context,
-  deserializeAccount,
-  gpaBuilder,
-  mapSerializer,
+  Pda,
   PublicKey,
   RpcAccount,
   RpcGetAccountOptions,
   RpcGetAccountsOptions,
   Serializer,
+  assertAccountExists,
+  deserializeAccount,
+  gpaBuilder,
+  mapSerializer,
+  publicKey as toPublicKey,
 } from '@metaplex-foundation/umi';
 import { DefaultGuardSet, DefaultGuardSetArgs } from '../defaultGuards';
 import { findCandyGuardPda } from '../generated/accounts/candyGuard';
 import {
   CandyGuardProgram,
-  getGuardGroupSerializer,
-  getGuardSetSerializer,
   GuardRepository,
   GuardSet,
   GuardSetArgs,
+  getGuardGroupSerializer,
+  getGuardSetSerializer,
 } from '../guards';
 import { CandyGuardData, CandyGuardDataArgs } from './candyGuardData';
 
@@ -90,11 +92,14 @@ export async function fetchCandyGuard<D extends GuardSet = DefaultGuardSet>(
   context: Pick<Context, 'serializer' | 'programs' | 'rpc'> & {
     guards: GuardRepository;
   },
-  publicKey: PublicKey,
+  publicKey: PublicKey | Pda,
   options?: RpcGetAccountOptions,
   program?: CandyGuardProgram
 ): Promise<CandyGuard<D>> {
-  const maybeAccount = await context.rpc.getAccount(publicKey, options);
+  const maybeAccount = await context.rpc.getAccount(
+    toPublicKey(publicKey, false),
+    options
+  );
   assertAccountExists(maybeAccount, 'CandyGuard');
   return deserializeCandyGuard<D>(context, maybeAccount, program);
 }
@@ -103,11 +108,14 @@ export async function safeFetchCandyGuard<D extends GuardSet = DefaultGuardSet>(
   context: Pick<Context, 'serializer' | 'programs' | 'rpc'> & {
     guards: GuardRepository;
   },
-  publicKey: PublicKey,
+  publicKey: PublicKey | Pda,
   options?: RpcGetAccountOptions,
   program?: CandyGuardProgram
 ): Promise<CandyGuard<D> | null> {
-  const maybeAccount = await context.rpc.getAccount(publicKey, options);
+  const maybeAccount = await context.rpc.getAccount(
+    toPublicKey(publicKey, false),
+    options
+  );
   return maybeAccount.exists
     ? deserializeCandyGuard<D>(context, maybeAccount, program)
     : null;
@@ -117,11 +125,14 @@ export async function fetchAllCandyGuard<D extends GuardSet = DefaultGuardSet>(
   context: Pick<Context, 'serializer' | 'programs' | 'rpc'> & {
     guards: GuardRepository;
   },
-  publicKeys: PublicKey[],
+  publicKeys: (PublicKey | Pda)[],
   options?: RpcGetAccountsOptions,
   program?: CandyGuardProgram
 ): Promise<CandyGuard<D>[]> {
-  const maybeAccounts = await context.rpc.getAccounts(publicKeys, options);
+  const maybeAccounts = await context.rpc.getAccounts(
+    publicKeys.map((publicKey) => toPublicKey(publicKey, false)),
+    options
+  );
   return maybeAccounts.map((maybeAccount) => {
     assertAccountExists(maybeAccount, 'CandyGuard');
     return deserializeCandyGuard<D>(context, maybeAccount, program);
@@ -134,11 +145,14 @@ export async function safeFetchAllCandyGuard<
   context: Pick<Context, 'serializer' | 'programs' | 'rpc'> & {
     guards: GuardRepository;
   },
-  publicKeys: PublicKey[],
+  publicKeys: (PublicKey | Pda)[],
   options?: RpcGetAccountsOptions,
   program?: CandyGuardProgram
 ): Promise<CandyGuard<D>[]> {
-  const maybeAccounts = await context.rpc.getAccounts(publicKeys, options);
+  const maybeAccounts = await context.rpc.getAccounts(
+    publicKeys.map((publicKey) => toPublicKey(publicKey, false)),
+    options
+  );
   return maybeAccounts
     .filter((maybeAccount) => maybeAccount.exists)
     .map((maybeAccount) =>

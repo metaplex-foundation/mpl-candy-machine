@@ -47,12 +47,12 @@ export const freezeSolPaymentGuardManifest: GuardManifest<
   name: 'freezeSolPayment',
   serializer: getFreezeSolPaymentSerializer,
   mintParser: (context, mintContext, args) => {
-    const freezeEscrow = findFreezeEscrowPda(context, {
+    const [freezeEscrow] = findFreezeEscrowPda(context, {
       destination: args.destination,
       candyMachine: mintContext.candyMachine,
       candyGuard: mintContext.candyGuard,
     });
-    const nftAta = findAssociatedTokenPda(context, {
+    const [nftAta] = findAssociatedTokenPda(context, {
       mint: mintContext.mint,
       owner: mintContext.minter.publicKey,
     });
@@ -208,7 +208,7 @@ export type FreezeSolPaymentRouteArgsUnlockFunds = Omit<
 const initializeRouteInstruction: RouteParser<
   FreezeSolPaymentRouteArgsInitialize
 > = (context, routeContext, args) => {
-  const freezeEscrow = findFreezeEscrowPda(context, {
+  const [freezeEscrow] = findFreezeEscrowPda(context, {
     destination: args.destination,
     candyMachine: routeContext.candyMachine,
     candyGuard: routeContext.candyGuard,
@@ -233,26 +233,26 @@ const thawRouteInstruction: RouteParser<FreezeSolPaymentRouteArgsThaw> = (
   routeContext,
   args
 ) => {
-  const freezeEscrow = findFreezeEscrowPda(context, {
+  const [freezeEscrow] = findFreezeEscrowPda(context, {
     destination: args.destination,
     candyMachine: routeContext.candyMachine,
     candyGuard: routeContext.candyGuard,
   });
-  const nftFreezeAta = findAssociatedTokenPda(context, {
+  const [nftFreezeAta] = findAssociatedTokenPda(context, {
     mint: args.nftMint,
     owner: freezeEscrow,
   });
-  const nftAta = findAssociatedTokenPda(context, {
+  const [nftAta] = findAssociatedTokenPda(context, {
     mint: args.nftMint,
     owner: args.nftOwner,
   });
-  const nftMetadata = findMetadataPda(context, { mint: args.nftMint });
-  const nftEdition = findMasterEditionPda(context, { mint: args.nftMint });
-  const nftAtaTokenRecord = findTokenRecordPda(context, {
+  const [nftMetadata] = findMetadataPda(context, { mint: args.nftMint });
+  const [nftEdition] = findMasterEditionPda(context, { mint: args.nftMint });
+  const [nftAtaTokenRecord] = findTokenRecordPda(context, {
     mint: args.nftMint,
     token: nftAta,
   });
-  const nftFreezeAtaTokenRecord = findTokenRecordPda(context, {
+  const [nftFreezeAtaTokenRecord] = findTokenRecordPda(context, {
     mint: args.nftMint,
     token: nftFreezeAta,
   });
@@ -301,7 +301,7 @@ const thawRouteInstruction: RouteParser<FreezeSolPaymentRouteArgsThaw> = (
 const unlockFundsRouteInstruction: RouteParser<
   FreezeSolPaymentRouteArgsUnlockFunds
 > = (context, routeContext, args) => {
-  const freezeEscrow = findFreezeEscrowPda(context, {
+  const [freezeEscrow] = findFreezeEscrowPda(context, {
     destination: args.destination,
     candyMachine: routeContext.candyMachine,
     candyGuard: routeContext.candyGuard,

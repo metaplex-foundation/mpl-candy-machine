@@ -32,10 +32,12 @@ export const nftBurnGuardManifest: GuardManifest<
       findAssociatedTokenPda(context, {
         mint: args.mint,
         owner: mintContext.minter.publicKey,
-      });
-    const nftMetadata = findMetadataPda(context, { mint: args.mint });
-    const nftMasterEdition = findMasterEditionPda(context, { mint: args.mint });
-    const collectionMetadata = findMetadataPda(context, {
+      })[0];
+    const [nftMetadata] = findMetadataPda(context, { mint: args.mint });
+    const [nftMasterEdition] = findMasterEditionPda(context, {
+      mint: args.mint,
+    });
+    const [collectionMetadata] = findMetadataPda(context, {
       mint: args.requiredCollection,
     });
 
@@ -48,7 +50,7 @@ export const nftBurnGuardManifest: GuardManifest<
     ];
 
     if (isProgrammable(args.tokenStandard)) {
-      const nftTokenRecord = findTokenRecordPda(context, {
+      const [nftTokenRecord] = findTokenRecordPda(context, {
         mint: args.mint,
         token: nftTokenAccount,
       });

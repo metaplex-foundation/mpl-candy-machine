@@ -10,6 +10,7 @@ import {
   AccountMeta,
   Context,
   Option,
+  Pda,
   PublicKey,
   Serializer,
   Signer,
@@ -19,13 +20,13 @@ import {
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import { findCandyGuardPda } from '../../hooked';
-import { addObjectProperty, isWritable } from '../shared';
+import { addAccountMeta, addObjectProperty } from '../shared';
 import { GuardType, GuardTypeArgs, getGuardTypeSerializer } from '../types';
 
 // Accounts.
 export type RouteInstructionAccounts = {
-  candyGuard?: PublicKey;
-  candyMachine: PublicKey;
+  candyGuard?: PublicKey | Pda;
+  candyMachine: PublicKey | Pda;
   payer?: Signer;
 };
 
@@ -80,48 +81,40 @@ export function route(
   const keys: AccountMeta[] = [];
 
   // Program ID.
-  const programId = {
-    ...context.programs.getPublicKey(
-      'mplCandyGuard',
-      'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
-    ),
-    isWritable: false,
-  };
+  const programId = context.programs.getPublicKey(
+    'mplCandyGuard',
+    'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
+  );
 
   // Resolved inputs.
-  const resolvingAccounts = {};
+  const resolvedAccounts = {
+    candyMachine: [input.candyMachine, true] as const,
+  };
   const resolvingArgs = {};
   addObjectProperty(
-    resolvingAccounts,
+    resolvedAccounts,
     'candyGuard',
-    input.candyGuard ??
-      findCandyGuardPda(context, { base: publicKey(input.candyMachine) })
+    input.candyGuard
+      ? ([input.candyGuard, false] as const)
+      : ([
+          findCandyGuardPda(context, {
+            base: publicKey(input.candyMachine, false),
+          }),
+          false,
+        ] as const)
   );
-  addObjectProperty(resolvingAccounts, 'payer', input.payer ?? context.payer);
-  const resolvedAccounts = { ...input, ...resolvingAccounts };
+  addObjectProperty(
+    resolvedAccounts,
+    'payer',
+    input.payer
+      ? ([input.payer, true] as const)
+      : ([context.payer, true] as const)
+  );
   const resolvedArgs = { ...input, ...resolvingArgs };
 
-  // Candy Guard.
-  keys.push({
-    pubkey: resolvedAccounts.candyGuard,
-    isSigner: false,
-    isWritable: isWritable(resolvedAccounts.candyGuard, false),
-  });
-
-  // Candy Machine.
-  keys.push({
-    pubkey: resolvedAccounts.candyMachine,
-    isSigner: false,
-    isWritable: isWritable(resolvedAccounts.candyMachine, true),
-  });
-
-  // Payer.
-  signers.push(resolvedAccounts.payer);
-  keys.push({
-    pubkey: resolvedAccounts.payer.publicKey,
-    isSigner: true,
-    isWritable: isWritable(resolvedAccounts.payer, true),
-  });
+  addAccountMeta(keys, signers, resolvedAccounts.candyGuard, false);
+  addAccountMeta(keys, signers, resolvedAccounts.candyMachine, false);
+  addAccountMeta(keys, signers, resolvedAccounts.payer, false);
 
   // Data.
   const data =

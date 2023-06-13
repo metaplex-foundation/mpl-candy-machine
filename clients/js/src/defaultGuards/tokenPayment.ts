@@ -23,7 +23,7 @@ export const tokenPaymentGuardManifest: GuardManifest<
   name: 'tokenPayment',
   serializer: getTokenPaymentSerializer,
   mintParser: (context, mintContext, args) => {
-    const sourceAta = findAssociatedTokenPda(context, {
+    const [sourceAta] = findAssociatedTokenPda(context, {
       mint: args.mint,
       owner: mintContext.minter.publicKey,
     });

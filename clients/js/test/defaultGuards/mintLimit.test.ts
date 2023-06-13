@@ -58,7 +58,7 @@ test('it allows minting when the mint limit is not reached', async (t) => {
     id: 1,
     user: umi.identity.publicKey,
     candyMachine,
-    candyGuard: findCandyGuardPda(umi, { base: candyMachine }),
+    candyGuard: findCandyGuardPda(umi, { base: candyMachine })[0],
   });
   const counterAccount = await fetchMintCounter(umi, counterPda);
   t.is(counterAccount.count, 1);
@@ -104,7 +104,7 @@ test('it allows minting even when the payer is different from the minter', async
     id: 1,
     user: minter.publicKey,
     candyMachine,
-    candyGuard: findCandyGuardPda(umi, { base: candyMachine }),
+    candyGuard: findCandyGuardPda(umi, { base: candyMachine })[0],
   });
   const counterAccount = await fetchMintCounter(umi, counterPda);
   t.is(counterAccount.count, 1);

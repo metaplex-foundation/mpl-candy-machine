@@ -7,6 +7,7 @@ import {
   mergeBytes,
   none,
   Option,
+  publicKey,
   TransactionBuilder,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
@@ -47,14 +48,16 @@ export function mint<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
 ): TransactionBuilder {
   const { mintArgs = {}, group = none(), ...rest } = input;
   const program = context.programs.get<CandyGuardProgram>('mplCandyGuard');
+  const candyMachine = publicKey(input.candyMachine, false);
   const mintContext: MintContext = {
     minter: input.payer ?? context.payer,
     payer: input.payer ?? context.payer,
-    mint: input.nftMint,
-    candyMachine: input.candyMachine,
-    candyGuard:
-      input.candyGuard ??
-      findCandyGuardPda(context, { base: input.candyMachine }),
+    mint: publicKey(input.nftMint, false),
+    candyMachine,
+    candyGuard: publicKey(
+      input.candyGuard ?? findCandyGuardPda(context, { base: candyMachine }),
+      false
+    ),
   };
   const { data, remainingAccounts } = parseMintArgs<
     MA extends undefined ? DefaultGuardSetMintArgs : MA

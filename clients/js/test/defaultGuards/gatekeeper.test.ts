@@ -473,7 +473,7 @@ const createGatekeeperNetwork = async (
   const gatekeeperNetwork = generateSigner(umi);
   const s = umi.serializer;
   const gatewayProgram = umi.programs.getPublicKey('civicGateway');
-  const gatekeeperAccount = umi.eddsa.findPda(gatewayProgram, [
+  const [gatekeeperAccount] = umi.eddsa.findPda(gatewayProgram, [
     s.publicKey().serialize(gatekeeperAuthority),
     s.publicKey().serialize(gatekeeperNetwork),
     s.string({ size: 'variable' }).serialize('gatekeeper'),
@@ -525,12 +525,12 @@ const issueGatewayToken = async (
   owner = owner ?? payer.publicKey;
   const s = umi.serializer;
   const gatewayProgram = umi.programs.getPublicKey('civicGateway');
-  const gatekeeperAccount = umi.eddsa.findPda(gatewayProgram, [
+  const [gatekeeperAccount] = umi.eddsa.findPda(gatewayProgram, [
     s.publicKey().serialize(gatekeeperAuthority),
     s.publicKey().serialize(gatekeeperNetwork),
     s.string({ size: 'variable' }).serialize('gatekeeper'),
   ]);
-  const gatewayTokenAccount = umi.eddsa.findPda(gatewayProgram, [
+  const [gatewayTokenAccount] = umi.eddsa.findPda(gatewayProgram, [
     s.publicKey().serialize(owner),
     s.string({ size: 'variable' }).serialize('gateway'),
     s.array(s.u8(), { size: 8 }).serialize(seeds),

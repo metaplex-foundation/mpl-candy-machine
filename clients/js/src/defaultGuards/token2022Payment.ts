@@ -33,9 +33,9 @@ export const token2022PaymentGuardManifest: GuardManifest<
       context.programs.get('splAssociatedToken').publicKey;
     const sourceAta = context.eddsa.findPda(associatedTokenProgramId, [
       s.publicKey().serialize(mintContext.minter.publicKey),
-      SPL_TOKEN_2022_PROGRAM_ID.bytes,
+      s.publicKey().serialize(SPL_TOKEN_2022_PROGRAM_ID),
       s.publicKey().serialize(args.mint),
-    ]);
+    ])[0];
 
     return {
       data: new Uint8Array(),

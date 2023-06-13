@@ -72,7 +72,7 @@ test('it allows minting when the allocation limit is not reached', async (t) => 
   const trackerPda = findAllocationTrackerPda(umi, {
     id: 1,
     candyMachine,
-    candyGuard: findCandyGuardPda(umi, { base: candyMachine }),
+    candyGuard: findCandyGuardPda(umi, { base: candyMachine })[0],
   });
   const trackerPdaAccount = await fetchAllocationTracker(umi, trackerPda);
   t.is(trackerPdaAccount.count, 1);

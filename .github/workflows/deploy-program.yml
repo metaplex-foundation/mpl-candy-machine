@@ -171,6 +171,7 @@ jobs:
           cargo login ${{ secrets.CRATES_TOKEN }}
           cargo release ${{ inputs.bump }} --no-confirm --no-push --no-tag --execute
 
+          git reset --soft HEAD~1
           git stash pop
           
       - name: Commit and tag new version

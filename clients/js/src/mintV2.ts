@@ -64,14 +64,16 @@ export function mintV2<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
 
   // Parsing mint data.
   const program = context.programs.get<CandyGuardProgram>('mplCandyGuard');
+  const candyMachine = publicKey(input.candyMachine, false);
   const mintContext: MintContext = {
     minter: input.minter ?? context.identity,
     payer: input.payer ?? context.payer,
-    mint: publicKey(input.nftMint),
-    candyMachine: input.candyMachine,
-    candyGuard:
-      input.candyGuard ??
-      findCandyGuardPda(context, { base: input.candyMachine }),
+    mint: publicKey(input.nftMint, false),
+    candyMachine,
+    candyGuard: publicKey(
+      input.candyGuard ?? findCandyGuardPda(context, { base: candyMachine }),
+      false
+    ),
   };
   const { data, remainingAccounts } = parseMintArgs<
     MA extends undefined ? DefaultGuardSetMintArgs : MA
@@ -82,13 +84,15 @@ export function mintV2<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
   const tokenStandard = input.tokenStandard ?? TokenStandard.NonFungible;
   const defaultTokenRecord = isProgrammable(tokenStandard)
     ? findTokenRecordPda(context, {
-        mint: publicKey(input.nftMint),
-        token:
+        mint: publicKey(input.nftMint, false),
+        token: publicKey(
           input.token ??
-          findAssociatedTokenPda(context, {
-            mint: publicKey(input.nftMint),
-            owner: publicKey(input.minter ?? context.identity),
-          }),
+            findAssociatedTokenPda(context, {
+              mint: publicKey(input.nftMint),
+              owner: publicKey(input.minter ?? context.identity),
+            }),
+          false
+        ),
       })
     : undefined;
 

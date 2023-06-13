@@ -32,7 +32,7 @@ export const mintLimitGuardManifest: GuardManifest<
           user: mintContext.minter.publicKey,
           candyMachine: mintContext.candyMachine,
           candyGuard: mintContext.candyGuard,
-        }),
+        })[0],
         isWritable: true,
       },
     ],

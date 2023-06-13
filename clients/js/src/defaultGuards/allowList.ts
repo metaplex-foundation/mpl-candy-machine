@@ -58,7 +58,7 @@ export const allowListGuardManifest: GuardManifest<
           user: mintContext.minter.publicKey,
           candyMachine: mintContext.candyMachine,
           candyGuard: mintContext.candyGuard,
-        }),
+        })[0],
       },
     ],
   }),
@@ -74,7 +74,7 @@ export const allowListGuardManifest: GuardManifest<
           user: publicKey(args.minter ?? routeContext.payer),
           candyMachine: routeContext.candyMachine,
           candyGuard: routeContext.candyGuard,
-        }),
+        })[0],
       },
       { isWritable: false, publicKey: getSplSystemProgramId(context) },
       ...(args.minter !== undefined

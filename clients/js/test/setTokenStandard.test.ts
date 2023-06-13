@@ -47,7 +47,7 @@ test('it can change token standard from NFT to pNFT', async (t) => {
           mint: collection.publicKey,
           collectionAuthority: findCandyMachineAuthorityPda(umi, {
             candyMachine: candyMachine.publicKey,
-          }),
+          })[0],
         }),
         tokenStandard: TokenStandard.ProgrammableNonFungible,
       })
@@ -142,7 +142,7 @@ test('it can change token standard from NFT to pNFT and then back to NFT', async
           mint: collection.publicKey,
           collectionAuthority: findCandyMachineAuthorityPda(umi, {
             candyMachine: candyMachine.publicKey,
-          }),
+          })[0],
         }),
         tokenStandard: TokenStandard.ProgrammableNonFungible,
       })

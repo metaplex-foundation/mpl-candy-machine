@@ -6,7 +6,7 @@ import { createCandyGuard, createUmi } from './_setup';
 test('it can delete a candy guard', async (t) => {
   // Given an existing candy guard.
   const umi = await createUmi();
-  const candyGuard = await createCandyGuard(umi);
+  const [candyGuard] = await createCandyGuard(umi);
 
   // When we delete it.
   await transactionBuilder()

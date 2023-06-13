@@ -9,6 +9,7 @@
 import {
   AccountMeta,
   Context,
+  Pda,
   PublicKey,
   Serializer,
   Signer,
@@ -16,11 +17,11 @@ import {
   mapSerializer,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
-import { addObjectProperty, isWritable } from '../shared';
+import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
 export type DeleteCandyGuardInstructionAccounts = {
-  candyGuard: PublicKey;
+  candyGuard: PublicKey | Pda;
   authority?: Signer;
 };
 
@@ -64,37 +65,25 @@ export function deleteCandyGuard(
   const keys: AccountMeta[] = [];
 
   // Program ID.
-  const programId = {
-    ...context.programs.getPublicKey(
-      'mplCandyGuard',
-      'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
-    ),
-    isWritable: false,
-  };
+  const programId = context.programs.getPublicKey(
+    'mplCandyGuard',
+    'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
+  );
 
   // Resolved inputs.
-  const resolvingAccounts = {};
+  const resolvedAccounts = {
+    candyGuard: [input.candyGuard, true] as const,
+  };
   addObjectProperty(
-    resolvingAccounts,
+    resolvedAccounts,
     'authority',
-    input.authority ?? context.identity
+    input.authority
+      ? ([input.authority, true] as const)
+      : ([context.identity, true] as const)
   );
-  const resolvedAccounts = { ...input, ...resolvingAccounts };
 
-  // Candy Guard.
-  keys.push({
-    pubkey: resolvedAccounts.candyGuard,
-    isSigner: false,
-    isWritable: isWritable(resolvedAccounts.candyGuard, true),
-  });
-
-  // Authority.
-  signers.push(resolvedAccounts.authority);
-  keys.push({
-    pubkey: resolvedAccounts.authority.publicKey,
-    isSigner: true,
-    isWritable: isWritable(resolvedAccounts.authority, true),
-  });
+  addAccountMeta(keys, signers, resolvedAccounts.candyGuard, false);
+  addAccountMeta(keys, signers, resolvedAccounts.authority, false);
 
   // Data.
   const data = getDeleteCandyGuardInstructionDataSerializer(context).serialize(

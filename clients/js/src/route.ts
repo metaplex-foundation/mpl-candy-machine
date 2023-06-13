@@ -2,6 +2,7 @@ import {
   mergeBytes,
   none,
   Option,
+  publicKey,
   TransactionBuilder,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
@@ -56,12 +57,14 @@ export function route<
 ): TransactionBuilder {
   const { routeArgs = {}, group = none(), ...rest } = input;
   const program = context.programs.get<CandyGuardProgram>('mplCandyGuard');
+  const candyMachine = publicKey(input.candyMachine, false);
   const routeContext: RouteContext = {
     payer: input.payer ?? context.payer,
-    candyMachine: input.candyMachine,
-    candyGuard:
-      input.candyGuard ??
-      findCandyGuardPda(context, { base: input.candyMachine }),
+    candyMachine,
+    candyGuard: publicKey(
+      input.candyGuard ?? findCandyGuardPda(context, { base: candyMachine }),
+      false
+    ),
   };
   const { data, remainingAccounts, guardIndex } = parseRouteArgs<
     G,

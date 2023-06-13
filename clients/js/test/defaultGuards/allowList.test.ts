@@ -400,7 +400,7 @@ test('it creates a proof for a minter even when the minter is not a signer', asy
     .sendAndConfirm(umi);
 
   // Then a proof has been created for the minter.
-  const candyGuard = findCandyGuardPda(umi, { base: candyMachine });
+  const [candyGuard] = findCandyGuardPda(umi, { base: candyMachine });
   t.true(
     await umi.rpc.accountExists(
       findAllowListProofPda(umi, {
@@ -408,7 +408,7 @@ test('it creates a proof for a minter even when the minter is not a signer', asy
         candyMachine,
         merkleRoot,
         user: minter,
-      })
+      })[0]
     )
   );
 
@@ -420,7 +420,7 @@ test('it creates a proof for a minter even when the minter is not a signer', asy
         candyMachine,
         merkleRoot,
         user: publicKey(umi.payer),
-      })
+      })[0]
     )
   );
 });
@@ -464,7 +464,7 @@ test('it creates a proof for the payer when the minter is not present', async (t
     .sendAndConfirm(umi);
 
   // Then a proof has been created for the payer.
-  const candyGuard = findCandyGuardPda(umi, { base: candyMachine });
+  const [candyGuard] = findCandyGuardPda(umi, { base: candyMachine });
   t.true(
     await umi.rpc.accountExists(
       findAllowListProofPda(umi, {
@@ -472,7 +472,7 @@ test('it creates a proof for the payer when the minter is not present', async (t
         candyMachine,
         merkleRoot,
         user: publicKey(umi.payer),
-      })
+      })[0]
     )
   );
 });

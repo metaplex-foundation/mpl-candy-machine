@@ -41,9 +41,9 @@ export const nftPaymentGuardManifest: GuardManifest<
       findAssociatedTokenPda(context, {
         mint: args.mint,
         owner: mintContext.minter.publicKey,
-      });
-    const nftMetadata = findMetadataPda(context, { mint: args.mint });
-    const destinationAta = findAssociatedTokenPda(context, {
+      })[0];
+    const [nftMetadata] = findMetadataPda(context, { mint: args.mint });
+    const [destinationAta] = findAssociatedTokenPda(context, {
       mint: args.mint,
       owner: args.destination,
     });
@@ -61,14 +61,14 @@ export const nftPaymentGuardManifest: GuardManifest<
     ];
 
     if (isProgrammable(args.tokenStandard)) {
-      const nftMasterEdition = findMasterEditionPda(context, {
+      const [nftMasterEdition] = findMasterEditionPda(context, {
         mint: args.mint,
       });
-      const ownerTokenRecord = findTokenRecordPda(context, {
+      const [ownerTokenRecord] = findTokenRecordPda(context, {
         mint: args.mint,
         token: nftTokenAccount,
       });
-      const destinationTokenRecord = findTokenRecordPda(context, {
+      const [destinationTokenRecord] = findTokenRecordPda(context, {
         mint: args.mint,
         token: destinationAta,
       });

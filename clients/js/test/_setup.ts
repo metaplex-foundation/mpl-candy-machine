@@ -1,50 +1,49 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import {
+  DigitalAssetWithToken,
+  TokenStandard,
+  createNft as baseCreateNft,
+  createProgrammableNft as baseCreateProgrammableNft,
+  fetchDigitalAssetWithAssociatedToken,
+  findMasterEditionPda,
+  findMetadataPda,
+  verifyCollectionV1,
+} from '@metaplex-foundation/mpl-token-metadata';
+import {
   createAssociatedToken,
   createMint,
   findAssociatedTokenPda,
   mintTokensTo,
 } from '@metaplex-foundation/mpl-toolbox';
 import {
-  createNft as baseCreateNft,
-  createProgrammableNft as baseCreateProgrammableNft,
-  DigitalAssetWithToken,
-  fetchDigitalAssetWithAssociatedToken,
-  findMasterEditionPda,
-  findMetadataPda,
-  TokenStandard,
-  verifyCollectionV1,
-} from '@metaplex-foundation/mpl-token-metadata';
-import {
   Context,
   DateTime,
-  generateSigner,
-  now,
-  Pda,
-  percentAmount,
-  publicKey,
   PublicKey,
   PublicKeyInput,
   Signer,
-  some,
-  transactionBuilder,
   TransactionSignature,
   Umi,
+  generateSigner,
+  now,
+  percentAmount,
+  publicKey,
+  some,
+  transactionBuilder,
 } from '@metaplex-foundation/umi';
 import { createUmi as basecreateUmi } from '@metaplex-foundation/umi-bundle-tests';
 import { Assertions } from 'ava';
 import {
-  addConfigLines,
   CandyGuardDataArgs,
   ConfigLine,
-  createCandyGuard as baseCreateCandyGuard,
   CreateCandyGuardInstructionAccounts,
   CreateCandyGuardInstructionDataArgs,
+  DefaultGuardSetArgs,
+  GuardSetArgs,
+  addConfigLines,
+  createCandyGuard as baseCreateCandyGuard,
   createCandyMachine as baseCreateCandyMachine,
   createCandyMachineV2 as baseCreateCandyMachineV2,
-  DefaultGuardSetArgs,
   findCandyGuardPda,
-  GuardSetArgs,
   mplCandyMachine,
   wrap,
 } from '../src';
@@ -108,7 +107,7 @@ export const createVerifiedNft = async (
       verifyCollectionV1(umi, {
         authority: collectionAuthority,
         collectionMint,
-        metadata: findMetadataPda(umi, { mint: effectiveMint }),
+        metadata: findMetadataPda(umi, { mint: effectiveMint })[0],
       })
     )
     .sendAndConfirm(umi);
@@ -135,7 +134,7 @@ export const createVerifiedProgrammableNft = async (
       verifyCollectionV1(umi, {
         authority: collectionAuthority,
         collectionMint,
-        metadata: findMetadataPda(umi, { mint: effectiveMint }),
+        metadata: findMetadataPda(umi, { mint: effectiveMint })[0],
       })
     )
     .sendAndConfirm(umi);
@@ -149,8 +148,8 @@ export const createMintWithHolders = async (
     mintAuthority?: Signer;
     holders: { owner: PublicKeyInput; amount: number | bigint }[];
   }
-): Promise<[Signer, ...Pda[]]> => {
-  const atas = [] as Pda[];
+): Promise<[Signer, ...PublicKey[]]> => {
+  const atas = [] as PublicKey[];
   const mint = input.mint ?? generateSigner(umi);
   const mintAuthority = input.mintAuthority ?? umi.identity;
   let builder = transactionBuilder().add(
@@ -162,7 +161,10 @@ export const createMintWithHolders = async (
   );
   input.holders.forEach((holder) => {
     const owner = publicKey(holder.owner);
-    const token = findAssociatedTokenPda(umi, { mint: mint.publicKey, owner });
+    const [token] = findAssociatedTokenPda(umi, {
+      mint: mint.publicKey,
+      owner,
+    });
     atas.push(token);
     builder = builder.add(
       createAssociatedToken(umi, { mint: mint.publicKey, owner })
@@ -383,7 +385,7 @@ export const assertBotTax = async (
   const logs = transaction!.meta.logs.join('');
   t.regex(logs, /Candy Guard Botting is taxed/);
   if (extraRegex !== undefined) t.regex(logs, extraRegex);
-  const metadata = findMetadataPda(umi, { mint: publicKey(mint) });
+  const [metadata] = findMetadataPda(umi, { mint: publicKey(mint) });
   t.false(await umi.rpc.accountExists(metadata));
 };
 
@@ -394,12 +396,12 @@ export const assertBurnedNft = async (
   owner?: Signer | PublicKey
 ) => {
   owner = owner ?? umi.identity;
-  const tokenAccount = findAssociatedTokenPda(umi, {
+  const [tokenAccount] = findAssociatedTokenPda(umi, {
     mint: publicKey(mint),
     owner: publicKey(owner),
   });
-  const metadataAccount = findMetadataPda(umi, { mint: publicKey(mint) });
-  const editionAccount = findMasterEditionPda(umi, { mint: publicKey(mint) });
+  const [metadataAccount] = findMetadataPda(umi, { mint: publicKey(mint) });
+  const [editionAccount] = findMasterEditionPda(umi, { mint: publicKey(mint) });
   t.false(await umi.rpc.accountExists(tokenAccount));
   t.false(await umi.rpc.accountExists(metadataAccount));
   t.false(await umi.rpc.accountExists(editionAccount));

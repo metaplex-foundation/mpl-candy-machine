@@ -46,12 +46,12 @@ export const gatekeeperGuardManifest: GuardManifest<
         s.string({ size: 'variable' }).serialize('gateway'),
         new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0]),
         s.publicKey().serialize(args.gatekeeperNetwork),
-      ]);
+      ])[0];
     const remainingAccounts: GuardRemainingAccount[] = [
       { publicKey: tokenAccount, isWritable: true },
     ];
     if (args.expireOnUse) {
-      const expireAccount = context.eddsa.findPda(gatewayProgramId, [
+      const [expireAccount] = context.eddsa.findPda(gatewayProgramId, [
         s.publicKey().serialize(args.gatekeeperNetwork),
         s.string({ size: 'variable' }).serialize('expire'),
       ]);

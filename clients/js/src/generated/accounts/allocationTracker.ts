@@ -18,6 +18,7 @@ import {
   assertAccountExists,
   deserializeAccount,
   gpaBuilder,
+  publicKey as toPublicKey,
 } from '@metaplex-foundation/umi';
 
 /** PDA to track the number of mints. */
@@ -51,20 +52,26 @@ export function deserializeAllocationTracker(
 
 export async function fetchAllocationTracker(
   context: Pick<Context, 'rpc' | 'serializer'>,
-  publicKey: PublicKey,
+  publicKey: PublicKey | Pda,
   options?: RpcGetAccountOptions
 ): Promise<AllocationTracker> {
-  const maybeAccount = await context.rpc.getAccount(publicKey, options);
+  const maybeAccount = await context.rpc.getAccount(
+    toPublicKey(publicKey, false),
+    options
+  );
   assertAccountExists(maybeAccount, 'AllocationTracker');
   return deserializeAllocationTracker(context, maybeAccount);
 }
 
 export async function safeFetchAllocationTracker(
   context: Pick<Context, 'rpc' | 'serializer'>,
-  publicKey: PublicKey,
+  publicKey: PublicKey | Pda,
   options?: RpcGetAccountOptions
 ): Promise<AllocationTracker | null> {
-  const maybeAccount = await context.rpc.getAccount(publicKey, options);
+  const maybeAccount = await context.rpc.getAccount(
+    toPublicKey(publicKey, false),
+    options
+  );
   return maybeAccount.exists
     ? deserializeAllocationTracker(context, maybeAccount)
     : null;
@@ -72,10 +79,13 @@ export async function safeFetchAllocationTracker(
 
 export async function fetchAllAllocationTracker(
   context: Pick<Context, 'rpc' | 'serializer'>,
-  publicKeys: PublicKey[],
+  publicKeys: Array<PublicKey | Pda>,
   options?: RpcGetAccountsOptions
 ): Promise<AllocationTracker[]> {
-  const maybeAccounts = await context.rpc.getAccounts(publicKeys, options);
+  const maybeAccounts = await context.rpc.getAccounts(
+    publicKeys.map((key) => toPublicKey(key, false)),
+    options
+  );
   return maybeAccounts.map((maybeAccount) => {
     assertAccountExists(maybeAccount, 'AllocationTracker');
     return deserializeAllocationTracker(context, maybeAccount);
@@ -84,10 +94,13 @@ export async function fetchAllAllocationTracker(
 
 export async function safeFetchAllAllocationTracker(
   context: Pick<Context, 'rpc' | 'serializer'>,
-  publicKeys: PublicKey[],
+  publicKeys: Array<PublicKey | Pda>,
   options?: RpcGetAccountsOptions
 ): Promise<AllocationTracker[]> {
-  const maybeAccounts = await context.rpc.getAccounts(publicKeys, options);
+  const maybeAccounts = await context.rpc.getAccounts(
+    publicKeys.map((key) => toPublicKey(key, false)),
+    options
+  );
   return maybeAccounts
     .filter((maybeAccount) => maybeAccount.exists)
     .map((maybeAccount) =>

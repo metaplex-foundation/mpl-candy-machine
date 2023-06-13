@@ -1,18 +1,18 @@
-import { createLut, getSysvar } from '@metaplex-foundation/mpl-toolbox';
 import {
+  MetadataDelegateRole,
   findCollectionAuthorityRecordPda,
   findMasterEditionPda,
   findMetadataDelegateRecordPda,
   findMetadataPda,
-  MetadataDelegateRole,
 } from '@metaplex-foundation/mpl-token-metadata';
+import { createLut, getSysvar } from '@metaplex-foundation/mpl-toolbox';
 import {
   AddressLookupTableInput,
   Context,
   PublicKey,
   Signer,
   TransactionBuilder,
-  uniquePublicKeys,
+  uniqueBy,
 } from '@metaplex-foundation/umi';
 import { AccountVersion, fetchCandyMachine } from './generated';
 import { findCandyMachineAuthorityPda } from './hooked';
@@ -51,32 +51,35 @@ export const getLutAddressesForCandyMachine = async (
   const candyMachineAccount = await fetchCandyMachine(context, candyMachine);
   const { mintAuthority, collectionMint } = candyMachineAccount;
   collectionUpdateAuthority ??= context.identity.publicKey;
-  const collectionAuthorityPda = findCandyMachineAuthorityPda(context, {
+  const [collectionAuthorityPda] = findCandyMachineAuthorityPda(context, {
     candyMachine,
   });
-  const delegateRecordV1 = findCollectionAuthorityRecordPda(context, {
+  const [delegateRecordV1] = findCollectionAuthorityRecordPda(context, {
     mint: collectionMint,
     collectionAuthority: collectionAuthorityPda,
   });
-  const delegateRecordV2 = findMetadataDelegateRecordPda(context, {
+  const [delegateRecordV2] = findMetadataDelegateRecordPda(context, {
     mint: collectionMint,
     delegateRole: MetadataDelegateRole.Collection,
     updateAuthority: collectionUpdateAuthority,
     delegate: collectionAuthorityPda,
   });
 
-  return uniquePublicKeys([
-    candyMachine,
-    mintAuthority,
-    collectionMint,
-    findMetadataPda(context, { mint: collectionMint }),
-    findMasterEditionPda(context, { mint: collectionMint }),
-    collectionUpdateAuthority ?? context.identity.publicKey,
-    findCandyMachineAuthorityPda(context, { candyMachine }),
-    candyMachineAccount.version === AccountVersion.V1
-      ? delegateRecordV1
-      : delegateRecordV2,
-    getSysvar('instructions'),
-    getSysvar('slotHashes'),
-  ]);
+  return uniqueBy(
+    [
+      candyMachine,
+      mintAuthority,
+      collectionMint,
+      findMetadataPda(context, { mint: collectionMint })[0],
+      findMasterEditionPda(context, { mint: collectionMint })[0],
+      collectionUpdateAuthority,
+      findCandyMachineAuthorityPda(context, { candyMachine })[0],
+      candyMachineAccount.version === AccountVersion.V1
+        ? delegateRecordV1
+        : delegateRecordV2,
+      getSysvar('instructions'),
+      getSysvar('slotHashes'),
+    ],
+    (a, b) => a === b
+  );
 };

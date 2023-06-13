@@ -222,7 +222,7 @@ test('it can mint from a candy guard attached to a candy machine v1', async (t) 
           mint: collectionMint,
           collectionAuthority: findCandyMachineAuthorityPda(umi, {
             candyMachine,
-          }),
+          })[0],
         }),
       })
     )

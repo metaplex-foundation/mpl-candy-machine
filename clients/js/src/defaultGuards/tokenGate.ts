@@ -19,7 +19,7 @@ export const tokenGateGuardManifest: GuardManifest<
   name: 'tokenGate',
   serializer: getTokenGateSerializer,
   mintParser: (context, mintContext, args) => {
-    const tokenAccount = findAssociatedTokenPda(context, {
+    const [tokenAccount] = findAssociatedTokenPda(context, {
       mint: args.mint,
       owner: mintContext.minter.publicKey,
     });

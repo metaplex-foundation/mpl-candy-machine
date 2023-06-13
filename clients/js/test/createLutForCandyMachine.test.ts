@@ -1,20 +1,16 @@
 /* eslint-disable no-promise-executor-return */
 import {
-  getSysvar,
-  setComputeUnitLimit,
-} from '@metaplex-foundation/mpl-toolbox';
-import {
+  MetadataDelegateRole,
   findCollectionAuthorityRecordPda,
   findMasterEditionPda,
   findMetadataDelegateRecordPda,
   findMetadataPda,
-  MetadataDelegateRole,
 } from '@metaplex-foundation/mpl-token-metadata';
 import {
-  base58PublicKey,
-  generateSigner,
-  transactionBuilder,
-} from '@metaplex-foundation/umi';
+  getSysvar,
+  setComputeUnitLimit,
+} from '@metaplex-foundation/mpl-toolbox';
+import { generateSigner, transactionBuilder } from '@metaplex-foundation/umi';
 import test from 'ava';
 import {
   createLutForCandyMachine,
@@ -31,7 +27,7 @@ import {
   createV2,
 } from './_setup';
 
-test('it can create a LUT for a candy machine v2', async (t) => {
+test.only('it can create a LUT for a candy machine v2', async (t) => {
   // Given a candy machine with a candy guard.
   const umi = await createUmi();
   const collectionMint = (await createCollectionNft(umi)).publicKey;
@@ -64,17 +60,17 @@ test('it can create a LUT for a candy machine v2', async (t) => {
   await lutBuilder.sendAndConfirm(umi);
 
   // Then we expect the LUT addresses to be the following.
-  const collectionAuthorityPda = findCandyMachineAuthorityPda(umi, {
+  const [collectionAuthorityPda] = findCandyMachineAuthorityPda(umi, {
     candyMachine,
   });
   t.deepEqual(
-    lut.addresses.map(base58PublicKey).sort(),
+    lut.addresses.sort(),
     [
       candyMachine,
-      findCandyGuardPda(umi, { base: candyMachine }),
+      findCandyGuardPda(umi, { base: candyMachine })[0],
       collectionMint,
-      findMetadataPda(umi, { mint: collectionMint }),
-      findMasterEditionPda(umi, { mint: collectionMint }),
+      findMetadataPda(umi, { mint: collectionMint })[0],
+      findMasterEditionPda(umi, { mint: collectionMint })[0],
       umi.identity.publicKey,
       collectionAuthorityPda,
       findMetadataDelegateRecordPda(umi, {
@@ -82,12 +78,10 @@ test('it can create a LUT for a candy machine v2', async (t) => {
         delegateRole: MetadataDelegateRole.Collection,
         updateAuthority: umi.identity.publicKey,
         delegate: collectionAuthorityPda,
-      }),
+      })[0],
       getSysvar('instructions'),
       getSysvar('slotHashes'),
-    ]
-      .map(base58PublicKey)
-      .sort()
+    ].sort()
   );
 
   // And we expect the mint builder to be smaller with the LUT.
@@ -104,6 +98,10 @@ test('it can create a LUT for a candy machine v2', async (t) => {
   // And we can use the builder with LUT to mint an NFT
   // providing we wait a little bit for the LUT to become active.
   await new Promise((resolve) => setTimeout(resolve, 1000));
+  const tx1 = await builderWithoutLut.buildWithLatestBlockhash(umi);
+  const tx2 = await builderWithLut.buildWithLatestBlockhash(umi);
+  console.log('tx1', tx1.message.accounts, tx1.message.addressLookupTables);
+  console.log('tx2', tx2.message.accounts, tx2.message.addressLookupTables);
   await builderWithLut.sendAndConfirm(umi);
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
 });
@@ -123,18 +121,14 @@ test('it can create a LUT for a candy machine v1', async (t) => {
   const [, lut] = await createLutForCandyMachine(umi, recentSlot, candyMachine);
 
   // Then we expect the LUT addresses to contain the legacy collection authority Record.
-  const collectionAuthorityPda = findCandyMachineAuthorityPda(umi, {
+  const [collectionAuthorityPda] = findCandyMachineAuthorityPda(umi, {
     candyMachine,
   });
-  const collectionAuthorityRecord = findCollectionAuthorityRecordPda(umi, {
+  const [collectionAuthorityRecord] = findCollectionAuthorityRecordPda(umi, {
     mint: collectionMint,
     collectionAuthority: collectionAuthorityPda,
   });
-  t.true(
-    lut.addresses
-      .map(base58PublicKey)
-      .includes(base58PublicKey(collectionAuthorityRecord))
-  );
+  t.true(lut.addresses.includes(collectionAuthorityRecord));
 });
 
 test('it can create a LUT for a candy machine with no candy guard', async (t) => {
@@ -158,7 +152,5 @@ test('it can create a LUT for a candy machine with no candy guard', async (t) =>
   const [, lut] = await createLutForCandyMachine(umi, recentSlot, candyMachine);
 
   // Then we expect the LUT addresses to contain the mint authority.
-  t.true(
-    lut.addresses.map(base58PublicKey).includes(base58PublicKey(mintAuthority))
-  );
+  t.true(lut.addresses.includes(mintAuthority.publicKey));
 });

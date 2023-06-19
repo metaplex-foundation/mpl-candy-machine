@@ -17,13 +17,18 @@ import {
   Context,
   Pda,
   PublicKey,
-  Serializer,
   Signer,
   TransactionBuilder,
-  mapSerializer,
   publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  array,
+  mapSerializer,
+  struct,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 import { findCandyMachineAuthorityPda } from '../../hooked';
 import { addAccountMeta, addObjectProperty } from '../shared';
 
@@ -54,20 +59,30 @@ export type SetCollectionV2InstructionData = { discriminator: Array<number> };
 
 export type SetCollectionV2InstructionDataArgs = {};
 
+/** @deprecated Use `getSetCollectionV2InstructionDataSerializer()` without any argument instead. */
 export function getSetCollectionV2InstructionDataSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<
+  SetCollectionV2InstructionDataArgs,
+  SetCollectionV2InstructionData
+>;
+export function getSetCollectionV2InstructionDataSerializer(): Serializer<
+  SetCollectionV2InstructionDataArgs,
+  SetCollectionV2InstructionData
+>;
+export function getSetCollectionV2InstructionDataSerializer(
+  _context: object = {}
 ): Serializer<
   SetCollectionV2InstructionDataArgs,
   SetCollectionV2InstructionData
 > {
-  const s = context.serializer;
   return mapSerializer<
     SetCollectionV2InstructionDataArgs,
     any,
     SetCollectionV2InstructionData
   >(
-    s.struct<SetCollectionV2InstructionData>(
-      [['discriminator', s.array(s.u8(), { size: 8 })]],
+    struct<SetCollectionV2InstructionData>(
+      [['discriminator', array(u8(), { size: 8 })]],
       { description: 'SetCollectionV2InstructionData' }
     ),
     (value) => ({ ...value, discriminator: [229, 35, 61, 91, 15, 14, 99, 160] })
@@ -79,10 +94,7 @@ export function getSetCollectionV2InstructionDataSerializer(
 
 // Instruction.
 export function setCollectionV2(
-  context: Pick<
-    Context,
-    'serializer' | 'programs' | 'eddsa' | 'identity' | 'payer'
-  >,
+  context: Pick<Context, 'programs' | 'eddsa' | 'identity' | 'payer'>,
   input: SetCollectionV2InstructionAccounts
 ): TransactionBuilder {
   const signers: Signer[] = [];
@@ -304,9 +316,7 @@ export function setCollectionV2(
   addAccountMeta(keys, signers, resolvedAccounts.authorizationRules, false);
 
   // Data.
-  const data = getSetCollectionV2InstructionDataSerializer(context).serialize(
-    {}
-  );
+  const data = getSetCollectionV2InstructionDataSerializer().serialize({});
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

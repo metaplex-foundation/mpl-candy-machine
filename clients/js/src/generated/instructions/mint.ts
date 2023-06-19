@@ -15,15 +15,24 @@ import {
   AccountMeta,
   Context,
   Option,
+  OptionOrNullable,
   Pda,
   PublicKey,
-  Serializer,
   Signer,
   TransactionBuilder,
-  mapSerializer,
   publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  array,
+  bytes,
+  mapSerializer,
+  option,
+  string,
+  struct,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 import { findCandyGuardPda, findCandyMachineAuthorityPda } from '../../hooked';
 import { addAccountMeta, addObjectProperty } from '../shared';
 
@@ -59,19 +68,26 @@ export type MintInstructionData = {
 
 export type MintInstructionDataArgs = {
   mintArgs: Uint8Array;
-  group: Option<string>;
+  group: OptionOrNullable<string>;
 };
 
+/** @deprecated Use `getMintInstructionDataSerializer()` without any argument instead. */
 export function getMintInstructionDataSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<MintInstructionDataArgs, MintInstructionData>;
+export function getMintInstructionDataSerializer(): Serializer<
+  MintInstructionDataArgs,
+  MintInstructionData
+>;
+export function getMintInstructionDataSerializer(
+  _context: object = {}
 ): Serializer<MintInstructionDataArgs, MintInstructionData> {
-  const s = context.serializer;
   return mapSerializer<MintInstructionDataArgs, any, MintInstructionData>(
-    s.struct<MintInstructionData>(
+    struct<MintInstructionData>(
       [
-        ['discriminator', s.array(s.u8(), { size: 8 })],
-        ['mintArgs', s.bytes()],
-        ['group', s.option(s.string())],
+        ['discriminator', array(u8(), { size: 8 })],
+        ['mintArgs', bytes()],
+        ['group', option(string())],
       ],
       { description: 'MintInstructionData' }
     ),
@@ -87,10 +103,7 @@ export type MintInstructionArgs = MintInstructionDataArgs;
 
 // Instruction.
 export function mint(
-  context: Pick<
-    Context,
-    'serializer' | 'programs' | 'eddsa' | 'identity' | 'payer'
-  >,
+  context: Pick<Context, 'programs' | 'eddsa' | 'identity' | 'payer'>,
   input: MintInstructionAccounts & MintInstructionArgs
 ): TransactionBuilder {
   const signers: Signer[] = [];
@@ -333,8 +346,7 @@ export function mint(
   );
 
   // Data.
-  const data =
-    getMintInstructionDataSerializer(context).serialize(resolvedArgs);
+  const data = getMintInstructionDataSerializer().serialize(resolvedArgs);
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

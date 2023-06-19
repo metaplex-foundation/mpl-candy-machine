@@ -1,30 +1,31 @@
 import {
+  TokenStandard,
+  findMasterEditionPda,
+  findMetadataPda,
+  findTokenRecordPda,
+  getMplTokenMetadataProgramId,
+  isProgrammable,
+} from '@metaplex-foundation/mpl-token-metadata';
+import {
   findAssociatedTokenPda,
   getSplAssociatedTokenProgramId,
   getSplSystemProgramId,
   getSplTokenProgramId,
   getSysvar,
 } from '@metaplex-foundation/mpl-toolbox';
-import {
-  findMasterEditionPda,
-  findMetadataPda,
-  findTokenRecordPda,
-  getMplTokenMetadataProgramId,
-  isProgrammable,
-  TokenStandard,
-} from '@metaplex-foundation/mpl-token-metadata';
 import { PublicKey, Signer } from '@metaplex-foundation/umi';
-import { getMplTokenAuthRulesProgramId } from '../programs';
+import { tuple, u64 } from '@metaplex-foundation/umi/serializers';
 import { UnrecognizePathForRouteInstructionError } from '../errors';
 import {
-  findFreezeEscrowPda,
   FreezeInstruction,
   FreezeSolPayment,
   FreezeSolPaymentArgs,
+  findFreezeEscrowPda,
   getFreezeInstructionSerializer,
   getFreezeSolPaymentSerializer,
 } from '../generated';
 import { GuardManifest, GuardRemainingAccount, RouteParser } from '../guards';
+import { getMplTokenAuthRulesProgramId } from '../programs';
 
 /**
  * The freezeSolPayment guard allows minting frozen NFTs by charging
@@ -213,11 +214,7 @@ const initializeRouteInstruction: RouteParser<
     candyMachine: routeContext.candyMachine,
     candyGuard: routeContext.candyGuard,
   });
-  const s = context.serializer;
-  const serializer = s.tuple([
-    getFreezeInstructionSerializer(context),
-    s.u64(),
-  ]);
+  const serializer = tuple([getFreezeInstructionSerializer(), u64()]);
   return {
     data: serializer.serialize([FreezeInstruction.Initialize, args.period]),
     remainingAccounts: [

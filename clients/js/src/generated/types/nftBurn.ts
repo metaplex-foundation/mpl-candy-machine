@@ -6,7 +6,12 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Context, PublicKey, Serializer } from '@metaplex-foundation/umi';
+import { PublicKey } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  publicKey as publicKeySerializer,
+  struct,
+} from '@metaplex-foundation/umi/serializers';
 
 /**
  * Guard that requires another NFT (token) from a specific collection to be burned.
@@ -25,11 +30,15 @@ export type NftBurn = { requiredCollection: PublicKey };
 
 export type NftBurnArgs = NftBurn;
 
+/** @deprecated Use `getNftBurnSerializer()` without any argument instead. */
 export function getNftBurnSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<NftBurnArgs, NftBurn>;
+export function getNftBurnSerializer(): Serializer<NftBurnArgs, NftBurn>;
+export function getNftBurnSerializer(
+  _context: object = {}
 ): Serializer<NftBurnArgs, NftBurn> {
-  const s = context.serializer;
-  return s.struct<NftBurn>([['requiredCollection', s.publicKey()]], {
+  return struct<NftBurn>([['requiredCollection', publicKeySerializer()]], {
     description: 'NftBurn',
   }) as Serializer<NftBurnArgs, NftBurn>;
 }

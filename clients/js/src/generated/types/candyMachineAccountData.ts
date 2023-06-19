@@ -11,12 +11,16 @@ import {
   TokenStandardArgs,
   getTokenStandardSerializer,
 } from '@metaplex-foundation/mpl-token-metadata';
+import { PublicKey } from '@metaplex-foundation/umi';
 import {
-  Context,
-  PublicKey,
   Serializer,
+  array,
   mapSerializer,
-} from '@metaplex-foundation/umi';
+  publicKey as publicKeySerializer,
+  struct,
+  u64,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 import {
   AccountVersion,
   AccountVersionArgs,
@@ -66,26 +70,33 @@ export type CandyMachineAccountDataArgs = {
   data: CandyMachineDataArgs;
 };
 
+/** @deprecated Use `getCandyMachineAccountDataSerializer()` without any argument instead. */
 export function getCandyMachineAccountDataSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<CandyMachineAccountDataArgs, CandyMachineAccountData>;
+export function getCandyMachineAccountDataSerializer(): Serializer<
+  CandyMachineAccountDataArgs,
+  CandyMachineAccountData
+>;
+export function getCandyMachineAccountDataSerializer(
+  _context: object = {}
 ): Serializer<CandyMachineAccountDataArgs, CandyMachineAccountData> {
-  const s = context.serializer;
   return mapSerializer<
     CandyMachineAccountDataArgs,
     any,
     CandyMachineAccountData
   >(
-    s.struct<CandyMachineAccountData>(
+    struct<CandyMachineAccountData>(
       [
-        ['discriminator', s.array(s.u8(), { size: 8 })],
-        ['version', getAccountVersionSerializer(context)],
-        ['tokenStandard', getTokenStandardSerializer(context)],
-        ['features', s.array(s.u8(), { size: 6 })],
-        ['authority', s.publicKey()],
-        ['mintAuthority', s.publicKey()],
-        ['collectionMint', s.publicKey()],
-        ['itemsRedeemed', s.u64()],
-        ['data', getCandyMachineDataSerializer(context)],
+        ['discriminator', array(u8(), { size: 8 })],
+        ['version', getAccountVersionSerializer()],
+        ['tokenStandard', getTokenStandardSerializer()],
+        ['features', array(u8(), { size: 6 })],
+        ['authority', publicKeySerializer()],
+        ['mintAuthority', publicKeySerializer()],
+        ['collectionMint', publicKeySerializer()],
+        ['itemsRedeemed', u64()],
+        ['data', getCandyMachineDataSerializer()],
       ],
       { description: 'CandyMachineAccountData' }
     ),

@@ -7,12 +7,16 @@
  */
 
 import {
-  Context,
   PublicKey,
-  Serializer,
   SolAmount,
   mapAmountSerializer,
 } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  publicKey as publicKeySerializer,
+  struct,
+  u64,
+} from '@metaplex-foundation/umi/serializers';
 
 /**
  * Guard that charges an amount in SOL (lamports) for the mint.
@@ -26,14 +30,21 @@ export type SolPayment = { lamports: SolAmount; destination: PublicKey };
 
 export type SolPaymentArgs = SolPayment;
 
+/** @deprecated Use `getSolPaymentSerializer()` without any argument instead. */
 export function getSolPaymentSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<SolPaymentArgs, SolPayment>;
+export function getSolPaymentSerializer(): Serializer<
+  SolPaymentArgs,
+  SolPayment
+>;
+export function getSolPaymentSerializer(
+  _context: object = {}
 ): Serializer<SolPaymentArgs, SolPayment> {
-  const s = context.serializer;
-  return s.struct<SolPayment>(
+  return struct<SolPayment>(
     [
-      ['lamports', mapAmountSerializer(s.u64(), 'SOL', 9)],
-      ['destination', s.publicKey()],
+      ['lamports', mapAmountSerializer(u64(), 'SOL', 9)],
+      ['destination', publicKeySerializer()],
     ],
     { description: 'SolPayment' }
   ) as Serializer<SolPaymentArgs, SolPayment>;

@@ -24,6 +24,12 @@ import {
   publicKey as toPublicKey,
 } from '@metaplex-foundation/umi';
 import {
+  array,
+  publicKey as publicKeySerializer,
+  u64,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
+import {
   CandyMachineAccountData,
   getCandyMachineAccountDataSerializer,
 } from '../../hooked';
@@ -37,18 +43,24 @@ import {
 /** Candy machine state and config data. */
 export type CandyMachine = Account<CandyMachineAccountData>;
 
+/** @deprecated Use `deserializeCandyMachine(rawAccount)` without any context instead. */
 export function deserializeCandyMachine(
-  context: Pick<Context, 'serializer'>,
+  context: object,
   rawAccount: RpcAccount
+): CandyMachine;
+export function deserializeCandyMachine(rawAccount: RpcAccount): CandyMachine;
+export function deserializeCandyMachine(
+  context: RpcAccount | object,
+  rawAccount?: RpcAccount
 ): CandyMachine {
   return deserializeAccount(
-    rawAccount,
-    getCandyMachineAccountDataSerializer(context)
+    rawAccount ?? (context as RpcAccount),
+    getCandyMachineAccountDataSerializer()
   );
 }
 
 export async function fetchCandyMachine(
-  context: Pick<Context, 'rpc' | 'serializer'>,
+  context: Pick<Context, 'rpc'>,
   publicKey: PublicKey | Pda,
   options?: RpcGetAccountOptions
 ): Promise<CandyMachine> {
@@ -57,11 +69,11 @@ export async function fetchCandyMachine(
     options
   );
   assertAccountExists(maybeAccount, 'CandyMachine');
-  return deserializeCandyMachine(context, maybeAccount);
+  return deserializeCandyMachine(maybeAccount);
 }
 
 export async function safeFetchCandyMachine(
-  context: Pick<Context, 'rpc' | 'serializer'>,
+  context: Pick<Context, 'rpc'>,
   publicKey: PublicKey | Pda,
   options?: RpcGetAccountOptions
 ): Promise<CandyMachine | null> {
@@ -69,13 +81,11 @@ export async function safeFetchCandyMachine(
     toPublicKey(publicKey, false),
     options
   );
-  return maybeAccount.exists
-    ? deserializeCandyMachine(context, maybeAccount)
-    : null;
+  return maybeAccount.exists ? deserializeCandyMachine(maybeAccount) : null;
 }
 
 export async function fetchAllCandyMachine(
-  context: Pick<Context, 'rpc' | 'serializer'>,
+  context: Pick<Context, 'rpc'>,
   publicKeys: Array<PublicKey | Pda>,
   options?: RpcGetAccountsOptions
 ): Promise<CandyMachine[]> {
@@ -85,12 +95,12 @@ export async function fetchAllCandyMachine(
   );
   return maybeAccounts.map((maybeAccount) => {
     assertAccountExists(maybeAccount, 'CandyMachine');
-    return deserializeCandyMachine(context, maybeAccount);
+    return deserializeCandyMachine(maybeAccount);
   });
 }
 
 export async function safeFetchAllCandyMachine(
-  context: Pick<Context, 'rpc' | 'serializer'>,
+  context: Pick<Context, 'rpc'>,
   publicKeys: Array<PublicKey | Pda>,
   options?: RpcGetAccountsOptions
 ): Promise<CandyMachine[]> {
@@ -100,15 +110,12 @@ export async function safeFetchAllCandyMachine(
   );
   return maybeAccounts
     .filter((maybeAccount) => maybeAccount.exists)
-    .map((maybeAccount) =>
-      deserializeCandyMachine(context, maybeAccount as RpcAccount)
-    );
+    .map((maybeAccount) => deserializeCandyMachine(maybeAccount as RpcAccount));
 }
 
 export function getCandyMachineGpaBuilder(
-  context: Pick<Context, 'rpc' | 'serializer' | 'programs'>
+  context: Pick<Context, 'rpc' | 'programs'>
 ) {
-  const s = context.serializer;
   const programId = context.programs.getPublicKey(
     'mplCandyMachineCore',
     'CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR'
@@ -125,18 +132,18 @@ export function getCandyMachineGpaBuilder(
       itemsRedeemed: number | bigint;
       data: CandyMachineDataArgs;
     }>({
-      discriminator: [0, s.array(s.u8(), { size: 8 })],
-      version: [8, getAccountVersionSerializer(context)],
-      tokenStandard: [9, getTokenStandardSerializer(context)],
-      features: [null, s.array(s.u8(), { size: 6 })],
-      authority: [null, s.publicKey()],
-      mintAuthority: [null, s.publicKey()],
-      collectionMint: [null, s.publicKey()],
-      itemsRedeemed: [null, s.u64()],
-      data: [null, getCandyMachineDataSerializer(context)],
+      discriminator: [0, array(u8(), { size: 8 })],
+      version: [8, getAccountVersionSerializer()],
+      tokenStandard: [9, getTokenStandardSerializer()],
+      features: [null, array(u8(), { size: 6 })],
+      authority: [null, publicKeySerializer()],
+      mintAuthority: [null, publicKeySerializer()],
+      collectionMint: [null, publicKeySerializer()],
+      itemsRedeemed: [null, u64()],
+      data: [null, getCandyMachineDataSerializer()],
     })
     .deserializeUsing<CandyMachine>((account) =>
-      deserializeCandyMachine(context, account)
+      deserializeCandyMachine(account)
     )
     .whereField('discriminator', [51, 173, 177, 113, 25, 241, 109, 189]);
 }

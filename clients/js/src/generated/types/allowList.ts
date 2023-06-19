@@ -6,7 +6,11 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Context, Serializer } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  bytes,
+  struct,
+} from '@metaplex-foundation/umi/serializers';
 
 /**
  * Guard that uses a merkle tree to specify the addresses allowed to mint.
@@ -24,11 +28,15 @@ export type AllowList = {
 
 export type AllowListArgs = AllowList;
 
+/** @deprecated Use `getAllowListSerializer()` without any argument instead. */
 export function getAllowListSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<AllowListArgs, AllowList>;
+export function getAllowListSerializer(): Serializer<AllowListArgs, AllowList>;
+export function getAllowListSerializer(
+  _context: object = {}
 ): Serializer<AllowListArgs, AllowList> {
-  const s = context.serializer;
-  return s.struct<AllowList>([['merkleRoot', s.bytes({ size: 32 })]], {
+  return struct<AllowList>([['merkleRoot', bytes({ size: 32 })]], {
     description: 'AllowList',
   }) as Serializer<AllowListArgs, AllowList>;
 }

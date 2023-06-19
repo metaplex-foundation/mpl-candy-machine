@@ -2,17 +2,25 @@ import {
   isProgrammable,
   TokenStandard,
 } from '@metaplex-foundation/mpl-token-metadata';
-import { isNone, Option } from '@metaplex-foundation/umi';
+import {
+  isNone,
+  isOption,
+  OptionOrNullable,
+  wrapNullable,
+} from '@metaplex-foundation/umi';
 import { CANDY_MACHINE_HIDDEN_SECTION } from '../constants';
 import { ConfigLineSettingsArgs } from '../generated/types/configLineSettings';
 
 export function getCandyMachineSize(
   itemsAvailable: number | bigint,
-  configLineSettings: Option<
+  configLineSettings: OptionOrNullable<
     Pick<ConfigLineSettingsArgs, 'nameLength' | 'uriLength'>
   >,
   tokenStandard = TokenStandard.NonFungible
 ): number {
+  configLineSettings = isOption(configLineSettings)
+    ? configLineSettings
+    : wrapNullable(configLineSettings);
   const base = isProgrammable(tokenStandard)
     ? CANDY_MACHINE_HIDDEN_SECTION + 33
     : CANDY_MACHINE_HIDDEN_SECTION;

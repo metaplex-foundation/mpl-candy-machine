@@ -18,13 +18,18 @@ import {
   Context,
   Pda,
   PublicKey,
-  Serializer,
   Signer,
   TransactionBuilder,
-  mapSerializer,
   publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  array,
+  mapSerializer,
+  struct,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 import { findCandyMachineAuthorityPda } from '../../hooked';
 import { addAccountMeta, addObjectProperty } from '../shared';
 
@@ -63,20 +68,30 @@ export type MintFromCandyMachineV2InstructionData = {
 
 export type MintFromCandyMachineV2InstructionDataArgs = {};
 
+/** @deprecated Use `getMintFromCandyMachineV2InstructionDataSerializer()` without any argument instead. */
 export function getMintFromCandyMachineV2InstructionDataSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<
+  MintFromCandyMachineV2InstructionDataArgs,
+  MintFromCandyMachineV2InstructionData
+>;
+export function getMintFromCandyMachineV2InstructionDataSerializer(): Serializer<
+  MintFromCandyMachineV2InstructionDataArgs,
+  MintFromCandyMachineV2InstructionData
+>;
+export function getMintFromCandyMachineV2InstructionDataSerializer(
+  _context: object = {}
 ): Serializer<
   MintFromCandyMachineV2InstructionDataArgs,
   MintFromCandyMachineV2InstructionData
 > {
-  const s = context.serializer;
   return mapSerializer<
     MintFromCandyMachineV2InstructionDataArgs,
     any,
     MintFromCandyMachineV2InstructionData
   >(
-    s.struct<MintFromCandyMachineV2InstructionData>(
-      [['discriminator', s.array(s.u8(), { size: 8 })]],
+    struct<MintFromCandyMachineV2InstructionData>(
+      [['discriminator', array(u8(), { size: 8 })]],
       { description: 'MintFromCandyMachineV2InstructionData' }
     ),
     (value) => ({
@@ -91,10 +106,7 @@ export function getMintFromCandyMachineV2InstructionDataSerializer(
 
 // Instruction.
 export function mintFromCandyMachineV2(
-  context: Pick<
-    Context,
-    'serializer' | 'programs' | 'eddsa' | 'identity' | 'payer'
-  >,
+  context: Pick<Context, 'programs' | 'eddsa' | 'identity' | 'payer'>,
   input: MintFromCandyMachineV2InstructionAccounts
 ): TransactionBuilder {
   const signers: Signer[] = [];
@@ -358,9 +370,9 @@ export function mintFromCandyMachineV2(
   addAccountMeta(keys, signers, resolvedAccounts.authorizationRules, false);
 
   // Data.
-  const data = getMintFromCandyMachineV2InstructionDataSerializer(
-    context
-  ).serialize({});
+  const data = getMintFromCandyMachineV2InstructionDataSerializer().serialize(
+    {}
+  );
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

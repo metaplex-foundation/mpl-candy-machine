@@ -14,13 +14,20 @@ import {
   RpcAccount,
   RpcGetAccountOptions,
   RpcGetAccountsOptions,
-  Serializer,
   assertAccountExists,
   deserializeAccount,
   gpaBuilder,
-  mapSerializer,
   publicKey as toPublicKey,
 } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  array,
+  mapSerializer,
+  publicKey as publicKeySerializer,
+  string,
+  struct,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 
 export type CandyGuard = Account<CandyGuardAccountData>;
 
@@ -37,17 +44,24 @@ export type CandyGuardAccountDataArgs = {
   authority: PublicKey;
 };
 
+/** @deprecated Use `getCandyGuardAccountDataSerializer()` without any argument instead. */
 export function getCandyGuardAccountDataSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<CandyGuardAccountDataArgs, CandyGuardAccountData>;
+export function getCandyGuardAccountDataSerializer(): Serializer<
+  CandyGuardAccountDataArgs,
+  CandyGuardAccountData
+>;
+export function getCandyGuardAccountDataSerializer(
+  _context: object = {}
 ): Serializer<CandyGuardAccountDataArgs, CandyGuardAccountData> {
-  const s = context.serializer;
   return mapSerializer<CandyGuardAccountDataArgs, any, CandyGuardAccountData>(
-    s.struct<CandyGuardAccountData>(
+    struct<CandyGuardAccountData>(
       [
-        ['discriminator', s.array(s.u8(), { size: 8 })],
-        ['base', s.publicKey()],
-        ['bump', s.u8()],
-        ['authority', s.publicKey()],
+        ['discriminator', array(u8(), { size: 8 })],
+        ['base', publicKeySerializer()],
+        ['bump', u8()],
+        ['authority', publicKeySerializer()],
       ],
       { description: 'CandyGuardAccountData' }
     ),
@@ -58,18 +72,24 @@ export function getCandyGuardAccountDataSerializer(
   ) as Serializer<CandyGuardAccountDataArgs, CandyGuardAccountData>;
 }
 
+/** @deprecated Use `deserializeCandyGuard(rawAccount)` without any context instead. */
 export function deserializeCandyGuard(
-  context: Pick<Context, 'serializer'>,
+  context: object,
   rawAccount: RpcAccount
+): CandyGuard;
+export function deserializeCandyGuard(rawAccount: RpcAccount): CandyGuard;
+export function deserializeCandyGuard(
+  context: RpcAccount | object,
+  rawAccount?: RpcAccount
 ): CandyGuard {
   return deserializeAccount(
-    rawAccount,
-    getCandyGuardAccountDataSerializer(context)
+    rawAccount ?? (context as RpcAccount),
+    getCandyGuardAccountDataSerializer()
   );
 }
 
 export async function fetchCandyGuard(
-  context: Pick<Context, 'rpc' | 'serializer'>,
+  context: Pick<Context, 'rpc'>,
   publicKey: PublicKey | Pda,
   options?: RpcGetAccountOptions
 ): Promise<CandyGuard> {
@@ -78,11 +98,11 @@ export async function fetchCandyGuard(
     options
   );
   assertAccountExists(maybeAccount, 'CandyGuard');
-  return deserializeCandyGuard(context, maybeAccount);
+  return deserializeCandyGuard(maybeAccount);
 }
 
 export async function safeFetchCandyGuard(
-  context: Pick<Context, 'rpc' | 'serializer'>,
+  context: Pick<Context, 'rpc'>,
   publicKey: PublicKey | Pda,
   options?: RpcGetAccountOptions
 ): Promise<CandyGuard | null> {
@@ -90,13 +110,11 @@ export async function safeFetchCandyGuard(
     toPublicKey(publicKey, false),
     options
   );
-  return maybeAccount.exists
-    ? deserializeCandyGuard(context, maybeAccount)
-    : null;
+  return maybeAccount.exists ? deserializeCandyGuard(maybeAccount) : null;
 }
 
 export async function fetchAllCandyGuard(
-  context: Pick<Context, 'rpc' | 'serializer'>,
+  context: Pick<Context, 'rpc'>,
   publicKeys: Array<PublicKey | Pda>,
   options?: RpcGetAccountsOptions
 ): Promise<CandyGuard[]> {
@@ -106,12 +124,12 @@ export async function fetchAllCandyGuard(
   );
   return maybeAccounts.map((maybeAccount) => {
     assertAccountExists(maybeAccount, 'CandyGuard');
-    return deserializeCandyGuard(context, maybeAccount);
+    return deserializeCandyGuard(maybeAccount);
   });
 }
 
 export async function safeFetchAllCandyGuard(
-  context: Pick<Context, 'rpc' | 'serializer'>,
+  context: Pick<Context, 'rpc'>,
   publicKeys: Array<PublicKey | Pda>,
   options?: RpcGetAccountsOptions
 ): Promise<CandyGuard[]> {
@@ -121,15 +139,12 @@ export async function safeFetchAllCandyGuard(
   );
   return maybeAccounts
     .filter((maybeAccount) => maybeAccount.exists)
-    .map((maybeAccount) =>
-      deserializeCandyGuard(context, maybeAccount as RpcAccount)
-    );
+    .map((maybeAccount) => deserializeCandyGuard(maybeAccount as RpcAccount));
 }
 
 export function getCandyGuardGpaBuilder(
-  context: Pick<Context, 'rpc' | 'serializer' | 'programs'>
+  context: Pick<Context, 'rpc' | 'programs'>
 ) {
-  const s = context.serializer;
   const programId = context.programs.getPublicKey(
     'mplCandyGuard',
     'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
@@ -141,14 +156,12 @@ export function getCandyGuardGpaBuilder(
       bump: number;
       authority: PublicKey;
     }>({
-      discriminator: [0, s.array(s.u8(), { size: 8 })],
-      base: [8, s.publicKey()],
-      bump: [40, s.u8()],
-      authority: [41, s.publicKey()],
+      discriminator: [0, array(u8(), { size: 8 })],
+      base: [8, publicKeySerializer()],
+      bump: [40, u8()],
+      authority: [41, publicKeySerializer()],
     })
-    .deserializeUsing<CandyGuard>((account) =>
-      deserializeCandyGuard(context, account)
-    )
+    .deserializeUsing<CandyGuard>((account) => deserializeCandyGuard(account))
     .whereField('discriminator', [44, 207, 199, 184, 112, 103, 34, 181]);
 }
 
@@ -157,25 +170,24 @@ export function getCandyGuardSize(): number {
 }
 
 export function findCandyGuardPda(
-  context: Pick<Context, 'eddsa' | 'programs' | 'serializer'>,
+  context: Pick<Context, 'eddsa' | 'programs'>,
   seeds: {
     /** The base address which the Candy Guard PDA derives from */
     base: PublicKey;
   }
 ): Pda {
-  const s = context.serializer;
   const programId = context.programs.getPublicKey(
     'mplCandyGuard',
     'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
   );
   return context.eddsa.findPda(programId, [
-    s.string({ size: 'variable' }).serialize('candy_guard'),
-    s.publicKey().serialize(seeds.base),
+    string({ size: 'variable' }).serialize('candy_guard'),
+    publicKeySerializer().serialize(seeds.base),
   ]);
 }
 
 export async function fetchCandyGuardFromSeeds(
-  context: Pick<Context, 'eddsa' | 'programs' | 'rpc' | 'serializer'>,
+  context: Pick<Context, 'eddsa' | 'programs' | 'rpc'>,
   seeds: Parameters<typeof findCandyGuardPda>[1],
   options?: RpcGetAccountOptions
 ): Promise<CandyGuard> {
@@ -183,7 +195,7 @@ export async function fetchCandyGuardFromSeeds(
 }
 
 export async function safeFetchCandyGuardFromSeeds(
-  context: Pick<Context, 'eddsa' | 'programs' | 'rpc' | 'serializer'>,
+  context: Pick<Context, 'eddsa' | 'programs' | 'rpc'>,
   seeds: Parameters<typeof findCandyGuardPda>[1],
   options?: RpcGetAccountOptions
 ): Promise<CandyGuard | null> {

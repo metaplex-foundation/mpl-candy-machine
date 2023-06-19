@@ -7,12 +7,16 @@
  */
 
 import {
-  Context,
   PublicKey,
-  Serializer,
   SolAmount,
   mapAmountSerializer,
 } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  publicKey as publicKeySerializer,
+  struct,
+  u64,
+} from '@metaplex-foundation/umi/serializers';
 
 /**
  * Guard that charges an amount in SOL (lamports) for the mint with a freeze period.
@@ -30,14 +34,21 @@ export type FreezeSolPayment = { lamports: SolAmount; destination: PublicKey };
 
 export type FreezeSolPaymentArgs = FreezeSolPayment;
 
+/** @deprecated Use `getFreezeSolPaymentSerializer()` without any argument instead. */
 export function getFreezeSolPaymentSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<FreezeSolPaymentArgs, FreezeSolPayment>;
+export function getFreezeSolPaymentSerializer(): Serializer<
+  FreezeSolPaymentArgs,
+  FreezeSolPayment
+>;
+export function getFreezeSolPaymentSerializer(
+  _context: object = {}
 ): Serializer<FreezeSolPaymentArgs, FreezeSolPayment> {
-  const s = context.serializer;
-  return s.struct<FreezeSolPayment>(
+  return struct<FreezeSolPayment>(
     [
-      ['lamports', mapAmountSerializer(s.u64(), 'SOL', 9)],
-      ['destination', s.publicKey()],
+      ['lamports', mapAmountSerializer(u64(), 'SOL', 9)],
+      ['destination', publicKeySerializer()],
     ],
     { description: 'FreezeSolPayment' }
   ) as Serializer<FreezeSolPaymentArgs, FreezeSolPayment>;

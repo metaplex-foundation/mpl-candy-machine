@@ -11,12 +11,17 @@ import {
   Context,
   Pda,
   PublicKey,
-  Serializer,
   Signer,
   TransactionBuilder,
-  mapSerializer,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  array,
+  mapSerializer,
+  struct,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
@@ -30,20 +35,30 @@ export type DeleteCandyGuardInstructionData = { discriminator: Array<number> };
 
 export type DeleteCandyGuardInstructionDataArgs = {};
 
+/** @deprecated Use `getDeleteCandyGuardInstructionDataSerializer()` without any argument instead. */
 export function getDeleteCandyGuardInstructionDataSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<
+  DeleteCandyGuardInstructionDataArgs,
+  DeleteCandyGuardInstructionData
+>;
+export function getDeleteCandyGuardInstructionDataSerializer(): Serializer<
+  DeleteCandyGuardInstructionDataArgs,
+  DeleteCandyGuardInstructionData
+>;
+export function getDeleteCandyGuardInstructionDataSerializer(
+  _context: object = {}
 ): Serializer<
   DeleteCandyGuardInstructionDataArgs,
   DeleteCandyGuardInstructionData
 > {
-  const s = context.serializer;
   return mapSerializer<
     DeleteCandyGuardInstructionDataArgs,
     any,
     DeleteCandyGuardInstructionData
   >(
-    s.struct<DeleteCandyGuardInstructionData>(
-      [['discriminator', s.array(s.u8(), { size: 8 })]],
+    struct<DeleteCandyGuardInstructionData>(
+      [['discriminator', array(u8(), { size: 8 })]],
       { description: 'DeleteCandyGuardInstructionData' }
     ),
     (value) => ({
@@ -58,7 +73,7 @@ export function getDeleteCandyGuardInstructionDataSerializer(
 
 // Instruction.
 export function deleteCandyGuard(
-  context: Pick<Context, 'serializer' | 'programs' | 'identity'>,
+  context: Pick<Context, 'programs' | 'identity'>,
   input: DeleteCandyGuardInstructionAccounts
 ): TransactionBuilder {
   const signers: Signer[] = [];
@@ -86,9 +101,7 @@ export function deleteCandyGuard(
   addAccountMeta(keys, signers, resolvedAccounts.authority, false);
 
   // Data.
-  const data = getDeleteCandyGuardInstructionDataSerializer(context).serialize(
-    {}
-  );
+  const data = getDeleteCandyGuardInstructionDataSerializer().serialize({});
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

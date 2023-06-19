@@ -4,17 +4,17 @@ import {
 } from '@metaplex-foundation/mpl-token-metadata';
 import {
   ACCOUNT_HEADER_SIZE,
-  mergeBytes,
-  none,
   Option,
-  publicKey,
   TransactionBuilder,
+  none,
+  publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
+import { mergeBytes, u32 } from '@metaplex-foundation/umi/serializers';
 import { DefaultGuardSetMintArgs } from './defaultGuards';
 import {
-  mint as baseMint,
   MintInstructionAccounts,
+  mint as baseMint,
 } from './generated/instructions/mint';
 import {
   CandyGuardProgram,
@@ -62,7 +62,7 @@ export function mint<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
   const { data, remainingAccounts } = parseMintArgs<
     MA extends undefined ? DefaultGuardSetMintArgs : MA
   >(context, program, mintContext, mintArgs);
-  const prefix = context.serializer.u32().serialize(data.length);
+  const prefix = u32().serialize(data.length);
   const ix = baseMint(context, {
     ...rest,
     mintArgs: mergeBytes([prefix, data]),

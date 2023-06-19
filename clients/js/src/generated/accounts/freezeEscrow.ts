@@ -10,18 +10,29 @@ import {
   Account,
   Context,
   Option,
+  OptionOrNullable,
   Pda,
   PublicKey,
   RpcAccount,
   RpcGetAccountOptions,
   RpcGetAccountsOptions,
-  Serializer,
   assertAccountExists,
   deserializeAccount,
   gpaBuilder,
-  mapSerializer,
   publicKey as toPublicKey,
 } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  array,
+  i64,
+  mapSerializer,
+  option,
+  publicKey as publicKeySerializer,
+  string,
+  struct,
+  u64,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 
 /** PDA to store the frozen funds. */
 export type FreezeEscrow = Account<FreezeEscrowAccountData>;
@@ -65,7 +76,7 @@ export type FreezeEscrowAccountDataArgs = {
    * The timestamp of the first (frozen) mint. This is used to calculate
    * when the freeze period is over.
    */
-  firstMintTime: Option<number | bigint>;
+  firstMintTime: OptionOrNullable<number | bigint>;
   /**
    * The amount of time (in seconds) for the freeze. The NFTs will be
    * allowed to thaw after this.
@@ -81,25 +92,32 @@ export type FreezeEscrowAccountDataArgs = {
   authority: PublicKey;
 };
 
+/** @deprecated Use `getFreezeEscrowAccountDataSerializer()` without any argument instead. */
 export function getFreezeEscrowAccountDataSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<FreezeEscrowAccountDataArgs, FreezeEscrowAccountData>;
+export function getFreezeEscrowAccountDataSerializer(): Serializer<
+  FreezeEscrowAccountDataArgs,
+  FreezeEscrowAccountData
+>;
+export function getFreezeEscrowAccountDataSerializer(
+  _context: object = {}
 ): Serializer<FreezeEscrowAccountDataArgs, FreezeEscrowAccountData> {
-  const s = context.serializer;
   return mapSerializer<
     FreezeEscrowAccountDataArgs,
     any,
     FreezeEscrowAccountData
   >(
-    s.struct<FreezeEscrowAccountData>(
+    struct<FreezeEscrowAccountData>(
       [
-        ['discriminator', s.array(s.u8(), { size: 8 })],
-        ['candyGuard', s.publicKey()],
-        ['candyMachine', s.publicKey()],
-        ['frozenCount', s.u64()],
-        ['firstMintTime', s.option(s.i64())],
-        ['freezePeriod', s.i64()],
-        ['destination', s.publicKey()],
-        ['authority', s.publicKey()],
+        ['discriminator', array(u8(), { size: 8 })],
+        ['candyGuard', publicKeySerializer()],
+        ['candyMachine', publicKeySerializer()],
+        ['frozenCount', u64()],
+        ['firstMintTime', option(i64())],
+        ['freezePeriod', i64()],
+        ['destination', publicKeySerializer()],
+        ['authority', publicKeySerializer()],
       ],
       { description: 'FreezeEscrowAccountData' }
     ),
@@ -110,18 +128,24 @@ export function getFreezeEscrowAccountDataSerializer(
   ) as Serializer<FreezeEscrowAccountDataArgs, FreezeEscrowAccountData>;
 }
 
+/** @deprecated Use `deserializeFreezeEscrow(rawAccount)` without any context instead. */
 export function deserializeFreezeEscrow(
-  context: Pick<Context, 'serializer'>,
+  context: object,
   rawAccount: RpcAccount
+): FreezeEscrow;
+export function deserializeFreezeEscrow(rawAccount: RpcAccount): FreezeEscrow;
+export function deserializeFreezeEscrow(
+  context: RpcAccount | object,
+  rawAccount?: RpcAccount
 ): FreezeEscrow {
   return deserializeAccount(
-    rawAccount,
-    getFreezeEscrowAccountDataSerializer(context)
+    rawAccount ?? (context as RpcAccount),
+    getFreezeEscrowAccountDataSerializer()
   );
 }
 
 export async function fetchFreezeEscrow(
-  context: Pick<Context, 'rpc' | 'serializer'>,
+  context: Pick<Context, 'rpc'>,
   publicKey: PublicKey | Pda,
   options?: RpcGetAccountOptions
 ): Promise<FreezeEscrow> {
@@ -130,11 +154,11 @@ export async function fetchFreezeEscrow(
     options
   );
   assertAccountExists(maybeAccount, 'FreezeEscrow');
-  return deserializeFreezeEscrow(context, maybeAccount);
+  return deserializeFreezeEscrow(maybeAccount);
 }
 
 export async function safeFetchFreezeEscrow(
-  context: Pick<Context, 'rpc' | 'serializer'>,
+  context: Pick<Context, 'rpc'>,
   publicKey: PublicKey | Pda,
   options?: RpcGetAccountOptions
 ): Promise<FreezeEscrow | null> {
@@ -142,13 +166,11 @@ export async function safeFetchFreezeEscrow(
     toPublicKey(publicKey, false),
     options
   );
-  return maybeAccount.exists
-    ? deserializeFreezeEscrow(context, maybeAccount)
-    : null;
+  return maybeAccount.exists ? deserializeFreezeEscrow(maybeAccount) : null;
 }
 
 export async function fetchAllFreezeEscrow(
-  context: Pick<Context, 'rpc' | 'serializer'>,
+  context: Pick<Context, 'rpc'>,
   publicKeys: Array<PublicKey | Pda>,
   options?: RpcGetAccountsOptions
 ): Promise<FreezeEscrow[]> {
@@ -158,12 +180,12 @@ export async function fetchAllFreezeEscrow(
   );
   return maybeAccounts.map((maybeAccount) => {
     assertAccountExists(maybeAccount, 'FreezeEscrow');
-    return deserializeFreezeEscrow(context, maybeAccount);
+    return deserializeFreezeEscrow(maybeAccount);
   });
 }
 
 export async function safeFetchAllFreezeEscrow(
-  context: Pick<Context, 'rpc' | 'serializer'>,
+  context: Pick<Context, 'rpc'>,
   publicKeys: Array<PublicKey | Pda>,
   options?: RpcGetAccountsOptions
 ): Promise<FreezeEscrow[]> {
@@ -173,15 +195,12 @@ export async function safeFetchAllFreezeEscrow(
   );
   return maybeAccounts
     .filter((maybeAccount) => maybeAccount.exists)
-    .map((maybeAccount) =>
-      deserializeFreezeEscrow(context, maybeAccount as RpcAccount)
-    );
+    .map((maybeAccount) => deserializeFreezeEscrow(maybeAccount as RpcAccount));
 }
 
 export function getFreezeEscrowGpaBuilder(
-  context: Pick<Context, 'rpc' | 'serializer' | 'programs'>
+  context: Pick<Context, 'rpc' | 'programs'>
 ) {
-  const s = context.serializer;
   const programId = context.programs.getPublicKey(
     'mplCandyGuard',
     'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
@@ -192,28 +211,28 @@ export function getFreezeEscrowGpaBuilder(
       candyGuard: PublicKey;
       candyMachine: PublicKey;
       frozenCount: number | bigint;
-      firstMintTime: Option<number | bigint>;
+      firstMintTime: OptionOrNullable<number | bigint>;
       freezePeriod: number | bigint;
       destination: PublicKey;
       authority: PublicKey;
     }>({
-      discriminator: [0, s.array(s.u8(), { size: 8 })],
-      candyGuard: [8, s.publicKey()],
-      candyMachine: [40, s.publicKey()],
-      frozenCount: [72, s.u64()],
-      firstMintTime: [80, s.option(s.i64())],
-      freezePeriod: [null, s.i64()],
-      destination: [null, s.publicKey()],
-      authority: [null, s.publicKey()],
+      discriminator: [0, array(u8(), { size: 8 })],
+      candyGuard: [8, publicKeySerializer()],
+      candyMachine: [40, publicKeySerializer()],
+      frozenCount: [72, u64()],
+      firstMintTime: [80, option(i64())],
+      freezePeriod: [null, i64()],
+      destination: [null, publicKeySerializer()],
+      authority: [null, publicKeySerializer()],
     })
     .deserializeUsing<FreezeEscrow>((account) =>
-      deserializeFreezeEscrow(context, account)
+      deserializeFreezeEscrow(account)
     )
     .whereField('discriminator', [227, 186, 40, 152, 7, 174, 131, 184]);
 }
 
 export function findFreezeEscrowPda(
-  context: Pick<Context, 'eddsa' | 'programs' | 'serializer'>,
+  context: Pick<Context, 'eddsa' | 'programs'>,
   seeds: {
     /** The wallet that will eventually receive the funds */
     destination: PublicKey;
@@ -223,21 +242,20 @@ export function findFreezeEscrowPda(
     candyMachine: PublicKey;
   }
 ): Pda {
-  const s = context.serializer;
   const programId = context.programs.getPublicKey(
     'mplCandyGuard',
     'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
   );
   return context.eddsa.findPda(programId, [
-    s.string({ size: 'variable' }).serialize('freeze_escrow'),
-    s.publicKey().serialize(seeds.destination),
-    s.publicKey().serialize(seeds.candyGuard),
-    s.publicKey().serialize(seeds.candyMachine),
+    string({ size: 'variable' }).serialize('freeze_escrow'),
+    publicKeySerializer().serialize(seeds.destination),
+    publicKeySerializer().serialize(seeds.candyGuard),
+    publicKeySerializer().serialize(seeds.candyMachine),
   ]);
 }
 
 export async function fetchFreezeEscrowFromSeeds(
-  context: Pick<Context, 'eddsa' | 'programs' | 'rpc' | 'serializer'>,
+  context: Pick<Context, 'eddsa' | 'programs' | 'rpc'>,
   seeds: Parameters<typeof findFreezeEscrowPda>[1],
   options?: RpcGetAccountOptions
 ): Promise<FreezeEscrow> {
@@ -249,7 +267,7 @@ export async function fetchFreezeEscrowFromSeeds(
 }
 
 export async function safeFetchFreezeEscrowFromSeeds(
-  context: Pick<Context, 'eddsa' | 'programs' | 'rpc' | 'serializer'>,
+  context: Pick<Context, 'eddsa' | 'programs' | 'rpc'>,
   seeds: Parameters<typeof findFreezeEscrowPda>[1],
   options?: RpcGetAccountOptions
 ): Promise<FreezeEscrow | null> {

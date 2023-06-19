@@ -6,7 +6,7 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Context, Serializer } from '@metaplex-foundation/umi';
+import { Serializer, scalarEnum } from '@metaplex-foundation/umi/serializers';
 
 /** Account versioning. */
 export enum AccountVersion {
@@ -16,11 +16,18 @@ export enum AccountVersion {
 
 export type AccountVersionArgs = AccountVersion;
 
+/** @deprecated Use `getAccountVersionSerializer()` without any argument instead. */
 export function getAccountVersionSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<AccountVersionArgs, AccountVersion>;
+export function getAccountVersionSerializer(): Serializer<
+  AccountVersionArgs,
+  AccountVersion
+>;
+export function getAccountVersionSerializer(
+  _context: object = {}
 ): Serializer<AccountVersionArgs, AccountVersion> {
-  const s = context.serializer;
-  return s.enum<AccountVersion>(AccountVersion, {
+  return scalarEnum<AccountVersion>(AccountVersion, {
     description: 'AccountVersion',
   }) as Serializer<AccountVersionArgs, AccountVersion>;
 }

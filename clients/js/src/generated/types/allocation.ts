@@ -6,7 +6,12 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Context, Serializer } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  struct,
+  u32,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 
 /**
  * Gaurd to specify the maximum number of mints in a guard set.
@@ -27,14 +32,21 @@ export type Allocation = {
 
 export type AllocationArgs = Allocation;
 
+/** @deprecated Use `getAllocationSerializer()` without any argument instead. */
 export function getAllocationSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<AllocationArgs, Allocation>;
+export function getAllocationSerializer(): Serializer<
+  AllocationArgs,
+  Allocation
+>;
+export function getAllocationSerializer(
+  _context: object = {}
 ): Serializer<AllocationArgs, Allocation> {
-  const s = context.serializer;
-  return s.struct<Allocation>(
+  return struct<Allocation>(
     [
-      ['id', s.u8()],
-      ['limit', s.u32()],
+      ['id', u8()],
+      ['limit', u32()],
     ],
     { description: 'Allocation' }
   ) as Serializer<AllocationArgs, Allocation>;

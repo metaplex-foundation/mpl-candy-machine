@@ -4,6 +4,7 @@ import {
   transactionBuilder,
   TransactionBuilder,
 } from '@metaplex-foundation/umi';
+import { u32 } from '@metaplex-foundation/umi/serializers';
 import { CANDY_GUARD_DATA } from './constants';
 import { DefaultGuardSetArgs } from './defaultGuards';
 import {
@@ -49,7 +50,7 @@ export function createCandyGuard<DA extends GuardSetArgs = DefaultGuardSetArgs>(
     guards: guards ?? {},
     groups: groups ?? [],
   });
-  const prefix = context.serializer.u32().serialize(data.length);
+  const prefix = u32().serialize(data.length);
   const dataWithPrefix = mergeBytes([prefix, data]);
 
   return transactionBuilder([

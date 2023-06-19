@@ -6,7 +6,13 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Context, PublicKey, Serializer } from '@metaplex-foundation/umi';
+import { PublicKey } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  array,
+  publicKey as publicKeySerializer,
+  struct,
+} from '@metaplex-foundation/umi/serializers';
 
 /**
  * Guard that restricts the programs that can be in a mint transaction. The guard allows the
@@ -17,11 +23,18 @@ export type ProgramGate = { additional: Array<PublicKey> };
 
 export type ProgramGateArgs = ProgramGate;
 
+/** @deprecated Use `getProgramGateSerializer()` without any argument instead. */
 export function getProgramGateSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<ProgramGateArgs, ProgramGate>;
+export function getProgramGateSerializer(): Serializer<
+  ProgramGateArgs,
+  ProgramGate
+>;
+export function getProgramGateSerializer(
+  _context: object = {}
 ): Serializer<ProgramGateArgs, ProgramGate> {
-  const s = context.serializer;
-  return s.struct<ProgramGate>([['additional', s.array(s.publicKey())]], {
+  return struct<ProgramGate>([['additional', array(publicKeySerializer())]], {
     description: 'ProgramGate',
   }) as Serializer<ProgramGateArgs, ProgramGate>;
 }

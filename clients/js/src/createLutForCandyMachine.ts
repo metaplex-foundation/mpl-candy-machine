@@ -18,10 +18,7 @@ import { AccountVersion, fetchCandyMachine } from './generated';
 import { findCandyMachineAuthorityPda } from './hooked';
 
 export const createLutForCandyMachine = async (
-  context: Pick<
-    Context,
-    'rpc' | 'serializer' | 'eddsa' | 'programs' | 'identity' | 'payer'
-  >,
+  context: Pick<Context, 'rpc' | 'eddsa' | 'programs' | 'identity' | 'payer'>,
   recentSlot: number,
   candyMachine: PublicKey,
   collectionUpdateAuthority?: PublicKey,
@@ -41,10 +38,7 @@ export const createLutForCandyMachine = async (
 };
 
 export const getLutAddressesForCandyMachine = async (
-  context: Pick<
-    Context,
-    'rpc' | 'serializer' | 'eddsa' | 'programs' | 'identity'
-  >,
+  context: Pick<Context, 'rpc' | 'eddsa' | 'programs' | 'identity'>,
   candyMachine: PublicKey,
   collectionUpdateAuthority?: PublicKey
 ): Promise<PublicKey[]> => {

@@ -6,7 +6,13 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Context, PublicKey, Serializer } from '@metaplex-foundation/umi';
+import { PublicKey } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  bool,
+  publicKey as publicKeySerializer,
+  struct,
+} from '@metaplex-foundation/umi/serializers';
 
 /**
  * Guard that validates if the payer of the transaction has a token from a specified
@@ -31,14 +37,21 @@ export type Gatekeeper = {
 
 export type GatekeeperArgs = Gatekeeper;
 
+/** @deprecated Use `getGatekeeperSerializer()` without any argument instead. */
 export function getGatekeeperSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<GatekeeperArgs, Gatekeeper>;
+export function getGatekeeperSerializer(): Serializer<
+  GatekeeperArgs,
+  Gatekeeper
+>;
+export function getGatekeeperSerializer(
+  _context: object = {}
 ): Serializer<GatekeeperArgs, Gatekeeper> {
-  const s = context.serializer;
-  return s.struct<Gatekeeper>(
+  return struct<Gatekeeper>(
     [
-      ['gatekeeperNetwork', s.publicKey()],
-      ['expireOnUse', s.bool()],
+      ['gatekeeperNetwork', publicKeySerializer()],
+      ['expireOnUse', bool()],
     ],
     { description: 'Gatekeeper' }
   ) as Serializer<GatekeeperArgs, Gatekeeper>;

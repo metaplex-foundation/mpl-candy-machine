@@ -6,7 +6,12 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Context, PublicKey, Serializer } from '@metaplex-foundation/umi';
+import { PublicKey } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  publicKey as publicKeySerializer,
+  struct,
+} from '@metaplex-foundation/umi/serializers';
 
 /**
  * Guard that charges another NFT (token) from a specific collection as payment
@@ -34,14 +39,21 @@ export type NftPayment = {
 
 export type NftPaymentArgs = NftPayment;
 
+/** @deprecated Use `getNftPaymentSerializer()` without any argument instead. */
 export function getNftPaymentSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<NftPaymentArgs, NftPayment>;
+export function getNftPaymentSerializer(): Serializer<
+  NftPaymentArgs,
+  NftPayment
+>;
+export function getNftPaymentSerializer(
+  _context: object = {}
 ): Serializer<NftPaymentArgs, NftPayment> {
-  const s = context.serializer;
-  return s.struct<NftPayment>(
+  return struct<NftPayment>(
     [
-      ['requiredCollection', s.publicKey()],
-      ['destination', s.publicKey()],
+      ['requiredCollection', publicKeySerializer()],
+      ['destination', publicKeySerializer()],
     ],
     { description: 'NftPayment' }
   ) as Serializer<NftPaymentArgs, NftPayment>;

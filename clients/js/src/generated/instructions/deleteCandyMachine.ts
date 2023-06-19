@@ -11,12 +11,17 @@ import {
   Context,
   Pda,
   PublicKey,
-  Serializer,
   Signer,
   TransactionBuilder,
-  mapSerializer,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  array,
+  mapSerializer,
+  struct,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
@@ -32,20 +37,30 @@ export type DeleteCandyMachineInstructionData = {
 
 export type DeleteCandyMachineInstructionDataArgs = {};
 
+/** @deprecated Use `getDeleteCandyMachineInstructionDataSerializer()` without any argument instead. */
 export function getDeleteCandyMachineInstructionDataSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<
+  DeleteCandyMachineInstructionDataArgs,
+  DeleteCandyMachineInstructionData
+>;
+export function getDeleteCandyMachineInstructionDataSerializer(): Serializer<
+  DeleteCandyMachineInstructionDataArgs,
+  DeleteCandyMachineInstructionData
+>;
+export function getDeleteCandyMachineInstructionDataSerializer(
+  _context: object = {}
 ): Serializer<
   DeleteCandyMachineInstructionDataArgs,
   DeleteCandyMachineInstructionData
 > {
-  const s = context.serializer;
   return mapSerializer<
     DeleteCandyMachineInstructionDataArgs,
     any,
     DeleteCandyMachineInstructionData
   >(
-    s.struct<DeleteCandyMachineInstructionData>(
-      [['discriminator', s.array(s.u8(), { size: 8 })]],
+    struct<DeleteCandyMachineInstructionData>(
+      [['discriminator', array(u8(), { size: 8 })]],
       { description: 'DeleteCandyMachineInstructionData' }
     ),
     (value) => ({
@@ -60,7 +75,7 @@ export function getDeleteCandyMachineInstructionDataSerializer(
 
 // Instruction.
 export function deleteCandyMachine(
-  context: Pick<Context, 'serializer' | 'programs' | 'identity'>,
+  context: Pick<Context, 'programs' | 'identity'>,
   input: DeleteCandyMachineInstructionAccounts
 ): TransactionBuilder {
   const signers: Signer[] = [];
@@ -88,9 +103,7 @@ export function deleteCandyMachine(
   addAccountMeta(keys, signers, resolvedAccounts.authority, false);
 
   // Data.
-  const data = getDeleteCandyMachineInstructionDataSerializer(
-    context
-  ).serialize({});
+  const data = getDeleteCandyMachineInstructionDataSerializer().serialize({});
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

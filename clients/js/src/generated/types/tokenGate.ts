@@ -6,7 +6,13 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Context, PublicKey, Serializer } from '@metaplex-foundation/umi';
+import { PublicKey } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  publicKey as publicKeySerializer,
+  struct,
+  u64,
+} from '@metaplex-foundation/umi/serializers';
 
 /**
  * Guard that restricts access to addresses that hold the specified spl-token.
@@ -20,14 +26,18 @@ export type TokenGate = { amount: bigint; mint: PublicKey };
 
 export type TokenGateArgs = { amount: number | bigint; mint: PublicKey };
 
+/** @deprecated Use `getTokenGateSerializer()` without any argument instead. */
 export function getTokenGateSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<TokenGateArgs, TokenGate>;
+export function getTokenGateSerializer(): Serializer<TokenGateArgs, TokenGate>;
+export function getTokenGateSerializer(
+  _context: object = {}
 ): Serializer<TokenGateArgs, TokenGate> {
-  const s = context.serializer;
-  return s.struct<TokenGate>(
+  return struct<TokenGate>(
     [
-      ['amount', s.u64()],
-      ['mint', s.publicKey()],
+      ['amount', u64()],
+      ['mint', publicKeySerializer()],
     ],
     { description: 'TokenGate' }
   ) as Serializer<TokenGateArgs, TokenGate>;

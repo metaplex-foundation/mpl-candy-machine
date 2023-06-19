@@ -6,7 +6,12 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Context, Serializer } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  struct,
+  u16,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 
 /**
  * Gaurd to set a limit of mints per wallet.
@@ -27,14 +32,18 @@ export type MintLimit = {
 
 export type MintLimitArgs = MintLimit;
 
+/** @deprecated Use `getMintLimitSerializer()` without any argument instead. */
 export function getMintLimitSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<MintLimitArgs, MintLimit>;
+export function getMintLimitSerializer(): Serializer<MintLimitArgs, MintLimit>;
+export function getMintLimitSerializer(
+  _context: object = {}
 ): Serializer<MintLimitArgs, MintLimit> {
-  const s = context.serializer;
-  return s.struct<MintLimit>(
+  return struct<MintLimit>(
     [
-      ['id', s.u8()],
-      ['limit', s.u16()],
+      ['id', u8()],
+      ['limit', u16()],
     ],
     { description: 'MintLimit' }
   ) as Serializer<MintLimitArgs, MintLimit>;

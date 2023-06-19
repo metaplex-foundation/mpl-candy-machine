@@ -14,12 +14,19 @@ import {
   RpcAccount,
   RpcGetAccountOptions,
   RpcGetAccountsOptions,
-  Serializer,
   assertAccountExists,
   deserializeAccount,
   gpaBuilder,
   publicKey as toPublicKey,
 } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  publicKey as publicKeySerializer,
+  string,
+  struct,
+  u16,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 
 /** PDA to track the number of mints for an individual address. */
 export type MintCounter = Account<MintCounterAccountData>;
@@ -28,27 +35,40 @@ export type MintCounterAccountData = { count: number };
 
 export type MintCounterAccountDataArgs = MintCounterAccountData;
 
+/** @deprecated Use `getMintCounterAccountDataSerializer()` without any argument instead. */
 export function getMintCounterAccountDataSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<MintCounterAccountDataArgs, MintCounterAccountData>;
+export function getMintCounterAccountDataSerializer(): Serializer<
+  MintCounterAccountDataArgs,
+  MintCounterAccountData
+>;
+export function getMintCounterAccountDataSerializer(
+  _context: object = {}
 ): Serializer<MintCounterAccountDataArgs, MintCounterAccountData> {
-  const s = context.serializer;
-  return s.struct<MintCounterAccountData>([['count', s.u16()]], {
+  return struct<MintCounterAccountData>([['count', u16()]], {
     description: 'MintCounterAccountData',
   }) as Serializer<MintCounterAccountDataArgs, MintCounterAccountData>;
 }
 
+/** @deprecated Use `deserializeMintCounter(rawAccount)` without any context instead. */
 export function deserializeMintCounter(
-  context: Pick<Context, 'serializer'>,
+  context: object,
   rawAccount: RpcAccount
+): MintCounter;
+export function deserializeMintCounter(rawAccount: RpcAccount): MintCounter;
+export function deserializeMintCounter(
+  context: RpcAccount | object,
+  rawAccount?: RpcAccount
 ): MintCounter {
   return deserializeAccount(
-    rawAccount,
-    getMintCounterAccountDataSerializer(context)
+    rawAccount ?? (context as RpcAccount),
+    getMintCounterAccountDataSerializer()
   );
 }
 
 export async function fetchMintCounter(
-  context: Pick<Context, 'rpc' | 'serializer'>,
+  context: Pick<Context, 'rpc'>,
   publicKey: PublicKey | Pda,
   options?: RpcGetAccountOptions
 ): Promise<MintCounter> {
@@ -57,11 +77,11 @@ export async function fetchMintCounter(
     options
   );
   assertAccountExists(maybeAccount, 'MintCounter');
-  return deserializeMintCounter(context, maybeAccount);
+  return deserializeMintCounter(maybeAccount);
 }
 
 export async function safeFetchMintCounter(
-  context: Pick<Context, 'rpc' | 'serializer'>,
+  context: Pick<Context, 'rpc'>,
   publicKey: PublicKey | Pda,
   options?: RpcGetAccountOptions
 ): Promise<MintCounter | null> {
@@ -69,13 +89,11 @@ export async function safeFetchMintCounter(
     toPublicKey(publicKey, false),
     options
   );
-  return maybeAccount.exists
-    ? deserializeMintCounter(context, maybeAccount)
-    : null;
+  return maybeAccount.exists ? deserializeMintCounter(maybeAccount) : null;
 }
 
 export async function fetchAllMintCounter(
-  context: Pick<Context, 'rpc' | 'serializer'>,
+  context: Pick<Context, 'rpc'>,
   publicKeys: Array<PublicKey | Pda>,
   options?: RpcGetAccountsOptions
 ): Promise<MintCounter[]> {
@@ -85,12 +103,12 @@ export async function fetchAllMintCounter(
   );
   return maybeAccounts.map((maybeAccount) => {
     assertAccountExists(maybeAccount, 'MintCounter');
-    return deserializeMintCounter(context, maybeAccount);
+    return deserializeMintCounter(maybeAccount);
   });
 }
 
 export async function safeFetchAllMintCounter(
-  context: Pick<Context, 'rpc' | 'serializer'>,
+  context: Pick<Context, 'rpc'>,
   publicKeys: Array<PublicKey | Pda>,
   options?: RpcGetAccountsOptions
 ): Promise<MintCounter[]> {
@@ -100,24 +118,19 @@ export async function safeFetchAllMintCounter(
   );
   return maybeAccounts
     .filter((maybeAccount) => maybeAccount.exists)
-    .map((maybeAccount) =>
-      deserializeMintCounter(context, maybeAccount as RpcAccount)
-    );
+    .map((maybeAccount) => deserializeMintCounter(maybeAccount as RpcAccount));
 }
 
 export function getMintCounterGpaBuilder(
-  context: Pick<Context, 'rpc' | 'serializer' | 'programs'>
+  context: Pick<Context, 'rpc' | 'programs'>
 ) {
-  const s = context.serializer;
   const programId = context.programs.getPublicKey(
     'mplCandyGuard',
     'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
   );
   return gpaBuilder(context, programId)
-    .registerFields<{ count: number }>({ count: [0, s.u16()] })
-    .deserializeUsing<MintCounter>((account) =>
-      deserializeMintCounter(context, account)
-    )
+    .registerFields<{ count: number }>({ count: [0, u16()] })
+    .deserializeUsing<MintCounter>((account) => deserializeMintCounter(account))
     .whereSize(2);
 }
 
@@ -126,7 +139,7 @@ export function getMintCounterSize(): number {
 }
 
 export function findMintCounterPda(
-  context: Pick<Context, 'eddsa' | 'programs' | 'serializer'>,
+  context: Pick<Context, 'eddsa' | 'programs'>,
   seeds: {
     /** A unique identifier in the context of a Candy Machine/Candy Guard combo */
     id: number;
@@ -138,22 +151,21 @@ export function findMintCounterPda(
     candyMachine: PublicKey;
   }
 ): Pda {
-  const s = context.serializer;
   const programId = context.programs.getPublicKey(
     'mplCandyGuard',
     'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
   );
   return context.eddsa.findPda(programId, [
-    s.string({ size: 'variable' }).serialize('mint_limit'),
-    s.u8().serialize(seeds.id),
-    s.publicKey().serialize(seeds.user),
-    s.publicKey().serialize(seeds.candyGuard),
-    s.publicKey().serialize(seeds.candyMachine),
+    string({ size: 'variable' }).serialize('mint_limit'),
+    u8().serialize(seeds.id),
+    publicKeySerializer().serialize(seeds.user),
+    publicKeySerializer().serialize(seeds.candyGuard),
+    publicKeySerializer().serialize(seeds.candyMachine),
   ]);
 }
 
 export async function fetchMintCounterFromSeeds(
-  context: Pick<Context, 'eddsa' | 'programs' | 'rpc' | 'serializer'>,
+  context: Pick<Context, 'eddsa' | 'programs' | 'rpc'>,
   seeds: Parameters<typeof findMintCounterPda>[1],
   options?: RpcGetAccountOptions
 ): Promise<MintCounter> {
@@ -161,7 +173,7 @@ export async function fetchMintCounterFromSeeds(
 }
 
 export async function safeFetchMintCounterFromSeeds(
-  context: Pick<Context, 'eddsa' | 'programs' | 'rpc' | 'serializer'>,
+  context: Pick<Context, 'eddsa' | 'programs' | 'rpc'>,
   seeds: Parameters<typeof findMintCounterPda>[1],
   options?: RpcGetAccountOptions
 ): Promise<MintCounter | null> {

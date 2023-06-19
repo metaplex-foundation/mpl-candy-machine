@@ -6,7 +6,7 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Context, Serializer } from '@metaplex-foundation/umi';
+import { Serializer, scalarEnum } from '@metaplex-foundation/umi/serializers';
 
 export enum FreezeInstruction {
   Initialize,
@@ -16,11 +16,18 @@ export enum FreezeInstruction {
 
 export type FreezeInstructionArgs = FreezeInstruction;
 
+/** @deprecated Use `getFreezeInstructionSerializer()` without any argument instead. */
 export function getFreezeInstructionSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<FreezeInstructionArgs, FreezeInstruction>;
+export function getFreezeInstructionSerializer(): Serializer<
+  FreezeInstructionArgs,
+  FreezeInstruction
+>;
+export function getFreezeInstructionSerializer(
+  _context: object = {}
 ): Serializer<FreezeInstructionArgs, FreezeInstruction> {
-  const s = context.serializer;
-  return s.enum<FreezeInstruction>(FreezeInstruction, {
+  return scalarEnum<FreezeInstruction>(FreezeInstruction, {
     description: 'FreezeInstruction',
   }) as Serializer<FreezeInstructionArgs, FreezeInstruction>;
 }

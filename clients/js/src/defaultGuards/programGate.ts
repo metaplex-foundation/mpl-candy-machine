@@ -1,4 +1,7 @@
-import { fixSerializer, mapSerializer } from '@metaplex-foundation/umi';
+import {
+  fixSerializer,
+  mapSerializer,
+} from '@metaplex-foundation/umi/serializers';
 import { MaximumOfFiveAdditionalProgramsError } from '../errors';
 import {
   ProgramGate,
@@ -32,9 +35,9 @@ export const programGateGuardManifest: GuardManifest<
   ProgramGate
 > = {
   name: 'programGate',
-  serializer: (context) =>
+  serializer: () =>
     mapSerializer(
-      fixSerializer(getProgramGateSerializer(context), 4 + 32 * 5),
+      fixSerializer(getProgramGateSerializer(), 4 + 32 * 5),
       (value) => {
         if (value.additional.length > 5) {
           throw new MaximumOfFiveAdditionalProgramsError();

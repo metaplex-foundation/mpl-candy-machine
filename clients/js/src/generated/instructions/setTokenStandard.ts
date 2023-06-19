@@ -19,13 +19,18 @@ import {
   Context,
   Pda,
   PublicKey,
-  Serializer,
   Signer,
   TransactionBuilder,
-  mapSerializer,
   publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  array,
+  mapSerializer,
+  struct,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 import { findCandyMachineAuthorityPda } from '../../hooked';
 import { addAccountMeta, addObjectProperty } from '../shared';
 
@@ -58,22 +63,32 @@ export type SetTokenStandardInstructionDataArgs = {
   tokenStandard: TokenStandardArgs;
 };
 
+/** @deprecated Use `getSetTokenStandardInstructionDataSerializer()` without any argument instead. */
 export function getSetTokenStandardInstructionDataSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<
+  SetTokenStandardInstructionDataArgs,
+  SetTokenStandardInstructionData
+>;
+export function getSetTokenStandardInstructionDataSerializer(): Serializer<
+  SetTokenStandardInstructionDataArgs,
+  SetTokenStandardInstructionData
+>;
+export function getSetTokenStandardInstructionDataSerializer(
+  _context: object = {}
 ): Serializer<
   SetTokenStandardInstructionDataArgs,
   SetTokenStandardInstructionData
 > {
-  const s = context.serializer;
   return mapSerializer<
     SetTokenStandardInstructionDataArgs,
     any,
     SetTokenStandardInstructionData
   >(
-    s.struct<SetTokenStandardInstructionData>(
+    struct<SetTokenStandardInstructionData>(
       [
-        ['discriminator', s.array(s.u8(), { size: 8 })],
-        ['tokenStandard', getTokenStandardSerializer(context)],
+        ['discriminator', array(u8(), { size: 8 })],
+        ['tokenStandard', getTokenStandardSerializer()],
       ],
       { description: 'SetTokenStandardInstructionData' }
     ),
@@ -93,10 +108,7 @@ export type SetTokenStandardInstructionArgs =
 
 // Instruction.
 export function setTokenStandard(
-  context: Pick<
-    Context,
-    'serializer' | 'programs' | 'eddsa' | 'identity' | 'payer'
-  >,
+  context: Pick<Context, 'programs' | 'eddsa' | 'identity' | 'payer'>,
   input: SetTokenStandardInstructionAccounts & SetTokenStandardInstructionArgs
 ): TransactionBuilder {
   const signers: Signer[] = [];
@@ -275,9 +287,7 @@ export function setTokenStandard(
 
   // Data.
   const data =
-    getSetTokenStandardInstructionDataSerializer(context).serialize(
-      resolvedArgs
-    );
+    getSetTokenStandardInstructionDataSerializer().serialize(resolvedArgs);
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

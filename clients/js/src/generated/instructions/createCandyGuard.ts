@@ -11,13 +11,19 @@ import {
   Context,
   Pda,
   PublicKey,
-  Serializer,
   Signer,
   TransactionBuilder,
-  mapSerializer,
   publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  array,
+  bytes,
+  mapSerializer,
+  struct,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 import { findCandyGuardPda } from '../../hooked';
 import { addAccountMeta, addObjectProperty } from '../shared';
 
@@ -38,22 +44,32 @@ export type CreateCandyGuardInstructionData = {
 
 export type CreateCandyGuardInstructionDataArgs = { data: Uint8Array };
 
+/** @deprecated Use `getCreateCandyGuardInstructionDataSerializer()` without any argument instead. */
 export function getCreateCandyGuardInstructionDataSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<
+  CreateCandyGuardInstructionDataArgs,
+  CreateCandyGuardInstructionData
+>;
+export function getCreateCandyGuardInstructionDataSerializer(): Serializer<
+  CreateCandyGuardInstructionDataArgs,
+  CreateCandyGuardInstructionData
+>;
+export function getCreateCandyGuardInstructionDataSerializer(
+  _context: object = {}
 ): Serializer<
   CreateCandyGuardInstructionDataArgs,
   CreateCandyGuardInstructionData
 > {
-  const s = context.serializer;
   return mapSerializer<
     CreateCandyGuardInstructionDataArgs,
     any,
     CreateCandyGuardInstructionData
   >(
-    s.struct<CreateCandyGuardInstructionData>(
+    struct<CreateCandyGuardInstructionData>(
       [
-        ['discriminator', s.array(s.u8(), { size: 8 })],
-        ['data', s.bytes()],
+        ['discriminator', array(u8(), { size: 8 })],
+        ['data', bytes()],
       ],
       { description: 'CreateCandyGuardInstructionData' }
     ),
@@ -73,10 +89,7 @@ export type CreateCandyGuardInstructionArgs =
 
 // Instruction.
 export function createCandyGuard(
-  context: Pick<
-    Context,
-    'serializer' | 'programs' | 'eddsa' | 'identity' | 'payer'
-  >,
+  context: Pick<Context, 'programs' | 'eddsa' | 'identity' | 'payer'>,
   input: CreateCandyGuardInstructionAccounts & CreateCandyGuardInstructionArgs
 ): TransactionBuilder {
   const signers: Signer[] = [];
@@ -140,9 +153,7 @@ export function createCandyGuard(
 
   // Data.
   const data =
-    getCreateCandyGuardInstructionDataSerializer(context).serialize(
-      resolvedArgs
-    );
+    getCreateCandyGuardInstructionDataSerializer().serialize(resolvedArgs);
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

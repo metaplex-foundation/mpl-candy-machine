@@ -1,17 +1,19 @@
 import {
   AccountMeta,
-  bitArray,
   Context,
   isNone,
   isSome,
-  mergeBytes,
   none,
   Option,
-  reverseSerializer,
-  Serializer,
   Signer,
   some,
 } from '@metaplex-foundation/umi';
+import {
+  bitArray,
+  mergeBytes,
+  reverseSerializer,
+  Serializer,
+} from '@metaplex-foundation/umi/serializers';
 import { UnregisteredCandyGuardError } from '../errors';
 import {
   GuardInstructionExtras,
@@ -41,7 +43,7 @@ export function getGuardSetSerializer<
   DA extends GuardSetArgs,
   D extends DA & GuardSet = DA
 >(
-  context: Pick<Context, 'serializer'> & { guards: GuardRepository },
+  context: { guards: GuardRepository },
   program: CandyGuardProgram
 ): Serializer<Partial<DA>, D> {
   const manifests = context.guards.forProgram(program);
@@ -58,7 +60,7 @@ export function getGuardSetSerializer<
         features.push(isSome(value));
         bytes.push(
           isSome(value)
-            ? manifest.serializer(context).serialize(value.value)
+            ? manifest.serializer().serialize(value.value)
             : new Uint8Array()
         );
       });
@@ -73,7 +75,7 @@ export function getGuardSetSerializer<
       const guardSet = manifests.reduce((acc, manifest, index) => {
         acc[manifest.name] = none();
         if (!(features[index] ?? false)) return acc;
-        const serializer = manifest.serializer(context);
+        const serializer = manifest.serializer();
         const [value, newOffset] = serializer.deserialize(bytes, offset);
         offset = newOffset;
         acc[manifest.name] = some(value);
@@ -85,7 +87,7 @@ export function getGuardSetSerializer<
 }
 
 export function parseMintArgs<MA extends GuardSetMintArgs>(
-  context: Pick<Context, 'serializer' | 'eddsa' | 'programs'> & {
+  context: Pick<Context, 'eddsa' | 'programs'> & {
     guards: GuardRepository;
   },
   program: CandyGuardProgram,
@@ -115,7 +117,7 @@ export function parseRouteArgs<
   G extends keyof RA & string,
   RA extends GuardSetRouteArgs
 >(
-  context: Pick<Context, 'serializer' | 'eddsa' | 'programs'> & {
+  context: Pick<Context, 'eddsa' | 'programs'> & {
     guards: GuardRepository;
   },
   program: CandyGuardProgram,

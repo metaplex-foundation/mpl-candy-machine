@@ -1,9 +1,5 @@
-import {
-  Context,
-  PublicKey,
-  Serializer,
-  Signer,
-} from '@metaplex-foundation/umi';
+import { Context, PublicKey, Signer } from '@metaplex-foundation/umi';
+import { Serializer } from '@metaplex-foundation/umi/serializers';
 
 export type GuardManifest<
   DA extends object = {},
@@ -12,19 +8,19 @@ export type GuardManifest<
   RA extends object = {}
 > = {
   name: string;
-  serializer: (context: Pick<Context, 'serializer'>) => Serializer<DA, D>;
+  serializer: () => Serializer<DA, D>;
   mintParser: MintParser<MA>;
   routeParser: RouteParser<RA>;
 };
 
 export type MintParser<MA extends object> = (
-  context: Pick<Context, 'eddsa' | 'programs' | 'serializer'>,
+  context: Pick<Context, 'eddsa' | 'programs'>,
   mintContext: MintContext,
   args: MA
 ) => GuardInstructionExtras;
 
 export type RouteParser<RA extends object> = (
-  context: Pick<Context, 'eddsa' | 'programs' | 'serializer'>,
+  context: Pick<Context, 'eddsa' | 'programs'>,
   routeContext: RouteContext,
   args: RA
 ) => GuardInstructionExtras;

@@ -6,6 +6,7 @@ import {
   TransactionBuilder,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
+import { u32 } from '@metaplex-foundation/umi/serializers';
 import { DefaultGuardSetRouteArgs } from './defaultGuards';
 import {
   route as baseRoute,
@@ -70,7 +71,7 @@ export function route<
     G,
     RA extends undefined ? DefaultGuardSetRouteArgs : RA
   >(context, program, routeContext, input.guard, input.routeArgs);
-  const prefix = context.serializer.u32().serialize(data.length);
+  const prefix = u32().serialize(data.length);
   const ix = baseRoute(context, {
     ...rest,
     guard: guardIndex,

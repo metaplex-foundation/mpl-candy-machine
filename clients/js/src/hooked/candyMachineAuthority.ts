@@ -1,16 +1,16 @@
 import { Context, Pda, PublicKey } from '@metaplex-foundation/umi';
+import { publicKey, string } from '@metaplex-foundation/umi/serializers';
 
 export function findCandyMachineAuthorityPda(
-  context: Pick<Context, 'serializer' | 'eddsa' | 'programs'>,
+  context: Pick<Context, 'eddsa' | 'programs'>,
   seeds: {
     /** The Candy Machine address */
     candyMachine: PublicKey;
   }
 ): Pda {
-  const s = context.serializer;
   const programId = context.programs.get('mplCandyMachineCore').publicKey;
   return context.eddsa.findPda(programId, [
-    s.string({ size: 'variable' }).serialize('candy_machine'),
-    s.publicKey().serialize(seeds.candyMachine),
+    string({ size: 'variable' }).serialize('candy_machine'),
+    publicKey().serialize(seeds.candyMachine),
   ]);
 }

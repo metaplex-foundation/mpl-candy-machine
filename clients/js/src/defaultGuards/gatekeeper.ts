@@ -1,4 +1,5 @@
 import { PublicKey } from '@metaplex-foundation/umi';
+import { publicKey, string } from '@metaplex-foundation/umi/serializers';
 import {
   Gatekeeper,
   GatekeeperArgs,
@@ -34,7 +35,6 @@ export const gatekeeperGuardManifest: GuardManifest<
   name: 'gatekeeper',
   serializer: getGatekeeperSerializer,
   mintParser: (context, mintContext, args) => {
-    const s = context.serializer;
     const gatewayProgramId = context.programs.getPublicKey(
       'civicGateway',
       'gatem74V238djXdzWnJf94Wo1DcnuGkfijbf3AuBhfs'
@@ -42,18 +42,18 @@ export const gatekeeperGuardManifest: GuardManifest<
     const tokenAccount =
       args?.tokenAccount ??
       context.eddsa.findPda(gatewayProgramId, [
-        s.publicKey().serialize(mintContext.minter),
-        s.string({ size: 'variable' }).serialize('gateway'),
+        publicKey().serialize(mintContext.minter),
+        string({ size: 'variable' }).serialize('gateway'),
         new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0]),
-        s.publicKey().serialize(args.gatekeeperNetwork),
+        publicKey().serialize(args.gatekeeperNetwork),
       ])[0];
     const remainingAccounts: GuardRemainingAccount[] = [
       { publicKey: tokenAccount, isWritable: true },
     ];
     if (args.expireOnUse) {
       const [expireAccount] = context.eddsa.findPda(gatewayProgramId, [
-        s.publicKey().serialize(args.gatekeeperNetwork),
-        s.string({ size: 'variable' }).serialize('expire'),
+        publicKey().serialize(args.gatekeeperNetwork),
+        string({ size: 'variable' }).serialize('expire'),
       ]);
       remainingAccounts.push({
         publicKey: gatewayProgramId,

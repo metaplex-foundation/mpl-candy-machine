@@ -1,25 +1,26 @@
 import {
+  TokenStandard,
+  findMasterEditionPda,
+  findMetadataPda,
+  findTokenRecordPda,
+  getMplTokenMetadataProgramId,
+  isProgrammable,
+} from '@metaplex-foundation/mpl-token-metadata';
+import {
   findAssociatedTokenPda,
   getSplAssociatedTokenProgramId,
   getSplSystemProgramId,
   getSplTokenProgramId,
   getSysvar,
 } from '@metaplex-foundation/mpl-toolbox';
-import {
-  findMasterEditionPda,
-  findMetadataPda,
-  findTokenRecordPda,
-  getMplTokenMetadataProgramId,
-  isProgrammable,
-  TokenStandard,
-} from '@metaplex-foundation/mpl-token-metadata';
 import { PublicKey, Signer } from '@metaplex-foundation/umi';
+import { tuple, u64 } from '@metaplex-foundation/umi/serializers';
 import { UnrecognizePathForRouteInstructionError } from '../errors';
 import {
-  findFreezeEscrowPda,
   FreezeInstruction,
   FreezeTokenPayment,
   FreezeTokenPaymentArgs,
+  findFreezeEscrowPda,
   getFreezeInstructionSerializer,
   getFreezeTokenPaymentSerializer,
 } from '../generated';
@@ -230,11 +231,7 @@ const initializeRouteInstruction: RouteParser<
     mint: args.mint,
     owner: freezeEscrow,
   });
-  const s = context.serializer;
-  const serializer = s.tuple([
-    getFreezeInstructionSerializer(context),
-    s.u64(),
-  ]);
+  const serializer = tuple([getFreezeInstructionSerializer(), u64()]);
   return {
     data: serializer.serialize([FreezeInstruction.Initialize, args.period]),
     remainingAccounts: [

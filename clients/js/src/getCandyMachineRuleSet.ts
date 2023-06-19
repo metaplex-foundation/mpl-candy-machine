@@ -10,7 +10,7 @@ import {
 import { fetchCandyMachine } from './generated';
 
 export const getCandyMachineRuleSet = async (
-  context: Pick<Context, 'rpc' | 'serializer' | 'eddsa' | 'programs'>,
+  context: Pick<Context, 'rpc' | 'eddsa' | 'programs'>,
   candyMachine: PublicKey
 ): Promise<Option<PublicKey>> => {
   const candyMachineAccount = await fetchCandyMachine(context, candyMachine);

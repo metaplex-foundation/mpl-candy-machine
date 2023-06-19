@@ -1,14 +1,16 @@
 import { isProgrammable } from '@metaplex-foundation/mpl-token-metadata';
+import { isNone, none, Option, PublicKey } from '@metaplex-foundation/umi';
 import {
+  array,
   bitArray,
-  Context,
-  isNone,
   mapSerializer,
-  none,
-  Option,
-  PublicKey,
+  option,
+  publicKey,
   Serializer,
-} from '@metaplex-foundation/umi';
+  string,
+  struct,
+  u32,
+} from '@metaplex-foundation/umi/serializers';
 import { CANDY_MACHINE_HIDDEN_SECTION } from '../constants';
 import {
   CandyMachineAccountData as BaseCandyMachineAccountData,
@@ -53,17 +55,17 @@ type CandyMachineHiddenSection = {
   itemsLeftToMint: number[];
 };
 
-export function getCandyMachineAccountDataSerializer(
-  context: Pick<Context, 'serializer'>
-): Serializer<CandyMachineAccountDataArgs, CandyMachineAccountData> {
-  const s = context.serializer;
+export function getCandyMachineAccountDataSerializer(): Serializer<
+  CandyMachineAccountDataArgs,
+  CandyMachineAccountData
+> {
   return mapSerializer<
     CandyMachineAccountDataArgs,
     BaseCandyMachineAccountDataArgs,
     CandyMachineAccountData,
     BaseCandyMachineAccountData
   >(
-    baseGetCandyMachineAccountDataSerializer(context),
+    baseGetCandyMachineAccountDataSerializer(),
     (args) => args,
     (base, bytes, offset) => {
       const slice = bytes.slice(offset + CANDY_MACHINE_HIDDEN_SECTION);
@@ -73,9 +75,10 @@ export function getCandyMachineAccountDataSerializer(
         ruleOffset = 0
       ): [Option<PublicKey>, number] => {
         if (!isProgrammable(base.tokenStandard)) return [none(), ruleOffset];
-        return s
-          .option(s.publicKey(), { fixed: true })
-          .deserialize(ruleBytes, ruleOffset);
+        return option(publicKey(), { fixed: true }).deserialize(
+          ruleBytes,
+          ruleOffset
+        );
       };
 
       if (isNone(base.data.configLineSettings)) {
@@ -94,20 +97,20 @@ export function getCandyMachineAccountDataSerializer(
         base.data.configLineSettings.value;
 
       const hiddenSectionSerializer: Serializer<CandyMachineHiddenSection> =
-        s.struct<CandyMachineHiddenSection>([
-          ['itemsLoaded', s.u32()],
+        struct<CandyMachineHiddenSection>([
+          ['itemsLoaded', u32()],
           [
             'rawConfigLines',
-            s.array(
-              s.struct<{ name: string; uri: string }>([
-                ['name', s.string({ size: nameLength })],
-                ['uri', s.string({ size: uriLength })],
+            array(
+              struct<{ name: string; uri: string }>([
+                ['name', string({ size: nameLength })],
+                ['uri', string({ size: uriLength })],
               ]),
               { size: itemsAvailable }
             ),
           ],
           ['itemsLoadedMap', bitArray(Math.floor(itemsAvailable / 8) + 1)],
-          ['itemsLeftToMint', s.array(s.u32(), { size: itemsAvailable })],
+          ['itemsLeftToMint', array(u32(), { size: itemsAvailable })],
         ]);
 
       const [hiddenSection, hiddenSectionOffset] =

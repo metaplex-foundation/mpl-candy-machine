@@ -6,7 +6,14 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Context, PublicKey, Serializer } from '@metaplex-foundation/umi';
+import { PublicKey } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  bool,
+  publicKey as publicKeySerializer,
+  struct,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 
 export type Creator = {
   /** Pubkey address */
@@ -18,15 +25,19 @@ export type Creator = {
 
 export type CreatorArgs = Creator;
 
+/** @deprecated Use `getCreatorSerializer()` without any argument instead. */
 export function getCreatorSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<CreatorArgs, Creator>;
+export function getCreatorSerializer(): Serializer<CreatorArgs, Creator>;
+export function getCreatorSerializer(
+  _context: object = {}
 ): Serializer<CreatorArgs, Creator> {
-  const s = context.serializer;
-  return s.struct<Creator>(
+  return struct<Creator>(
     [
-      ['address', s.publicKey()],
-      ['verified', s.bool()],
-      ['percentageShare', s.u8()],
+      ['address', publicKeySerializer()],
+      ['verified', bool()],
+      ['percentageShare', u8()],
     ],
     { description: 'Creator' }
   ) as Serializer<CreatorArgs, Creator>;

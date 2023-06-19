@@ -1,30 +1,31 @@
 import {
-  findAssociatedTokenPda,
-  getMintSize,
-  getTokenSize,
-} from '@metaplex-foundation/mpl-toolbox';
-import {
+  TokenStandard,
   findTokenRecordPda,
   getMasterEditionSize,
   getMetadataSize,
   getTokenRecordSize,
   isProgrammable,
-  TokenStandard,
 } from '@metaplex-foundation/mpl-token-metadata';
 import {
+  findAssociatedTokenPda,
+  getMintSize,
+  getTokenSize,
+} from '@metaplex-foundation/mpl-toolbox';
+import {
   ACCOUNT_HEADER_SIZE,
+  Option,
+  TransactionBuilder,
   isSigner,
   mergeBytes,
   none,
-  Option,
   publicKey,
   transactionBuilder,
-  TransactionBuilder,
 } from '@metaplex-foundation/umi';
+import { u32 } from '@metaplex-foundation/umi/serializers';
 import { DefaultGuardSetMintArgs } from './defaultGuards';
 import {
-  mintV2 as baseMintV2,
   MintV2InstructionAccounts,
+  mintV2 as baseMintV2,
 } from './generated/instructions/mintV2';
 import {
   CandyGuardProgram,
@@ -78,7 +79,7 @@ export function mintV2<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
   const { data, remainingAccounts } = parseMintArgs<
     MA extends undefined ? DefaultGuardSetMintArgs : MA
   >(context, program, mintContext, mintArgs);
-  const prefix = context.serializer.u32().serialize(data.length);
+  const prefix = u32().serialize(data.length);
 
   // Default token Record value.
   const tokenStandard = input.tokenStandard ?? TokenStandard.NonFungible;

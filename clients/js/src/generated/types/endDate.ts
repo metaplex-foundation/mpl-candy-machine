@@ -7,23 +7,26 @@
  */
 
 import {
-  Context,
   DateTime,
   DateTimeInput,
-  Serializer,
   mapDateTimeSerializer,
 } from '@metaplex-foundation/umi';
+import { Serializer, i64, struct } from '@metaplex-foundation/umi/serializers';
 
 /** Guard that sets a specific date for the mint to stop. */
 export type EndDate = { date: DateTime };
 
 export type EndDateArgs = { date: DateTimeInput };
 
+/** @deprecated Use `getEndDateSerializer()` without any argument instead. */
 export function getEndDateSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<EndDateArgs, EndDate>;
+export function getEndDateSerializer(): Serializer<EndDateArgs, EndDate>;
+export function getEndDateSerializer(
+  _context: object = {}
 ): Serializer<EndDateArgs, EndDate> {
-  const s = context.serializer;
-  return s.struct<EndDate>([['date', mapDateTimeSerializer(s.i64())]], {
+  return struct<EndDate>([['date', mapDateTimeSerializer(i64())]], {
     description: 'EndDate',
   }) as Serializer<EndDateArgs, EndDate>;
 }

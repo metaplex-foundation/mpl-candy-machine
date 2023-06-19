@@ -1,4 +1,4 @@
-import { Context, Program } from '@metaplex-foundation/umi';
+import { Program } from '@metaplex-foundation/umi';
 import { UnregisteredCandyGuardError, VariableSizeGuardError } from '../errors';
 import { GuardManifest } from './guardManifest';
 
@@ -31,11 +31,9 @@ export interface GuardRepository {
 export class DefaultGuardRepository implements GuardRepository {
   protected readonly manifests = new Map<string, AnyGuardManifest>();
 
-  constructor(readonly context: Pick<Context, 'serializer'>) {}
-
   add(...manifests: AnyGuardManifest[]): void {
     manifests.forEach((manifest) => {
-      if (manifest.serializer(this.context).fixedSize === null) {
+      if (manifest.serializer().fixedSize === null) {
         throw new VariableSizeGuardError(manifest.name);
       }
       this.manifests.set(manifest.name, manifest);

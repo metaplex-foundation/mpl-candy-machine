@@ -11,12 +11,18 @@ import {
   Context,
   Pda,
   PublicKey,
-  Serializer,
   Signer,
   TransactionBuilder,
-  mapSerializer,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  array,
+  bytes,
+  mapSerializer,
+  struct,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
@@ -35,22 +41,32 @@ export type UpdateCandyGuardInstructionData = {
 
 export type UpdateCandyGuardInstructionDataArgs = { data: Uint8Array };
 
+/** @deprecated Use `getUpdateCandyGuardInstructionDataSerializer()` without any argument instead. */
 export function getUpdateCandyGuardInstructionDataSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<
+  UpdateCandyGuardInstructionDataArgs,
+  UpdateCandyGuardInstructionData
+>;
+export function getUpdateCandyGuardInstructionDataSerializer(): Serializer<
+  UpdateCandyGuardInstructionDataArgs,
+  UpdateCandyGuardInstructionData
+>;
+export function getUpdateCandyGuardInstructionDataSerializer(
+  _context: object = {}
 ): Serializer<
   UpdateCandyGuardInstructionDataArgs,
   UpdateCandyGuardInstructionData
 > {
-  const s = context.serializer;
   return mapSerializer<
     UpdateCandyGuardInstructionDataArgs,
     any,
     UpdateCandyGuardInstructionData
   >(
-    s.struct<UpdateCandyGuardInstructionData>(
+    struct<UpdateCandyGuardInstructionData>(
       [
-        ['discriminator', s.array(s.u8(), { size: 8 })],
-        ['data', s.bytes()],
+        ['discriminator', array(u8(), { size: 8 })],
+        ['data', bytes()],
       ],
       { description: 'UpdateCandyGuardInstructionData' }
     ),
@@ -70,7 +86,7 @@ export type UpdateCandyGuardInstructionArgs =
 
 // Instruction.
 export function updateCandyGuard(
-  context: Pick<Context, 'serializer' | 'programs' | 'identity' | 'payer'>,
+  context: Pick<Context, 'programs' | 'identity' | 'payer'>,
   input: UpdateCandyGuardInstructionAccounts & UpdateCandyGuardInstructionArgs
 ): TransactionBuilder {
   const signers: Signer[] = [];
@@ -123,9 +139,7 @@ export function updateCandyGuard(
 
   // Data.
   const data =
-    getUpdateCandyGuardInstructionDataSerializer(context).serialize(
-      resolvedArgs
-    );
+    getUpdateCandyGuardInstructionDataSerializer().serialize(resolvedArgs);
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

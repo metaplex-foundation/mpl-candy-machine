@@ -6,7 +6,12 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Context, PublicKey, Serializer } from '@metaplex-foundation/umi';
+import { PublicKey } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  publicKey as publicKeySerializer,
+  struct,
+} from '@metaplex-foundation/umi/serializers';
 
 /**
  * Guard that restricts the transaction to holders of a specified collection.
@@ -21,11 +26,15 @@ export type NftGate = { requiredCollection: PublicKey };
 
 export type NftGateArgs = NftGate;
 
+/** @deprecated Use `getNftGateSerializer()` without any argument instead. */
 export function getNftGateSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<NftGateArgs, NftGate>;
+export function getNftGateSerializer(): Serializer<NftGateArgs, NftGate>;
+export function getNftGateSerializer(
+  _context: object = {}
 ): Serializer<NftGateArgs, NftGate> {
-  const s = context.serializer;
-  return s.struct<NftGate>([['requiredCollection', s.publicKey()]], {
+  return struct<NftGate>([['requiredCollection', publicKeySerializer()]], {
     description: 'NftGate',
   }) as Serializer<NftGateArgs, NftGate>;
 }

@@ -10,15 +10,24 @@ import {
   AccountMeta,
   Context,
   Option,
+  OptionOrNullable,
   Pda,
   PublicKey,
-  Serializer,
   Signer,
   TransactionBuilder,
-  mapSerializer,
   publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  array,
+  bytes,
+  mapSerializer,
+  option,
+  string,
+  struct,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 import { findCandyGuardPda } from '../../hooked';
 import { addAccountMeta, addObjectProperty } from '../shared';
 import { GuardType, GuardTypeArgs, getGuardTypeSerializer } from '../types';
@@ -45,20 +54,27 @@ export type RouteInstructionDataArgs = {
   guard: GuardTypeArgs;
   /** Arguments for the guard instruction. */
   data: Uint8Array;
-  group: Option<string>;
+  group: OptionOrNullable<string>;
 };
 
+/** @deprecated Use `getRouteInstructionDataSerializer()` without any argument instead. */
 export function getRouteInstructionDataSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<RouteInstructionDataArgs, RouteInstructionData>;
+export function getRouteInstructionDataSerializer(): Serializer<
+  RouteInstructionDataArgs,
+  RouteInstructionData
+>;
+export function getRouteInstructionDataSerializer(
+  _context: object = {}
 ): Serializer<RouteInstructionDataArgs, RouteInstructionData> {
-  const s = context.serializer;
   return mapSerializer<RouteInstructionDataArgs, any, RouteInstructionData>(
-    s.struct<RouteInstructionData>(
+    struct<RouteInstructionData>(
       [
-        ['discriminator', s.array(s.u8(), { size: 8 })],
-        ['guard', getGuardTypeSerializer(context)],
-        ['data', s.bytes()],
-        ['group', s.option(s.string())],
+        ['discriminator', array(u8(), { size: 8 })],
+        ['guard', getGuardTypeSerializer()],
+        ['data', bytes()],
+        ['group', option(string())],
       ],
       { description: 'RouteInstructionData' }
     ),
@@ -74,7 +90,7 @@ export type RouteInstructionArgs = RouteInstructionDataArgs;
 
 // Instruction.
 export function route(
-  context: Pick<Context, 'serializer' | 'programs' | 'eddsa' | 'payer'>,
+  context: Pick<Context, 'programs' | 'eddsa' | 'payer'>,
   input: RouteInstructionAccounts & RouteInstructionArgs
 ): TransactionBuilder {
   const signers: Signer[] = [];
@@ -117,8 +133,7 @@ export function route(
   addAccountMeta(keys, signers, resolvedAccounts.payer, false);
 
   // Data.
-  const data =
-    getRouteInstructionDataSerializer(context).serialize(resolvedArgs);
+  const data = getRouteInstructionDataSerializer().serialize(resolvedArgs);
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

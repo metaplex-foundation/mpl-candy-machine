@@ -1,5 +1,6 @@
 import { getSplSystemProgramId } from '@metaplex-foundation/mpl-toolbox';
 import { PublicKey, Signer, publicKey } from '@metaplex-foundation/umi';
+import { array, bytes } from '@metaplex-foundation/umi/serializers';
 import {
   AllowList,
   AllowListArgs,
@@ -63,9 +64,7 @@ export const allowListGuardManifest: GuardManifest<
     ],
   }),
   routeParser: (context, routeContext, args) => ({
-    data: context.serializer
-      .array(context.serializer.bytes({ size: 32 }))
-      .serialize(args.merkleProof),
+    data: array(bytes({ size: 32 })).serialize(args.merkleProof),
     remainingAccounts: [
       {
         isWritable: true,

@@ -25,20 +25,20 @@
   "author": "Metaplex Maintainers <contact@metaplex.com>",
   "license": "Apache-2.0",
   "peerDependencies": {
-    "@metaplex-foundation/umi": "^0.8.0"
+    "@metaplex-foundation/umi": "^0.8.2"
   },
   "dependencies": {
-    "@metaplex-foundation/mpl-toolbox": "^0.7.0",
-    "@metaplex-foundation/mpl-token-metadata": "3.0.0-alpha.23",
+    "@metaplex-foundation/mpl-toolbox": "^0.8.0",
+    "@metaplex-foundation/mpl-token-metadata": "3.0.0-alpha.24",
     "@noble/hashes": "^1.2.0",
     "merkletreejs": "^0.3.9"
   },
   "devDependencies": {
     "@ava/typescript": "^3.0.1",
     "@identity.com/solana-gateway-ts": "^0.9.0",
-    "@metaplex-foundation/umi": "^0.8.0",
-    "@metaplex-foundation/umi-bundle-tests": "^0.8.0",
-    "@metaplex-foundation/umi-web3js-adapters": "^0.8.0",
+    "@metaplex-foundation/umi": "^0.8.2",
+    "@metaplex-foundation/umi-bundle-tests": "^0.8.2",
+    "@metaplex-foundation/umi-web3js-adapters": "^0.8.2",
     "@metaplex-foundation/mpl-token-auth-rules": "^1.2.0",
     "@solana/web3.js": "^1.73.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",

@@ -6,12 +6,13 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+import { SolAmount, mapAmountSerializer } from '@metaplex-foundation/umi';
 import {
-  Context,
   Serializer,
-  SolAmount,
-  mapAmountSerializer,
-} from '@metaplex-foundation/umi';
+  bool,
+  struct,
+  u64,
+} from '@metaplex-foundation/umi/serializers';
 
 /**
  * Guard is used to:
@@ -27,14 +28,18 @@ export type BotTax = { lamports: SolAmount; lastInstruction: boolean };
 
 export type BotTaxArgs = BotTax;
 
+/** @deprecated Use `getBotTaxSerializer()` without any argument instead. */
 export function getBotTaxSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<BotTaxArgs, BotTax>;
+export function getBotTaxSerializer(): Serializer<BotTaxArgs, BotTax>;
+export function getBotTaxSerializer(
+  _context: object = {}
 ): Serializer<BotTaxArgs, BotTax> {
-  const s = context.serializer;
-  return s.struct<BotTax>(
+  return struct<BotTax>(
     [
-      ['lamports', mapAmountSerializer(s.u64(), 'SOL', 9)],
-      ['lastInstruction', s.bool()],
+      ['lamports', mapAmountSerializer(u64(), 'SOL', 9)],
+      ['lastInstruction', bool()],
     ],
     { description: 'BotTax' }
   ) as Serializer<BotTaxArgs, BotTax>;

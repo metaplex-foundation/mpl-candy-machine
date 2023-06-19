@@ -6,7 +6,7 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Context, Serializer } from '@metaplex-foundation/umi';
+import { Serializer, struct, u64 } from '@metaplex-foundation/umi/serializers';
 
 /**
  * Guard that stop the mint once the specified amount of items
@@ -17,11 +17,18 @@ export type RedeemedAmount = { maximum: bigint };
 
 export type RedeemedAmountArgs = { maximum: number | bigint };
 
+/** @deprecated Use `getRedeemedAmountSerializer()` without any argument instead. */
 export function getRedeemedAmountSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<RedeemedAmountArgs, RedeemedAmount>;
+export function getRedeemedAmountSerializer(): Serializer<
+  RedeemedAmountArgs,
+  RedeemedAmount
+>;
+export function getRedeemedAmountSerializer(
+  _context: object = {}
 ): Serializer<RedeemedAmountArgs, RedeemedAmount> {
-  const s = context.serializer;
-  return s.struct<RedeemedAmount>([['maximum', s.u64()]], {
+  return struct<RedeemedAmount>([['maximum', u64()]], {
     description: 'RedeemedAmount',
   }) as Serializer<RedeemedAmountArgs, RedeemedAmount>;
 }

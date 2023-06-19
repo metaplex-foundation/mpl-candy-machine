@@ -66,11 +66,10 @@ import { NftGateMintArgs } from './nftGate';
 import { NftPaymentMintArgs } from './nftPayment';
 import { SolPaymentMintArgs } from './solPayment';
 import { ThirdPartySignerMintArgs } from './thirdPartySigner';
+import { Token2022PaymentMintArgs } from './token2022Payment';
 import { TokenBurnMintArgs } from './tokenBurn';
 import { TokenGateMintArgs } from './tokenGate';
 import { TokenPaymentMintArgs } from './tokenPayment';
-
-import { Token2022PaymentMintArgs } from './token2022Payment';
 
 /**
  * The arguments for all default Candy Machine guards.

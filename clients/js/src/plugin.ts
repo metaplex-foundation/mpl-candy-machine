@@ -55,7 +55,7 @@ export const mplCandyMachine = (): UmiPlugin => ({
     umi.programs.add(createMplTokenAuthRulesProgram(), false);
 
     // Default Guards.
-    umi.guards = new DefaultGuardRepository(umi);
+    umi.guards = new DefaultGuardRepository();
     umi.guards.add(
       botTaxGuardManifest,
       solPaymentGuardManifest,

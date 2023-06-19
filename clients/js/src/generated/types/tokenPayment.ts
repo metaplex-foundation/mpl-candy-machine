@@ -6,7 +6,13 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Context, PublicKey, Serializer } from '@metaplex-foundation/umi';
+import { PublicKey } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  publicKey as publicKeySerializer,
+  struct,
+  u64,
+} from '@metaplex-foundation/umi/serializers';
 
 /**
  * Guard that charges an amount in a specified spl-token as payment for the mint.
@@ -29,15 +35,22 @@ export type TokenPaymentArgs = {
   destinationAta: PublicKey;
 };
 
+/** @deprecated Use `getTokenPaymentSerializer()` without any argument instead. */
 export function getTokenPaymentSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<TokenPaymentArgs, TokenPayment>;
+export function getTokenPaymentSerializer(): Serializer<
+  TokenPaymentArgs,
+  TokenPayment
+>;
+export function getTokenPaymentSerializer(
+  _context: object = {}
 ): Serializer<TokenPaymentArgs, TokenPayment> {
-  const s = context.serializer;
-  return s.struct<TokenPayment>(
+  return struct<TokenPayment>(
     [
-      ['amount', s.u64()],
-      ['mint', s.publicKey()],
-      ['destinationAta', s.publicKey()],
+      ['amount', u64()],
+      ['mint', publicKeySerializer()],
+      ['destinationAta', publicKeySerializer()],
     ],
     { description: 'TokenPayment' }
   ) as Serializer<TokenPaymentArgs, TokenPayment>;

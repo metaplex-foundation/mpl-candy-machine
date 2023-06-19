@@ -11,12 +11,17 @@ import {
   Context,
   Pda,
   PublicKey,
-  Serializer,
   Signer,
   TransactionBuilder,
-  mapSerializer,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  array,
+  mapSerializer,
+  struct,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
@@ -33,15 +38,21 @@ export type WrapInstructionData = { discriminator: Array<number> };
 
 export type WrapInstructionDataArgs = {};
 
+/** @deprecated Use `getWrapInstructionDataSerializer()` without any argument instead. */
 export function getWrapInstructionDataSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<WrapInstructionDataArgs, WrapInstructionData>;
+export function getWrapInstructionDataSerializer(): Serializer<
+  WrapInstructionDataArgs,
+  WrapInstructionData
+>;
+export function getWrapInstructionDataSerializer(
+  _context: object = {}
 ): Serializer<WrapInstructionDataArgs, WrapInstructionData> {
-  const s = context.serializer;
   return mapSerializer<WrapInstructionDataArgs, any, WrapInstructionData>(
-    s.struct<WrapInstructionData>(
-      [['discriminator', s.array(s.u8(), { size: 8 })]],
-      { description: 'WrapInstructionData' }
-    ),
+    struct<WrapInstructionData>([['discriminator', array(u8(), { size: 8 })]], {
+      description: 'WrapInstructionData',
+    }),
     (value) => ({
       ...value,
       discriminator: [178, 40, 10, 189, 228, 129, 186, 140],
@@ -51,7 +62,7 @@ export function getWrapInstructionDataSerializer(
 
 // Instruction.
 export function wrap(
-  context: Pick<Context, 'serializer' | 'programs' | 'identity'>,
+  context: Pick<Context, 'programs' | 'identity'>,
   input: WrapInstructionAccounts
 ): TransactionBuilder {
   const signers: Signer[] = [];
@@ -103,7 +114,7 @@ export function wrap(
   addAccountMeta(keys, signers, resolvedAccounts.candyMachineAuthority, false);
 
   // Data.
-  const data = getWrapInstructionDataSerializer(context).serialize({});
+  const data = getWrapInstructionDataSerializer().serialize({});
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

@@ -6,7 +6,12 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Context, PublicKey, Serializer } from '@metaplex-foundation/umi';
+import { PublicKey } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  publicKey as publicKeySerializer,
+  struct,
+} from '@metaplex-foundation/umi/serializers';
 
 /**
  * Guard that requires a specified signer to validate the transaction.
@@ -20,11 +25,18 @@ export type ThirdPartySigner = { signerKey: PublicKey };
 
 export type ThirdPartySignerArgs = ThirdPartySigner;
 
+/** @deprecated Use `getThirdPartySignerSerializer()` without any argument instead. */
 export function getThirdPartySignerSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<ThirdPartySignerArgs, ThirdPartySigner>;
+export function getThirdPartySignerSerializer(): Serializer<
+  ThirdPartySignerArgs,
+  ThirdPartySigner
+>;
+export function getThirdPartySignerSerializer(
+  _context: object = {}
 ): Serializer<ThirdPartySignerArgs, ThirdPartySigner> {
-  const s = context.serializer;
-  return s.struct<ThirdPartySigner>([['signerKey', s.publicKey()]], {
+  return struct<ThirdPartySigner>([['signerKey', publicKeySerializer()]], {
     description: 'ThirdPartySigner',
   }) as Serializer<ThirdPartySignerArgs, ThirdPartySigner>;
 }

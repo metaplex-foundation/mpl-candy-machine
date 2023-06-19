@@ -16,17 +16,28 @@ import {
   Amount,
   Context,
   Option,
+  OptionOrNullable,
   Pda,
   PublicKey,
-  Serializer,
   Signer,
   TransactionBuilder,
   mapAmountSerializer,
-  mapSerializer,
   none,
   publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  array,
+  bool,
+  mapSerializer,
+  option,
+  string,
+  struct,
+  u16,
+  u64,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 import { findCandyMachineAuthorityPda } from '../../hooked';
 import { addAccountMeta, addObjectProperty } from '../shared';
 import {
@@ -91,37 +102,44 @@ export type InitializeCandyMachineInstructionDataArgs = {
   /** List of creators */
   creators: Array<CreatorArgs>;
   /** Config line settings */
-  configLineSettings?: Option<ConfigLineSettingsArgs>;
+  configLineSettings?: OptionOrNullable<ConfigLineSettingsArgs>;
   /** Hidden setttings */
-  hiddenSettings?: Option<HiddenSettingsArgs>;
+  hiddenSettings?: OptionOrNullable<HiddenSettingsArgs>;
 };
 
+/** @deprecated Use `getInitializeCandyMachineInstructionDataSerializer()` without any argument instead. */
 export function getInitializeCandyMachineInstructionDataSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<
+  InitializeCandyMachineInstructionDataArgs,
+  InitializeCandyMachineInstructionData
+>;
+export function getInitializeCandyMachineInstructionDataSerializer(): Serializer<
+  InitializeCandyMachineInstructionDataArgs,
+  InitializeCandyMachineInstructionData
+>;
+export function getInitializeCandyMachineInstructionDataSerializer(
+  _context: object = {}
 ): Serializer<
   InitializeCandyMachineInstructionDataArgs,
   InitializeCandyMachineInstructionData
 > {
-  const s = context.serializer;
   return mapSerializer<
     InitializeCandyMachineInstructionDataArgs,
     any,
     InitializeCandyMachineInstructionData
   >(
-    s.struct<InitializeCandyMachineInstructionData>(
+    struct<InitializeCandyMachineInstructionData>(
       [
-        ['discriminator', s.array(s.u8(), { size: 8 })],
-        ['itemsAvailable', s.u64()],
-        ['symbol', s.string()],
-        ['sellerFeeBasisPoints', mapAmountSerializer(s.u16(), '%', 2)],
-        ['maxEditionSupply', s.u64()],
-        ['isMutable', s.bool()],
-        ['creators', s.array(getCreatorSerializer(context))],
-        [
-          'configLineSettings',
-          s.option(getConfigLineSettingsSerializer(context)),
-        ],
-        ['hiddenSettings', s.option(getHiddenSettingsSerializer(context))],
+        ['discriminator', array(u8(), { size: 8 })],
+        ['itemsAvailable', u64()],
+        ['symbol', string()],
+        ['sellerFeeBasisPoints', mapAmountSerializer(u16(), '%', 2)],
+        ['maxEditionSupply', u64()],
+        ['isMutable', bool()],
+        ['creators', array(getCreatorSerializer())],
+        ['configLineSettings', option(getConfigLineSettingsSerializer())],
+        ['hiddenSettings', option(getHiddenSettingsSerializer())],
       ],
       { description: 'InitializeCandyMachineInstructionData' }
     ),
@@ -146,10 +164,7 @@ export type InitializeCandyMachineInstructionArgs =
 
 // Instruction.
 export function initializeCandyMachine(
-  context: Pick<
-    Context,
-    'serializer' | 'programs' | 'eddsa' | 'identity' | 'payer'
-  >,
+  context: Pick<Context, 'programs' | 'eddsa' | 'identity' | 'payer'>,
   input: InitializeCandyMachineInstructionAccounts &
     InitializeCandyMachineInstructionArgs
 ): TransactionBuilder {
@@ -292,7 +307,7 @@ export function initializeCandyMachine(
 
   // Data.
   const data =
-    getInitializeCandyMachineInstructionDataSerializer(context).serialize(
+    getInitializeCandyMachineInstructionDataSerializer().serialize(
       resolvedArgs
     );
 

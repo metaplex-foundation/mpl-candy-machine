@@ -20,17 +20,28 @@ import {
   Amount,
   Context,
   Option,
+  OptionOrNullable,
   Pda,
   PublicKey,
-  Serializer,
   Signer,
   TransactionBuilder,
   mapAmountSerializer,
-  mapSerializer,
   none,
   publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  array,
+  bool,
+  mapSerializer,
+  option,
+  string,
+  struct,
+  u16,
+  u64,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 import { findCandyMachineAuthorityPda } from '../../hooked';
 import { addAccountMeta, addObjectProperty } from '../shared';
 import {
@@ -100,39 +111,46 @@ export type InitializeCandyMachineV2InstructionDataArgs = {
   /** List of creators */
   creators: Array<CreatorArgs>;
   /** Config line settings */
-  configLineSettings?: Option<ConfigLineSettingsArgs>;
+  configLineSettings?: OptionOrNullable<ConfigLineSettingsArgs>;
   /** Hidden setttings */
-  hiddenSettings?: Option<HiddenSettingsArgs>;
+  hiddenSettings?: OptionOrNullable<HiddenSettingsArgs>;
   tokenStandard: TokenStandardArgs;
 };
 
+/** @deprecated Use `getInitializeCandyMachineV2InstructionDataSerializer()` without any argument instead. */
 export function getInitializeCandyMachineV2InstructionDataSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<
+  InitializeCandyMachineV2InstructionDataArgs,
+  InitializeCandyMachineV2InstructionData
+>;
+export function getInitializeCandyMachineV2InstructionDataSerializer(): Serializer<
+  InitializeCandyMachineV2InstructionDataArgs,
+  InitializeCandyMachineV2InstructionData
+>;
+export function getInitializeCandyMachineV2InstructionDataSerializer(
+  _context: object = {}
 ): Serializer<
   InitializeCandyMachineV2InstructionDataArgs,
   InitializeCandyMachineV2InstructionData
 > {
-  const s = context.serializer;
   return mapSerializer<
     InitializeCandyMachineV2InstructionDataArgs,
     any,
     InitializeCandyMachineV2InstructionData
   >(
-    s.struct<InitializeCandyMachineV2InstructionData>(
+    struct<InitializeCandyMachineV2InstructionData>(
       [
-        ['discriminator', s.array(s.u8(), { size: 8 })],
-        ['itemsAvailable', s.u64()],
-        ['symbol', s.string()],
-        ['sellerFeeBasisPoints', mapAmountSerializer(s.u16(), '%', 2)],
-        ['maxEditionSupply', s.u64()],
-        ['isMutable', s.bool()],
-        ['creators', s.array(getCreatorSerializer(context))],
-        [
-          'configLineSettings',
-          s.option(getConfigLineSettingsSerializer(context)),
-        ],
-        ['hiddenSettings', s.option(getHiddenSettingsSerializer(context))],
-        ['tokenStandard', getTokenStandardSerializer(context)],
+        ['discriminator', array(u8(), { size: 8 })],
+        ['itemsAvailable', u64()],
+        ['symbol', string()],
+        ['sellerFeeBasisPoints', mapAmountSerializer(u16(), '%', 2)],
+        ['maxEditionSupply', u64()],
+        ['isMutable', bool()],
+        ['creators', array(getCreatorSerializer())],
+        ['configLineSettings', option(getConfigLineSettingsSerializer())],
+        ['hiddenSettings', option(getHiddenSettingsSerializer())],
+        ['tokenStandard', getTokenStandardSerializer()],
       ],
       { description: 'InitializeCandyMachineV2InstructionData' }
     ),
@@ -157,10 +175,7 @@ export type InitializeCandyMachineV2InstructionArgs =
 
 // Instruction.
 export function initializeCandyMachineV2(
-  context: Pick<
-    Context,
-    'serializer' | 'programs' | 'eddsa' | 'identity' | 'payer'
-  >,
+  context: Pick<Context, 'programs' | 'eddsa' | 'identity' | 'payer'>,
   input: InitializeCandyMachineV2InstructionAccounts &
     InitializeCandyMachineV2InstructionArgs
 ): TransactionBuilder {
@@ -342,7 +357,7 @@ export function initializeCandyMachineV2(
 
   // Data.
   const data =
-    getInitializeCandyMachineV2InstructionDataSerializer(context).serialize(
+    getInitializeCandyMachineV2InstructionDataSerializer().serialize(
       resolvedArgs
     );
 

@@ -14,12 +14,19 @@ import {
   RpcAccount,
   RpcGetAccountOptions,
   RpcGetAccountsOptions,
-  Serializer,
   assertAccountExists,
   deserializeAccount,
   gpaBuilder,
   publicKey as toPublicKey,
 } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  bytes,
+  i64,
+  publicKey as publicKeySerializer,
+  string,
+  struct,
+} from '@metaplex-foundation/umi/serializers';
 
 /** PDA to track whether an address has been validated or not. */
 export type AllowListProof = Account<AllowListProofAccountData>;
@@ -28,27 +35,42 @@ export type AllowListProofAccountData = { timestamp: bigint };
 
 export type AllowListProofAccountDataArgs = { timestamp: number | bigint };
 
+/** @deprecated Use `getAllowListProofAccountDataSerializer()` without any argument instead. */
 export function getAllowListProofAccountDataSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<AllowListProofAccountDataArgs, AllowListProofAccountData>;
+export function getAllowListProofAccountDataSerializer(): Serializer<
+  AllowListProofAccountDataArgs,
+  AllowListProofAccountData
+>;
+export function getAllowListProofAccountDataSerializer(
+  _context: object = {}
 ): Serializer<AllowListProofAccountDataArgs, AllowListProofAccountData> {
-  const s = context.serializer;
-  return s.struct<AllowListProofAccountData>([['timestamp', s.i64()]], {
+  return struct<AllowListProofAccountData>([['timestamp', i64()]], {
     description: 'AllowListProofAccountData',
   }) as Serializer<AllowListProofAccountDataArgs, AllowListProofAccountData>;
 }
 
+/** @deprecated Use `deserializeAllowListProof(rawAccount)` without any context instead. */
 export function deserializeAllowListProof(
-  context: Pick<Context, 'serializer'>,
+  context: object,
   rawAccount: RpcAccount
+): AllowListProof;
+export function deserializeAllowListProof(
+  rawAccount: RpcAccount
+): AllowListProof;
+export function deserializeAllowListProof(
+  context: RpcAccount | object,
+  rawAccount?: RpcAccount
 ): AllowListProof {
   return deserializeAccount(
-    rawAccount,
-    getAllowListProofAccountDataSerializer(context)
+    rawAccount ?? (context as RpcAccount),
+    getAllowListProofAccountDataSerializer()
   );
 }
 
 export async function fetchAllowListProof(
-  context: Pick<Context, 'rpc' | 'serializer'>,
+  context: Pick<Context, 'rpc'>,
   publicKey: PublicKey | Pda,
   options?: RpcGetAccountOptions
 ): Promise<AllowListProof> {
@@ -57,11 +79,11 @@ export async function fetchAllowListProof(
     options
   );
   assertAccountExists(maybeAccount, 'AllowListProof');
-  return deserializeAllowListProof(context, maybeAccount);
+  return deserializeAllowListProof(maybeAccount);
 }
 
 export async function safeFetchAllowListProof(
-  context: Pick<Context, 'rpc' | 'serializer'>,
+  context: Pick<Context, 'rpc'>,
   publicKey: PublicKey | Pda,
   options?: RpcGetAccountOptions
 ): Promise<AllowListProof | null> {
@@ -69,13 +91,11 @@ export async function safeFetchAllowListProof(
     toPublicKey(publicKey, false),
     options
   );
-  return maybeAccount.exists
-    ? deserializeAllowListProof(context, maybeAccount)
-    : null;
+  return maybeAccount.exists ? deserializeAllowListProof(maybeAccount) : null;
 }
 
 export async function fetchAllAllowListProof(
-  context: Pick<Context, 'rpc' | 'serializer'>,
+  context: Pick<Context, 'rpc'>,
   publicKeys: Array<PublicKey | Pda>,
   options?: RpcGetAccountsOptions
 ): Promise<AllowListProof[]> {
@@ -85,12 +105,12 @@ export async function fetchAllAllowListProof(
   );
   return maybeAccounts.map((maybeAccount) => {
     assertAccountExists(maybeAccount, 'AllowListProof');
-    return deserializeAllowListProof(context, maybeAccount);
+    return deserializeAllowListProof(maybeAccount);
   });
 }
 
 export async function safeFetchAllAllowListProof(
-  context: Pick<Context, 'rpc' | 'serializer'>,
+  context: Pick<Context, 'rpc'>,
   publicKeys: Array<PublicKey | Pda>,
   options?: RpcGetAccountsOptions
 ): Promise<AllowListProof[]> {
@@ -101,22 +121,21 @@ export async function safeFetchAllAllowListProof(
   return maybeAccounts
     .filter((maybeAccount) => maybeAccount.exists)
     .map((maybeAccount) =>
-      deserializeAllowListProof(context, maybeAccount as RpcAccount)
+      deserializeAllowListProof(maybeAccount as RpcAccount)
     );
 }
 
 export function getAllowListProofGpaBuilder(
-  context: Pick<Context, 'rpc' | 'serializer' | 'programs'>
+  context: Pick<Context, 'rpc' | 'programs'>
 ) {
-  const s = context.serializer;
   const programId = context.programs.getPublicKey(
     'mplCandyGuard',
     'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
   );
   return gpaBuilder(context, programId)
-    .registerFields<{ timestamp: number | bigint }>({ timestamp: [0, s.i64()] })
+    .registerFields<{ timestamp: number | bigint }>({ timestamp: [0, i64()] })
     .deserializeUsing<AllowListProof>((account) =>
-      deserializeAllowListProof(context, account)
+      deserializeAllowListProof(account)
     )
     .whereSize(4);
 }
@@ -126,7 +145,7 @@ export function getAllowListProofSize(): number {
 }
 
 export function findAllowListProofPda(
-  context: Pick<Context, 'eddsa' | 'programs' | 'serializer'>,
+  context: Pick<Context, 'eddsa' | 'programs'>,
   seeds: {
     /** The Merkle Root used when verifying the user */
     merkleRoot: Uint8Array;
@@ -138,22 +157,21 @@ export function findAllowListProofPda(
     candyMachine: PublicKey;
   }
 ): Pda {
-  const s = context.serializer;
   const programId = context.programs.getPublicKey(
     'mplCandyGuard',
     'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
   );
   return context.eddsa.findPda(programId, [
-    s.string({ size: 'variable' }).serialize('allow_list'),
-    s.bytes({ size: 32 }).serialize(seeds.merkleRoot),
-    s.publicKey().serialize(seeds.user),
-    s.publicKey().serialize(seeds.candyGuard),
-    s.publicKey().serialize(seeds.candyMachine),
+    string({ size: 'variable' }).serialize('allow_list'),
+    bytes({ size: 32 }).serialize(seeds.merkleRoot),
+    publicKeySerializer().serialize(seeds.user),
+    publicKeySerializer().serialize(seeds.candyGuard),
+    publicKeySerializer().serialize(seeds.candyMachine),
   ]);
 }
 
 export async function fetchAllowListProofFromSeeds(
-  context: Pick<Context, 'eddsa' | 'programs' | 'rpc' | 'serializer'>,
+  context: Pick<Context, 'eddsa' | 'programs' | 'rpc'>,
   seeds: Parameters<typeof findAllowListProofPda>[1],
   options?: RpcGetAccountOptions
 ): Promise<AllowListProof> {
@@ -165,7 +183,7 @@ export async function fetchAllowListProofFromSeeds(
 }
 
 export async function safeFetchAllowListProofFromSeeds(
-  context: Pick<Context, 'eddsa' | 'programs' | 'rpc' | 'serializer'>,
+  context: Pick<Context, 'eddsa' | 'programs' | 'rpc'>,
   seeds: Parameters<typeof findAllowListProofPda>[1],
   options?: RpcGetAccountOptions
 ): Promise<AllowListProof | null> {

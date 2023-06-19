@@ -1,4 +1,5 @@
 import { publicKey } from '@metaplex-foundation/umi';
+import { publicKey as publicKeySerializer } from '@metaplex-foundation/umi/serializers';
 import {
   getToken2022PaymentSerializer,
   Token2022Payment,
@@ -28,13 +29,12 @@ export const token2022PaymentGuardManifest: GuardManifest<
   name: 'token2022Payment',
   serializer: getToken2022PaymentSerializer,
   mintParser: (context, mintContext, args) => {
-    const s = context.serializer;
     const associatedTokenProgramId =
       context.programs.get('splAssociatedToken').publicKey;
     const sourceAta = context.eddsa.findPda(associatedTokenProgramId, [
-      s.publicKey().serialize(mintContext.minter.publicKey),
-      s.publicKey().serialize(SPL_TOKEN_2022_PROGRAM_ID),
-      s.publicKey().serialize(args.mint),
+      publicKeySerializer().serialize(mintContext.minter.publicKey),
+      publicKeySerializer().serialize(SPL_TOKEN_2022_PROGRAM_ID),
+      publicKeySerializer().serialize(args.mint),
     ])[0];
 
     return {

@@ -6,7 +6,13 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Context, PublicKey, Serializer } from '@metaplex-foundation/umi';
+import { PublicKey } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  publicKey as publicKeySerializer,
+  struct,
+  u64,
+} from '@metaplex-foundation/umi/serializers';
 
 /**
  * Guard that requires addresses that hold an amount of a specified spl-token
@@ -22,14 +28,18 @@ export type TokenBurn = { amount: bigint; mint: PublicKey };
 
 export type TokenBurnArgs = { amount: number | bigint; mint: PublicKey };
 
+/** @deprecated Use `getTokenBurnSerializer()` without any argument instead. */
 export function getTokenBurnSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<TokenBurnArgs, TokenBurn>;
+export function getTokenBurnSerializer(): Serializer<TokenBurnArgs, TokenBurn>;
+export function getTokenBurnSerializer(
+  _context: object = {}
 ): Serializer<TokenBurnArgs, TokenBurn> {
-  const s = context.serializer;
-  return s.struct<TokenBurn>(
+  return struct<TokenBurn>(
     [
-      ['amount', s.u64()],
-      ['mint', s.publicKey()],
+      ['amount', u64()],
+      ['mint', publicKeySerializer()],
     ],
     { description: 'TokenBurn' }
   ) as Serializer<TokenBurnArgs, TokenBurn>;

@@ -6,13 +6,19 @@ import {
   RpcAccount,
   RpcGetAccountOptions,
   RpcGetAccountsOptions,
-  Serializer,
   assertAccountExists,
   deserializeAccount,
   gpaBuilder,
-  mapSerializer,
   publicKey as toPublicKey,
 } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  array,
+  mapSerializer,
+  publicKey as publicKeySerializer,
+  struct,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 import { DefaultGuardSet, DefaultGuardSetArgs } from '../defaultGuards';
 import { findCandyGuardPda } from '../generated/accounts/candyGuard';
 import {
@@ -52,22 +58,21 @@ export function getCandyGuardAccountDataSerializer<
   DA extends GuardSetArgs = DefaultGuardSetArgs,
   D extends DA & GuardSet = DA
 >(
-  context: Pick<Context, 'serializer' | 'programs'> & {
+  context: Pick<Context, 'programs'> & {
     guards: GuardRepository;
   },
   program?: CandyGuardProgram
 ): Serializer<CandyGuardAccountDataArgs<DA>, CandyGuardAccountData<D>> {
-  const s = context.serializer;
   program ??= context.programs.get<CandyGuardProgram>('mplCandyGuard');
   return mapSerializer(
-    s.struct<any>(
+    struct<any>(
       [
-        ['discriminator', s.array(s.u8(), { size: 8 })],
-        ['base', s.publicKey()],
-        ['bump', s.u8()],
-        ['authority', s.publicKey()],
+        ['discriminator', array(u8(), { size: 8 })],
+        ['base', publicKeySerializer()],
+        ['bump', u8()],
+        ['authority', publicKeySerializer()],
         ['guards', getGuardSetSerializer<DA, D>(context, program)],
-        ['groups', s.array(getGuardGroupSerializer<DA, D>(context, program))],
+        ['groups', array(getGuardGroupSerializer<DA, D>(context, program))],
       ],
       { description: 'CandyGuard' }
     ),
@@ -76,7 +81,7 @@ export function getCandyGuardAccountDataSerializer<
 }
 
 export function deserializeCandyGuard<D extends GuardSet = DefaultGuardSet>(
-  context: Pick<Context, 'serializer' | 'programs'> & {
+  context: Pick<Context, 'programs'> & {
     guards: GuardRepository;
   },
   rawAccount: RpcAccount,
@@ -89,7 +94,7 @@ export function deserializeCandyGuard<D extends GuardSet = DefaultGuardSet>(
 }
 
 export async function fetchCandyGuard<D extends GuardSet = DefaultGuardSet>(
-  context: Pick<Context, 'serializer' | 'programs' | 'rpc'> & {
+  context: Pick<Context, 'programs' | 'rpc'> & {
     guards: GuardRepository;
   },
   publicKey: PublicKey | Pda,
@@ -105,7 +110,7 @@ export async function fetchCandyGuard<D extends GuardSet = DefaultGuardSet>(
 }
 
 export async function safeFetchCandyGuard<D extends GuardSet = DefaultGuardSet>(
-  context: Pick<Context, 'serializer' | 'programs' | 'rpc'> & {
+  context: Pick<Context, 'programs' | 'rpc'> & {
     guards: GuardRepository;
   },
   publicKey: PublicKey | Pda,
@@ -122,7 +127,7 @@ export async function safeFetchCandyGuard<D extends GuardSet = DefaultGuardSet>(
 }
 
 export async function fetchAllCandyGuard<D extends GuardSet = DefaultGuardSet>(
-  context: Pick<Context, 'serializer' | 'programs' | 'rpc'> & {
+  context: Pick<Context, 'programs' | 'rpc'> & {
     guards: GuardRepository;
   },
   publicKeys: (PublicKey | Pda)[],
@@ -142,7 +147,7 @@ export async function fetchAllCandyGuard<D extends GuardSet = DefaultGuardSet>(
 export async function safeFetchAllCandyGuard<
   D extends GuardSet = DefaultGuardSet
 >(
-  context: Pick<Context, 'serializer' | 'programs' | 'rpc'> & {
+  context: Pick<Context, 'programs' | 'rpc'> & {
     guards: GuardRepository;
   },
   publicKeys: (PublicKey | Pda)[],
@@ -161,12 +166,11 @@ export async function safeFetchAllCandyGuard<
 }
 
 export function getCandyGuardGpaBuilder<D extends GuardSet = DefaultGuardSet>(
-  context: Pick<Context, 'serializer' | 'programs' | 'rpc'> & {
+  context: Pick<Context, 'programs' | 'rpc'> & {
     guards: GuardRepository;
   },
   program?: CandyGuardProgram
 ) {
-  const s = context.serializer;
   const programId = context.programs.getPublicKey(
     'mplCandyGuard',
     'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
@@ -178,10 +182,10 @@ export function getCandyGuardGpaBuilder<D extends GuardSet = DefaultGuardSet>(
       bump: number;
       authority: PublicKey;
     }>({
-      discriminator: [0, s.array(s.u8(), { size: 8 })],
-      base: [8, s.publicKey()],
-      bump: [40, s.u8()],
-      authority: [41, s.publicKey()],
+      discriminator: [0, array(u8(), { size: 8 })],
+      base: [8, publicKeySerializer()],
+      bump: [40, u8()],
+      authority: [41, publicKeySerializer()],
     })
     .deserializeUsing<CandyGuard<D>>((account) =>
       deserializeCandyGuard(context, account, program)

@@ -11,12 +11,18 @@ import {
   Context,
   Pda,
   PublicKey,
-  Serializer,
   Signer,
   TransactionBuilder,
-  mapSerializer,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
+import {
+  Serializer,
+  array,
+  mapSerializer,
+  publicKey as publicKeySerializer,
+  struct,
+  u8,
+} from '@metaplex-foundation/umi/serializers';
 import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
@@ -35,22 +41,32 @@ export type SetCandyGuardAuthorityInstructionDataArgs = {
   newAuthority: PublicKey;
 };
 
+/** @deprecated Use `getSetCandyGuardAuthorityInstructionDataSerializer()` without any argument instead. */
 export function getSetCandyGuardAuthorityInstructionDataSerializer(
-  context: Pick<Context, 'serializer'>
+  _context: object
+): Serializer<
+  SetCandyGuardAuthorityInstructionDataArgs,
+  SetCandyGuardAuthorityInstructionData
+>;
+export function getSetCandyGuardAuthorityInstructionDataSerializer(): Serializer<
+  SetCandyGuardAuthorityInstructionDataArgs,
+  SetCandyGuardAuthorityInstructionData
+>;
+export function getSetCandyGuardAuthorityInstructionDataSerializer(
+  _context: object = {}
 ): Serializer<
   SetCandyGuardAuthorityInstructionDataArgs,
   SetCandyGuardAuthorityInstructionData
 > {
-  const s = context.serializer;
   return mapSerializer<
     SetCandyGuardAuthorityInstructionDataArgs,
     any,
     SetCandyGuardAuthorityInstructionData
   >(
-    s.struct<SetCandyGuardAuthorityInstructionData>(
+    struct<SetCandyGuardAuthorityInstructionData>(
       [
-        ['discriminator', s.array(s.u8(), { size: 8 })],
-        ['newAuthority', s.publicKey()],
+        ['discriminator', array(u8(), { size: 8 })],
+        ['newAuthority', publicKeySerializer()],
       ],
       { description: 'SetCandyGuardAuthorityInstructionData' }
     ),
@@ -70,7 +86,7 @@ export type SetCandyGuardAuthorityInstructionArgs =
 
 // Instruction.
 export function setCandyGuardAuthority(
-  context: Pick<Context, 'serializer' | 'programs' | 'identity'>,
+  context: Pick<Context, 'programs' | 'identity'>,
   input: SetCandyGuardAuthorityInstructionAccounts &
     SetCandyGuardAuthorityInstructionArgs
 ): TransactionBuilder {
@@ -102,7 +118,7 @@ export function setCandyGuardAuthority(
 
   // Data.
   const data =
-    getSetCandyGuardAuthorityInstructionDataSerializer(context).serialize(
+    getSetCandyGuardAuthorityInstructionDataSerializer().serialize(
       resolvedArgs
     );
 

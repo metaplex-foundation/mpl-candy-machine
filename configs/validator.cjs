@@ -11,7 +11,7 @@ function getExternalProgram(programName) {
 module.exports = {
   validator: {
     commitment: "processed",
-    accountsCluster: "https://metaplex.devnet.rpcpool.com/",
+    accountsCluster: "https://api.devnet.solana.com",
     programs: [
       {
         label: "Candy Machine Core",

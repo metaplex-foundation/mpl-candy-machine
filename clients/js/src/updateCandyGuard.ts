@@ -38,7 +38,8 @@ export function updateCandyGuard<DA extends GuardSetArgs = DefaultGuardSetArgs>(
   const { guards, groups, ...rest } = input;
   const program = context.programs.get<CandyGuardProgram>('mplCandyGuard');
   const serializer = getCandyGuardDataSerializer<
-    DA extends undefined ? DefaultGuardSetArgs : DA
+    DA extends undefined ? DefaultGuardSetArgs : DA,
+    any
   >(context, program);
   const data = serializer.serialize({ guards, groups });
   const prefix = u32().serialize(data.length);

@@ -26,7 +26,7 @@ export type CandyGuardDataArgs<DA extends GuardSetArgs> = {
 
 export function getCandyGuardDataSerializer<
   DA extends GuardSetArgs,
-  D extends DA & GuardSet = DA
+  D extends DA & GuardSet
 >(
   context: { guards: GuardRepository },
   program: CandyGuardProgram

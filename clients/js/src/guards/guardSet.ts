@@ -2,11 +2,14 @@ import {
   AccountMeta,
   Context,
   isNone,
+  isOption,
   isSome,
   none,
   Option,
+  OptionOrNullable,
   Signer,
   some,
+  wrapNullable,
 } from '@metaplex-foundation/umi';
 import {
   bitArray,
@@ -24,7 +27,7 @@ import {
 import { CandyGuardProgram, GuardRepository } from './guardRepository';
 
 export type GuardSetArgs = {
-  [name: string]: Option<object>;
+  [name: string]: OptionOrNullable<object>;
 };
 
 export type GuardSet = {
@@ -32,7 +35,7 @@ export type GuardSet = {
 };
 
 export type GuardSetMintArgs = {
-  [name: string]: Option<object>;
+  [name: string]: OptionOrNullable<object>;
 };
 
 export type GuardSetRouteArgs = {
@@ -41,7 +44,7 @@ export type GuardSetRouteArgs = {
 
 export function getGuardSetSerializer<
   DA extends GuardSetArgs,
-  D extends DA & GuardSet = DA
+  D extends DA & GuardSet
 >(
   context: { guards: GuardRepository },
   program: CandyGuardProgram
@@ -57,10 +60,11 @@ export function getGuardSetSerializer<
       const bytes = [] as Uint8Array[];
       manifests.forEach((manifest) => {
         const value = set[manifest.name] ?? none();
-        features.push(isSome(value));
+        const option = isOption(value) ? value : wrapNullable(value);
+        features.push(isSome(option));
         bytes.push(
-          isSome(value)
-            ? manifest.serializer().serialize(value.value)
+          isSome(option)
+            ? manifest.serializer().serialize(option.value)
             : new Uint8Array()
         );
       });
@@ -98,11 +102,12 @@ export function parseMintArgs<MA extends GuardSetMintArgs>(
   return manifests.reduce(
     (acc, manifest) => {
       const args = mintArgs[manifest.name] ?? none();
-      if (isNone(args)) return acc;
+      const argsAsOption = isOption(args) ? args : wrapNullable(args);
+      if (isNone(argsAsOption)) return acc;
       const { data, remainingAccounts } = manifest.mintParser(
         context,
         mintContext,
-        args.value
+        argsAsOption.value
       );
       return {
         data: mergeBytes([acc.data, data]),

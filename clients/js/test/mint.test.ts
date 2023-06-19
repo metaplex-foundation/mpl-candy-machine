@@ -3,7 +3,6 @@ import {
   generateSigner,
   isEqualToAmount,
   sol,
-  some,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
@@ -62,8 +61,8 @@ test('it can mint from a candy guard with guards', async (t) => {
     collectionMint,
     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
     guards: {
-      botTax: some({ lamports: sol(0.01), lastInstruction: true }),
-      solPayment: some({ lamports: sol(2), destination }),
+      botTax: { lamports: sol(0.01), lastInstruction: true },
+      solPayment: { lamports: sol(2), destination },
     },
   });
   const candyMachine = candyMachineSigner.publicKey;
@@ -82,7 +81,7 @@ test('it can mint from a candy guard with guards', async (t) => {
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
         mintArgs: {
-          solPayment: some({ destination }),
+          solPayment: { destination },
         },
       })
     )
@@ -109,12 +108,12 @@ test('it can mint from a candy guard with groups', async (t) => {
     collectionMint,
     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
     guards: {
-      botTax: some({ lamports: sol(0.01), lastInstruction: true }),
-      solPayment: some({ lamports: sol(2), destination }),
+      botTax: { lamports: sol(0.01), lastInstruction: true },
+      solPayment: { lamports: sol(2), destination },
     },
     groups: [
-      { label: 'GROUP1', guards: { startDate: some({ date: yesterday() }) } },
-      { label: 'GROUP2', guards: { startDate: some({ date: tomorrow() }) } },
+      { label: 'GROUP1', guards: { startDate: { date: yesterday() } } },
+      { label: 'GROUP2', guards: { startDate: { date: tomorrow() } } },
     ],
   });
   const candyMachine = candyMachineSigner.publicKey;
@@ -130,8 +129,8 @@ test('it can mint from a candy guard with groups', async (t) => {
         nftMint: mint.publicKey,
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
-        mintArgs: { solPayment: some({ destination }) },
-        group: some('GROUP1'),
+        mintArgs: { solPayment: { destination } },
+        group: 'GROUP1',
       })
     )
     .sendAndConfirm(umi);

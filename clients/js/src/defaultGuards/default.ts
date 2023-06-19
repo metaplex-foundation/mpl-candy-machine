@@ -1,4 +1,4 @@
-import { none, Option } from '@metaplex-foundation/umi';
+import { none, Option, OptionOrNullable } from '@metaplex-foundation/umi';
 import {
   AddressGate,
   AddressGateArgs,
@@ -75,27 +75,27 @@ import { TokenPaymentMintArgs } from './tokenPayment';
  * The arguments for all default Candy Machine guards.
  */
 export type DefaultGuardSetArgs = GuardSetArgs & {
-  botTax: Option<BotTaxArgs>;
-  solPayment: Option<SolPaymentArgs>;
-  tokenPayment: Option<TokenPaymentArgs>;
-  startDate: Option<StartDateArgs>;
-  thirdPartySigner: Option<ThirdPartySignerArgs>;
-  tokenGate: Option<TokenGateArgs>;
-  gatekeeper: Option<GatekeeperArgs>;
-  endDate: Option<EndDateArgs>;
-  allowList: Option<AllowListArgs>;
-  mintLimit: Option<MintLimitArgs>;
-  nftPayment: Option<NftPaymentArgs>;
-  redeemedAmount: Option<RedeemedAmountArgs>;
-  addressGate: Option<AddressGateArgs>;
-  nftGate: Option<NftGateArgs>;
-  nftBurn: Option<NftBurnArgs>;
-  tokenBurn: Option<TokenBurnArgs>;
-  freezeSolPayment: Option<FreezeSolPaymentArgs>;
-  freezeTokenPayment: Option<FreezeTokenPaymentArgs>;
-  programGate: Option<ProgramGateArgs>;
-  allocation: Option<AllocationArgs>;
-  token2022Payment: Option<Token2022PaymentArgs>;
+  botTax: OptionOrNullable<BotTaxArgs>;
+  solPayment: OptionOrNullable<SolPaymentArgs>;
+  tokenPayment: OptionOrNullable<TokenPaymentArgs>;
+  startDate: OptionOrNullable<StartDateArgs>;
+  thirdPartySigner: OptionOrNullable<ThirdPartySignerArgs>;
+  tokenGate: OptionOrNullable<TokenGateArgs>;
+  gatekeeper: OptionOrNullable<GatekeeperArgs>;
+  endDate: OptionOrNullable<EndDateArgs>;
+  allowList: OptionOrNullable<AllowListArgs>;
+  mintLimit: OptionOrNullable<MintLimitArgs>;
+  nftPayment: OptionOrNullable<NftPaymentArgs>;
+  redeemedAmount: OptionOrNullable<RedeemedAmountArgs>;
+  addressGate: OptionOrNullable<AddressGateArgs>;
+  nftGate: OptionOrNullable<NftGateArgs>;
+  nftBurn: OptionOrNullable<NftBurnArgs>;
+  tokenBurn: OptionOrNullable<TokenBurnArgs>;
+  freezeSolPayment: OptionOrNullable<FreezeSolPaymentArgs>;
+  freezeTokenPayment: OptionOrNullable<FreezeTokenPaymentArgs>;
+  programGate: OptionOrNullable<ProgramGateArgs>;
+  allocation: OptionOrNullable<AllocationArgs>;
+  token2022Payment: OptionOrNullable<Token2022PaymentArgs>;
 };
 
 /**
@@ -130,26 +130,26 @@ export type DefaultGuardSet = GuardSet & {
  */
 export type DefaultGuardSetMintArgs = GuardSetMintArgs & {
   // botTax: no mint settings
-  solPayment: Option<SolPaymentMintArgs>;
-  tokenPayment: Option<TokenPaymentMintArgs>;
+  solPayment: OptionOrNullable<SolPaymentMintArgs>;
+  tokenPayment: OptionOrNullable<TokenPaymentMintArgs>;
   // startDate: no mint settings
-  thirdPartySigner: Option<ThirdPartySignerMintArgs>;
-  tokenGate: Option<TokenGateMintArgs>;
-  gatekeeper: Option<GatekeeperMintArgs>;
+  thirdPartySigner: OptionOrNullable<ThirdPartySignerMintArgs>;
+  tokenGate: OptionOrNullable<TokenGateMintArgs>;
+  gatekeeper: OptionOrNullable<GatekeeperMintArgs>;
   // endDate: no mint settings
-  allowList: Option<AllowListMintArgs>;
-  mintLimit: Option<MintLimitMintArgs>;
-  nftPayment: Option<NftPaymentMintArgs>;
+  allowList: OptionOrNullable<AllowListMintArgs>;
+  mintLimit: OptionOrNullable<MintLimitMintArgs>;
+  nftPayment: OptionOrNullable<NftPaymentMintArgs>;
   // redeemedAmount: no mint settings
   // addressGate: no mint settings
-  nftGate: Option<NftGateMintArgs>;
-  nftBurn: Option<NftBurnMintArgs>;
-  tokenBurn: Option<TokenBurnMintArgs>;
-  freezeSolPayment: Option<FreezeSolPaymentMintArgs>;
-  freezeTokenPayment: Option<FreezeTokenPaymentMintArgs>;
+  nftGate: OptionOrNullable<NftGateMintArgs>;
+  nftBurn: OptionOrNullable<NftBurnMintArgs>;
+  tokenBurn: OptionOrNullable<TokenBurnMintArgs>;
+  freezeSolPayment: OptionOrNullable<FreezeSolPaymentMintArgs>;
+  freezeTokenPayment: OptionOrNullable<FreezeTokenPaymentMintArgs>;
   // programGate: no mint settings
-  allocation: Option<AllocationMintArgs>;
-  token2022Payment: Option<Token2022PaymentMintArgs>;
+  allocation: OptionOrNullable<AllocationMintArgs>;
+  token2022Payment: OptionOrNullable<Token2022PaymentMintArgs>;
 };
 
 /**

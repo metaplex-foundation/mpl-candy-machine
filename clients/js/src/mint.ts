@@ -5,6 +5,7 @@ import {
 import {
   ACCOUNT_HEADER_SIZE,
   Option,
+  OptionOrNullable,
   TransactionBuilder,
   none,
   publicKey,
@@ -36,7 +37,7 @@ export type MintInstructionData<MA extends GuardSetMintArgs> = {
 
 export type MintInstructionDataArgs<MA extends GuardSetMintArgs> = {
   mintArgs?: Partial<MA>;
-  group?: Option<string>;
+  group?: OptionOrNullable<string>;
 };
 
 export function mint<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(

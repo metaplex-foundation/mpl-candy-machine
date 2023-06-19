@@ -1,5 +1,10 @@
 /* eslint-disable no-await-in-loop */
 import {
+  TokenStandard,
+  fetchDigitalAsset,
+  findCollectionAuthorityRecordPda,
+} from '@metaplex-foundation/mpl-token-metadata';
+import {
   createAssociatedToken,
   createMint,
   createMintWithAssociatedToken,
@@ -7,18 +12,12 @@ import {
   setComputeUnitLimit,
 } from '@metaplex-foundation/mpl-toolbox';
 import {
-  fetchDigitalAsset,
-  findCollectionAuthorityRecordPda,
-  TokenStandard,
-} from '@metaplex-foundation/mpl-token-metadata';
-import {
   PublicKey,
   Umi,
   generateSigner,
   isEqualToAmount,
   none,
   sol,
-  some,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
@@ -245,8 +244,8 @@ test('it can mint from a candy guard with guards', async (t) => {
     collectionMint,
     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
     guards: {
-      botTax: some({ lamports: sol(0.01), lastInstruction: true }),
-      solPayment: some({ lamports: sol(2), destination }),
+      botTax: { lamports: sol(0.01), lastInstruction: true },
+      solPayment: { lamports: sol(2), destination },
     },
   });
   const candyMachine = candyMachineSigner.publicKey;
@@ -266,7 +265,7 @@ test('it can mint from a candy guard with guards', async (t) => {
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
         mintArgs: {
-          solPayment: some({ destination }),
+          solPayment: { destination },
         },
       })
     )
@@ -293,12 +292,12 @@ test('it can mint from a candy guard with groups', async (t) => {
     collectionMint,
     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
     guards: {
-      botTax: some({ lamports: sol(0.01), lastInstruction: true }),
-      solPayment: some({ lamports: sol(2), destination }),
+      botTax: { lamports: sol(0.01), lastInstruction: true },
+      solPayment: { lamports: sol(2), destination },
     },
     groups: [
-      { label: 'GROUP1', guards: { startDate: some({ date: yesterday() }) } },
-      { label: 'GROUP2', guards: { startDate: some({ date: tomorrow() }) } },
+      { label: 'GROUP1', guards: { startDate: { date: yesterday() } } },
+      { label: 'GROUP2', guards: { startDate: { date: tomorrow() } } },
     ],
   });
   const candyMachine = candyMachineSigner.publicKey;
@@ -315,8 +314,8 @@ test('it can mint from a candy guard with groups', async (t) => {
         minter,
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
-        mintArgs: { solPayment: some({ destination }) },
-        group: some('GROUP1'),
+        mintArgs: { solPayment: { destination } },
+        group: 'GROUP1',
       })
     )
     .sendAndConfirm(umi);
@@ -333,10 +332,10 @@ test('it cannot mint using the default guards if the candy guard has groups', as
   const candyMachineSigner = await createV2(umi, {
     collectionMint,
     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
-    guards: { solPayment: some({ lamports: sol(2), destination }) },
+    guards: { solPayment: { lamports: sol(2), destination } },
     groups: [
-      { label: 'GROUP1', guards: { startDate: some({ date: yesterday() }) } },
-      { label: 'GROUP2', guards: { startDate: some({ date: tomorrow() }) } },
+      { label: 'GROUP1', guards: { startDate: { date: yesterday() } } },
+      { label: 'GROUP2', guards: { startDate: { date: tomorrow() } } },
     ],
   });
   const candyMachine = candyMachineSigner.publicKey;
@@ -353,7 +352,7 @@ test('it cannot mint using the default guards if the candy guard has groups', as
         minter,
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
-        mintArgs: { solPayment: some({ destination }) },
+        mintArgs: { solPayment: { destination } },
         group: none(),
       })
     )
@@ -371,10 +370,8 @@ test('it cannot mint from a group if the provided group label does not exist', a
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
-    guards: { solPayment: some({ lamports: sol(2), destination }) },
-    groups: [
-      { label: 'GROUP1', guards: { startDate: some({ date: yesterday() }) } },
-    ],
+    guards: { solPayment: { lamports: sol(2), destination } },
+    groups: [{ label: 'GROUP1', guards: { startDate: { date: yesterday() } } }],
   });
 
   // When we try to mint using a group that does not exist.
@@ -389,8 +386,8 @@ test('it cannot mint from a group if the provided group label does not exist', a
         minter,
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
-        mintArgs: { solPayment: some({ destination }) },
-        group: some('GROUPX'),
+        mintArgs: { solPayment: { destination } },
+        group: 'GROUPX',
       })
     )
     .sendAndConfirm(umi);
@@ -407,7 +404,7 @@ test('it can mint using an explicit payer', async (t) => {
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
-    guards: { solPayment: some({ lamports: sol(2), destination }) },
+    guards: { solPayment: { lamports: sol(2), destination } },
   });
 
   // And an explicit payer with 10 SOL.
@@ -426,7 +423,7 @@ test('it can mint using an explicit payer', async (t) => {
         nftMint: mint,
         collectionMint,
         collectionUpdateAuthority: umi.identity.publicKey,
-        mintArgs: { solPayment: some({ destination }) },
+        mintArgs: { solPayment: { destination } },
       })
     )
     .sendAndConfirm(umi);
@@ -548,11 +545,11 @@ test('it can mint from a candy machine using hidden settings', async (t) => {
     collectionMint,
     itemsAvailable: 100,
     configLineSettings: none(),
-    hiddenSettings: some({
+    hiddenSettings: {
       name: 'Degen #$ID+1$',
       uri: 'https://example.com/degen/$ID+1$',
       hash: new Uint8Array(32),
-    }),
+    },
     guards: {},
   });
 
@@ -593,13 +590,13 @@ test('it can mint from a candy machine sequentially', async (t) => {
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
     configLines,
-    configLineSettings: some({
+    configLineSettings: {
       prefixName: '',
       nameLength: 32,
       prefixUri: '',
       uriLength: 200,
       isSequential: true,
-    }),
+    },
     guards: {},
   });
 
@@ -622,13 +619,13 @@ test('it can mint from a candy machine in a random order', async (t) => {
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
     configLines,
-    configLineSettings: some({
+    configLineSettings: {
       prefixName: '',
       nameLength: 32,
       prefixUri: '',
       uriLength: 200,
       isSequential: false,
-    }),
+    },
     guards: {},
   });
 

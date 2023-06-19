@@ -55,8 +55,8 @@ export type CandyGuardAccountDataArgs<
 } & CandyGuardDataArgs<DA>;
 
 export function getCandyGuardAccountDataSerializer<
-  DA extends GuardSetArgs = DefaultGuardSetArgs,
-  D extends DA & GuardSet = DA
+  DA extends GuardSetArgs,
+  D extends DA & GuardSet
 >(
   context: Pick<Context, 'programs'> & {
     guards: GuardRepository;
@@ -89,7 +89,7 @@ export function deserializeCandyGuard<D extends GuardSet = DefaultGuardSet>(
 ): CandyGuard<D> {
   return deserializeAccount(
     rawAccount,
-    getCandyGuardAccountDataSerializer<D>(context, program)
+    getCandyGuardAccountDataSerializer<D, D>(context, program)
   );
 }
 

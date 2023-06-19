@@ -14,6 +14,7 @@ import {
 import {
   ACCOUNT_HEADER_SIZE,
   Option,
+  OptionOrNullable,
   TransactionBuilder,
   isSigner,
   mergeBytes,
@@ -47,7 +48,7 @@ export type MintV2InstructionData<MA extends GuardSetMintArgs> = {
 
 export type MintV2InstructionDataArgs<MA extends GuardSetMintArgs> = {
   mintArgs?: Partial<MA>;
-  group?: Option<string>;
+  group?: OptionOrNullable<string>;
   /** @defaultValue `TokenStandard.NonFungible`. */
   tokenStandard?: TokenStandard;
 };

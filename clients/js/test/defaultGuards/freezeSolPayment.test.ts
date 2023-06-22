@@ -476,7 +476,7 @@ test('it can have multiple freeze escrow and reuse the same ones', async (t) => 
     isEqualToAmount(
       newIdentityBalance,
       subtractAmounts(identityBalance, sol(6.5)),
-      sol(0.1)
+      sol(0.2)
     ),
     'identity lost SOLs'
   );

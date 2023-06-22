@@ -10,3 +10,4 @@ dist
 .crates
 .vscode
 .yarn
+programs/.bin

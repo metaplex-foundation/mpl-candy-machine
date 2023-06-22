@@ -141,7 +141,7 @@ jobs:
         run: |
           echo "Deploying ${{ inputs.program }} to ${{ inputs.cluster }}"
 
-          solana -v program deploy ./programs/${{ inputs.program }}/target/deploy/${{ env.PROGRAM_NAME }}.so \
+          solana -v program deploy ./programs/.bin/${{ env.PROGRAM_NAME }}.so \
             -u ${{ env.RPC }} \
             --program-id ./program-id.json \
             -k ./deploy-key.json

@@ -23,6 +23,7 @@ import {
   Signer,
   TransactionSignature,
   Umi,
+  assertAccountExists,
   generateSigner,
   now,
   percentAmount,
@@ -402,8 +403,15 @@ export const assertBurnedNft = async (
   });
   const [metadataAccount] = findMetadataPda(umi, { mint: publicKey(mint) });
   const [editionAccount] = findMasterEditionPda(umi, { mint: publicKey(mint) });
+
+  const metadata = await umi.rpc.getAccount(metadataAccount);
+  // Metadata accounts is not closed since it contains fees but
+  // the data length should be 0.
+  t.true(metadata.exists);
+  assertAccountExists(metadata);
+  t.true(metadata.data.length === 0);
+
   t.false(await umi.rpc.accountExists(tokenAccount));
-  t.false(await umi.rpc.accountExists(metadataAccount));
   t.false(await umi.rpc.accountExists(editionAccount));
 };
 

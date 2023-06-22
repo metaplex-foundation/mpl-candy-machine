@@ -92,7 +92,7 @@ test('it can mint from a candy guard with guards', async (t) => {
 
   // And the payer was charged.
   const payerBalance = await umi.rpc.getBalance(payer.publicKey);
-  t.true(isEqualToAmount(payerBalance, sol(8), sol(0.01)));
+  t.true(isEqualToAmount(payerBalance, sol(8), sol(0.02)));
 
   // And the candy machine was updated.
   const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);

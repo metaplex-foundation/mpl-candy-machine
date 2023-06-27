@@ -84,7 +84,6 @@ jobs:
         if: github.event.inputs.publish_crate == 'true'
         with:
           cache: ${{ env.CACHE }}
-          locked: "true"
 
       - name: Set RPC
         run: |

@@ -8,6 +8,7 @@
     "generate:idls": "node ./configs/shank.cjs",
     "generate:clients": "node ./configs/kinobi.cjs",
     "validator": "CI=1 amman start --config ./configs/validator.cjs",
+    "validator:debug": "amman start --config ./configs/validator.cjs",
     "validator:stop": "amman stop"
   },
   "devDependencies": {

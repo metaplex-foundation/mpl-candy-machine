@@ -2,7 +2,7 @@ import {
   addFeatureToNetwork,
   addGatekeeper,
   GatewayTokenData,
-  issueVanilla,
+  issue,
   NetworkFeature,
   UserTokenExpiry,
 } from '@identity.com/solana-gateway-ts';
@@ -540,7 +540,7 @@ const issueGatewayToken = async (
   await transactionBuilder()
     .add({
       instruction: fromWeb3JsInstruction(
-        issueVanilla(
+        issue(
           toWeb3JsPublicKey(gatewayTokenAccount),
           toWeb3JsPublicKey(payer.publicKey),
           toWeb3JsPublicKey(gatekeeperAccount),

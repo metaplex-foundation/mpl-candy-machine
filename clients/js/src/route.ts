@@ -1,12 +1,12 @@
 import {
-  mergeBytes,
   none,
   Option,
+  OptionOrNullable,
   publicKey,
   TransactionBuilder,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
-import { u32 } from '@metaplex-foundation/umi/serializers';
+import { mergeBytes, u32 } from '@metaplex-foundation/umi/serializers';
 import { DefaultGuardSetRouteArgs } from './defaultGuards';
 import {
   route as baseRoute,
@@ -40,7 +40,7 @@ export type RouteInstructionDataArgs<
 > = {
   guard: G;
   routeArgs: RA[G];
-  group?: Option<string>;
+  group?: OptionOrNullable<string>;
 };
 
 export function route<

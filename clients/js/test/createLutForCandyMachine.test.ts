@@ -5,8 +5,11 @@ import {
   findMasterEditionPda,
   findMetadataDelegateRecordPda,
   findMetadataPda,
+  getMplTokenMetadataProgramId,
 } from '@metaplex-foundation/mpl-token-metadata';
 import {
+  getSplAssociatedTokenProgramId,
+  getSplTokenProgramId,
   getSysvar,
   setComputeUnitLimit,
 } from '@metaplex-foundation/mpl-toolbox';
@@ -16,6 +19,7 @@ import {
   createLutForCandyMachine,
   findCandyGuardPda,
   findCandyMachineAuthorityPda,
+  getMplCandyMachineCoreProgramId,
   mintV2,
   setMintAuthority,
 } from '../src';
@@ -81,6 +85,10 @@ test('it can create a LUT for a candy machine v2', async (t) => {
       })[0],
       getSysvar('instructions'),
       getSysvar('slotHashes'),
+      getSplTokenProgramId(umi),
+      getSplAssociatedTokenProgramId(umi),
+      getMplTokenMetadataProgramId(umi),
+      getMplCandyMachineCoreProgramId(umi),
     ].sort()
   );
 
@@ -90,7 +98,7 @@ test('it can create a LUT for a candy machine v2', async (t) => {
     builderWithoutLut.getTransactionSize(umi) -
     builderWithLut.getTransactionSize(umi);
   const expectedSizeDifference =
-    (32 - 1) * 9 + // Replaces keys with indexes for 9 out of 10 addresses (one is a Signer).
+    (32 - 1) * 13 + // Replaces keys with indexes for 13 out of 14 addresses (one is a Signer).
     -32 + // Adds 32 bytes for the LUT address itself.
     -2; // Adds 2 bytes for writable and readonly array sizes.
   t.is(transactionSizeDifference, expectedSizeDifference);

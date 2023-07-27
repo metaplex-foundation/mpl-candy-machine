@@ -4,8 +4,14 @@ import {
   findMasterEditionPda,
   findMetadataDelegateRecordPda,
   findMetadataPda,
+  getMplTokenMetadataProgramId,
 } from '@metaplex-foundation/mpl-token-metadata';
-import { createLut, getSysvar } from '@metaplex-foundation/mpl-toolbox';
+import {
+  createLut,
+  getSysvar,
+  getSplAssociatedTokenProgramId,
+  getSplTokenProgramId,
+} from '@metaplex-foundation/mpl-toolbox';
 import {
   AddressLookupTableInput,
   Context,
@@ -14,7 +20,11 @@ import {
   TransactionBuilder,
   uniquePublicKeys,
 } from '@metaplex-foundation/umi';
-import { AccountVersion, fetchCandyMachine } from './generated';
+import {
+  AccountVersion,
+  fetchCandyMachine,
+  getMplCandyMachineCoreProgramId,
+} from './generated';
 import { findCandyMachineAuthorityPda } from './hooked';
 
 export const createLutForCandyMachine = async (
@@ -72,5 +82,9 @@ export const getLutAddressesForCandyMachine = async (
       : delegateRecordV2,
     getSysvar('instructions'),
     getSysvar('slotHashes'),
+    getSplTokenProgramId(context),
+    getSplAssociatedTokenProgramId(context),
+    getMplTokenMetadataProgramId(context),
+    getMplCandyMachineCoreProgramId(context),
   ]);
 };

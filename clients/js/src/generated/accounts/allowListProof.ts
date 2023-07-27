@@ -137,11 +137,11 @@ export function getAllowListProofGpaBuilder(
     .deserializeUsing<AllowListProof>((account) =>
       deserializeAllowListProof(account)
     )
-    .whereSize(4);
+    .whereSize(8);
 }
 
 export function getAllowListProofSize(): number {
-  return 4;
+  return 8;
 }
 
 export function findAllowListProofPda(

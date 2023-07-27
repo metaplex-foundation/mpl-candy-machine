@@ -71,7 +71,7 @@ kinobi.update(
       ],
     },
     allowListProof: {
-      size: 4,
+      size: 8,
       discriminator: k.sizeAccountDiscriminator(),
       seeds: [
         k.stringConstantSeed("allow_list"),

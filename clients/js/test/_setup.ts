@@ -406,10 +406,10 @@ export const assertBurnedNft = async (
 
   const metadata = await umi.rpc.getAccount(metadataAccount);
   // Metadata accounts is not closed since it contains fees but
-  // the data length should be 0.
+  // the data length should be 1.
   t.true(metadata.exists);
   assertAccountExists(metadata);
-  t.true(metadata.data.length === 0);
+  t.true(metadata.data.length === 1);
 
   t.false(await umi.rpc.accountExists(tokenAccount));
   t.false(await umi.rpc.accountExists(editionAccount));

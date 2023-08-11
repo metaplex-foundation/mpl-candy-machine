@@ -89,8 +89,8 @@ pub fn mint_v2<'info>(ctx: Context<'_, '_, '_, 'info, MintV2<'info>>) -> Result<
 /// The index minted depends on the configuration of the candy machine: it could be
 /// a psuedo-randomly selected one or sequential. In both cases, after minted a
 /// specific index, the candy machine does not allow to mint the same index again.
-pub(crate) fn process_mint<'info>(
-    candy_machine: &mut Box<Account<'info, CandyMachine>>,
+pub(crate) fn process_mint(
+    candy_machine: &mut Box<Account<'_, CandyMachine>>,
     accounts: MintAccounts,
     bump: u8,
 ) -> Result<()> {
@@ -281,8 +281,8 @@ pub fn get_config_line(
 }
 
 /// Creates the metadata accounts and mint a new token.
-fn create_and_mint<'info>(
-    candy_machine: &mut Box<Account<'info, CandyMachine>>,
+fn create_and_mint(
+    candy_machine: &mut Box<Account<'_, CandyMachine>>,
     accounts: MintAccounts,
     bump: u8,
     config_line: ConfigLine,
@@ -419,13 +419,15 @@ fn create_and_mint<'info>(
 
     // changes the update authority, primary sale happened, authorization rules
 
-    let mut update_args = UpdateArgs::default();
-    let UpdateArgs::V1 {
+    let mut update_args = UpdateArgs::default_as_update_authority();
+    let UpdateArgs::AsUpdateAuthorityV2 {
         new_update_authority,
         primary_sale_happened,
         rule_set,
         ..
-    } = &mut update_args;
+    } = &mut update_args else {
+        return err!(CandyError::InstructionBuilderFailed);
+    };
     // set the update authority to the update authority of the collection NFT
     *new_update_authority = Some(collection_metadata.update_authority);
     // set primary sale happened to true
@@ -501,8 +503,8 @@ fn create_and_mint<'info>(
 }
 
 /// Creates the metadata accounts
-fn create<'info>(
-    candy_machine: &mut Box<Account<'info, CandyMachine>>,
+fn create(
+    candy_machine: &mut Box<Account<'_, CandyMachine>>,
     accounts: MintAccounts,
     bump: u8,
     config_line: ConfigLine,

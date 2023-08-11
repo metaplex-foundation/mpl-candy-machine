@@ -77,8 +77,8 @@ pub fn mint_v2<'info>(
     process_mint(&mut ctx, mint_args, label)
 }
 
-pub fn process_mint<'info>(
-    ctx: &mut EvaluationContext<'_, '_, 'info>,
+pub fn process_mint(
+    ctx: &mut EvaluationContext<'_, '_, '_>,
     mint_args: Vec<u8>,
     label: Option<String>,
 ) -> Result<()> {

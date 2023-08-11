@@ -6,7 +6,6 @@ import {
   TransactionBuilder,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
-import { mergeBytes, u32 } from '@metaplex-foundation/umi/serializers';
 import { DefaultGuardSetRouteArgs } from './defaultGuards';
 import {
   route as baseRoute,
@@ -71,13 +70,8 @@ export function route<
     G,
     RA extends undefined ? DefaultGuardSetRouteArgs : RA
   >(context, program, routeContext, input.guard, input.routeArgs);
-  const prefix = u32().serialize(data.length);
-  const ix = baseRoute(context, {
-    ...rest,
-    guard: guardIndex,
-    data: mergeBytes([prefix, data]),
-    group,
-  }).items[0];
+  const ix = baseRoute(context, { ...rest, guard: guardIndex, data, group })
+    .items[0];
 
   const [keys, signers] = parseGuardRemainingAccounts(remainingAccounts);
   ix.instruction.keys.push(...keys);

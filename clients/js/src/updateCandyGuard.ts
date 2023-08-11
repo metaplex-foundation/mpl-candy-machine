@@ -1,5 +1,4 @@
-import { mergeBytes, TransactionBuilder } from '@metaplex-foundation/umi';
-import { u32 } from '@metaplex-foundation/umi/serializers';
+import { TransactionBuilder } from '@metaplex-foundation/umi';
 import { DefaultGuardSetArgs } from './defaultGuards';
 import {
   updateCandyGuard as baseUpdateCandyGuard,
@@ -42,8 +41,6 @@ export function updateCandyGuard<DA extends GuardSetArgs = DefaultGuardSetArgs>(
     any
   >(context, program);
   const data = serializer.serialize({ guards, groups });
-  const prefix = u32().serialize(data.length);
-  const dataWithPrefix = mergeBytes([prefix, data]);
 
-  return baseUpdateCandyGuard(context, { ...rest, data: dataWithPrefix });
+  return baseUpdateCandyGuard(context, { ...rest, data });
 }

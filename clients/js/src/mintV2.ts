@@ -17,12 +17,10 @@ import {
   OptionOrNullable,
   TransactionBuilder,
   isSigner,
-  mergeBytes,
   none,
   publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
-import { u32 } from '@metaplex-foundation/umi/serializers';
 import { DefaultGuardSetMintArgs } from './defaultGuards';
 import {
   MintV2InstructionAccounts,
@@ -80,7 +78,6 @@ export function mintV2<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
   const { data, remainingAccounts } = parseMintArgs<
     MA extends undefined ? DefaultGuardSetMintArgs : MA
   >(context, program, mintContext, mintArgs);
-  const prefix = u32().serialize(data.length);
 
   // Default token Record value.
   const tokenStandard = input.tokenStandard ?? TokenStandard.NonFungible;
@@ -101,7 +98,7 @@ export function mintV2<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
   const ix = baseMintV2(context, {
     ...rest,
     tokenRecord: input.tokenRecord ?? defaultTokenRecord,
-    mintArgs: mergeBytes([prefix, data]),
+    mintArgs: data,
     group,
   }).items[0];
 

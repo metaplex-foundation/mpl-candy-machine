@@ -11,7 +11,6 @@ import {
   publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
-import { mergeBytes, u32 } from '@metaplex-foundation/umi/serializers';
 import { DefaultGuardSetMintArgs } from './defaultGuards';
 import {
   MintInstructionAccounts,
@@ -63,12 +62,7 @@ export function mint<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
   const { data, remainingAccounts } = parseMintArgs<
     MA extends undefined ? DefaultGuardSetMintArgs : MA
   >(context, program, mintContext, mintArgs);
-  const prefix = u32().serialize(data.length);
-  const ix = baseMint(context, {
-    ...rest,
-    mintArgs: mergeBytes([prefix, data]),
-    group,
-  }).items[0];
+  const ix = baseMint(context, { ...rest, mintArgs: data, group }).items[0];
 
   const [keys, signers] = parseGuardRemainingAccounts(remainingAccounts);
   ix.instruction.keys.push(...keys);

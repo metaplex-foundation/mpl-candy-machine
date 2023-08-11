@@ -28,7 +28,9 @@ import { ConfigLine, ConfigLineArgs, getConfigLineSerializer } from '../types';
 
 // Accounts.
 export type AddConfigLinesInstructionAccounts = {
+  /** Candy Machine account. */
   candyMachine: PublicKey | Pda;
+  /** Autority of the candy machine. */
   authority?: Signer;
 };
 

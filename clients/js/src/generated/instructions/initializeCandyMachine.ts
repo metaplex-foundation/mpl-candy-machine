@@ -54,16 +54,64 @@ import {
 
 // Accounts.
 export type InitializeCandyMachineInstructionAccounts = {
+  /**
+   * Candy Machine account. The account space must be allocated to allow accounts larger
+   * than 10kb.
+   *
+   */
+
   candyMachine: PublicKey | Pda;
+  /**
+   * Authority PDA used to verify minted NFTs to the collection.
+   *
+   */
+
   authorityPda?: PublicKey | Pda;
+  /**
+   * Candy Machine authority. This is the address that controls the upate of the candy machine.
+   *
+   */
+
   authority?: PublicKey | Pda;
+  /** Payer of the transaction. */
   payer?: Signer;
+  /**
+   * Metadata account of the collection.
+   *
+   */
+
   collectionMetadata?: PublicKey | Pda;
+  /**
+   * Mint account of the collection.
+   *
+   */
+
   collectionMint: PublicKey | Pda;
+  /**
+   * Master Edition account of the collection.
+   *
+   */
+
   collectionMasterEdition?: PublicKey | Pda;
+  /**
+   * Update authority of the collection. This needs to be a signer so the candy
+   * machine can approve a delegate to verify minted NFTs to the collection.
+   */
+
   collectionUpdateAuthority: Signer;
+  /**
+   * Collection authority record. The delegate is used to verify NFTs.
+   *
+   */
+
   collectionAuthorityRecord?: PublicKey | Pda;
+  /**
+   * Token Metadata program.
+   *
+   */
+
   tokenMetadataProgram?: PublicKey | Pda;
+  /** System program. */
   systemProgram?: PublicKey | Pda;
 };
 

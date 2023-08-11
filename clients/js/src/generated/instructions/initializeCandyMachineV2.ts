@@ -58,20 +58,88 @@ import {
 
 // Accounts.
 export type InitializeCandyMachineV2InstructionAccounts = {
+  /**
+   * Candy Machine account. The account space must be allocated to allow accounts larger
+   * than 10kb.
+   *
+   */
+
   candyMachine: PublicKey | Pda;
+  /**
+   * Authority PDA used to verify minted NFTs to the collection.
+   *
+   */
+
   authorityPda?: PublicKey | Pda;
+  /**
+   * Candy Machine authority. This is the address that controls the upate of the candy machine.
+   *
+   */
+
   authority?: PublicKey | Pda;
+  /** Payer of the transaction. */
   payer?: Signer;
+  /**
+   * Authorization rule set to be used by minted NFTs.
+   *
+   */
+
   ruleSet?: PublicKey | Pda;
+  /**
+   * Metadata account of the collection.
+   *
+   */
+
   collectionMetadata?: PublicKey | Pda;
+  /**
+   * Mint account of the collection.
+   *
+   */
+
   collectionMint: PublicKey | Pda;
+  /**
+   * Master Edition account of the collection.
+   *
+   */
+
   collectionMasterEdition?: PublicKey | Pda;
+  /**
+   * Update authority of the collection. This needs to be a signer so the candy
+   * machine can approve a delegate to verify minted NFTs to the collection.
+   */
+
   collectionUpdateAuthority: Signer;
+  /**
+   * Metadata delegate record. The delegate is used to verify NFTs.
+   *
+   */
+
   collectionDelegateRecord?: PublicKey | Pda;
+  /**
+   * Token Metadata program.
+   *
+   */
+
   tokenMetadataProgram?: PublicKey | Pda;
+  /** System program. */
   systemProgram?: PublicKey | Pda;
+  /**
+   * Instructions sysvar account.
+   *
+   */
+
   sysvarInstructions?: PublicKey | Pda;
+  /**
+   * Token Authorization Rules program.
+   *
+   */
+
   authorizationRulesProgram?: PublicKey | Pda;
+  /**
+   * Token Authorization rules account for the collection metadata (if any).
+   *
+   */
+
   authorizationRules?: PublicKey | Pda;
 };
 

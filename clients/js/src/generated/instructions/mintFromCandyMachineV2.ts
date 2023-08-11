@@ -35,29 +35,122 @@ import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
 export type MintFromCandyMachineV2InstructionAccounts = {
+  /** Candy machine account. */
   candyMachine: PublicKey | Pda;
+  /**
+   * Candy machine authority account. This is the account that holds a delegate
+   * to verify an item into the collection.
+   *
+   */
+
   authorityPda?: PublicKey | Pda;
+  /** Candy machine mint authority (mint only allowed for the mint_authority). */
   mintAuthority: Signer;
+  /** Payer for the transaction and account allocation (rent). */
   payer?: Signer;
+  /**
+   * NFT account owner.
+   *
+   */
+
   nftOwner: PublicKey | Pda;
+  /**
+   * Mint account of the NFT. The account will be initialized if necessary.
+   *
+   */
+
   nftMint: PublicKey | Pda | Signer;
+  /** Mint authority of the NFT. In most cases this will be the owner of the NFT. */
   nftMintAuthority?: Signer;
+  /**
+   * Metadata account of the NFT. This account must be uninitialized.
+   *
+   */
+
   nftMetadata?: PublicKey | Pda;
+  /**
+   * Master edition account of the NFT. The account will be initialized if necessary.
+   *
+   */
+
   nftMasterEdition?: PublicKey | Pda;
+  /**
+   * Destination token account (required for pNFT).
+   *
+   */
+
   token?: PublicKey | Pda;
+  /**
+   * Token record (required for pNFT).
+   *
+   */
+
   tokenRecord?: PublicKey | Pda;
+  /**
+   * Collection authority or metadata delegate record.
+   *
+   */
+
   collectionDelegateRecord?: PublicKey | Pda;
+  /**
+   * Mint account of the collection NFT.
+   *
+   */
+
   collectionMint: PublicKey | Pda;
+  /**
+   * Metadata account of the collection NFT.
+   *
+   */
+
   collectionMetadata?: PublicKey | Pda;
+  /**
+   * Master edition account of the collection NFT.
+   *
+   */
+
   collectionMasterEdition?: PublicKey | Pda;
+  /**
+   * Update authority of the collection NFT.
+   *
+   */
+
   collectionUpdateAuthority: PublicKey | Pda;
+  /**
+   * Token Metadata program.
+   *
+   */
+
   tokenMetadataProgram?: PublicKey | Pda;
+  /** SPL Token program. */
   splTokenProgram?: PublicKey | Pda;
+  /** SPL Associated Token program. */
   splAtaProgram?: PublicKey | Pda;
+  /** System program. */
   systemProgram?: PublicKey | Pda;
+  /**
+   * Instructions sysvar account.
+   *
+   */
+
   sysvarInstructions?: PublicKey | Pda;
+  /**
+   * SlotHashes sysvar cluster data.
+   *
+   */
+
   recentSlothashes?: PublicKey | Pda;
+  /**
+   * Token Authorization Rules program.
+   *
+   */
+
   authorizationRulesProgram?: PublicKey | Pda;
+  /**
+   * Token Authorization rules account for the collection metadata (if any).
+   *
+   */
+
   authorizationRules?: PublicKey | Pda;
 };
 

@@ -33,6 +33,7 @@ import {
   option,
   string,
   struct,
+  u32,
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import { findCandyGuardPda, findCandyMachineAuthorityPda } from '../../hooked';
@@ -40,30 +41,132 @@ import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
 export type MintV2InstructionAccounts = {
+  /** Candy Guard account. */
   candyGuard?: PublicKey | Pda;
+  /**
+   * Candy Machine program account.
+   *
+   */
+
   candyMachineProgram?: PublicKey | Pda;
+  /** Candy machine account. */
   candyMachine: PublicKey | Pda;
+  /**
+   * Candy Machine authority account.
+   *
+   */
+
   candyMachineAuthorityPda?: PublicKey | Pda;
+  /** Payer for the mint (SOL) fees. */
   payer?: Signer;
+  /** Minter account for validation and non-SOL fees. */
   minter?: Signer;
+  /**
+   * Mint account of the NFT. The account will be initialized if necessary.
+   *
+   * Must be a signer if:
+   * * the nft_mint account does not exist.
+   *
+   */
+
   nftMint: PublicKey | Pda | Signer;
+  /**
+   * Mint authority of the NFT before the authority gets transfer to the master edition account.
+   *
+   * If nft_mint account exists:
+   * * it must match the mint authority of nft_mint.
+   */
+
   nftMintAuthority?: Signer;
+  /**
+   * Metadata account of the NFT. This account must be uninitialized.
+   *
+   */
+
   nftMetadata?: PublicKey | Pda;
+  /**
+   * Master edition account of the NFT. The account will be initialized if necessary.
+   *
+   */
+
   nftMasterEdition?: PublicKey | Pda;
+  /**
+   * Destination token account (required for pNFT).
+   *
+   */
+
   token?: PublicKey | Pda;
+  /**
+   * Token record (required for pNFT).
+   *
+   */
+
   tokenRecord?: PublicKey | Pda;
+  /**
+   * Collection authority or metadata delegate record.
+   *
+   */
+
   collectionDelegateRecord?: PublicKey | Pda;
+  /**
+   * Mint account of the collection NFT.
+   *
+   */
+
   collectionMint: PublicKey | Pda;
+  /**
+   * Metadata account of the collection NFT.
+   *
+   */
+
   collectionMetadata?: PublicKey | Pda;
+  /**
+   * Master edition account of the collection NFT.
+   *
+   */
+
   collectionMasterEdition?: PublicKey | Pda;
+  /**
+   * Update authority of the collection NFT.
+   *
+   */
+
   collectionUpdateAuthority: PublicKey | Pda;
+  /**
+   * Token Metadata program.
+   *
+   */
+
   tokenMetadataProgram?: PublicKey | Pda;
+  /** SPL Token program. */
   splTokenProgram?: PublicKey | Pda;
+  /** SPL Associated Token program. */
   splAtaProgram?: PublicKey | Pda;
+  /** System program. */
   systemProgram?: PublicKey | Pda;
+  /**
+   * Instructions sysvar account.
+   *
+   */
+
   sysvarInstructions?: PublicKey | Pda;
+  /**
+   * SlotHashes sysvar cluster data.
+   *
+   */
+
   recentSlothashes?: PublicKey | Pda;
+  /**
+   * Token Authorization Rules program.
+   *
+   */
+
   authorizationRulesProgram?: PublicKey | Pda;
+  /**
+   * Token Authorization rules account for the collection metadata (if any).
+   *
+   */
+
   authorizationRules?: PublicKey | Pda;
 };
 
@@ -94,7 +197,7 @@ export function getMintV2InstructionDataSerializer(
     struct<MintV2InstructionData>(
       [
         ['discriminator', array(u8(), { size: 8 })],
-        ['mintArgs', bytes()],
+        ['mintArgs', bytes({ size: u32() })],
         ['group', option(string())],
       ],
       { description: 'MintV2InstructionData' }

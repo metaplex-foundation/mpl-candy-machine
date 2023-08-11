@@ -31,6 +31,7 @@ import {
   option,
   string,
   struct,
+  u32,
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import { findCandyGuardPda, findCandyMachineAuthorityPda } from '../../hooked';
@@ -86,7 +87,7 @@ export function getMintInstructionDataSerializer(
     struct<MintInstructionData>(
       [
         ['discriminator', array(u8(), { size: 8 })],
-        ['mintArgs', bytes()],
+        ['mintArgs', bytes({ size: u32() })],
         ['group', option(string())],
       ],
       { description: 'MintInstructionData' }

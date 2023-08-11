@@ -33,19 +33,69 @@ import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
 export type SetCollectionInstructionAccounts = {
+  /** Candy Machine account. */
   candyMachine: PublicKey | Pda;
+  /** Candy Machine authority. */
   authority?: Signer;
+  /**
+   * Authority PDA.
+   *
+   */
+
   authorityPda?: PublicKey | Pda;
+  /** Payer of the transaction. */
   payer?: Signer;
+  /**
+   * Mint account of the collection.
+   *
+   */
+
   collectionMint: PublicKey | Pda;
+  /**
+   * Metadata account of the collection.
+   *
+   */
+
   collectionMetadata?: PublicKey | Pda;
+  /**
+   * Collection authority record.
+   *
+   */
+
   collectionAuthorityRecord?: PublicKey | Pda;
+  /** Update authority of the new collection NFT. */
   newCollectionUpdateAuthority: Signer;
+  /**
+   * New collection metadata.
+   *
+   */
+
   newCollectionMetadata?: PublicKey | Pda;
+  /**
+   * New collection mint.
+   *
+   */
+
   newCollectionMint: PublicKey | Pda;
+  /**
+   * New collection master edition.
+   *
+   */
+
   newCollectionMasterEdition?: PublicKey | Pda;
+  /**
+   * New collection authority record.
+   *
+   */
+
   newCollectionAuthorityRecord?: PublicKey | Pda;
+  /**
+   * Token Metadata program.
+   *
+   */
+
   tokenMetadataProgram?: PublicKey | Pda;
+  /** System program. */
   systemProgram?: PublicKey | Pda;
 };
 

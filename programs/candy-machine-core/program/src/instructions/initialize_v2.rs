@@ -112,7 +112,7 @@ pub struct InitializeV2<'info> {
     #[account(
         zero,
         rent_exempt = skip,
-        constraint = candy_machine.to_account_info().owner == program_id && candy_machine.to_account_info().data_len() >= data.get_space_for_candy()?
+        constraint = candy_machine.to_account_info().owner == __program_id && candy_machine.to_account_info().data_len() >= data.get_space_for_candy()?
     )]
     candy_machine: UncheckedAccount<'info>,
 

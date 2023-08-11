@@ -34,23 +34,93 @@ import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
 export type SetCollectionV2InstructionAccounts = {
+  /** Candy Machine account. */
   candyMachine: PublicKey | Pda;
+  /** Candy Machine authority. */
   authority?: Signer;
+  /**
+   * Authority PDA.
+   *
+   */
+
   authorityPda?: PublicKey | Pda;
+  /** Payer of the transaction. */
   payer?: Signer;
+  /**
+   * Update authority of the collection.
+   *
+   */
+
   collectionUpdateAuthority: PublicKey | Pda;
+  /**
+   * Mint account of the collection.
+   *
+   */
+
   collectionMint: PublicKey | Pda;
+  /**
+   * Metadata account of the collection.
+   *
+   */
+
   collectionMetadata?: PublicKey | Pda;
+  /**
+   * Collection authority or metadata delegate record.
+   *
+   */
+
   collectionDelegateRecord?: PublicKey | Pda;
+  /** Update authority of the new collection NFT. */
   newCollectionUpdateAuthority: Signer;
+  /**
+   * New collection mint.
+   *
+   */
+
   newCollectionMint: PublicKey | Pda;
+  /**
+   * New collection metadata.
+   *
+   */
+
   newCollectionMetadata?: PublicKey | Pda;
+  /**
+   * New collection master edition.
+   *
+   */
+
   newCollectionMasterEdition?: PublicKey | Pda;
+  /**
+   * New metadata delegate record.
+   *
+   */
+
   newCollectionDelegateRecord?: PublicKey | Pda;
+  /**
+   * Token Metadata program.
+   *
+   */
+
   tokenMetadataProgram?: PublicKey | Pda;
+  /** System program. */
   systemProgram?: PublicKey | Pda;
+  /**
+   * Instructions sysvar account.
+   *
+   */
+
   sysvarInstructions?: PublicKey | Pda;
+  /**
+   * Token Authorization Rules program.
+   *
+   */
+
   authorizationRulesProgram?: PublicKey | Pda;
+  /**
+   * Token Authorization rules account for the collection metadata (if any).
+   *
+   */
+
   authorizationRules?: PublicKey | Pda;
 };
 

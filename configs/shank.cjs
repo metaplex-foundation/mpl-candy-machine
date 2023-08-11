@@ -12,6 +12,9 @@ generateIdl({
   idlDir,
   binaryInstallDir,
   programDir: path.join(programDir, "candy-machine-core", "program"),
+  rustbin: {
+    versionRangeFallback: "0.27.0",
+  },
 });
 
 generateIdl({
@@ -21,4 +24,7 @@ generateIdl({
   idlDir,
   binaryInstallDir,
   programDir: path.join(programDir, "candy-guard", "program"),
+  rustbin: {
+    versionRangeFallback: "0.27.0",
+  },
 });

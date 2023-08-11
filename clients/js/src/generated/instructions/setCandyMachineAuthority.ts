@@ -27,7 +27,9 @@ import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
 export type SetCandyMachineAuthorityInstructionAccounts = {
+  /** Candy Machine account. */
   candyMachine: PublicKey | Pda;
+  /** Autority of the candy machine. */
   authority?: Signer;
 };
 

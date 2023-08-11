@@ -31,7 +31,9 @@ import {
 
 // Accounts.
 export type UpdateCandyMachineInstructionAccounts = {
+  /** Candy Machine account. */
   candyMachine: PublicKey | Pda;
+  /** Authority of the candy machine. */
   authority?: Signer;
 };
 

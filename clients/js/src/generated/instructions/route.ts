@@ -26,6 +26,7 @@ import {
   option,
   string,
   struct,
+  u32,
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import { findCandyGuardPda } from '../../hooked';
@@ -73,7 +74,7 @@ export function getRouteInstructionDataSerializer(
       [
         ['discriminator', array(u8(), { size: 8 })],
         ['guard', getGuardTypeSerializer()],
-        ['data', bytes()],
+        ['data', bytes({ size: u32() })],
         ['group', option(string())],
       ],
       { description: 'RouteInstructionData' }

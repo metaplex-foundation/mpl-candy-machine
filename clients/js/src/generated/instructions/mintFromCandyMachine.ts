@@ -33,22 +33,86 @@ import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
 export type MintFromCandyMachineInstructionAccounts = {
+  /** Candy machine account. */
   candyMachine: PublicKey | Pda;
+  /**
+   * Candy machine authority account. This is the account that holds a delegate
+   * to verify an item into the collection.
+   *
+   */
+
   authorityPda?: PublicKey | Pda;
+  /** Candy machine mint authority (mint only allowed for the mint_authority). */
   mintAuthority: Signer;
+  /** Payer for the transaction and account allocation (rent). */
   payer?: Signer;
+  /**
+   * Mint account of the NFT. The account will be initialized if necessary.
+   *
+   */
+
   nftMint: PublicKey | Pda;
+  /** Mint authority of the NFT. In most cases this will be the owner of the NFT. */
   nftMintAuthority?: Signer;
+  /**
+   * Metadata account of the NFT. This account must be uninitialized.
+   *
+   */
+
   nftMetadata?: PublicKey | Pda;
+  /**
+   * Master edition account of the NFT. The account will be initialized if necessary.
+   *
+   */
+
   nftMasterEdition?: PublicKey | Pda;
+  /**
+   * Collection authority record account is either the delegated authority record (legacy)
+   * or a metadata delegate record for the `authority_pda`. The delegate is set when a new collection
+   * is set to the candy machine.
+   *
+   */
+
   collectionAuthorityRecord?: PublicKey | Pda;
+  /**
+   * Mint account of the collection NFT.
+   *
+   */
+
   collectionMint: PublicKey | Pda;
+  /**
+   * Metadata account of the collection NFT.
+   *
+   */
+
   collectionMetadata?: PublicKey | Pda;
+  /**
+   * Master edition account of the collection NFT.
+   *
+   */
+
   collectionMasterEdition?: PublicKey | Pda;
+  /**
+   * Update authority of the collection NFT.
+   *
+   */
+
   collectionUpdateAuthority: PublicKey | Pda;
+  /**
+   * Token Metadata program.
+   *
+   */
+
   tokenMetadataProgram?: PublicKey | Pda;
+  /** SPL Token program. */
   tokenProgram?: PublicKey | Pda;
+  /** System program. */
   systemProgram?: PublicKey | Pda;
+  /**
+   * SlotHashes sysvar cluster data.
+   *
+   */
+
   recentSlothashes?: PublicKey | Pda;
 };
 

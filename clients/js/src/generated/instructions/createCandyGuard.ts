@@ -22,6 +22,7 @@ import {
   bytes,
   mapSerializer,
   struct,
+  u32,
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import { findCandyGuardPda } from '../../hooked';
@@ -69,7 +70,7 @@ export function getCreateCandyGuardInstructionDataSerializer(
     struct<CreateCandyGuardInstructionData>(
       [
         ['discriminator', array(u8(), { size: 8 })],
-        ['data', bytes()],
+        ['data', bytes({ size: u32() })],
       ],
       { description: 'CreateCandyGuardInstructionData' }
     ),

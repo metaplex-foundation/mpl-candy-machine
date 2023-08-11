@@ -21,6 +21,7 @@ import {
   bytes,
   mapSerializer,
   struct,
+  u32,
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import { addAccountMeta, addObjectProperty } from '../shared';
@@ -66,7 +67,7 @@ export function getUpdateCandyGuardInstructionDataSerializer(
     struct<UpdateCandyGuardInstructionData>(
       [
         ['discriminator', array(u8(), { size: 8 })],
-        ['data', bytes()],
+        ['data', bytes({ size: u32() })],
       ],
       { description: 'UpdateCandyGuardInstructionData' }
     ),

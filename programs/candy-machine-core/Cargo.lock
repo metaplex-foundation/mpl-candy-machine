@@ -1227,7 +1227,7 @@ dependencies = [
 
 [[package]]
 name = "mpl-candy-machine-core"
-version = "1.0.4"
+version = "2.0.0"
 dependencies = [
  "anchor-lang",
  "arrayref",
@@ -1235,7 +1235,7 @@ dependencies = [
  "mpl-token-metadata",
  "solana-program",
  "spl-associated-token-account",
- "spl-token 4.0.0",
+ "spl-token 3.5.0",
 ]
 
 [[package]]

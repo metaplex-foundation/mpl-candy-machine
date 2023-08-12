@@ -115,7 +115,6 @@ jobs:
           filters: .github/file-filters.yml
 
   test_js:
-    runs-on: ubuntu-latest-16-cores
     if: needs.generate_clients.outputs.js_changed == 'true'
     name: JS Client
     needs: generate_clients

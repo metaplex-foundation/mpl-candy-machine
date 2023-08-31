@@ -12,7 +12,6 @@ import {
   findMetadataPda,
 } from '@metaplex-foundation/mpl-token-metadata';
 import {
-  AccountMeta,
   Context,
   Pda,
   PublicKey,
@@ -29,7 +28,12 @@ import {
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import { findCandyMachineAuthorityPda } from '../../hooked';
-import { addAccountMeta, addObjectProperty } from '../shared';
+import {
+  ResolvedAccount,
+  ResolvedAccountsWithIndices,
+  expectPublicKey,
+  getAccountMetasAndSigners,
+} from '../shared';
 
 // Accounts.
 export type MintFromCandyMachineInstructionAccounts = {
@@ -123,20 +127,7 @@ export type MintFromCandyMachineInstructionData = {
 
 export type MintFromCandyMachineInstructionDataArgs = {};
 
-/** @deprecated Use `getMintFromCandyMachineInstructionDataSerializer()` without any argument instead. */
-export function getMintFromCandyMachineInstructionDataSerializer(
-  _context: object
-): Serializer<
-  MintFromCandyMachineInstructionDataArgs,
-  MintFromCandyMachineInstructionData
->;
 export function getMintFromCandyMachineInstructionDataSerializer(): Serializer<
-  MintFromCandyMachineInstructionDataArgs,
-  MintFromCandyMachineInstructionData
->;
-export function getMintFromCandyMachineInstructionDataSerializer(
-  _context: object = {}
-): Serializer<
   MintFromCandyMachineInstructionDataArgs,
   MintFromCandyMachineInstructionData
 > {
@@ -161,199 +152,177 @@ export function getMintFromCandyMachineInstructionDataSerializer(
 
 // Instruction.
 export function mintFromCandyMachine(
-  context: Pick<Context, 'programs' | 'eddsa' | 'identity' | 'payer'>,
+  context: Pick<Context, 'eddsa' | 'identity' | 'payer' | 'programs'>,
   input: MintFromCandyMachineInstructionAccounts
 ): TransactionBuilder {
-  const signers: Signer[] = [];
-  const keys: AccountMeta[] = [];
-
   // Program ID.
   const programId = context.programs.getPublicKey(
     'mplCandyMachineCore',
     'CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR'
   );
 
-  // Resolved inputs.
-  const resolvedAccounts = {
-    candyMachine: [input.candyMachine, true] as const,
-    mintAuthority: [input.mintAuthority, false] as const,
-    nftMint: [input.nftMint, true] as const,
-    collectionMint: [input.collectionMint, false] as const,
-    collectionUpdateAuthority: [
-      input.collectionUpdateAuthority,
-      false,
-    ] as const,
+  // Accounts.
+  const resolvedAccounts: ResolvedAccountsWithIndices = {
+    candyMachine: {
+      index: 0,
+      isWritable: true,
+      value: input.candyMachine ?? null,
+    },
+    authorityPda: {
+      index: 1,
+      isWritable: true,
+      value: input.authorityPda ?? null,
+    },
+    mintAuthority: {
+      index: 2,
+      isWritable: false,
+      value: input.mintAuthority ?? null,
+    },
+    payer: { index: 3, isWritable: true, value: input.payer ?? null },
+    nftMint: { index: 4, isWritable: true, value: input.nftMint ?? null },
+    nftMintAuthority: {
+      index: 5,
+      isWritable: false,
+      value: input.nftMintAuthority ?? null,
+    },
+    nftMetadata: {
+      index: 6,
+      isWritable: true,
+      value: input.nftMetadata ?? null,
+    },
+    nftMasterEdition: {
+      index: 7,
+      isWritable: true,
+      value: input.nftMasterEdition ?? null,
+    },
+    collectionAuthorityRecord: {
+      index: 8,
+      isWritable: false,
+      value: input.collectionAuthorityRecord ?? null,
+    },
+    collectionMint: {
+      index: 9,
+      isWritable: false,
+      value: input.collectionMint ?? null,
+    },
+    collectionMetadata: {
+      index: 10,
+      isWritable: true,
+      value: input.collectionMetadata ?? null,
+    },
+    collectionMasterEdition: {
+      index: 11,
+      isWritable: false,
+      value: input.collectionMasterEdition ?? null,
+    },
+    collectionUpdateAuthority: {
+      index: 12,
+      isWritable: false,
+      value: input.collectionUpdateAuthority ?? null,
+    },
+    tokenMetadataProgram: {
+      index: 13,
+      isWritable: false,
+      value: input.tokenMetadataProgram ?? null,
+    },
+    tokenProgram: {
+      index: 14,
+      isWritable: false,
+      value: input.tokenProgram ?? null,
+    },
+    systemProgram: {
+      index: 15,
+      isWritable: false,
+      value: input.systemProgram ?? null,
+    },
+    recentSlothashes: {
+      index: 16,
+      isWritable: false,
+      value: input.recentSlothashes ?? null,
+    },
   };
-  addObjectProperty(
-    resolvedAccounts,
-    'authorityPda',
-    input.authorityPda
-      ? ([input.authorityPda, true] as const)
-      : ([
-          findCandyMachineAuthorityPda(context, {
-            candyMachine: publicKey(input.candyMachine, false),
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'payer',
-    input.payer
-      ? ([input.payer, true] as const)
-      : ([context.payer, true] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'nftMintAuthority',
-    input.nftMintAuthority
-      ? ([input.nftMintAuthority, false] as const)
-      : ([context.identity, false] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'nftMetadata',
-    input.nftMetadata
-      ? ([input.nftMetadata, true] as const)
-      : ([
-          findMetadataPda(context, { mint: publicKey(input.nftMint, false) }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'nftMasterEdition',
-    input.nftMasterEdition
-      ? ([input.nftMasterEdition, true] as const)
-      : ([
-          findMasterEditionPda(context, {
-            mint: publicKey(input.nftMint, false),
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'collectionAuthorityRecord',
-    input.collectionAuthorityRecord
-      ? ([input.collectionAuthorityRecord, false] as const)
-      : ([
-          findCollectionAuthorityRecordPda(context, {
-            mint: publicKey(input.collectionMint, false),
-            collectionAuthority: publicKey(
-              resolvedAccounts.authorityPda[0],
-              false
-            ),
-          }),
-          false,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'collectionMetadata',
-    input.collectionMetadata
-      ? ([input.collectionMetadata, true] as const)
-      : ([
-          findMetadataPda(context, {
-            mint: publicKey(input.collectionMint, false),
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'collectionMasterEdition',
-    input.collectionMasterEdition
-      ? ([input.collectionMasterEdition, false] as const)
-      : ([
-          findMasterEditionPda(context, {
-            mint: publicKey(input.collectionMint, false),
-          }),
-          false,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'tokenMetadataProgram',
-    input.tokenMetadataProgram
-      ? ([input.tokenMetadataProgram, false] as const)
-      : ([
-          context.programs.getPublicKey(
-            'mplTokenMetadata',
-            'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'
-          ),
-          false,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'tokenProgram',
-    input.tokenProgram
-      ? ([input.tokenProgram, false] as const)
-      : ([
-          context.programs.getPublicKey(
-            'splToken',
-            'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
-          ),
-          false,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'systemProgram',
-    input.systemProgram
-      ? ([input.systemProgram, false] as const)
-      : ([
-          context.programs.getPublicKey(
-            'splSystem',
-            '11111111111111111111111111111111'
-          ),
-          false,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'recentSlothashes',
-    input.recentSlothashes
-      ? ([input.recentSlothashes, false] as const)
-      : ([
-          publicKey('SysvarS1otHashes111111111111111111111111111'),
-          false,
-        ] as const)
-  );
 
-  addAccountMeta(keys, signers, resolvedAccounts.candyMachine, false);
-  addAccountMeta(keys, signers, resolvedAccounts.authorityPda, false);
-  addAccountMeta(keys, signers, resolvedAccounts.mintAuthority, false);
-  addAccountMeta(keys, signers, resolvedAccounts.payer, false);
-  addAccountMeta(keys, signers, resolvedAccounts.nftMint, false);
-  addAccountMeta(keys, signers, resolvedAccounts.nftMintAuthority, false);
-  addAccountMeta(keys, signers, resolvedAccounts.nftMetadata, false);
-  addAccountMeta(keys, signers, resolvedAccounts.nftMasterEdition, false);
-  addAccountMeta(
-    keys,
-    signers,
-    resolvedAccounts.collectionAuthorityRecord,
-    false
+  // Default values.
+  if (!resolvedAccounts.authorityPda.value) {
+    resolvedAccounts.authorityPda.value = findCandyMachineAuthorityPda(
+      context,
+      { candyMachine: expectPublicKey(resolvedAccounts.candyMachine.value) }
+    );
+  }
+  if (!resolvedAccounts.payer.value) {
+    resolvedAccounts.payer.value = context.payer;
+  }
+  if (!resolvedAccounts.nftMintAuthority.value) {
+    resolvedAccounts.nftMintAuthority.value = context.identity;
+  }
+  if (!resolvedAccounts.nftMetadata.value) {
+    resolvedAccounts.nftMetadata.value = findMetadataPda(context, {
+      mint: expectPublicKey(resolvedAccounts.nftMint.value),
+    });
+  }
+  if (!resolvedAccounts.nftMasterEdition.value) {
+    resolvedAccounts.nftMasterEdition.value = findMasterEditionPda(context, {
+      mint: expectPublicKey(resolvedAccounts.nftMint.value),
+    });
+  }
+  if (!resolvedAccounts.collectionAuthorityRecord.value) {
+    resolvedAccounts.collectionAuthorityRecord.value =
+      findCollectionAuthorityRecordPda(context, {
+        mint: expectPublicKey(resolvedAccounts.collectionMint.value),
+        collectionAuthority: expectPublicKey(
+          resolvedAccounts.authorityPda.value
+        ),
+      });
+  }
+  if (!resolvedAccounts.collectionMetadata.value) {
+    resolvedAccounts.collectionMetadata.value = findMetadataPda(context, {
+      mint: expectPublicKey(resolvedAccounts.collectionMint.value),
+    });
+  }
+  if (!resolvedAccounts.collectionMasterEdition.value) {
+    resolvedAccounts.collectionMasterEdition.value = findMasterEditionPda(
+      context,
+      { mint: expectPublicKey(resolvedAccounts.collectionMint.value) }
+    );
+  }
+  if (!resolvedAccounts.tokenMetadataProgram.value) {
+    resolvedAccounts.tokenMetadataProgram.value = context.programs.getPublicKey(
+      'mplTokenMetadata',
+      'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'
+    );
+    resolvedAccounts.tokenMetadataProgram.isWritable = false;
+  }
+  if (!resolvedAccounts.tokenProgram.value) {
+    resolvedAccounts.tokenProgram.value = context.programs.getPublicKey(
+      'splToken',
+      'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
+    );
+    resolvedAccounts.tokenProgram.isWritable = false;
+  }
+  if (!resolvedAccounts.systemProgram.value) {
+    resolvedAccounts.systemProgram.value = context.programs.getPublicKey(
+      'splSystem',
+      '11111111111111111111111111111111'
+    );
+    resolvedAccounts.systemProgram.isWritable = false;
+  }
+  if (!resolvedAccounts.recentSlothashes.value) {
+    resolvedAccounts.recentSlothashes.value = publicKey(
+      'SysvarS1otHashes111111111111111111111111111'
+    );
+  }
+
+  // Accounts in order.
+  const orderedAccounts: ResolvedAccount[] = Object.values(
+    resolvedAccounts
+  ).sort((a, b) => a.index - b.index);
+
+  // Keys and Signers.
+  const [keys, signers] = getAccountMetasAndSigners(
+    orderedAccounts,
+    'programId',
+    programId
   );
-  addAccountMeta(keys, signers, resolvedAccounts.collectionMint, false);
-  addAccountMeta(keys, signers, resolvedAccounts.collectionMetadata, false);
-  addAccountMeta(
-    keys,
-    signers,
-    resolvedAccounts.collectionMasterEdition,
-    false
-  );
-  addAccountMeta(
-    keys,
-    signers,
-    resolvedAccounts.collectionUpdateAuthority,
-    false
-  );
-  addAccountMeta(keys, signers, resolvedAccounts.tokenMetadataProgram, false);
-  addAccountMeta(keys, signers, resolvedAccounts.tokenProgram, false);
-  addAccountMeta(keys, signers, resolvedAccounts.systemProgram, false);
-  addAccountMeta(keys, signers, resolvedAccounts.recentSlothashes, false);
 
   // Data.
   const data = getMintFromCandyMachineInstructionDataSerializer().serialize({});

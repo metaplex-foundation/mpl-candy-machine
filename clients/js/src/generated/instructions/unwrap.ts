@@ -7,7 +7,6 @@
  */
 
 import {
-  AccountMeta,
   Context,
   Pda,
   PublicKey,
@@ -22,7 +21,11 @@ import {
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import { addAccountMeta, addObjectProperty } from '../shared';
+import {
+  ResolvedAccount,
+  ResolvedAccountsWithIndices,
+  getAccountMetasAndSigners,
+} from '../shared';
 
 // Accounts.
 export type UnwrapInstructionAccounts = {
@@ -38,17 +41,10 @@ export type UnwrapInstructionData = { discriminator: Array<number> };
 
 export type UnwrapInstructionDataArgs = {};
 
-/** @deprecated Use `getUnwrapInstructionDataSerializer()` without any argument instead. */
-export function getUnwrapInstructionDataSerializer(
-  _context: object
-): Serializer<UnwrapInstructionDataArgs, UnwrapInstructionData>;
 export function getUnwrapInstructionDataSerializer(): Serializer<
   UnwrapInstructionDataArgs,
   UnwrapInstructionData
->;
-export function getUnwrapInstructionDataSerializer(
-  _context: object = {}
-): Serializer<UnwrapInstructionDataArgs, UnwrapInstructionData> {
+> {
   return mapSerializer<UnwrapInstructionDataArgs, any, UnwrapInstructionData>(
     struct<UnwrapInstructionData>(
       [['discriminator', array(u8(), { size: 8 })]],
@@ -63,56 +59,66 @@ export function getUnwrapInstructionDataSerializer(
 
 // Instruction.
 export function unwrap(
-  context: Pick<Context, 'programs' | 'identity'>,
+  context: Pick<Context, 'identity' | 'programs'>,
   input: UnwrapInstructionAccounts
 ): TransactionBuilder {
-  const signers: Signer[] = [];
-  const keys: AccountMeta[] = [];
-
   // Program ID.
   const programId = context.programs.getPublicKey(
     'mplCandyGuard',
     'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
   );
 
-  // Resolved inputs.
-  const resolvedAccounts = {
-    candyGuard: [input.candyGuard, false] as const,
-    candyMachine: [input.candyMachine, true] as const,
+  // Accounts.
+  const resolvedAccounts: ResolvedAccountsWithIndices = {
+    candyGuard: {
+      index: 0,
+      isWritable: false,
+      value: input.candyGuard ?? null,
+    },
+    authority: { index: 1, isWritable: false, value: input.authority ?? null },
+    candyMachine: {
+      index: 2,
+      isWritable: true,
+      value: input.candyMachine ?? null,
+    },
+    candyMachineAuthority: {
+      index: 3,
+      isWritable: false,
+      value: input.candyMachineAuthority ?? null,
+    },
+    candyMachineProgram: {
+      index: 4,
+      isWritable: false,
+      value: input.candyMachineProgram ?? null,
+    },
   };
-  addObjectProperty(
-    resolvedAccounts,
-    'authority',
-    input.authority
-      ? ([input.authority, false] as const)
-      : ([context.identity, false] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'candyMachineAuthority',
-    input.candyMachineAuthority
-      ? ([input.candyMachineAuthority, false] as const)
-      : ([context.identity, false] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'candyMachineProgram',
-    input.candyMachineProgram
-      ? ([input.candyMachineProgram, false] as const)
-      : ([
-          context.programs.getPublicKey(
-            'mplCandyMachine',
-            'CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR'
-          ),
-          false,
-        ] as const)
-  );
 
-  addAccountMeta(keys, signers, resolvedAccounts.candyGuard, false);
-  addAccountMeta(keys, signers, resolvedAccounts.authority, false);
-  addAccountMeta(keys, signers, resolvedAccounts.candyMachine, false);
-  addAccountMeta(keys, signers, resolvedAccounts.candyMachineAuthority, false);
-  addAccountMeta(keys, signers, resolvedAccounts.candyMachineProgram, false);
+  // Default values.
+  if (!resolvedAccounts.authority.value) {
+    resolvedAccounts.authority.value = context.identity;
+  }
+  if (!resolvedAccounts.candyMachineAuthority.value) {
+    resolvedAccounts.candyMachineAuthority.value = context.identity;
+  }
+  if (!resolvedAccounts.candyMachineProgram.value) {
+    resolvedAccounts.candyMachineProgram.value = context.programs.getPublicKey(
+      'mplCandyMachine',
+      'CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR'
+    );
+    resolvedAccounts.candyMachineProgram.isWritable = false;
+  }
+
+  // Accounts in order.
+  const orderedAccounts: ResolvedAccount[] = Object.values(
+    resolvedAccounts
+  ).sort((a, b) => a.index - b.index);
+
+  // Keys and Signers.
+  const [keys, signers] = getAccountMetasAndSigners(
+    orderedAccounts,
+    'programId',
+    programId
+  );
 
   // Data.
   const data = getUnwrapInstructionDataSerializer().serialize({});

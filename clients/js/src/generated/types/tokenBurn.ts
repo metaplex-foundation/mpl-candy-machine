@@ -28,14 +28,7 @@ export type TokenBurn = { amount: bigint; mint: PublicKey };
 
 export type TokenBurnArgs = { amount: number | bigint; mint: PublicKey };
 
-/** @deprecated Use `getTokenBurnSerializer()` without any argument instead. */
-export function getTokenBurnSerializer(
-  _context: object
-): Serializer<TokenBurnArgs, TokenBurn>;
-export function getTokenBurnSerializer(): Serializer<TokenBurnArgs, TokenBurn>;
-export function getTokenBurnSerializer(
-  _context: object = {}
-): Serializer<TokenBurnArgs, TokenBurn> {
+export function getTokenBurnSerializer(): Serializer<TokenBurnArgs, TokenBurn> {
   return struct<TokenBurn>(
     [
       ['amount', u64()],

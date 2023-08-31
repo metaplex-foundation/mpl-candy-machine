@@ -30,14 +30,7 @@ export type NftBurn = { requiredCollection: PublicKey };
 
 export type NftBurnArgs = NftBurn;
 
-/** @deprecated Use `getNftBurnSerializer()` without any argument instead. */
-export function getNftBurnSerializer(
-  _context: object
-): Serializer<NftBurnArgs, NftBurn>;
-export function getNftBurnSerializer(): Serializer<NftBurnArgs, NftBurn>;
-export function getNftBurnSerializer(
-  _context: object = {}
-): Serializer<NftBurnArgs, NftBurn> {
+export function getNftBurnSerializer(): Serializer<NftBurnArgs, NftBurn> {
   return struct<NftBurn>([['requiredCollection', publicKeySerializer()]], {
     description: 'NftBurn',
   }) as Serializer<NftBurnArgs, NftBurn>;

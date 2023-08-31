@@ -37,17 +37,10 @@ export type Gatekeeper = {
 
 export type GatekeeperArgs = Gatekeeper;
 
-/** @deprecated Use `getGatekeeperSerializer()` without any argument instead. */
-export function getGatekeeperSerializer(
-  _context: object
-): Serializer<GatekeeperArgs, Gatekeeper>;
 export function getGatekeeperSerializer(): Serializer<
   GatekeeperArgs,
   Gatekeeper
->;
-export function getGatekeeperSerializer(
-  _context: object = {}
-): Serializer<GatekeeperArgs, Gatekeeper> {
+> {
   return struct<Gatekeeper>(
     [
       ['gatekeeperNetwork', publicKeySerializer()],

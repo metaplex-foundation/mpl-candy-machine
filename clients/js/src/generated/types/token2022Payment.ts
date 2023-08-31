@@ -37,17 +37,10 @@ export type Token2022PaymentArgs = {
   destinationAta: PublicKey;
 };
 
-/** @deprecated Use `getToken2022PaymentSerializer()` without any argument instead. */
-export function getToken2022PaymentSerializer(
-  _context: object
-): Serializer<Token2022PaymentArgs, Token2022Payment>;
 export function getToken2022PaymentSerializer(): Serializer<
   Token2022PaymentArgs,
   Token2022Payment
->;
-export function getToken2022PaymentSerializer(
-  _context: object = {}
-): Serializer<Token2022PaymentArgs, Token2022Payment> {
+> {
   return struct<Token2022Payment>(
     [
       ['amount', u64()],

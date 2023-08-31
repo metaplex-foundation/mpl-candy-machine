@@ -18,14 +18,7 @@ export type StartDate = { date: DateTime };
 
 export type StartDateArgs = { date: DateTimeInput };
 
-/** @deprecated Use `getStartDateSerializer()` without any argument instead. */
-export function getStartDateSerializer(
-  _context: object
-): Serializer<StartDateArgs, StartDate>;
-export function getStartDateSerializer(): Serializer<StartDateArgs, StartDate>;
-export function getStartDateSerializer(
-  _context: object = {}
-): Serializer<StartDateArgs, StartDate> {
+export function getStartDateSerializer(): Serializer<StartDateArgs, StartDate> {
   return struct<StartDate>([['date', mapDateTimeSerializer(i64())]], {
     description: 'StartDate',
   }) as Serializer<StartDateArgs, StartDate>;

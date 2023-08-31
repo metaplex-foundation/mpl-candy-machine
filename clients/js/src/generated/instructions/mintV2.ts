@@ -14,7 +14,6 @@ import {
 } from '@metaplex-foundation/mpl-token-metadata';
 import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-toolbox';
 import {
-  AccountMeta,
   Context,
   Option,
   OptionOrNullable,
@@ -37,7 +36,12 @@ import {
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import { findCandyGuardPda, findCandyMachineAuthorityPda } from '../../hooked';
-import { addAccountMeta, addObjectProperty } from '../shared';
+import {
+  ResolvedAccount,
+  ResolvedAccountsWithIndices,
+  expectPublicKey,
+  getAccountMetasAndSigners,
+} from '../shared';
 
 // Accounts.
 export type MintV2InstructionAccounts = {
@@ -182,17 +186,10 @@ export type MintV2InstructionDataArgs = {
   group: OptionOrNullable<string>;
 };
 
-/** @deprecated Use `getMintV2InstructionDataSerializer()` without any argument instead. */
-export function getMintV2InstructionDataSerializer(
-  _context: object
-): Serializer<MintV2InstructionDataArgs, MintV2InstructionData>;
 export function getMintV2InstructionDataSerializer(): Serializer<
   MintV2InstructionDataArgs,
   MintV2InstructionData
->;
-export function getMintV2InstructionDataSerializer(
-  _context: object = {}
-): Serializer<MintV2InstructionDataArgs, MintV2InstructionData> {
+> {
   return mapSerializer<MintV2InstructionDataArgs, any, MintV2InstructionData>(
     struct<MintV2InstructionData>(
       [
@@ -214,312 +211,254 @@ export type MintV2InstructionArgs = MintV2InstructionDataArgs;
 
 // Instruction.
 export function mintV2(
-  context: Pick<Context, 'programs' | 'eddsa' | 'identity' | 'payer'>,
+  context: Pick<Context, 'eddsa' | 'identity' | 'payer' | 'programs'>,
   input: MintV2InstructionAccounts & MintV2InstructionArgs
 ): TransactionBuilder {
-  const signers: Signer[] = [];
-  const keys: AccountMeta[] = [];
-
   // Program ID.
   const programId = context.programs.getPublicKey(
     'mplCandyGuard',
     'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
   );
 
-  // Resolved inputs.
-  const resolvedAccounts = {
-    candyMachine: [input.candyMachine, true] as const,
-    nftMint: [input.nftMint, true] as const,
-    collectionMint: [input.collectionMint, false] as const,
-    collectionUpdateAuthority: [
-      input.collectionUpdateAuthority,
-      false,
-    ] as const,
+  // Accounts.
+  const resolvedAccounts: ResolvedAccountsWithIndices = {
+    candyGuard: {
+      index: 0,
+      isWritable: false,
+      value: input.candyGuard ?? null,
+    },
+    candyMachineProgram: {
+      index: 1,
+      isWritable: false,
+      value: input.candyMachineProgram ?? null,
+    },
+    candyMachine: {
+      index: 2,
+      isWritable: true,
+      value: input.candyMachine ?? null,
+    },
+    candyMachineAuthorityPda: {
+      index: 3,
+      isWritable: true,
+      value: input.candyMachineAuthorityPda ?? null,
+    },
+    payer: { index: 4, isWritable: true, value: input.payer ?? null },
+    minter: { index: 5, isWritable: true, value: input.minter ?? null },
+    nftMint: { index: 6, isWritable: true, value: input.nftMint ?? null },
+    nftMintAuthority: {
+      index: 7,
+      isWritable: false,
+      value: input.nftMintAuthority ?? null,
+    },
+    nftMetadata: {
+      index: 8,
+      isWritable: true,
+      value: input.nftMetadata ?? null,
+    },
+    nftMasterEdition: {
+      index: 9,
+      isWritable: true,
+      value: input.nftMasterEdition ?? null,
+    },
+    token: { index: 10, isWritable: true, value: input.token ?? null },
+    tokenRecord: {
+      index: 11,
+      isWritable: true,
+      value: input.tokenRecord ?? null,
+    },
+    collectionDelegateRecord: {
+      index: 12,
+      isWritable: false,
+      value: input.collectionDelegateRecord ?? null,
+    },
+    collectionMint: {
+      index: 13,
+      isWritable: false,
+      value: input.collectionMint ?? null,
+    },
+    collectionMetadata: {
+      index: 14,
+      isWritable: true,
+      value: input.collectionMetadata ?? null,
+    },
+    collectionMasterEdition: {
+      index: 15,
+      isWritable: false,
+      value: input.collectionMasterEdition ?? null,
+    },
+    collectionUpdateAuthority: {
+      index: 16,
+      isWritable: false,
+      value: input.collectionUpdateAuthority ?? null,
+    },
+    tokenMetadataProgram: {
+      index: 17,
+      isWritable: false,
+      value: input.tokenMetadataProgram ?? null,
+    },
+    splTokenProgram: {
+      index: 18,
+      isWritable: false,
+      value: input.splTokenProgram ?? null,
+    },
+    splAtaProgram: {
+      index: 19,
+      isWritable: false,
+      value: input.splAtaProgram ?? null,
+    },
+    systemProgram: {
+      index: 20,
+      isWritable: false,
+      value: input.systemProgram ?? null,
+    },
+    sysvarInstructions: {
+      index: 21,
+      isWritable: false,
+      value: input.sysvarInstructions ?? null,
+    },
+    recentSlothashes: {
+      index: 22,
+      isWritable: false,
+      value: input.recentSlothashes ?? null,
+    },
+    authorizationRulesProgram: {
+      index: 23,
+      isWritable: false,
+      value: input.authorizationRulesProgram ?? null,
+    },
+    authorizationRules: {
+      index: 24,
+      isWritable: false,
+      value: input.authorizationRules ?? null,
+    },
   };
-  const resolvingArgs = {};
-  addObjectProperty(
-    resolvedAccounts,
-    'candyGuard',
-    input.candyGuard
-      ? ([input.candyGuard, false] as const)
-      : ([
-          findCandyGuardPda(context, {
-            base: publicKey(input.candyMachine, false),
-          }),
-          false,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'candyMachineProgram',
-    input.candyMachineProgram
-      ? ([input.candyMachineProgram, false] as const)
-      : ([
-          context.programs.getPublicKey(
-            'mplCandyMachine',
-            'CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR'
-          ),
-          false,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'candyMachineAuthorityPda',
-    input.candyMachineAuthorityPda
-      ? ([input.candyMachineAuthorityPda, true] as const)
-      : ([
-          findCandyMachineAuthorityPda(context, {
-            candyMachine: publicKey(input.candyMachine, false),
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'payer',
-    input.payer
-      ? ([input.payer, true] as const)
-      : ([context.payer, true] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'minter',
-    input.minter
-      ? ([input.minter, true] as const)
-      : ([context.identity, true] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'nftMintAuthority',
-    input.nftMintAuthority
-      ? ([input.nftMintAuthority, false] as const)
-      : ([context.identity, false] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'nftMetadata',
-    input.nftMetadata
-      ? ([input.nftMetadata, true] as const)
-      : ([
-          findMetadataPda(context, { mint: publicKey(input.nftMint, false) }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'nftMasterEdition',
-    input.nftMasterEdition
-      ? ([input.nftMasterEdition, true] as const)
-      : ([
-          findMasterEditionPda(context, {
-            mint: publicKey(input.nftMint, false),
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'token',
-    input.token
-      ? ([input.token, true] as const)
-      : ([
-          findAssociatedTokenPda(context, {
-            mint: publicKey(input.nftMint, false),
-            owner: publicKey(resolvedAccounts.minter[0], false),
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'tokenRecord',
-    input.tokenRecord
-      ? ([input.tokenRecord, true] as const)
-      : ([programId, false] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'collectionDelegateRecord',
-    input.collectionDelegateRecord
-      ? ([input.collectionDelegateRecord, false] as const)
-      : ([
-          findMetadataDelegateRecordPda(context, {
-            mint: publicKey(input.collectionMint, false),
-            delegateRole: MetadataDelegateRole.Collection,
-            updateAuthority: publicKey(input.collectionUpdateAuthority, false),
-            delegate: publicKey(
-              resolvedAccounts.candyMachineAuthorityPda[0],
-              false
-            ),
-          }),
-          false,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'collectionMetadata',
-    input.collectionMetadata
-      ? ([input.collectionMetadata, true] as const)
-      : ([
-          findMetadataPda(context, {
-            mint: publicKey(input.collectionMint, false),
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'collectionMasterEdition',
-    input.collectionMasterEdition
-      ? ([input.collectionMasterEdition, false] as const)
-      : ([
-          findMasterEditionPda(context, {
-            mint: publicKey(input.collectionMint, false),
-          }),
-          false,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'tokenMetadataProgram',
-    input.tokenMetadataProgram
-      ? ([input.tokenMetadataProgram, false] as const)
-      : ([
-          context.programs.getPublicKey(
-            'mplTokenMetadata',
-            'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'
-          ),
-          false,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'splTokenProgram',
-    input.splTokenProgram
-      ? ([input.splTokenProgram, false] as const)
-      : ([
-          context.programs.getPublicKey(
-            'splToken',
-            'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
-          ),
-          false,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'splAtaProgram',
-    input.splAtaProgram
-      ? ([input.splAtaProgram, false] as const)
-      : ([
-          context.programs.getPublicKey(
-            'splAssociatedToken',
-            'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'
-          ),
-          false,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'systemProgram',
-    input.systemProgram
-      ? ([input.systemProgram, false] as const)
-      : ([
-          context.programs.getPublicKey(
-            'splSystem',
-            '11111111111111111111111111111111'
-          ),
-          false,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'sysvarInstructions',
-    input.sysvarInstructions
-      ? ([input.sysvarInstructions, false] as const)
-      : ([
-          publicKey('Sysvar1nstructions1111111111111111111111111'),
-          false,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'recentSlothashes',
-    input.recentSlothashes
-      ? ([input.recentSlothashes, false] as const)
-      : ([
-          publicKey('SysvarS1otHashes111111111111111111111111111'),
-          false,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'authorizationRulesProgram',
-    input.authorizationRulesProgram
-      ? ([input.authorizationRulesProgram, false] as const)
-      : ([programId, false] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'authorizationRules',
-    input.authorizationRules
-      ? ([input.authorizationRules, false] as const)
-      : ([programId, false] as const)
-  );
-  const resolvedArgs = { ...input, ...resolvingArgs };
 
-  addAccountMeta(keys, signers, resolvedAccounts.candyGuard, false);
-  addAccountMeta(keys, signers, resolvedAccounts.candyMachineProgram, false);
-  addAccountMeta(keys, signers, resolvedAccounts.candyMachine, false);
-  addAccountMeta(
-    keys,
-    signers,
-    resolvedAccounts.candyMachineAuthorityPda,
-    false
+  // Arguments.
+  const resolvedArgs: MintV2InstructionArgs = { ...input };
+
+  // Default values.
+  if (!resolvedAccounts.candyGuard.value) {
+    resolvedAccounts.candyGuard.value = findCandyGuardPda(context, {
+      base: expectPublicKey(resolvedAccounts.candyMachine.value),
+    });
+  }
+  if (!resolvedAccounts.candyMachineProgram.value) {
+    resolvedAccounts.candyMachineProgram.value = context.programs.getPublicKey(
+      'mplCandyMachine',
+      'CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR'
+    );
+    resolvedAccounts.candyMachineProgram.isWritable = false;
+  }
+  if (!resolvedAccounts.candyMachineAuthorityPda.value) {
+    resolvedAccounts.candyMachineAuthorityPda.value =
+      findCandyMachineAuthorityPda(context, {
+        candyMachine: expectPublicKey(resolvedAccounts.candyMachine.value),
+      });
+  }
+  if (!resolvedAccounts.payer.value) {
+    resolvedAccounts.payer.value = context.payer;
+  }
+  if (!resolvedAccounts.minter.value) {
+    resolvedAccounts.minter.value = context.identity;
+  }
+  if (!resolvedAccounts.nftMintAuthority.value) {
+    resolvedAccounts.nftMintAuthority.value = context.identity;
+  }
+  if (!resolvedAccounts.nftMetadata.value) {
+    resolvedAccounts.nftMetadata.value = findMetadataPda(context, {
+      mint: expectPublicKey(resolvedAccounts.nftMint.value),
+    });
+  }
+  if (!resolvedAccounts.nftMasterEdition.value) {
+    resolvedAccounts.nftMasterEdition.value = findMasterEditionPda(context, {
+      mint: expectPublicKey(resolvedAccounts.nftMint.value),
+    });
+  }
+  if (!resolvedAccounts.token.value) {
+    resolvedAccounts.token.value = findAssociatedTokenPda(context, {
+      mint: expectPublicKey(resolvedAccounts.nftMint.value),
+      owner: expectPublicKey(resolvedAccounts.minter.value),
+    });
+  }
+  if (!resolvedAccounts.collectionDelegateRecord.value) {
+    resolvedAccounts.collectionDelegateRecord.value =
+      findMetadataDelegateRecordPda(context, {
+        mint: expectPublicKey(resolvedAccounts.collectionMint.value),
+        delegateRole: MetadataDelegateRole.Collection,
+        updateAuthority: expectPublicKey(
+          resolvedAccounts.collectionUpdateAuthority.value
+        ),
+        delegate: expectPublicKey(
+          resolvedAccounts.candyMachineAuthorityPda.value
+        ),
+      });
+  }
+  if (!resolvedAccounts.collectionMetadata.value) {
+    resolvedAccounts.collectionMetadata.value = findMetadataPda(context, {
+      mint: expectPublicKey(resolvedAccounts.collectionMint.value),
+    });
+  }
+  if (!resolvedAccounts.collectionMasterEdition.value) {
+    resolvedAccounts.collectionMasterEdition.value = findMasterEditionPda(
+      context,
+      { mint: expectPublicKey(resolvedAccounts.collectionMint.value) }
+    );
+  }
+  if (!resolvedAccounts.tokenMetadataProgram.value) {
+    resolvedAccounts.tokenMetadataProgram.value = context.programs.getPublicKey(
+      'mplTokenMetadata',
+      'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'
+    );
+    resolvedAccounts.tokenMetadataProgram.isWritable = false;
+  }
+  if (!resolvedAccounts.splTokenProgram.value) {
+    resolvedAccounts.splTokenProgram.value = context.programs.getPublicKey(
+      'splToken',
+      'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
+    );
+    resolvedAccounts.splTokenProgram.isWritable = false;
+  }
+  if (!resolvedAccounts.splAtaProgram.value) {
+    resolvedAccounts.splAtaProgram.value = context.programs.getPublicKey(
+      'splAssociatedToken',
+      'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'
+    );
+    resolvedAccounts.splAtaProgram.isWritable = false;
+  }
+  if (!resolvedAccounts.systemProgram.value) {
+    resolvedAccounts.systemProgram.value = context.programs.getPublicKey(
+      'splSystem',
+      '11111111111111111111111111111111'
+    );
+    resolvedAccounts.systemProgram.isWritable = false;
+  }
+  if (!resolvedAccounts.sysvarInstructions.value) {
+    resolvedAccounts.sysvarInstructions.value = publicKey(
+      'Sysvar1nstructions1111111111111111111111111'
+    );
+  }
+  if (!resolvedAccounts.recentSlothashes.value) {
+    resolvedAccounts.recentSlothashes.value = publicKey(
+      'SysvarS1otHashes111111111111111111111111111'
+    );
+  }
+
+  // Accounts in order.
+  const orderedAccounts: ResolvedAccount[] = Object.values(
+    resolvedAccounts
+  ).sort((a, b) => a.index - b.index);
+
+  // Keys and Signers.
+  const [keys, signers] = getAccountMetasAndSigners(
+    orderedAccounts,
+    'programId',
+    programId
   );
-  addAccountMeta(keys, signers, resolvedAccounts.payer, false);
-  addAccountMeta(keys, signers, resolvedAccounts.minter, false);
-  addAccountMeta(keys, signers, resolvedAccounts.nftMint, false);
-  addAccountMeta(keys, signers, resolvedAccounts.nftMintAuthority, false);
-  addAccountMeta(keys, signers, resolvedAccounts.nftMetadata, false);
-  addAccountMeta(keys, signers, resolvedAccounts.nftMasterEdition, false);
-  addAccountMeta(keys, signers, resolvedAccounts.token, false);
-  addAccountMeta(keys, signers, resolvedAccounts.tokenRecord, false);
-  addAccountMeta(
-    keys,
-    signers,
-    resolvedAccounts.collectionDelegateRecord,
-    false
-  );
-  addAccountMeta(keys, signers, resolvedAccounts.collectionMint, false);
-  addAccountMeta(keys, signers, resolvedAccounts.collectionMetadata, false);
-  addAccountMeta(
-    keys,
-    signers,
-    resolvedAccounts.collectionMasterEdition,
-    false
-  );
-  addAccountMeta(
-    keys,
-    signers,
-    resolvedAccounts.collectionUpdateAuthority,
-    false
-  );
-  addAccountMeta(keys, signers, resolvedAccounts.tokenMetadataProgram, false);
-  addAccountMeta(keys, signers, resolvedAccounts.splTokenProgram, false);
-  addAccountMeta(keys, signers, resolvedAccounts.splAtaProgram, false);
-  addAccountMeta(keys, signers, resolvedAccounts.systemProgram, false);
-  addAccountMeta(keys, signers, resolvedAccounts.sysvarInstructions, false);
-  addAccountMeta(keys, signers, resolvedAccounts.recentSlothashes, false);
-  addAccountMeta(
-    keys,
-    signers,
-    resolvedAccounts.authorizationRulesProgram,
-    false
-  );
-  addAccountMeta(keys, signers, resolvedAccounts.authorizationRules, false);
 
   // Data.
-  const data = getMintV2InstructionDataSerializer().serialize(resolvedArgs);
+  const data = getMintV2InstructionDataSerializer().serialize(
+    resolvedArgs as MintV2InstructionDataArgs
+  );
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

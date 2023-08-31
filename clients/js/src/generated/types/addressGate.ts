@@ -18,17 +18,10 @@ export type AddressGate = { address: PublicKey };
 
 export type AddressGateArgs = AddressGate;
 
-/** @deprecated Use `getAddressGateSerializer()` without any argument instead. */
-export function getAddressGateSerializer(
-  _context: object
-): Serializer<AddressGateArgs, AddressGate>;
 export function getAddressGateSerializer(): Serializer<
   AddressGateArgs,
   AddressGate
->;
-export function getAddressGateSerializer(
-  _context: object = {}
-): Serializer<AddressGateArgs, AddressGate> {
+> {
   return struct<AddressGate>([['address', publicKeySerializer()]], {
     description: 'AddressGate',
   }) as Serializer<AddressGateArgs, AddressGate>;

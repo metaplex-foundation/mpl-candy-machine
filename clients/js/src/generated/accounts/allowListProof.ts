@@ -35,36 +35,20 @@ export type AllowListProofAccountData = { timestamp: bigint };
 
 export type AllowListProofAccountDataArgs = { timestamp: number | bigint };
 
-/** @deprecated Use `getAllowListProofAccountDataSerializer()` without any argument instead. */
-export function getAllowListProofAccountDataSerializer(
-  _context: object
-): Serializer<AllowListProofAccountDataArgs, AllowListProofAccountData>;
 export function getAllowListProofAccountDataSerializer(): Serializer<
   AllowListProofAccountDataArgs,
   AllowListProofAccountData
->;
-export function getAllowListProofAccountDataSerializer(
-  _context: object = {}
-): Serializer<AllowListProofAccountDataArgs, AllowListProofAccountData> {
+> {
   return struct<AllowListProofAccountData>([['timestamp', i64()]], {
     description: 'AllowListProofAccountData',
   }) as Serializer<AllowListProofAccountDataArgs, AllowListProofAccountData>;
 }
 
-/** @deprecated Use `deserializeAllowListProof(rawAccount)` without any context instead. */
-export function deserializeAllowListProof(
-  context: object,
-  rawAccount: RpcAccount
-): AllowListProof;
 export function deserializeAllowListProof(
   rawAccount: RpcAccount
-): AllowListProof;
-export function deserializeAllowListProof(
-  context: RpcAccount | object,
-  rawAccount?: RpcAccount
 ): AllowListProof {
   return deserializeAccount(
-    rawAccount ?? (context as RpcAccount),
+    rawAccount,
     getAllowListProofAccountDataSerializer()
   );
 }

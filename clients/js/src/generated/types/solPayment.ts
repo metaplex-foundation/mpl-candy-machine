@@ -30,17 +30,10 @@ export type SolPayment = { lamports: SolAmount; destination: PublicKey };
 
 export type SolPaymentArgs = SolPayment;
 
-/** @deprecated Use `getSolPaymentSerializer()` without any argument instead. */
-export function getSolPaymentSerializer(
-  _context: object
-): Serializer<SolPaymentArgs, SolPayment>;
 export function getSolPaymentSerializer(): Serializer<
   SolPaymentArgs,
   SolPayment
->;
-export function getSolPaymentSerializer(
-  _context: object = {}
-): Serializer<SolPaymentArgs, SolPayment> {
+> {
   return struct<SolPayment>(
     [
       ['lamports', mapAmountSerializer(u64(), 'SOL', 9)],

@@ -26,14 +26,7 @@ export type NftGate = { requiredCollection: PublicKey };
 
 export type NftGateArgs = NftGate;
 
-/** @deprecated Use `getNftGateSerializer()` without any argument instead. */
-export function getNftGateSerializer(
-  _context: object
-): Serializer<NftGateArgs, NftGate>;
-export function getNftGateSerializer(): Serializer<NftGateArgs, NftGate>;
-export function getNftGateSerializer(
-  _context: object = {}
-): Serializer<NftGateArgs, NftGate> {
+export function getNftGateSerializer(): Serializer<NftGateArgs, NftGate> {
   return struct<NftGate>([['requiredCollection', publicKeySerializer()]], {
     description: 'NftGate',
   }) as Serializer<NftGateArgs, NftGate>;

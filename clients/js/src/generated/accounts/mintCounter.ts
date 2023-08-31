@@ -35,36 +35,17 @@ export type MintCounterAccountData = { count: number };
 
 export type MintCounterAccountDataArgs = MintCounterAccountData;
 
-/** @deprecated Use `getMintCounterAccountDataSerializer()` without any argument instead. */
-export function getMintCounterAccountDataSerializer(
-  _context: object
-): Serializer<MintCounterAccountDataArgs, MintCounterAccountData>;
 export function getMintCounterAccountDataSerializer(): Serializer<
   MintCounterAccountDataArgs,
   MintCounterAccountData
->;
-export function getMintCounterAccountDataSerializer(
-  _context: object = {}
-): Serializer<MintCounterAccountDataArgs, MintCounterAccountData> {
+> {
   return struct<MintCounterAccountData>([['count', u16()]], {
     description: 'MintCounterAccountData',
   }) as Serializer<MintCounterAccountDataArgs, MintCounterAccountData>;
 }
 
-/** @deprecated Use `deserializeMintCounter(rawAccount)` without any context instead. */
-export function deserializeMintCounter(
-  context: object,
-  rawAccount: RpcAccount
-): MintCounter;
-export function deserializeMintCounter(rawAccount: RpcAccount): MintCounter;
-export function deserializeMintCounter(
-  context: RpcAccount | object,
-  rawAccount?: RpcAccount
-): MintCounter {
-  return deserializeAccount(
-    rawAccount ?? (context as RpcAccount),
-    getMintCounterAccountDataSerializer()
-  );
+export function deserializeMintCounter(rawAccount: RpcAccount): MintCounter {
+  return deserializeAccount(rawAccount, getMintCounterAccountDataSerializer());
 }
 
 export async function fetchMintCounter(

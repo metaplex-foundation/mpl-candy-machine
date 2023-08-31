@@ -12,13 +12,11 @@ import {
   findMetadataPda,
 } from '@metaplex-foundation/mpl-token-metadata';
 import {
-  AccountMeta,
   Context,
   Pda,
   PublicKey,
   Signer,
   TransactionBuilder,
-  publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import {
@@ -29,7 +27,12 @@ import {
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import { findCandyMachineAuthorityPda } from '../../hooked';
-import { addAccountMeta, addObjectProperty } from '../shared';
+import {
+  ResolvedAccount,
+  ResolvedAccountsWithIndices,
+  expectPublicKey,
+  getAccountMetasAndSigners,
+} from '../shared';
 
 // Accounts.
 export type SetCollectionInstructionAccounts = {
@@ -104,17 +107,10 @@ export type SetCollectionInstructionData = { discriminator: Array<number> };
 
 export type SetCollectionInstructionDataArgs = {};
 
-/** @deprecated Use `getSetCollectionInstructionDataSerializer()` without any argument instead. */
-export function getSetCollectionInstructionDataSerializer(
-  _context: object
-): Serializer<SetCollectionInstructionDataArgs, SetCollectionInstructionData>;
 export function getSetCollectionInstructionDataSerializer(): Serializer<
   SetCollectionInstructionDataArgs,
   SetCollectionInstructionData
->;
-export function getSetCollectionInstructionDataSerializer(
-  _context: object = {}
-): Serializer<SetCollectionInstructionDataArgs, SetCollectionInstructionData> {
+> {
   return mapSerializer<
     SetCollectionInstructionDataArgs,
     any,
@@ -136,183 +132,154 @@ export function getSetCollectionInstructionDataSerializer(
 
 // Instruction.
 export function setCollection(
-  context: Pick<Context, 'programs' | 'eddsa' | 'identity' | 'payer'>,
+  context: Pick<Context, 'eddsa' | 'identity' | 'payer' | 'programs'>,
   input: SetCollectionInstructionAccounts
 ): TransactionBuilder {
-  const signers: Signer[] = [];
-  const keys: AccountMeta[] = [];
-
   // Program ID.
   const programId = context.programs.getPublicKey(
     'mplCandyMachineCore',
     'CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR'
   );
 
-  // Resolved inputs.
-  const resolvedAccounts = {
-    candyMachine: [input.candyMachine, true] as const,
-    collectionMint: [input.collectionMint, false] as const,
-    newCollectionUpdateAuthority: [
-      input.newCollectionUpdateAuthority,
-      true,
-    ] as const,
-    newCollectionMint: [input.newCollectionMint, false] as const,
+  // Accounts.
+  const resolvedAccounts: ResolvedAccountsWithIndices = {
+    candyMachine: {
+      index: 0,
+      isWritable: true,
+      value: input.candyMachine ?? null,
+    },
+    authority: { index: 1, isWritable: false, value: input.authority ?? null },
+    authorityPda: {
+      index: 2,
+      isWritable: true,
+      value: input.authorityPda ?? null,
+    },
+    payer: { index: 3, isWritable: false, value: input.payer ?? null },
+    collectionMint: {
+      index: 4,
+      isWritable: false,
+      value: input.collectionMint ?? null,
+    },
+    collectionMetadata: {
+      index: 5,
+      isWritable: false,
+      value: input.collectionMetadata ?? null,
+    },
+    collectionAuthorityRecord: {
+      index: 6,
+      isWritable: true,
+      value: input.collectionAuthorityRecord ?? null,
+    },
+    newCollectionUpdateAuthority: {
+      index: 7,
+      isWritable: true,
+      value: input.newCollectionUpdateAuthority ?? null,
+    },
+    newCollectionMetadata: {
+      index: 8,
+      isWritable: false,
+      value: input.newCollectionMetadata ?? null,
+    },
+    newCollectionMint: {
+      index: 9,
+      isWritable: false,
+      value: input.newCollectionMint ?? null,
+    },
+    newCollectionMasterEdition: {
+      index: 10,
+      isWritable: false,
+      value: input.newCollectionMasterEdition ?? null,
+    },
+    newCollectionAuthorityRecord: {
+      index: 11,
+      isWritable: true,
+      value: input.newCollectionAuthorityRecord ?? null,
+    },
+    tokenMetadataProgram: {
+      index: 12,
+      isWritable: false,
+      value: input.tokenMetadataProgram ?? null,
+    },
+    systemProgram: {
+      index: 13,
+      isWritable: false,
+      value: input.systemProgram ?? null,
+    },
   };
-  addObjectProperty(
-    resolvedAccounts,
-    'authority',
-    input.authority
-      ? ([input.authority, false] as const)
-      : ([context.identity, false] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'authorityPda',
-    input.authorityPda
-      ? ([input.authorityPda, true] as const)
-      : ([
-          findCandyMachineAuthorityPda(context, {
-            candyMachine: publicKey(input.candyMachine, false),
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'payer',
-    input.payer
-      ? ([input.payer, false] as const)
-      : ([context.payer, false] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'collectionMetadata',
-    input.collectionMetadata
-      ? ([input.collectionMetadata, false] as const)
-      : ([
-          findMetadataPda(context, {
-            mint: publicKey(input.collectionMint, false),
-          }),
-          false,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'collectionAuthorityRecord',
-    input.collectionAuthorityRecord
-      ? ([input.collectionAuthorityRecord, true] as const)
-      : ([
-          findCollectionAuthorityRecordPda(context, {
-            mint: publicKey(input.collectionMint, false),
-            collectionAuthority: publicKey(
-              resolvedAccounts.authorityPda[0],
-              false
-            ),
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'newCollectionMetadata',
-    input.newCollectionMetadata
-      ? ([input.newCollectionMetadata, false] as const)
-      : ([
-          findMetadataPda(context, {
-            mint: publicKey(input.newCollectionMint, false),
-          }),
-          false,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'newCollectionMasterEdition',
-    input.newCollectionMasterEdition
-      ? ([input.newCollectionMasterEdition, false] as const)
-      : ([
-          findMasterEditionPda(context, {
-            mint: publicKey(input.newCollectionMint, false),
-          }),
-          false,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'newCollectionAuthorityRecord',
-    input.newCollectionAuthorityRecord
-      ? ([input.newCollectionAuthorityRecord, true] as const)
-      : ([
-          findCollectionAuthorityRecordPda(context, {
-            mint: publicKey(input.newCollectionMint, false),
-            collectionAuthority: publicKey(
-              resolvedAccounts.authorityPda[0],
-              false
-            ),
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'tokenMetadataProgram',
-    input.tokenMetadataProgram
-      ? ([input.tokenMetadataProgram, false] as const)
-      : ([
-          context.programs.getPublicKey(
-            'mplTokenMetadata',
-            'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'
-          ),
-          false,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'systemProgram',
-    input.systemProgram
-      ? ([input.systemProgram, false] as const)
-      : ([
-          context.programs.getPublicKey(
-            'splSystem',
-            '11111111111111111111111111111111'
-          ),
-          false,
-        ] as const)
-  );
 
-  addAccountMeta(keys, signers, resolvedAccounts.candyMachine, false);
-  addAccountMeta(keys, signers, resolvedAccounts.authority, false);
-  addAccountMeta(keys, signers, resolvedAccounts.authorityPda, false);
-  addAccountMeta(keys, signers, resolvedAccounts.payer, false);
-  addAccountMeta(keys, signers, resolvedAccounts.collectionMint, false);
-  addAccountMeta(keys, signers, resolvedAccounts.collectionMetadata, false);
-  addAccountMeta(
-    keys,
-    signers,
-    resolvedAccounts.collectionAuthorityRecord,
-    false
+  // Default values.
+  if (!resolvedAccounts.authority.value) {
+    resolvedAccounts.authority.value = context.identity;
+  }
+  if (!resolvedAccounts.authorityPda.value) {
+    resolvedAccounts.authorityPda.value = findCandyMachineAuthorityPda(
+      context,
+      { candyMachine: expectPublicKey(resolvedAccounts.candyMachine.value) }
+    );
+  }
+  if (!resolvedAccounts.payer.value) {
+    resolvedAccounts.payer.value = context.payer;
+  }
+  if (!resolvedAccounts.collectionMetadata.value) {
+    resolvedAccounts.collectionMetadata.value = findMetadataPda(context, {
+      mint: expectPublicKey(resolvedAccounts.collectionMint.value),
+    });
+  }
+  if (!resolvedAccounts.collectionAuthorityRecord.value) {
+    resolvedAccounts.collectionAuthorityRecord.value =
+      findCollectionAuthorityRecordPda(context, {
+        mint: expectPublicKey(resolvedAccounts.collectionMint.value),
+        collectionAuthority: expectPublicKey(
+          resolvedAccounts.authorityPda.value
+        ),
+      });
+  }
+  if (!resolvedAccounts.newCollectionMetadata.value) {
+    resolvedAccounts.newCollectionMetadata.value = findMetadataPda(context, {
+      mint: expectPublicKey(resolvedAccounts.newCollectionMint.value),
+    });
+  }
+  if (!resolvedAccounts.newCollectionMasterEdition.value) {
+    resolvedAccounts.newCollectionMasterEdition.value = findMasterEditionPda(
+      context,
+      { mint: expectPublicKey(resolvedAccounts.newCollectionMint.value) }
+    );
+  }
+  if (!resolvedAccounts.newCollectionAuthorityRecord.value) {
+    resolvedAccounts.newCollectionAuthorityRecord.value =
+      findCollectionAuthorityRecordPda(context, {
+        mint: expectPublicKey(resolvedAccounts.newCollectionMint.value),
+        collectionAuthority: expectPublicKey(
+          resolvedAccounts.authorityPda.value
+        ),
+      });
+  }
+  if (!resolvedAccounts.tokenMetadataProgram.value) {
+    resolvedAccounts.tokenMetadataProgram.value = context.programs.getPublicKey(
+      'mplTokenMetadata',
+      'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'
+    );
+    resolvedAccounts.tokenMetadataProgram.isWritable = false;
+  }
+  if (!resolvedAccounts.systemProgram.value) {
+    resolvedAccounts.systemProgram.value = context.programs.getPublicKey(
+      'splSystem',
+      '11111111111111111111111111111111'
+    );
+    resolvedAccounts.systemProgram.isWritable = false;
+  }
+
+  // Accounts in order.
+  const orderedAccounts: ResolvedAccount[] = Object.values(
+    resolvedAccounts
+  ).sort((a, b) => a.index - b.index);
+
+  // Keys and Signers.
+  const [keys, signers] = getAccountMetasAndSigners(
+    orderedAccounts,
+    'programId',
+    programId
   );
-  addAccountMeta(
-    keys,
-    signers,
-    resolvedAccounts.newCollectionUpdateAuthority,
-    false
-  );
-  addAccountMeta(keys, signers, resolvedAccounts.newCollectionMetadata, false);
-  addAccountMeta(keys, signers, resolvedAccounts.newCollectionMint, false);
-  addAccountMeta(
-    keys,
-    signers,
-    resolvedAccounts.newCollectionMasterEdition,
-    false
-  );
-  addAccountMeta(
-    keys,
-    signers,
-    resolvedAccounts.newCollectionAuthorityRecord,
-    false
-  );
-  addAccountMeta(keys, signers, resolvedAccounts.tokenMetadataProgram, false);
-  addAccountMeta(keys, signers, resolvedAccounts.systemProgram, false);
 
   // Data.
   const data = getSetCollectionInstructionDataSerializer().serialize({});

@@ -1,8 +1,4 @@
 import {
-  getMasterEditionSize,
-  getMetadataSize,
-} from '@metaplex-foundation/mpl-token-metadata';
-import {
   ACCOUNT_HEADER_SIZE,
   Option,
   OptionOrNullable,
@@ -11,6 +7,7 @@ import {
   publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
+import { MASTER_EDITION_SIZE, METADATA_SIZE } from './constants';
 import { DefaultGuardSetMintArgs } from './defaultGuards';
 import {
   MintInstructionAccounts,
@@ -68,7 +65,7 @@ export function mint<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
   ix.instruction.keys.push(...keys);
   ix.signers.push(...signers);
   ix.bytesCreatedOnChain =
-    getMetadataSize() + getMasterEditionSize() + 2 * ACCOUNT_HEADER_SIZE;
+    METADATA_SIZE + MASTER_EDITION_SIZE + 2 * ACCOUNT_HEADER_SIZE;
 
   return transactionBuilder([ix]);
 }

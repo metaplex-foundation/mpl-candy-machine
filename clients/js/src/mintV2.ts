@@ -1,8 +1,6 @@
 import {
   TokenStandard,
   findTokenRecordPda,
-  getMasterEditionSize,
-  getMetadataSize,
   getTokenRecordSize,
   isProgrammable,
 } from '@metaplex-foundation/mpl-token-metadata';
@@ -21,6 +19,7 @@ import {
   publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
+import { MASTER_EDITION_SIZE, METADATA_SIZE } from './constants';
 import { DefaultGuardSetMintArgs } from './defaultGuards';
 import {
   MintV2InstructionAccounts,
@@ -106,7 +105,7 @@ export function mintV2<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
   ix.instruction.keys.push(...keys);
   ix.signers.push(...signers);
   ix.bytesCreatedOnChain =
-    getMetadataSize() + getMasterEditionSize() + 2 * ACCOUNT_HEADER_SIZE;
+    METADATA_SIZE + MASTER_EDITION_SIZE + 2 * ACCOUNT_HEADER_SIZE;
 
   if (isSigner(input.nftMint)) {
     ix.bytesCreatedOnChain +=

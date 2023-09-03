@@ -16,17 +16,10 @@ export enum AccountVersion {
 
 export type AccountVersionArgs = AccountVersion;
 
-/** @deprecated Use `getAccountVersionSerializer()` without any argument instead. */
-export function getAccountVersionSerializer(
-  _context: object
-): Serializer<AccountVersionArgs, AccountVersion>;
 export function getAccountVersionSerializer(): Serializer<
   AccountVersionArgs,
   AccountVersion
->;
-export function getAccountVersionSerializer(
-  _context: object = {}
-): Serializer<AccountVersionArgs, AccountVersion> {
+> {
   return scalarEnum<AccountVersion>(AccountVersion, {
     description: 'AccountVersion',
   }) as Serializer<AccountVersionArgs, AccountVersion>;

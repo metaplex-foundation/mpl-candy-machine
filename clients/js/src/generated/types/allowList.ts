@@ -28,14 +28,7 @@ export type AllowList = {
 
 export type AllowListArgs = AllowList;
 
-/** @deprecated Use `getAllowListSerializer()` without any argument instead. */
-export function getAllowListSerializer(
-  _context: object
-): Serializer<AllowListArgs, AllowList>;
-export function getAllowListSerializer(): Serializer<AllowListArgs, AllowList>;
-export function getAllowListSerializer(
-  _context: object = {}
-): Serializer<AllowListArgs, AllowList> {
+export function getAllowListSerializer(): Serializer<AllowListArgs, AllowList> {
   return struct<AllowList>([['merkleRoot', bytes({ size: 32 })]], {
     description: 'AllowList',
   }) as Serializer<AllowListArgs, AllowList>;

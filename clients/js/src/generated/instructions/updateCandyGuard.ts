@@ -7,7 +7,6 @@
  */
 
 import {
-  AccountMeta,
   Context,
   Pda,
   PublicKey,
@@ -24,7 +23,11 @@ import {
   u32,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import { addAccountMeta, addObjectProperty } from '../shared';
+import {
+  ResolvedAccount,
+  ResolvedAccountsWithIndices,
+  getAccountMetasAndSigners,
+} from '../shared';
 
 // Accounts.
 export type UpdateCandyGuardInstructionAccounts = {
@@ -42,20 +45,7 @@ export type UpdateCandyGuardInstructionData = {
 
 export type UpdateCandyGuardInstructionDataArgs = { data: Uint8Array };
 
-/** @deprecated Use `getUpdateCandyGuardInstructionDataSerializer()` without any argument instead. */
-export function getUpdateCandyGuardInstructionDataSerializer(
-  _context: object
-): Serializer<
-  UpdateCandyGuardInstructionDataArgs,
-  UpdateCandyGuardInstructionData
->;
 export function getUpdateCandyGuardInstructionDataSerializer(): Serializer<
-  UpdateCandyGuardInstructionDataArgs,
-  UpdateCandyGuardInstructionData
->;
-export function getUpdateCandyGuardInstructionDataSerializer(
-  _context: object = {}
-): Serializer<
   UpdateCandyGuardInstructionDataArgs,
   UpdateCandyGuardInstructionData
 > {
@@ -87,60 +77,61 @@ export type UpdateCandyGuardInstructionArgs =
 
 // Instruction.
 export function updateCandyGuard(
-  context: Pick<Context, 'programs' | 'identity' | 'payer'>,
+  context: Pick<Context, 'identity' | 'payer' | 'programs'>,
   input: UpdateCandyGuardInstructionAccounts & UpdateCandyGuardInstructionArgs
 ): TransactionBuilder {
-  const signers: Signer[] = [];
-  const keys: AccountMeta[] = [];
-
   // Program ID.
   const programId = context.programs.getPublicKey(
     'mplCandyGuard',
     'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
   );
 
-  // Resolved inputs.
-  const resolvedAccounts = {
-    candyGuard: [input.candyGuard, true] as const,
+  // Accounts.
+  const resolvedAccounts: ResolvedAccountsWithIndices = {
+    candyGuard: { index: 0, isWritable: true, value: input.candyGuard ?? null },
+    authority: { index: 1, isWritable: false, value: input.authority ?? null },
+    payer: { index: 2, isWritable: false, value: input.payer ?? null },
+    systemProgram: {
+      index: 3,
+      isWritable: false,
+      value: input.systemProgram ?? null,
+    },
   };
-  const resolvingArgs = {};
-  addObjectProperty(
-    resolvedAccounts,
-    'authority',
-    input.authority
-      ? ([input.authority, false] as const)
-      : ([context.identity, false] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'payer',
-    input.payer
-      ? ([input.payer, false] as const)
-      : ([context.payer, false] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'systemProgram',
-    input.systemProgram
-      ? ([input.systemProgram, false] as const)
-      : ([
-          context.programs.getPublicKey(
-            'splSystem',
-            '11111111111111111111111111111111'
-          ),
-          false,
-        ] as const)
-  );
-  const resolvedArgs = { ...input, ...resolvingArgs };
 
-  addAccountMeta(keys, signers, resolvedAccounts.candyGuard, false);
-  addAccountMeta(keys, signers, resolvedAccounts.authority, false);
-  addAccountMeta(keys, signers, resolvedAccounts.payer, false);
-  addAccountMeta(keys, signers, resolvedAccounts.systemProgram, false);
+  // Arguments.
+  const resolvedArgs: UpdateCandyGuardInstructionArgs = { ...input };
+
+  // Default values.
+  if (!resolvedAccounts.authority.value) {
+    resolvedAccounts.authority.value = context.identity;
+  }
+  if (!resolvedAccounts.payer.value) {
+    resolvedAccounts.payer.value = context.payer;
+  }
+  if (!resolvedAccounts.systemProgram.value) {
+    resolvedAccounts.systemProgram.value = context.programs.getPublicKey(
+      'splSystem',
+      '11111111111111111111111111111111'
+    );
+    resolvedAccounts.systemProgram.isWritable = false;
+  }
+
+  // Accounts in order.
+  const orderedAccounts: ResolvedAccount[] = Object.values(
+    resolvedAccounts
+  ).sort((a, b) => a.index - b.index);
+
+  // Keys and Signers.
+  const [keys, signers] = getAccountMetasAndSigners(
+    orderedAccounts,
+    'programId',
+    programId
+  );
 
   // Data.
-  const data =
-    getUpdateCandyGuardInstructionDataSerializer().serialize(resolvedArgs);
+  const data = getUpdateCandyGuardInstructionDataSerializer().serialize(
+    resolvedArgs as UpdateCandyGuardInstructionDataArgs
+  );
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

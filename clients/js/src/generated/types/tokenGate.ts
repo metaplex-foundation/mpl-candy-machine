@@ -26,14 +26,7 @@ export type TokenGate = { amount: bigint; mint: PublicKey };
 
 export type TokenGateArgs = { amount: number | bigint; mint: PublicKey };
 
-/** @deprecated Use `getTokenGateSerializer()` without any argument instead. */
-export function getTokenGateSerializer(
-  _context: object
-): Serializer<TokenGateArgs, TokenGate>;
-export function getTokenGateSerializer(): Serializer<TokenGateArgs, TokenGate>;
-export function getTokenGateSerializer(
-  _context: object = {}
-): Serializer<TokenGateArgs, TokenGate> {
+export function getTokenGateSerializer(): Serializer<TokenGateArgs, TokenGate> {
   return struct<TokenGate>(
     [
       ['amount', u64()],

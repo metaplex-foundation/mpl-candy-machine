@@ -34,17 +34,10 @@ export type FreezeSolPayment = { lamports: SolAmount; destination: PublicKey };
 
 export type FreezeSolPaymentArgs = FreezeSolPayment;
 
-/** @deprecated Use `getFreezeSolPaymentSerializer()` without any argument instead. */
-export function getFreezeSolPaymentSerializer(
-  _context: object
-): Serializer<FreezeSolPaymentArgs, FreezeSolPayment>;
 export function getFreezeSolPaymentSerializer(): Serializer<
   FreezeSolPaymentArgs,
   FreezeSolPayment
->;
-export function getFreezeSolPaymentSerializer(
-  _context: object = {}
-): Serializer<FreezeSolPaymentArgs, FreezeSolPayment> {
+> {
   return struct<FreezeSolPayment>(
     [
       ['lamports', mapAmountSerializer(u64(), 'SOL', 9)],

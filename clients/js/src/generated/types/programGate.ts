@@ -23,17 +23,10 @@ export type ProgramGate = { additional: Array<PublicKey> };
 
 export type ProgramGateArgs = ProgramGate;
 
-/** @deprecated Use `getProgramGateSerializer()` without any argument instead. */
-export function getProgramGateSerializer(
-  _context: object
-): Serializer<ProgramGateArgs, ProgramGate>;
 export function getProgramGateSerializer(): Serializer<
   ProgramGateArgs,
   ProgramGate
->;
-export function getProgramGateSerializer(
-  _context: object = {}
-): Serializer<ProgramGateArgs, ProgramGate> {
+> {
   return struct<ProgramGate>([['additional', array(publicKeySerializer())]], {
     description: 'ProgramGate',
   }) as Serializer<ProgramGateArgs, ProgramGate>;

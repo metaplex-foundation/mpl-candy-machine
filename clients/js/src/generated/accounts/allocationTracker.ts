@@ -35,17 +35,10 @@ export type AllocationTrackerAccountData = { count: number };
 
 export type AllocationTrackerAccountDataArgs = AllocationTrackerAccountData;
 
-/** @deprecated Use `getAllocationTrackerAccountDataSerializer()` without any argument instead. */
-export function getAllocationTrackerAccountDataSerializer(
-  _context: object
-): Serializer<AllocationTrackerAccountDataArgs, AllocationTrackerAccountData>;
 export function getAllocationTrackerAccountDataSerializer(): Serializer<
   AllocationTrackerAccountDataArgs,
   AllocationTrackerAccountData
->;
-export function getAllocationTrackerAccountDataSerializer(
-  _context: object = {}
-): Serializer<AllocationTrackerAccountDataArgs, AllocationTrackerAccountData> {
+> {
   return struct<AllocationTrackerAccountData>([['count', u32()]], {
     description: 'AllocationTrackerAccountData',
   }) as Serializer<
@@ -54,20 +47,11 @@ export function getAllocationTrackerAccountDataSerializer(
   >;
 }
 
-/** @deprecated Use `deserializeAllocationTracker(rawAccount)` without any context instead. */
-export function deserializeAllocationTracker(
-  context: object,
-  rawAccount: RpcAccount
-): AllocationTracker;
 export function deserializeAllocationTracker(
   rawAccount: RpcAccount
-): AllocationTracker;
-export function deserializeAllocationTracker(
-  context: RpcAccount | object,
-  rawAccount?: RpcAccount
 ): AllocationTracker {
   return deserializeAccount(
-    rawAccount ?? (context as RpcAccount),
+    rawAccount,
     getAllocationTrackerAccountDataSerializer()
   );
 }

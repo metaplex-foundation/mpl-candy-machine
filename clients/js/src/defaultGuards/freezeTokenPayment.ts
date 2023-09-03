@@ -275,7 +275,7 @@ const thawRouteInstruction: RouteParser<FreezeTokenPaymentRouteArgsThaw> = (
     mint: args.nftMint,
     token: nftFreezeAta,
   });
-  const data = getFreezeInstructionSerializer(context).serialize(
+  const data = getFreezeInstructionSerializer().serialize(
     FreezeInstruction.Thaw
   );
   const remainingAccounts: GuardRemainingAccount[] = [
@@ -330,7 +330,7 @@ const unlockFundsRouteInstruction: RouteParser<
     owner: freezeEscrow,
   });
   return {
-    data: getFreezeInstructionSerializer(context).serialize(
+    data: getFreezeInstructionSerializer().serialize(
       FreezeInstruction.UnlockFunds
     ),
     remainingAccounts: [

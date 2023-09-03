@@ -28,14 +28,7 @@ export type BotTax = { lamports: SolAmount; lastInstruction: boolean };
 
 export type BotTaxArgs = BotTax;
 
-/** @deprecated Use `getBotTaxSerializer()` without any argument instead. */
-export function getBotTaxSerializer(
-  _context: object
-): Serializer<BotTaxArgs, BotTax>;
-export function getBotTaxSerializer(): Serializer<BotTaxArgs, BotTax>;
-export function getBotTaxSerializer(
-  _context: object = {}
-): Serializer<BotTaxArgs, BotTax> {
+export function getBotTaxSerializer(): Serializer<BotTaxArgs, BotTax> {
   return struct<BotTax>(
     [
       ['lamports', mapAmountSerializer(u64(), 'SOL', 9)],

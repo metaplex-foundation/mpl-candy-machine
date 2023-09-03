@@ -92,17 +92,10 @@ export type FreezeEscrowAccountDataArgs = {
   authority: PublicKey;
 };
 
-/** @deprecated Use `getFreezeEscrowAccountDataSerializer()` without any argument instead. */
-export function getFreezeEscrowAccountDataSerializer(
-  _context: object
-): Serializer<FreezeEscrowAccountDataArgs, FreezeEscrowAccountData>;
 export function getFreezeEscrowAccountDataSerializer(): Serializer<
   FreezeEscrowAccountDataArgs,
   FreezeEscrowAccountData
->;
-export function getFreezeEscrowAccountDataSerializer(
-  _context: object = {}
-): Serializer<FreezeEscrowAccountDataArgs, FreezeEscrowAccountData> {
+> {
   return mapSerializer<
     FreezeEscrowAccountDataArgs,
     any,
@@ -128,20 +121,8 @@ export function getFreezeEscrowAccountDataSerializer(
   ) as Serializer<FreezeEscrowAccountDataArgs, FreezeEscrowAccountData>;
 }
 
-/** @deprecated Use `deserializeFreezeEscrow(rawAccount)` without any context instead. */
-export function deserializeFreezeEscrow(
-  context: object,
-  rawAccount: RpcAccount
-): FreezeEscrow;
-export function deserializeFreezeEscrow(rawAccount: RpcAccount): FreezeEscrow;
-export function deserializeFreezeEscrow(
-  context: RpcAccount | object,
-  rawAccount?: RpcAccount
-): FreezeEscrow {
-  return deserializeAccount(
-    rawAccount ?? (context as RpcAccount),
-    getFreezeEscrowAccountDataSerializer()
-  );
+export function deserializeFreezeEscrow(rawAccount: RpcAccount): FreezeEscrow {
+  return deserializeAccount(rawAccount, getFreezeEscrowAccountDataSerializer());
 }
 
 export async function fetchFreezeEscrow(

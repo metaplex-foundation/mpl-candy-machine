@@ -16,17 +16,10 @@ export enum FreezeInstruction {
 
 export type FreezeInstructionArgs = FreezeInstruction;
 
-/** @deprecated Use `getFreezeInstructionSerializer()` without any argument instead. */
-export function getFreezeInstructionSerializer(
-  _context: object
-): Serializer<FreezeInstructionArgs, FreezeInstruction>;
 export function getFreezeInstructionSerializer(): Serializer<
   FreezeInstructionArgs,
   FreezeInstruction
->;
-export function getFreezeInstructionSerializer(
-  _context: object = {}
-): Serializer<FreezeInstructionArgs, FreezeInstruction> {
+> {
   return scalarEnum<FreezeInstruction>(FreezeInstruction, {
     description: 'FreezeInstruction',
   }) as Serializer<FreezeInstructionArgs, FreezeInstruction>;

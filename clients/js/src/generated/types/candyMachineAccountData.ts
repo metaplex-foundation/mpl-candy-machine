@@ -70,17 +70,10 @@ export type CandyMachineAccountDataArgs = {
   data: CandyMachineDataArgs;
 };
 
-/** @deprecated Use `getCandyMachineAccountDataSerializer()` without any argument instead. */
-export function getCandyMachineAccountDataSerializer(
-  _context: object
-): Serializer<CandyMachineAccountDataArgs, CandyMachineAccountData>;
 export function getCandyMachineAccountDataSerializer(): Serializer<
   CandyMachineAccountDataArgs,
   CandyMachineAccountData
->;
-export function getCandyMachineAccountDataSerializer(
-  _context: object = {}
-): Serializer<CandyMachineAccountDataArgs, CandyMachineAccountData> {
+> {
   return mapSerializer<
     CandyMachineAccountDataArgs,
     any,

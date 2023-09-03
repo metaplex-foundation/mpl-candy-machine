@@ -43,20 +43,8 @@ import {
 /** Candy machine state and config data. */
 export type CandyMachine = Account<CandyMachineAccountData>;
 
-/** @deprecated Use `deserializeCandyMachine(rawAccount)` without any context instead. */
-export function deserializeCandyMachine(
-  context: object,
-  rawAccount: RpcAccount
-): CandyMachine;
-export function deserializeCandyMachine(rawAccount: RpcAccount): CandyMachine;
-export function deserializeCandyMachine(
-  context: RpcAccount | object,
-  rawAccount?: RpcAccount
-): CandyMachine {
-  return deserializeAccount(
-    rawAccount ?? (context as RpcAccount),
-    getCandyMachineAccountDataSerializer()
-  );
+export function deserializeCandyMachine(rawAccount: RpcAccount): CandyMachine {
+  return deserializeAccount(rawAccount, getCandyMachineAccountDataSerializer());
 }
 
 export async function fetchCandyMachine(

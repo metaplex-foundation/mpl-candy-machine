@@ -44,17 +44,10 @@ export type CandyGuardAccountDataArgs = {
   authority: PublicKey;
 };
 
-/** @deprecated Use `getCandyGuardAccountDataSerializer()` without any argument instead. */
-export function getCandyGuardAccountDataSerializer(
-  _context: object
-): Serializer<CandyGuardAccountDataArgs, CandyGuardAccountData>;
 export function getCandyGuardAccountDataSerializer(): Serializer<
   CandyGuardAccountDataArgs,
   CandyGuardAccountData
->;
-export function getCandyGuardAccountDataSerializer(
-  _context: object = {}
-): Serializer<CandyGuardAccountDataArgs, CandyGuardAccountData> {
+> {
   return mapSerializer<CandyGuardAccountDataArgs, any, CandyGuardAccountData>(
     struct<CandyGuardAccountData>(
       [
@@ -72,20 +65,8 @@ export function getCandyGuardAccountDataSerializer(
   ) as Serializer<CandyGuardAccountDataArgs, CandyGuardAccountData>;
 }
 
-/** @deprecated Use `deserializeCandyGuard(rawAccount)` without any context instead. */
-export function deserializeCandyGuard(
-  context: object,
-  rawAccount: RpcAccount
-): CandyGuard;
-export function deserializeCandyGuard(rawAccount: RpcAccount): CandyGuard;
-export function deserializeCandyGuard(
-  context: RpcAccount | object,
-  rawAccount?: RpcAccount
-): CandyGuard {
-  return deserializeAccount(
-    rawAccount ?? (context as RpcAccount),
-    getCandyGuardAccountDataSerializer()
-  );
+export function deserializeCandyGuard(rawAccount: RpcAccount): CandyGuard {
+  return deserializeAccount(rawAccount, getCandyGuardAccountDataSerializer());
 }
 
 export async function fetchCandyGuard(

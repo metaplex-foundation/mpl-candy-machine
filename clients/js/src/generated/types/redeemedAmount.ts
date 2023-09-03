@@ -17,17 +17,10 @@ export type RedeemedAmount = { maximum: bigint };
 
 export type RedeemedAmountArgs = { maximum: number | bigint };
 
-/** @deprecated Use `getRedeemedAmountSerializer()` without any argument instead. */
-export function getRedeemedAmountSerializer(
-  _context: object
-): Serializer<RedeemedAmountArgs, RedeemedAmount>;
 export function getRedeemedAmountSerializer(): Serializer<
   RedeemedAmountArgs,
   RedeemedAmount
->;
-export function getRedeemedAmountSerializer(
-  _context: object = {}
-): Serializer<RedeemedAmountArgs, RedeemedAmount> {
+> {
   return struct<RedeemedAmount>([['maximum', u64()]], {
     description: 'RedeemedAmount',
   }) as Serializer<RedeemedAmountArgs, RedeemedAmount>;

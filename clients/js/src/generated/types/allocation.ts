@@ -32,17 +32,10 @@ export type Allocation = {
 
 export type AllocationArgs = Allocation;
 
-/** @deprecated Use `getAllocationSerializer()` without any argument instead. */
-export function getAllocationSerializer(
-  _context: object
-): Serializer<AllocationArgs, Allocation>;
 export function getAllocationSerializer(): Serializer<
   AllocationArgs,
   Allocation
->;
-export function getAllocationSerializer(
-  _context: object = {}
-): Serializer<AllocationArgs, Allocation> {
+> {
   return struct<Allocation>(
     [
       ['id', u8()],

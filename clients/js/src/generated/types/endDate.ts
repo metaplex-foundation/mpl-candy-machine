@@ -18,14 +18,7 @@ export type EndDate = { date: DateTime };
 
 export type EndDateArgs = { date: DateTimeInput };
 
-/** @deprecated Use `getEndDateSerializer()` without any argument instead. */
-export function getEndDateSerializer(
-  _context: object
-): Serializer<EndDateArgs, EndDate>;
-export function getEndDateSerializer(): Serializer<EndDateArgs, EndDate>;
-export function getEndDateSerializer(
-  _context: object = {}
-): Serializer<EndDateArgs, EndDate> {
+export function getEndDateSerializer(): Serializer<EndDateArgs, EndDate> {
   return struct<EndDate>([['date', mapDateTimeSerializer(i64())]], {
     description: 'EndDate',
   }) as Serializer<EndDateArgs, EndDate>;

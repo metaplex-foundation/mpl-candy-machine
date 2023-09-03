@@ -32,14 +32,7 @@ export type MintLimit = {
 
 export type MintLimitArgs = MintLimit;
 
-/** @deprecated Use `getMintLimitSerializer()` without any argument instead. */
-export function getMintLimitSerializer(
-  _context: object
-): Serializer<MintLimitArgs, MintLimit>;
-export function getMintLimitSerializer(): Serializer<MintLimitArgs, MintLimit>;
-export function getMintLimitSerializer(
-  _context: object = {}
-): Serializer<MintLimitArgs, MintLimit> {
+export function getMintLimitSerializer(): Serializer<MintLimitArgs, MintLimit> {
   return struct<MintLimit>(
     [
       ['id', u8()],

@@ -7,7 +7,6 @@
  */
 
 import {
-  AccountMeta,
   Context,
   Option,
   OptionOrNullable,
@@ -15,7 +14,6 @@ import {
   PublicKey,
   Signer,
   TransactionBuilder,
-  publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import {
@@ -30,7 +28,12 @@ import {
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import { findCandyGuardPda } from '../../hooked';
-import { addAccountMeta, addObjectProperty } from '../shared';
+import {
+  ResolvedAccount,
+  ResolvedAccountsWithIndices,
+  expectPublicKey,
+  getAccountMetasAndSigners,
+} from '../shared';
 import { GuardType, GuardTypeArgs, getGuardTypeSerializer } from '../types';
 
 // Accounts.
@@ -58,17 +61,10 @@ export type RouteInstructionDataArgs = {
   group: OptionOrNullable<string>;
 };
 
-/** @deprecated Use `getRouteInstructionDataSerializer()` without any argument instead. */
-export function getRouteInstructionDataSerializer(
-  _context: object
-): Serializer<RouteInstructionDataArgs, RouteInstructionData>;
 export function getRouteInstructionDataSerializer(): Serializer<
   RouteInstructionDataArgs,
   RouteInstructionData
->;
-export function getRouteInstructionDataSerializer(
-  _context: object = {}
-): Serializer<RouteInstructionDataArgs, RouteInstructionData> {
+> {
   return mapSerializer<RouteInstructionDataArgs, any, RouteInstructionData>(
     struct<RouteInstructionData>(
       [
@@ -91,50 +87,59 @@ export type RouteInstructionArgs = RouteInstructionDataArgs;
 
 // Instruction.
 export function route(
-  context: Pick<Context, 'programs' | 'eddsa' | 'payer'>,
+  context: Pick<Context, 'eddsa' | 'payer' | 'programs'>,
   input: RouteInstructionAccounts & RouteInstructionArgs
 ): TransactionBuilder {
-  const signers: Signer[] = [];
-  const keys: AccountMeta[] = [];
-
   // Program ID.
   const programId = context.programs.getPublicKey(
     'mplCandyGuard',
     'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
   );
 
-  // Resolved inputs.
-  const resolvedAccounts = {
-    candyMachine: [input.candyMachine, true] as const,
+  // Accounts.
+  const resolvedAccounts: ResolvedAccountsWithIndices = {
+    candyGuard: {
+      index: 0,
+      isWritable: false,
+      value: input.candyGuard ?? null,
+    },
+    candyMachine: {
+      index: 1,
+      isWritable: true,
+      value: input.candyMachine ?? null,
+    },
+    payer: { index: 2, isWritable: true, value: input.payer ?? null },
   };
-  const resolvingArgs = {};
-  addObjectProperty(
-    resolvedAccounts,
-    'candyGuard',
-    input.candyGuard
-      ? ([input.candyGuard, false] as const)
-      : ([
-          findCandyGuardPda(context, {
-            base: publicKey(input.candyMachine, false),
-          }),
-          false,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'payer',
-    input.payer
-      ? ([input.payer, true] as const)
-      : ([context.payer, true] as const)
-  );
-  const resolvedArgs = { ...input, ...resolvingArgs };
 
-  addAccountMeta(keys, signers, resolvedAccounts.candyGuard, false);
-  addAccountMeta(keys, signers, resolvedAccounts.candyMachine, false);
-  addAccountMeta(keys, signers, resolvedAccounts.payer, false);
+  // Arguments.
+  const resolvedArgs: RouteInstructionArgs = { ...input };
+
+  // Default values.
+  if (!resolvedAccounts.candyGuard.value) {
+    resolvedAccounts.candyGuard.value = findCandyGuardPda(context, {
+      base: expectPublicKey(resolvedAccounts.candyMachine.value),
+    });
+  }
+  if (!resolvedAccounts.payer.value) {
+    resolvedAccounts.payer.value = context.payer;
+  }
+
+  // Accounts in order.
+  const orderedAccounts: ResolvedAccount[] = Object.values(
+    resolvedAccounts
+  ).sort((a, b) => a.index - b.index);
+
+  // Keys and Signers.
+  const [keys, signers] = getAccountMetasAndSigners(
+    orderedAccounts,
+    'programId',
+    programId
+  );
 
   // Data.
-  const data = getRouteInstructionDataSerializer().serialize(resolvedArgs);
+  const data = getRouteInstructionDataSerializer().serialize(
+    resolvedArgs as RouteInstructionDataArgs
+  );
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

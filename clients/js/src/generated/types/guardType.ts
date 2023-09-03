@@ -35,14 +35,7 @@ export enum GuardType {
 
 export type GuardTypeArgs = GuardType;
 
-/** @deprecated Use `getGuardTypeSerializer()` without any argument instead. */
-export function getGuardTypeSerializer(
-  _context: object
-): Serializer<GuardTypeArgs, GuardType>;
-export function getGuardTypeSerializer(): Serializer<GuardTypeArgs, GuardType>;
-export function getGuardTypeSerializer(
-  _context: object = {}
-): Serializer<GuardTypeArgs, GuardType> {
+export function getGuardTypeSerializer(): Serializer<GuardTypeArgs, GuardType> {
   return scalarEnum<GuardType>(GuardType, {
     description: 'GuardType',
   }) as Serializer<GuardTypeArgs, GuardType>;

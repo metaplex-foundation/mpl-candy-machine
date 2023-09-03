@@ -39,17 +39,10 @@ export type NftPayment = {
 
 export type NftPaymentArgs = NftPayment;
 
-/** @deprecated Use `getNftPaymentSerializer()` without any argument instead. */
-export function getNftPaymentSerializer(
-  _context: object
-): Serializer<NftPaymentArgs, NftPayment>;
 export function getNftPaymentSerializer(): Serializer<
   NftPaymentArgs,
   NftPayment
->;
-export function getNftPaymentSerializer(
-  _context: object = {}
-): Serializer<NftPaymentArgs, NftPayment> {
+> {
   return struct<NftPayment>(
     [
       ['requiredCollection', publicKeySerializer()],

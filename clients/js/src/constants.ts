@@ -41,3 +41,7 @@ export const CANDY_GUARD_DATA =
   32 + // base
   1 + // bump
   32; // authority
+
+export const METADATA_SIZE: number = 679;
+
+export const MASTER_EDITION_SIZE: number = 282;

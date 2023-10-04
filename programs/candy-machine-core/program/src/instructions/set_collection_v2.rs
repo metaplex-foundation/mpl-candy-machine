@@ -12,13 +12,21 @@ pub fn set_collection_v2(ctx: Context<SetCollectionV2>) -> Result<()> {
     let accounts = ctx.accounts;
     let candy_machine = &mut accounts.candy_machine;
 
-    if candy_machine.items_redeemed > 0 {
-        return err!(CandyError::NoChangingCollectionDuringMint);
-    } else if !cmp_pubkeys(accounts.collection_mint.key, &candy_machine.collection_mint) {
-        return err!(CandyError::MintMismatch);
-    }
+    // check whether the new collection mint is the same as the current collection; when they
+    // are the same, we are just using this instruction to update the collection delegate so
+    // we don't enforce the "mint in progress" constraint
+    if !cmp_pubkeys(
+        accounts.new_collection_mint.key,
+        &candy_machine.collection_mint,
+    ) {
+        if candy_machine.items_redeemed > 0 {
+            return err!(CandyError::NoChangingCollectionDuringMint);
+        } else if !cmp_pubkeys(accounts.collection_mint.key, &candy_machine.collection_mint) {
+            return err!(CandyError::MintMismatch);
+        }
 
-    candy_machine.collection_mint = accounts.new_collection_mint.key();
+        candy_machine.collection_mint = accounts.new_collection_mint.key();
+    }
 
     if matches!(candy_machine.version, AccountVersion::V2) {
         // revoking the existing metadata delegate

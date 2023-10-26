@@ -1,12 +1,11 @@
 use anchor_lang::{prelude::*, solana_program::sysvar, Discriminator};
-use mpl_token_metadata::{
-    state::{TokenStandard, MAX_SYMBOL_LENGTH},
-    utils::resize_or_reallocate_account_raw,
-};
+use mpl_token_metadata::{types::TokenStandard, MAX_SYMBOL_LENGTH};
+use mpl_utils::resize_or_reallocate_account_raw;
 
 use crate::{
     approve_metadata_delegate, assert_token_standard,
     constants::{AUTHORITY_SEED, HIDDEN_SECTION, RULE_SET_LENGTH, SET},
+    instructions::MPL_TOKEN_AUTH_RULES_PROGRAM,
     state::{CandyMachine, CandyMachineData},
     utils::fixed_length_string,
     AccountVersion, ApproveMetadataDelegateHelperAccounts,
@@ -78,6 +77,7 @@ pub fn initialize_v2(
 
     // approves the metadata delegate so the candy machine can verify minted NFTs
     let delegate_accounts = ApproveMetadataDelegateHelperAccounts {
+        token_metadata_program: ctx.accounts.token_metadata_program.to_account_info(),
         authority_pda: ctx.accounts.authority_pda.to_account_info(),
         collection_metadata: ctx.accounts.collection_metadata.to_account_info(),
         collection_mint: ctx.accounts.collection_mint.to_account_info(),
@@ -138,7 +138,7 @@ pub struct InitializeV2<'info> {
     /// Authorization rule set to be used by minted NFTs.
     ///
     /// CHECK: must be ownwed by mpl_token_auth_rules
-    #[account(owner = mpl_token_auth_rules::id())]
+    #[account(owner = MPL_TOKEN_AUTH_RULES_PROGRAM)]
     rule_set: Option<UncheckedAccount<'info>>,
 
     /// Metadata account of the collection.
@@ -171,7 +171,7 @@ pub struct InitializeV2<'info> {
     /// Token Metadata program.
     ///
     /// CHECK: account constraint checked in account trait
-    #[account(address = mpl_token_metadata::id())]
+    #[account(address = mpl_token_metadata::ID)]
     token_metadata_program: UncheckedAccount<'info>,
 
     /// System program.
@@ -186,12 +186,12 @@ pub struct InitializeV2<'info> {
     /// Token Authorization Rules program.
     ///
     /// CHECK: account constraint checked in account trait
-    #[account(address = mpl_token_auth_rules::id())]
+    #[account(address = MPL_TOKEN_AUTH_RULES_PROGRAM)]
     authorization_rules_program: Option<UncheckedAccount<'info>>,
 
     /// Token Authorization rules account for the collection metadata (if any).
     ///
     /// CHECK: account checked in CPI
-    #[account(owner = mpl_token_auth_rules::id())]
+    #[account(owner = MPL_TOKEN_AUTH_RULES_PROGRAM)]
     authorization_rules: Option<UncheckedAccount<'info>>,
 }

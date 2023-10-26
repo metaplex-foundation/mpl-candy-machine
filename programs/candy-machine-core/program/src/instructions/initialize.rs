@@ -1,5 +1,5 @@
 use anchor_lang::{prelude::*, Discriminator};
-use mpl_token_metadata::state::{TokenStandard, MAX_SYMBOL_LENGTH};
+use mpl_token_metadata::{types::TokenStandard, MAX_SYMBOL_LENGTH};
 
 use crate::{
     approve_collection_authority_helper,
@@ -118,7 +118,7 @@ pub struct Initialize<'info> {
     /// Token Metadata program.
     ///
     /// CHECK: account constraint checked in account trait
-    #[account(address = mpl_token_metadata::id())]
+    #[account(address = mpl_token_metadata::ID)]
     token_metadata_program: UncheckedAccount<'info>,
 
     /// System program.

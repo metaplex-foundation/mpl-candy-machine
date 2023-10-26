@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use arrayref::array_ref;
-use mpl_token_metadata::state::{Metadata, ProgrammableConfig};
+use mpl_token_metadata::{accounts::Metadata, types::ProgrammableConfig};
 
 use crate::constants::{RULE_SET_LENGTH, SET};
 

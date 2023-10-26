@@ -1,44 +1,45 @@
 use anchor_lang::prelude::*;
 use arrayref::array_ref;
 use mpl_token_metadata::{
-    instruction::{
-        builders::{CreateBuilder, MintBuilder, UpdateBuilder, VerifyBuilder},
-        create_master_edition_v3, create_metadata_accounts_v3, set_and_verify_collection,
-        set_and_verify_sized_collection_item, update_metadata_accounts_v2, CreateArgs,
-        InstructionBuilder, MintArgs, RuleSetToggle, UpdateArgs, VerificationArgs,
+    accounts::Metadata,
+    instructions::{
+        CreateMasterEditionV3CpiBuilder, CreateMetadataAccountV3CpiBuilder, CreateV1CpiBuilder,
+        MintV1CpiBuilder, SetAndVerifyCollectionCpiBuilder, UpdateMetadataAccountV2CpiBuilder,
+        UpdateV1CpiBuilder, VerifyCollectionV1CpiBuilder,
     },
-    state::{AssetData, Collection, Metadata, PrintSupply, TokenMetadataAccount, TokenStandard},
+    types::{Collection, DataV2, PrintSupply, RuleSetToggle, TokenStandard},
 };
-use solana_program::{program::invoke_signed, sysvar};
+use solana_program::sysvar;
 
 use crate::{
     constants::{AUTHORITY_SEED, EMPTY_STR, HIDDEN_SECTION, NULL_STRING},
+    instructions::MPL_TOKEN_AUTH_RULES_PROGRAM,
     utils::*,
     AccountVersion, CandyError, CandyMachine, ConfigLine,
 };
 
 /// Accounts to mint an NFT.
 pub(crate) struct MintAccounts<'info> {
-    pub(crate) authority_pda: AccountInfo<'info>,
-    pub(crate) payer: AccountInfo<'info>,
-    pub(crate) nft_owner: AccountInfo<'info>,
-    pub(crate) nft_mint: AccountInfo<'info>,
-    pub(crate) nft_mint_authority: AccountInfo<'info>,
-    pub(crate) nft_metadata: AccountInfo<'info>,
-    pub(crate) nft_master_edition: AccountInfo<'info>,
-    pub(crate) token: Option<AccountInfo<'info>>,
-    pub(crate) token_record: Option<AccountInfo<'info>>,
-    pub(crate) collection_delegate_record: AccountInfo<'info>,
-    pub(crate) collection_mint: AccountInfo<'info>,
-    pub(crate) collection_metadata: AccountInfo<'info>,
-    pub(crate) collection_master_edition: AccountInfo<'info>,
-    pub(crate) collection_update_authority: AccountInfo<'info>,
-    pub(crate) token_metadata_program: AccountInfo<'info>,
-    pub(crate) spl_token_program: AccountInfo<'info>,
-    pub(crate) spl_ata_program: Option<AccountInfo<'info>>,
-    pub(crate) system_program: AccountInfo<'info>,
-    pub(crate) sysvar_instructions: Option<AccountInfo<'info>>,
-    pub(crate) recent_slothashes: AccountInfo<'info>,
+    pub authority_pda: AccountInfo<'info>,
+    pub payer: AccountInfo<'info>,
+    pub nft_owner: AccountInfo<'info>,
+    pub nft_mint: AccountInfo<'info>,
+    pub nft_mint_authority: AccountInfo<'info>,
+    pub nft_metadata: AccountInfo<'info>,
+    pub nft_master_edition: AccountInfo<'info>,
+    pub token: Option<AccountInfo<'info>>,
+    pub token_record: Option<AccountInfo<'info>>,
+    pub collection_delegate_record: AccountInfo<'info>,
+    pub collection_mint: AccountInfo<'info>,
+    pub collection_metadata: AccountInfo<'info>,
+    pub collection_master_edition: AccountInfo<'info>,
+    pub collection_update_authority: AccountInfo<'info>,
+    pub token_metadata_program: AccountInfo<'info>,
+    pub spl_token_program: AccountInfo<'info>,
+    pub spl_ata_program: Option<AccountInfo<'info>>,
+    pub system_program: AccountInfo<'info>,
+    pub sysvar_instructions: Option<AccountInfo<'info>>,
+    pub recent_slothashes: AccountInfo<'info>,
 }
 
 pub fn mint_v2<'info>(ctx: Context<'_, '_, '_, 'info, MintV2<'info>>) -> Result<()> {
@@ -112,16 +113,13 @@ pub(crate) fn process_mint(
     }
 
     // collection metadata must be owner by token metadata
-    if !cmp_pubkeys(
-        accounts.collection_metadata.owner,
-        &mpl_token_metadata::id(),
-    ) {
+    if !cmp_pubkeys(accounts.collection_metadata.owner, &mpl_token_metadata::ID) {
         return err!(CandyError::IncorrectOwner);
     }
 
     let collection_metadata_info = &accounts.collection_metadata;
     let collection_metadata: Metadata =
-        Metadata::from_account_info(&collection_metadata_info.to_account_info())?;
+        Metadata::try_from(&collection_metadata_info.to_account_info())?;
     // check that the update authority matches the collection update authority
     if !cmp_pubkeys(
         &collection_metadata.update_authority,
@@ -155,15 +153,15 @@ pub(crate) fn process_mint(
 
     // (3) minting
 
-    let mut creators: Vec<mpl_token_metadata::state::Creator> =
-        vec![mpl_token_metadata::state::Creator {
+    let mut creators: Vec<mpl_token_metadata::types::Creator> =
+        vec![mpl_token_metadata::types::Creator {
             address: accounts.authority_pda.key(),
             verified: true,
             share: 0,
         }];
 
     for c in &candy_machine.data.creators {
-        creators.push(mpl_token_metadata::state::Creator {
+        creators.push(mpl_token_metadata::types::Creator {
             address: c.address,
             verified: false,
             share: c.percentage_share,
@@ -286,67 +284,9 @@ fn create_and_mint(
     accounts: MintAccounts,
     bump: u8,
     config_line: ConfigLine,
-    creators: Vec<mpl_token_metadata::state::Creator>,
+    creators: Vec<mpl_token_metadata::types::Creator>,
     collection_metadata: Metadata,
 ) -> Result<()> {
-    let mut asset_data = AssetData::new(
-        if candy_machine.token_standard == TokenStandard::ProgrammableNonFungible as u8 {
-            TokenStandard::ProgrammableNonFungible
-        } else {
-            TokenStandard::NonFungible
-        },
-        config_line.name,
-        candy_machine.data.symbol.to_string(),
-        config_line.uri,
-    );
-    asset_data.seller_fee_basis_points = candy_machine.data.seller_fee_basis_points;
-    asset_data.is_mutable = candy_machine.data.is_mutable;
-    asset_data.creators = Some(creators);
-    asset_data.collection = Some(Collection {
-        verified: false,
-        key: candy_machine.collection_mint,
-    });
-
-    // create metadata accounts
-
-    let sysvar_instructions_info = accounts
-        .sysvar_instructions
-        .as_ref()
-        .ok_or(CandyError::MissingInstructionsSysvar)?;
-
-    let create_ix = CreateBuilder::new()
-        .metadata(accounts.nft_metadata.key())
-        .mint(accounts.nft_mint.key())
-        .authority(accounts.nft_mint_authority.key())
-        .payer(accounts.payer.key())
-        .update_authority(accounts.authority_pda.key())
-        .master_edition(accounts.nft_master_edition.key())
-        .initialize_mint(accounts.nft_mint.is_signer)
-        .update_authority_as_signer(true)
-        .build(CreateArgs::V1 {
-            asset_data,
-            decimals: Some(0),
-            print_supply: if candy_machine.data.max_supply == 0 {
-                Some(PrintSupply::Zero)
-            } else {
-                Some(PrintSupply::Limited(candy_machine.data.max_supply))
-            },
-        })
-        .map_err(|_| CandyError::InstructionBuilderFailed)?
-        .instruction();
-
-    let create_infos = vec![
-        accounts.nft_metadata.to_account_info(),
-        accounts.nft_mint.to_account_info(),
-        accounts.nft_mint_authority.to_account_info(),
-        accounts.payer.to_account_info(),
-        accounts.authority_pda.to_account_info(),
-        accounts.nft_master_edition.to_account_info(),
-        accounts.system_program.to_account_info(),
-        sysvar_instructions_info.to_account_info(),
-        accounts.spl_token_program.to_account_info(),
-    ];
-
     let candy_machine_key = candy_machine.key();
     let authority_seeds = [
         AUTHORITY_SEED.as_bytes(),
@@ -354,7 +294,47 @@ fn create_and_mint(
         &[bump],
     ];
 
-    invoke_signed(&create_ix, &create_infos, &[&authority_seeds])?;
+    let sysvar_instructions_info = accounts
+        .sysvar_instructions
+        .as_ref()
+        .ok_or(CandyError::MissingInstructionsSysvar)?;
+
+    // create metadata accounts
+
+    CreateV1CpiBuilder::new(&accounts.token_metadata_program)
+        .metadata(&accounts.nft_metadata)
+        .mint(&accounts.nft_mint, accounts.nft_mint.is_signer)
+        .authority(&accounts.nft_mint_authority)
+        .payer(&accounts.payer)
+        .update_authority(&accounts.authority_pda, true)
+        .master_edition(Some(&accounts.nft_master_edition))
+        .token_standard(
+            if candy_machine.token_standard == TokenStandard::ProgrammableNonFungible as u8 {
+                TokenStandard::ProgrammableNonFungible
+            } else {
+                TokenStandard::NonFungible
+            },
+        )
+        .name(config_line.name)
+        .uri(config_line.uri)
+        .symbol(candy_machine.data.symbol.to_string())
+        .seller_fee_basis_points(candy_machine.data.seller_fee_basis_points)
+        .is_mutable(candy_machine.data.is_mutable)
+        .creators(creators)
+        .collection(Collection {
+            verified: false,
+            key: candy_machine.collection_mint,
+        })
+        .decimals(0)
+        .print_supply(if candy_machine.data.max_supply == 0 {
+            PrintSupply::Zero
+        } else {
+            PrintSupply::Limited(candy_machine.data.max_supply)
+        })
+        .system_program(&accounts.system_program)
+        .sysvar_instructions(sysvar_instructions_info)
+        .spl_token_program(&accounts.spl_token_program)
+        .invoke_signed(&[&authority_seeds])?;
 
     // mints one token
 
@@ -378,60 +358,34 @@ fn create_and_mint(
         .as_ref()
         .ok_or(CandyError::MissingSplAtaProgram)?;
 
-    let mut mint_builder = MintBuilder::new();
-    mint_builder
-        .token(token_info.key())
-        .token_owner(accounts.nft_owner.key())
-        .metadata(accounts.nft_metadata.key())
-        .master_edition(accounts.nft_master_edition.key())
-        .mint(accounts.nft_mint.key())
-        .payer(accounts.payer.key())
-        .authority(accounts.authority_pda.key());
-
-    let mut mint_infos = vec![
-        token_info.to_account_info(),
-        accounts.nft_owner.to_account_info(),
-        accounts.nft_metadata.to_account_info(),
-        accounts.nft_master_edition.to_account_info(),
-        accounts.nft_mint.to_account_info(),
-        accounts.payer.to_account_info(),
-        accounts.authority_pda.to_account_info(),
-        accounts.system_program.to_account_info(),
-        sysvar_instructions_info.to_account_info(),
-        accounts.spl_token_program.to_account_info(),
-        spl_ata_program_info.to_account_info(),
-    ];
-
-    if let Some(token_record_info) = token_record_info {
-        mint_builder.token_record(token_record_info.key());
-        mint_infos.push(token_record_info.to_account_info());
-    }
-
-    let mint_ix = mint_builder
-        .build(MintArgs::V1 {
-            amount: 1,
-            authorization_data: None,
-        })
-        .map_err(|_| CandyError::InstructionBuilderFailed)?
-        .instruction();
-
-    invoke_signed(&mint_ix, &mint_infos, &[&authority_seeds])?;
+    MintV1CpiBuilder::new(&accounts.token_metadata_program)
+        .token(token_info)
+        .token_owner(Some(&accounts.nft_owner))
+        .metadata(&accounts.nft_metadata)
+        .master_edition(Some(&accounts.nft_master_edition))
+        .mint(&accounts.nft_mint)
+        .payer(&accounts.payer)
+        .authority(&accounts.authority_pda)
+        .token_record(token_record_info)
+        .system_program(&accounts.system_program)
+        .sysvar_instructions(sysvar_instructions_info)
+        .spl_token_program(&accounts.spl_token_program)
+        .spl_ata_program(spl_ata_program_info)
+        .amount(1)
+        .invoke_signed(&[&authority_seeds])?;
 
     // changes the update authority, primary sale happened, authorization rules
 
-    let mut update_args = UpdateArgs::default_as_update_authority();
-    let UpdateArgs::AsUpdateAuthorityV2 {
-        new_update_authority,
-        primary_sale_happened,
-        rule_set,
-        ..
-    } = &mut update_args else {
-        return err!(CandyError::InstructionBuilderFailed);
-    };
-    // set the update authority to the update authority of the collection NFT
-    *new_update_authority = Some(collection_metadata.update_authority);
-    // set primary sale happened to true
-    *primary_sale_happened = Some(true);
+    let mut update_cpi = UpdateV1CpiBuilder::new(&accounts.token_metadata_program);
+    update_cpi
+        .authority(&accounts.authority_pda)
+        .token(Some(token_info))
+        .metadata(&accounts.nft_metadata)
+        .edition(Some(&accounts.nft_master_edition))
+        .mint(&accounts.nft_mint)
+        .payer(&accounts.payer)
+        .primary_sale_happened(true)
+        .new_update_authority(collection_metadata.update_authority);
 
     if candy_machine.token_standard == TokenStandard::ProgrammableNonFungible as u8 {
         let candy_machine_info = candy_machine.to_account_info();
@@ -443,63 +397,24 @@ fn create_and_mint(
         let candy_machine_rule_set =
             candy_machine.get_rule_set(&account_data, &collection_metadata)?;
 
-        *rule_set = if let Some(rule_set) = candy_machine_rule_set {
-            // set the rule set to be the same as the parent collection
-            RuleSetToggle::Set(rule_set)
-        } else {
-            RuleSetToggle::None
-        };
+        if let Some(rule_set) = candy_machine_rule_set {
+            update_cpi.rule_set(RuleSetToggle::Set(rule_set));
+        }
     }
 
-    let update_ix = UpdateBuilder::new()
-        .authority(accounts.authority_pda.key())
-        .token(token_info.key())
-        .metadata(accounts.nft_metadata.key())
-        .edition(accounts.nft_master_edition.key())
-        .mint(accounts.nft_mint.key())
-        .payer(accounts.payer.key())
-        .build(update_args)
-        .map_err(|_| CandyError::InstructionBuilderFailed)?
-        .instruction();
-
-    let update_infos = vec![
-        accounts.authority_pda.to_account_info(),
-        token_info.to_account_info(),
-        accounts.nft_metadata.to_account_info(),
-        accounts.nft_master_edition.to_account_info(),
-        accounts.nft_mint.to_account_info(),
-        accounts.payer.to_account_info(),
-        accounts.system_program.to_account_info(),
-        sysvar_instructions_info.to_account_info(),
-    ];
-
-    invoke_signed(&update_ix, &update_infos, &[&authority_seeds])?;
+    update_cpi.invoke_signed(&[&authority_seeds])?;
 
     // verify the minted nft into the collection
 
-    let verify_ix = VerifyBuilder::new()
-        .authority(accounts.authority_pda.key())
-        .delegate_record(accounts.collection_delegate_record.key())
-        .metadata(accounts.nft_metadata.key())
-        .collection_mint(accounts.collection_mint.key())
-        .collection_metadata(accounts.collection_metadata.key())
-        .collection_master_edition(accounts.collection_master_edition.key())
-        .build(VerificationArgs::CollectionV1)
-        .map_err(|_| CandyError::InstructionBuilderFailed)?
-        .instruction();
-
-    let verify_infos = vec![
-        accounts.authority_pda.to_account_info(),
-        accounts.collection_delegate_record.to_account_info(),
-        accounts.nft_metadata.to_account_info(),
-        accounts.collection_mint.to_account_info(),
-        accounts.collection_metadata.to_account_info(),
-        accounts.collection_master_edition.to_account_info(),
-        accounts.system_program.to_account_info(),
-        sysvar_instructions_info.to_account_info(),
-    ];
-
-    invoke_signed(&verify_ix, &verify_infos, &[&authority_seeds]).map_err(|error| error.into())
+    VerifyCollectionV1CpiBuilder::new(&accounts.token_metadata_program)
+        .authority(&accounts.authority_pda)
+        .delegate_record(Some(&accounts.collection_delegate_record))
+        .metadata(&accounts.nft_metadata)
+        .collection_mint(&accounts.collection_mint)
+        .collection_metadata(Some(&accounts.collection_metadata))
+        .collection_master_edition(Some(&accounts.collection_master_edition))
+        .invoke_signed(&[&authority_seeds])
+        .map_err(|error| error.into())
 }
 
 /// Creates the metadata accounts
@@ -508,140 +423,66 @@ fn create(
     accounts: MintAccounts,
     bump: u8,
     config_line: ConfigLine,
-    creators: Vec<mpl_token_metadata::state::Creator>,
+    creators: Vec<mpl_token_metadata::types::Creator>,
     collection_metadata: Metadata,
 ) -> Result<()> {
-    let metadata_infos = vec![
-        accounts.nft_metadata.to_account_info(),
-        accounts.nft_mint.to_account_info(),
-        accounts.nft_mint_authority.to_account_info(),
-        accounts.payer.to_account_info(),
-        accounts.authority_pda.to_account_info(),
-        accounts.nft_master_edition.to_account_info(),
-        accounts.system_program.to_account_info(),
-        accounts.authority_pda.to_account_info(),
-    ];
-
-    let master_edition_infos = vec![
-        accounts.nft_master_edition.to_account_info(),
-        accounts.nft_mint.to_account_info(),
-        accounts.nft_mint_authority.to_account_info(),
-        accounts.payer.to_account_info(),
-        accounts.nft_metadata.to_account_info(),
-        accounts.token_metadata_program.to_account_info(),
-        accounts.spl_token_program.to_account_info(),
-        accounts.system_program.to_account_info(),
-        accounts.authority_pda.to_account_info(),
-    ];
-
     let cm_key = candy_machine.key();
     let authority_seeds = [AUTHORITY_SEED.as_bytes(), cm_key.as_ref(), &[bump]];
 
-    invoke_signed(
-        &create_metadata_accounts_v3(
-            accounts.token_metadata_program.key(),
-            accounts.nft_metadata.key(),
-            accounts.nft_mint.key(),
-            accounts.nft_mint_authority.key(),
-            accounts.payer.key(),
-            accounts.authority_pda.key(),
-            config_line.name,
-            candy_machine.data.symbol.clone(),
-            config_line.uri,
-            Some(creators),
-            candy_machine.data.seller_fee_basis_points,
-            true,
-            candy_machine.data.is_mutable,
-            None,
-            None,
-            None,
-        ),
-        metadata_infos.as_slice(),
-        &[&authority_seeds],
-    )?;
+    // create metadata account
 
-    invoke_signed(
-        &create_master_edition_v3(
-            accounts.token_metadata_program.key(),
-            accounts.nft_master_edition.key(),
-            accounts.nft_mint.key(),
-            accounts.authority_pda.key(),
-            accounts.nft_mint_authority.key(),
-            accounts.nft_metadata.key(),
-            accounts.payer.key(),
-            Some(candy_machine.data.max_supply),
-        ),
-        master_edition_infos.as_slice(),
-        &[&authority_seeds],
-    )?;
+    CreateMetadataAccountV3CpiBuilder::new(&accounts.token_metadata_program)
+        .metadata(&accounts.nft_metadata)
+        .mint(&accounts.nft_mint)
+        .mint_authority(&accounts.nft_mint_authority)
+        .payer(&accounts.payer)
+        .update_authority(&accounts.authority_pda, true)
+        .system_program(&accounts.system_program)
+        .data(DataV2 {
+            name: config_line.name,
+            uri: config_line.uri,
+            symbol: candy_machine.data.symbol.to_string(),
+            seller_fee_basis_points: candy_machine.data.seller_fee_basis_points,
+            creators: Some(creators),
+            collection: None,
+            uses: None,
+        })
+        .is_mutable(candy_machine.data.is_mutable)
+        .invoke_signed(&[&authority_seeds])?;
 
-    invoke_signed(
-        &update_metadata_accounts_v2(
-            accounts.token_metadata_program.key(),
-            accounts.nft_metadata.key(),
-            accounts.authority_pda.key(),
-            Some(collection_metadata.update_authority),
-            None,
-            Some(true),
-            if !candy_machine.data.is_mutable {
-                Some(false)
-            } else {
-                None
-            },
-        ),
-        &[
-            accounts.token_metadata_program.to_account_info(),
-            accounts.nft_metadata.to_account_info(),
-            accounts.authority_pda.to_account_info(),
-        ],
-        &[&authority_seeds],
-    )?;
+    // create master edition account
 
-    let collection_mint = &accounts.collection_mint;
-    let collection_master_edition = &accounts.collection_master_edition;
-    let set_collection_ix = if collection_metadata.collection_details.is_some() {
-        set_and_verify_sized_collection_item(
-            accounts.token_metadata_program.key(),
-            accounts.nft_metadata.key(),
-            accounts.authority_pda.key(),
-            accounts.payer.key(),
-            accounts.collection_update_authority.key(),
-            collection_mint.key(),
-            accounts.collection_metadata.key(),
-            collection_master_edition.key(),
-            Some(accounts.collection_delegate_record.key()),
-        )
-    } else {
-        set_and_verify_collection(
-            accounts.token_metadata_program.key(),
-            accounts.nft_metadata.key(),
-            accounts.authority_pda.key(),
-            accounts.payer.key(),
-            accounts.collection_update_authority.key(),
-            collection_mint.key(),
-            accounts.collection_metadata.key(),
-            collection_master_edition.key(),
-            Some(accounts.collection_delegate_record.key()),
-        )
-    };
+    CreateMasterEditionV3CpiBuilder::new(&accounts.token_metadata_program)
+        .edition(&accounts.nft_master_edition)
+        .mint(&accounts.nft_mint)
+        .mint_authority(&accounts.nft_mint_authority)
+        .update_authority(&accounts.authority_pda)
+        .metadata(&accounts.nft_metadata)
+        .payer(&accounts.payer)
+        .max_supply(candy_machine.data.max_supply)
+        .invoke_signed(&[&authority_seeds])?;
 
-    let set_collection_infos = vec![
-        accounts.nft_metadata.to_account_info(),
-        accounts.authority_pda.to_account_info(),
-        accounts.collection_update_authority.to_account_info(),
-        accounts.payer.to_account_info(),
-        collection_mint.to_account_info(),
-        accounts.collection_metadata.to_account_info(),
-        collection_master_edition.to_account_info(),
-        accounts.collection_delegate_record.to_account_info(),
-    ];
+    // update metadata account
 
-    invoke_signed(
-        &set_collection_ix,
-        set_collection_infos.as_slice(),
-        &[&authority_seeds],
-    )
-    .map_err(|error| error.into())
+    UpdateMetadataAccountV2CpiBuilder::new(&accounts.token_metadata_program)
+        .metadata(&accounts.nft_metadata)
+        .update_authority(&accounts.authority_pda)
+        .primary_sale_happened(true)
+        .new_update_authority(collection_metadata.update_authority)
+        .invoke_signed(&[&authority_seeds])?;
+
+    // set and verify collection
+
+    SetAndVerifyCollectionCpiBuilder::new(&accounts.token_metadata_program)
+        .metadata(&accounts.nft_metadata)
+        .collection_authority(&accounts.authority_pda)
+        .collection_authority_record(Some(&accounts.collection_delegate_record))
+        .collection(&accounts.collection_metadata)
+        .collection_master_edition_account(&accounts.collection_master_edition)
+        .collection_mint(&accounts.collection_mint)
+        .update_authority(&accounts.collection_update_authority)
+        .invoke_signed(&[&authority_seeds])
+        .map_err(|error| error.into())
 }
 
 /// Mints a new NFT.
@@ -732,7 +573,7 @@ pub struct MintV2<'info> {
     /// Token Metadata program.
     ///
     /// CHECK: account checked in CPI
-    #[account(address = mpl_token_metadata::id())]
+    #[account(address = mpl_token_metadata::ID)]
     token_metadata_program: UncheckedAccount<'info>,
 
     /// SPL Token program.
@@ -759,12 +600,12 @@ pub struct MintV2<'info> {
     /// Token Authorization Rules program.
     ///
     /// CHECK: account checked in CPI
-    #[account(address = mpl_token_auth_rules::id())]
+    #[account(address = MPL_TOKEN_AUTH_RULES_PROGRAM)]
     authorization_rules_program: Option<UncheckedAccount<'info>>,
 
     /// Token Authorization rules account for the collection metadata (if any).
     ///
     /// CHECK: account constraints checked in account trait
-    #[account(owner = mpl_token_auth_rules::id())]
+    #[account(owner = MPL_TOKEN_AUTH_RULES_PROGRAM)]
     authorization_rules: Option<UncheckedAccount<'info>>,
 }

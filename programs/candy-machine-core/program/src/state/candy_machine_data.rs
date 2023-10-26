@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use mpl_token_metadata::state::{MAX_CREATOR_LIMIT, MAX_NAME_LENGTH, MAX_URI_LENGTH};
+use mpl_token_metadata::{MAX_CREATOR_LIMIT, MAX_NAME_LENGTH, MAX_URI_LENGTH};
 
 use crate::{constants::HIDDEN_SECTION, errors::CandyError, utils::replace_patterns};
 

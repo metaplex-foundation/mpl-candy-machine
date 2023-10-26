@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use mpl_token_metadata::state::{Metadata, TokenMetadataAccount};
+use mpl_token_metadata::accounts::Metadata;
 
 use crate::{
     approve_collection_authority_helper, cmp_pubkeys, constants::AUTHORITY_SEED,
@@ -25,7 +25,7 @@ pub fn set_collection(ctx: Context<SetCollection>) -> Result<()> {
 
     let collection_metadata_info = &accounts.collection_metadata;
     let collection_metadata: Metadata =
-        Metadata::from_account_info(&collection_metadata_info.to_account_info())?;
+        Metadata::try_from(&collection_metadata_info.to_account_info())?;
 
     // revoking the existing collection authority
 
@@ -128,7 +128,7 @@ pub struct SetCollection<'info> {
     /// Token Metadata program.
     ///
     /// CHECK: account checked in CPI
-    #[account(address = mpl_token_metadata::id())]
+    #[account(address = mpl_token_metadata::ID)]
     token_metadata_program: UncheckedAccount<'info>,
 
     /// System program.

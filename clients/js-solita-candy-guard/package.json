@@ -63,7 +63,7 @@
     "eslint": "^8.3.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
-    "merkletreejs": "^0.2.32",
+    "merkletreejs": "^0.3.11",
     "prettier": "^2.5.1",
     "rimraf": "^3.0.2",
     "spok": "^1.4.3",

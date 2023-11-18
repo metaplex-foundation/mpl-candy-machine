@@ -2,10 +2,11 @@ use anchor_lang::{prelude::*, solana_program::sysvar};
 use mpl_token_metadata::accounts::Metadata;
 
 use crate::{
-    approve_metadata_delegate, cmp_pubkeys, constants::AUTHORITY_SEED,
-    instructions::MPL_TOKEN_AUTH_RULES_PROGRAM, revoke_collection_authority_helper,
-    revoke_metadata_delegate, AccountVersion, ApproveMetadataDelegateHelperAccounts, CandyError,
-    CandyMachine, RevokeCollectionAuthorityHelperAccounts, RevokeMetadataDelegateHelperAccounts,
+    approve_metadata_delegate, cmp_pubkeys,
+    constants::{AUTHORITY_SEED, MPL_TOKEN_AUTH_RULES_PROGRAM},
+    revoke_collection_authority_helper, revoke_metadata_delegate, AccountVersion,
+    ApproveMetadataDelegateHelperAccounts, CandyError, CandyMachine,
+    RevokeCollectionAuthorityHelperAccounts, RevokeMetadataDelegateHelperAccounts,
 };
 
 pub fn set_collection_v2(ctx: Context<SetCollectionV2>) -> Result<()> {

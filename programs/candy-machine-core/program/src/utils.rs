@@ -269,7 +269,7 @@ pub fn revoke_metadata_delegate(
         .mint(&accounts.collection_mint)
         .metadata(&accounts.collection_metadata)
         .payer(&accounts.payer)
-        .authority(&accounts.collection_update_authority)
+        .authority(&accounts.authority_pda)
         .system_program(&accounts.system_program)
         .sysvar_instructions(&accounts.sysvar_instructions)
         .authorization_rules(accounts.authorization_rules.as_ref())

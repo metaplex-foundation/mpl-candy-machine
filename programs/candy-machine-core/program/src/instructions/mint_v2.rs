@@ -4,7 +4,8 @@ use mpl_token_metadata::{
     accounts::Metadata,
     instructions::{
         CreateMasterEditionV3CpiBuilder, CreateMetadataAccountV3CpiBuilder, CreateV1CpiBuilder,
-        MintV1CpiBuilder, SetAndVerifyCollectionCpiBuilder, UpdateMetadataAccountV2CpiBuilder,
+        MintV1CpiBuilder, SetAndVerifyCollectionCpiBuilder,
+        SetAndVerifySizedCollectionItemCpiBuilder, UpdateMetadataAccountV2CpiBuilder,
         UpdateV1CpiBuilder, VerifyCollectionV1CpiBuilder,
     },
     types::{Collection, DataV2, PrintSupply, RuleSetToggle, TokenStandard},
@@ -12,8 +13,9 @@ use mpl_token_metadata::{
 use solana_program::sysvar;
 
 use crate::{
-    constants::{AUTHORITY_SEED, EMPTY_STR, HIDDEN_SECTION, NULL_STRING},
-    instructions::MPL_TOKEN_AUTH_RULES_PROGRAM,
+    constants::{
+        AUTHORITY_SEED, EMPTY_STR, HIDDEN_SECTION, MPL_TOKEN_AUTH_RULES_PROGRAM, NULL_STRING,
+    },
     utils::*,
     AccountVersion, CandyError, CandyMachine, ConfigLine,
 };
@@ -384,6 +386,8 @@ fn create_and_mint(
         .edition(Some(&accounts.nft_master_edition))
         .mint(&accounts.nft_mint)
         .payer(&accounts.payer)
+        .system_program(&accounts.system_program)
+        .sysvar_instructions(sysvar_instructions_info)
         .primary_sale_happened(true)
         .new_update_authority(collection_metadata.update_authority);
 
@@ -413,6 +417,8 @@ fn create_and_mint(
         .collection_mint(&accounts.collection_mint)
         .collection_metadata(Some(&accounts.collection_metadata))
         .collection_master_edition(Some(&accounts.collection_master_edition))
+        .system_program(&accounts.system_program)
+        .sysvar_instructions(sysvar_instructions_info)
         .invoke_signed(&[&authority_seeds])
         .map_err(|error| error.into())
 }
@@ -459,6 +465,8 @@ fn create(
         .update_authority(&accounts.authority_pda)
         .metadata(&accounts.nft_metadata)
         .payer(&accounts.payer)
+        .system_program(&accounts.system_program)
+        .token_program(&accounts.spl_token_program)
         .max_supply(candy_machine.data.max_supply)
         .invoke_signed(&[&authority_seeds])?;
 
@@ -467,22 +475,37 @@ fn create(
     UpdateMetadataAccountV2CpiBuilder::new(&accounts.token_metadata_program)
         .metadata(&accounts.nft_metadata)
         .update_authority(&accounts.authority_pda)
-        .primary_sale_happened(true)
         .new_update_authority(collection_metadata.update_authority)
+        .primary_sale_happened(true)
         .invoke_signed(&[&authority_seeds])?;
 
     // set and verify collection
 
-    SetAndVerifyCollectionCpiBuilder::new(&accounts.token_metadata_program)
-        .metadata(&accounts.nft_metadata)
-        .collection_authority(&accounts.authority_pda)
-        .collection_authority_record(Some(&accounts.collection_delegate_record))
-        .collection(&accounts.collection_metadata)
-        .collection_master_edition_account(&accounts.collection_master_edition)
-        .collection_mint(&accounts.collection_mint)
-        .update_authority(&accounts.collection_update_authority)
-        .invoke_signed(&[&authority_seeds])
-        .map_err(|error| error.into())
+    if collection_metadata.collection_details.is_some() {
+        SetAndVerifySizedCollectionItemCpiBuilder::new(&accounts.token_metadata_program)
+            .metadata(&accounts.nft_metadata)
+            .collection_authority(&accounts.authority_pda)
+            .collection_authority_record(Some(&accounts.collection_delegate_record))
+            .collection(&accounts.collection_metadata)
+            .collection_master_edition_account(&accounts.collection_master_edition)
+            .collection_mint(&accounts.collection_mint)
+            .update_authority(&accounts.collection_update_authority)
+            .payer(&accounts.payer)
+            .invoke_signed(&[&authority_seeds])
+            .map_err(|error| error.into())
+    } else {
+        SetAndVerifyCollectionCpiBuilder::new(&accounts.token_metadata_program)
+            .metadata(&accounts.nft_metadata)
+            .collection_authority(&accounts.authority_pda)
+            .collection_authority_record(Some(&accounts.collection_delegate_record))
+            .collection(&accounts.collection_metadata)
+            .collection_master_edition_account(&accounts.collection_master_edition)
+            .collection_mint(&accounts.collection_mint)
+            .update_authority(&accounts.collection_update_authority)
+            .payer(&accounts.payer)
+            .invoke_signed(&[&authority_seeds])
+            .map_err(|error| error.into())
+    }
 }
 
 /// Mints a new NFT.

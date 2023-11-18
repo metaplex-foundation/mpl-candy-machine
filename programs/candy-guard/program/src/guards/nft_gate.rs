@@ -1,10 +1,11 @@
+use mpl_token_metadata::accounts::Metadata;
+
 use super::*;
 use crate::{
     errors::CandyGuardError,
     state::GuardType,
     utils::{assert_is_token_account, assert_keys_equal},
 };
-use mpl_token_metadata::state::{Metadata, TokenMetadataAccount};
 
 /// Guard that restricts the transaction to holders of a specified collection.
 ///
@@ -56,9 +57,9 @@ impl NftGate {
         collection: &Pubkey,
         owner: &Pubkey,
     ) -> Result<()> {
-        let metadata: Metadata = Metadata::from_account_info(nft_metadata)?;
+        let metadata: Metadata = Metadata::try_from(nft_metadata)?;
         // validates the metadata information
-        assert_keys_equal(nft_metadata.owner, &mpl_token_metadata::id())?;
+        assert_keys_equal(nft_metadata.owner, &mpl_token_metadata::ID)?;
 
         match metadata.collection {
             Some(c) if c.verified && c.key == *collection => Ok(()),

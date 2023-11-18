@@ -4,8 +4,7 @@ use mpl_utils::resize_or_reallocate_account_raw;
 
 use crate::{
     approve_metadata_delegate, assert_token_standard, cmp_pubkeys,
-    constants::{AUTHORITY_SEED, RULE_SET_LENGTH, SET, UNSET},
-    instructions::MPL_TOKEN_AUTH_RULES_PROGRAM,
+    constants::{AUTHORITY_SEED, MPL_TOKEN_AUTH_RULES_PROGRAM, RULE_SET_LENGTH, SET, UNSET},
     revoke_collection_authority_helper, AccountVersion, ApproveMetadataDelegateHelperAccounts,
     CandyError, CandyMachine, RevokeCollectionAuthorityHelperAccounts,
 };

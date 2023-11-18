@@ -3,13 +3,13 @@ use super::*;
 use anchor_lang::AccountsClose;
 use mpl_candy_machine_core::{AccountVersion, CandyMachine};
 use mpl_token_metadata::{
-    assertions::edition::assert_edition_is_not_programmable,
-    instruction::{
-        builders::{Delegate, Lock, Transfer, Unlock},
-        freeze_delegated_account, thaw_delegated_account, DelegateArgs, InstructionBuilder,
-        LockArgs, TransferArgs, UnlockArgs,
+    accounts::{Metadata, TokenRecord},
+    instructions::{
+        DelegateCpiBuilder, FreezeDelegatedAccountCpiBuilder, LockCpiBuilder,
+        ThawDelegatedAccountCpiBuilder, TransferV1CpiBuilder, UnlockV1CpiBuilder,
     },
-    state::{Metadata, TokenMetadataAccount, TokenRecord, TokenStandard},
+    types::{DelegateArgs, LockArgs, TokenStandard, TokenState},
+    utils::assert_edition_is_programmable,
 };
 use solana_program::{
     program::{invoke, invoke_signed},
@@ -213,7 +213,7 @@ impl Condition for FreezeSolPayment {
         let account_data = candy_machine_info.data.borrow_mut();
 
         let collection_metadata =
-            Metadata::from_account_info(&ctx.accounts.collection_metadata.to_account_info())?;
+            Metadata::try_from(&ctx.accounts.collection_metadata.to_account_info())?;
 
         let rule_set = ctx
             .accounts
@@ -403,16 +403,6 @@ pub fn freeze_nft(
     let nft_ata = try_get_account_info(ctx.accounts.remaining, account_index + 1)?;
 
     if matches!(ctx.accounts.candy_machine.version, AccountVersion::V1) {
-        let mut freeze_ix = freeze_delegated_account(
-            mpl_token_metadata::ID,
-            freeze_pda.key(),
-            nft_ata.key(),
-            ctx.accounts.nft_master_edition.key(),
-            ctx.accounts.nft_mint.key(),
-        );
-
-        freeze_ix.accounts[0] = AccountMeta::new_readonly(freeze_pda.key(), true);
-
         invoke(
             &approve(
                 &spl_token::ID,
@@ -428,16 +418,14 @@ pub fn freeze_nft(
                 owner.to_account_info(),
             ],
         )?;
-        invoke_signed(
-            &freeze_ix,
-            &[
-                freeze_pda.to_account_info(),
-                nft_ata.to_account_info(),
-                ctx.accounts.nft_master_edition.to_account_info(),
-                ctx.accounts.nft_mint.to_account_info(),
-            ],
-            &[&signer],
-        )?;
+
+        FreezeDelegatedAccountCpiBuilder::new(&ctx.accounts.token_metadata_program)
+            .delegate(freeze_pda)
+            .token_account(nft_ata)
+            .edition(&ctx.accounts.nft_master_edition)
+            .mint(&ctx.accounts.nft_mint)
+            .token_program(&ctx.accounts.spl_token_program)
+            .invoke_signed(&[&signer])?;
     } else {
         let token_record = ctx
             .accounts
@@ -452,109 +440,55 @@ pub fn freeze_nft(
             assert_keys_equal(nft_ata.key, token_info.key)?;
         }
 
-        // approves a locked transfer delegate
+        // approves a delegate to lock and transfer the token
 
-        let args = if ctx.accounts.candy_machine.token_standard
-            == TokenStandard::ProgrammableNonFungible as u8
-        {
-            DelegateArgs::LockedTransferV1 {
-                amount: 1,
-                locked_address: freeze_escrow.key(),
-                authorization_data: None,
-            }
-        } else {
-            DelegateArgs::StandardV1 { amount: 1 }
-        };
-
-        let delegate = Delegate {
-            args,
-            delegate_record: None,
-            delegate: freeze_pda.key(),
-            metadata: ctx.accounts.nft_metadata.key(),
-            master_edition: Some(ctx.accounts.nft_master_edition.key()),
-            token_record: token_record.as_ref().map(|token_record| token_record.key()),
-            mint: ctx.accounts.nft_mint.key(),
-            token: Some(nft_ata.key()),
-            authority: ctx.accounts.minter.key(),
-            payer: ctx.accounts.payer.key(),
-            system_program: ctx.accounts.system_program.key(),
-            sysvar_instructions: ctx.accounts.sysvar_instructions.key(),
-            spl_token_program: Some(ctx.accounts.spl_token_program.key()),
-            authorization_rules_program: ctx
-                .accounts
-                .authorization_rules_program
-                .as_ref()
-                .map(|authorization_rules_program| authorization_rules_program.key()),
-            authorization_rules: authorization_rules
-                .as_ref()
-                .map(|authorization_rules| authorization_rules.key()),
-        };
-
-        let delegate_ix = delegate.instruction();
-
-        let mut delegagte_infos = vec![
-            freeze_pda.to_account_info(),
-            ctx.accounts.nft_metadata.to_account_info(),
-            ctx.accounts.nft_master_edition.to_account_info(),
-            ctx.accounts.nft_mint.to_account_info(),
-            nft_ata.to_account_info(),
-            ctx.accounts.minter.to_account_info(),
-            ctx.accounts.payer.to_account_info(),
-            ctx.accounts.system_program.to_account_info(),
-            ctx.accounts.sysvar_instructions.to_account_info(),
-            ctx.accounts.spl_token_program.to_account_info(),
-        ];
-
-        if let Some(token_record) = &token_record {
-            delegagte_infos.push(token_record.to_account_info());
-        }
-
-        if let Some(authorization_rules) = &authorization_rules {
-            delegagte_infos.push(authorization_rules.to_account_info());
-        }
-
-        invoke_signed(&delegate_ix, &delegagte_infos, &[&signer])?;
+        DelegateCpiBuilder::new(&ctx.accounts.token_metadata_program)
+            .delegate(freeze_pda)
+            .metadata(&ctx.accounts.nft_metadata)
+            .master_edition(Some(&ctx.accounts.nft_master_edition))
+            .token_record(token_record.as_ref())
+            .mint(&ctx.accounts.nft_mint)
+            .token(Some(nft_ata))
+            .authority(&ctx.accounts.minter)
+            .payer(&ctx.accounts.payer)
+            .system_program(&ctx.accounts.system_program)
+            .sysvar_instructions(&ctx.accounts.sysvar_instructions)
+            .spl_token_program(Some(&ctx.accounts.spl_token_program))
+            .authorization_rules_program(ctx.accounts.authorization_rules_program.as_ref())
+            .authorization_rules(authorization_rules)
+            .delegate_args(
+                if ctx.accounts.candy_machine.token_standard
+                    == TokenStandard::ProgrammableNonFungible as u8
+                {
+                    DelegateArgs::LockedTransferV1 {
+                        amount: 1,
+                        locked_address: freeze_escrow.key(),
+                        authorization_data: None,
+                    }
+                } else {
+                    DelegateArgs::StandardV1 { amount: 1 }
+                },
+            )
+            .invoke_signed(&[&signer])?;
 
         // locks the token account
 
-        let lock = Lock {
-            args: LockArgs::V1 {
+        LockCpiBuilder::new(&ctx.accounts.token_metadata_program)
+            .authority(freeze_pda)
+            .token_owner(Some(&ctx.accounts.minter))
+            .token(nft_ata)
+            .mint(&ctx.accounts.nft_mint)
+            .metadata(&ctx.accounts.nft_metadata)
+            .edition(Some(&ctx.accounts.nft_master_edition))
+            .token_record(token_record.as_ref())
+            .payer(&ctx.accounts.payer)
+            .system_program(&ctx.accounts.system_program)
+            .sysvar_instructions(&ctx.accounts.sysvar_instructions)
+            .spl_token_program(Some(&ctx.accounts.spl_token_program))
+            .lock_args(LockArgs::V1 {
                 authorization_data: None,
-            },
-            authority: freeze_pda.key(),
-            token_owner: Some(ctx.accounts.minter.key()),
-            token: nft_ata.key(),
-            mint: ctx.accounts.nft_mint.key(),
-            metadata: ctx.accounts.nft_metadata.key(),
-            edition: Some(ctx.accounts.nft_master_edition.key()),
-            token_record: token_record.as_ref().map(|token_record| token_record.key()),
-            payer: ctx.accounts.payer.key(),
-            system_program: ctx.accounts.system_program.key(),
-            sysvar_instructions: ctx.accounts.sysvar_instructions.key(),
-            spl_token_program: Some(ctx.accounts.spl_token_program.key()),
-            authorization_rules_program: None,
-            authorization_rules: None,
-        };
-        let lock_ix = lock.instruction();
-
-        let mut lock_accounts = vec![
-            freeze_pda.to_account_info(),
-            ctx.accounts.minter.to_account_info(),
-            nft_ata.to_account_info(),
-            ctx.accounts.nft_mint.to_account_info(),
-            ctx.accounts.nft_metadata.to_account_info(),
-            ctx.accounts.nft_master_edition.to_account_info(),
-            ctx.accounts.payer.to_account_info(),
-            ctx.accounts.system_program.to_account_info(),
-            ctx.accounts.sysvar_instructions.to_account_info(),
-            ctx.accounts.spl_token_program.to_account_info(),
-        ];
-
-        if let Some(token_record) = &token_record {
-            lock_accounts.push(token_record.to_account_info());
-        }
-
-        invoke_signed(&lock_ix, &lock_accounts, &[&signer])?;
+            })
+            .invoke_signed(&[&signer])?;
     }
 
     Ok(())
@@ -717,7 +651,7 @@ pub fn thaw_nft<'info>(
         &[bump],
     ];
 
-    let is_programmable = assert_edition_is_not_programmable(nft_master_edition).is_err();
+    let is_programmable = assert_edition_is_programmable(&nft_master_edition.data.borrow()).is_ok();
 
     let is_frozen = if is_programmable {
         // for programmable assets, thaw consists of unlocking the token, transferring the
@@ -744,8 +678,8 @@ pub fn thaw_nft<'info>(
         let authorization_rules = get_account_info(ctx.remaining_accounts, 15);
 
         let is_locked = if let Some(token_record) = owner_token_record {
-            let token_record = TokenRecord::from_account_info(token_record)?;
-            token_record.is_locked()
+            let token_record = TokenRecord::try_from(token_record)?;
+            token_record.state == TokenState::Locked
         } else {
             nft_token_account.is_frozen()
         };
@@ -757,159 +691,65 @@ pub fn thaw_nft<'info>(
         if is_locked {
             // unlocks the token account
 
-            let unlock = Unlock {
-                args: UnlockArgs::V1 {
-                    authorization_data: None,
-                },
-                authority: freeze_pda.key(),
-                token_owner: Some(nft_owner.key()),
-                token: nft_ata.key(),
-                mint: nft_mint.key(),
-                metadata: nft_metadata.key(),
-                edition: Some(nft_master_edition.key()),
-                token_record: owner_token_record
-                    .as_ref()
-                    .map(|token_record| token_record.key()),
-                payer: ctx.accounts.payer.key(),
-                system_program: system_program_info.key(),
-                sysvar_instructions: sysvar_instructions_info.key(),
-                spl_token_program: Some(token_program.key()),
-                authorization_rules_program: None,
-                authorization_rules: None,
-            };
-            let unlock_ix = unlock.instruction();
+            UnlockV1CpiBuilder::new(token_metadata_program)
+                .authority(freeze_pda)
+                .token_owner(Some(nft_owner))
+                .token(nft_ata)
+                .mint(nft_mint)
+                .metadata(nft_metadata)
+                .edition(Some(nft_master_edition))
+                .token_record(owner_token_record)
+                .payer(&ctx.accounts.payer)
+                .system_program(system_program_info)
+                .sysvar_instructions(sysvar_instructions_info)
+                .spl_token_program(Some(token_program))
+                .invoke_signed(&[&signer])?;
 
-            let mut unlock_accounts = vec![
-                freeze_pda.to_account_info(),
-                nft_owner.to_account_info(),
-                nft_ata.to_account_info(),
-                nft_mint.to_account_info(),
-                nft_metadata.to_account_info(),
-                nft_master_edition.to_account_info(),
-                ctx.accounts.payer.to_account_info(),
-                system_program_info.to_account_info(),
-                sysvar_instructions_info.to_account_info(),
-                token_program.to_account_info(),
-            ];
-
-            if let Some(token_record) = &owner_token_record {
-                unlock_accounts.push(token_record.to_account_info());
-            }
-
-            invoke_signed(&unlock_ix, &unlock_accounts, &[&signer])?;
+            let freeze_escrow_info = freeze_escrow.to_account_info();
 
             // transfer out the asset (using a freeze escrow as delegate)
 
-            let mut transfer_accounts = vec![
-                nft_ata.to_account_info(),
-                nft_owner.to_account_info(),
-                escrow_ata.to_account_info(),
-                freeze_pda.to_account_info(),
-                nft_mint.to_account_info(),
-                nft_metadata.to_account_info(),
-                nft_master_edition.to_account_info(),
-                ctx.accounts.payer.to_account_info(),
-                system_program_info.to_account_info(),
-                sysvar_instructions_info.to_account_info(),
-                token_program.to_account_info(),
-                spl_ata_program.to_account_info(),
-            ];
-
-            if is_programmable {
-                transfer_accounts.push(
-                    owner_token_record
-                        .ok_or(CandyGuardError::MissingRemainingAccount)?
-                        .to_account_info(),
-                );
-                transfer_accounts.push(
-                    escrow_token_record
-                        .ok_or(CandyGuardError::MissingRemainingAccount)?
-                        .to_account_info(),
-                );
-
-                if let Some(authorization_rules) = authorization_rules {
-                    transfer_accounts.push(
-                        authorization_rules_program
-                            .ok_or(CandyGuardError::MissingRemainingAccount)?
-                            .to_account_info(),
-                    );
-                    transfer_accounts.push(authorization_rules.to_account_info());
-                }
-            }
-
-            let transfer_out = Transfer {
-                args: TransferArgs::V1 {
-                    amount: 1,
-                    authorization_data: None,
-                },
-                token: nft_ata.key(),
-                token_owner: nft_owner.key(),
-                destination: escrow_ata.key(),
-                destination_owner: freeze_escrow.key(),
-                mint: nft_mint.key(),
-                metadata: nft_metadata.key(),
-                edition: Some(nft_master_edition.key()),
-                owner_token_record: owner_token_record
-                    .as_ref()
-                    .map(|token_record| token_record.key()),
-                destination_token_record: escrow_token_record
-                    .as_ref()
-                    .map(|token_record| token_record.key()),
-                authority: freeze_escrow.key(),
-                payer: ctx.accounts.payer.key(),
-                system_program: system_program_info.key(),
-                sysvar_instructions: sysvar_instructions_info.key(),
-                spl_token_program: token_program.key(),
-                spl_ata_program: spl_ata_program.key(),
-                authorization_rules_program: authorization_rules_program
-                    .as_ref()
-                    .map(|authorization_rules_program| authorization_rules_program.key()),
-                authorization_rules: authorization_rules
-                    .as_ref()
-                    .map(|authorization_rules| authorization_rules.key()),
-            };
-
-            let transfer_out_ix = transfer_out.instruction();
-
-            invoke_signed(&transfer_out_ix, &transfer_accounts, &[&signer])?;
+            TransferV1CpiBuilder::new(token_metadata_program)
+                .authority(&freeze_escrow_info)
+                .token(nft_ata)
+                .token_owner(nft_owner)
+                .destination_token(escrow_ata)
+                .destination_owner(&freeze_escrow_info)
+                .mint(nft_mint)
+                .metadata(nft_metadata)
+                .edition(Some(nft_master_edition))
+                .token_record(owner_token_record)
+                .destination_token_record(escrow_token_record)
+                .payer(&ctx.accounts.payer)
+                .system_program(system_program_info)
+                .sysvar_instructions(sysvar_instructions_info)
+                .spl_token_program(token_program)
+                .spl_ata_program(spl_ata_program)
+                .authorization_rules(authorization_rules)
+                .authorization_rules_program(authorization_rules_program)
+                .invoke_signed(&[&signer])?;
 
             // transfer in the asset (using a freeze escrow as owner)
 
-            let transfer_in = Transfer {
-                args: TransferArgs::V1 {
-                    amount: 1,
-                    authorization_data: None,
-                },
-                token: escrow_ata.key(),
-                token_owner: freeze_escrow.key(),
-                destination: nft_ata.key(),
-                destination_owner: nft_owner.key(),
-                mint: nft_mint.key(),
-                metadata: nft_metadata.key(),
-                edition: Some(nft_master_edition.key()),
-                owner_token_record: escrow_token_record
-                    .as_ref()
-                    .map(|token_record| token_record.key()),
-                destination_token_record: owner_token_record
-                    .as_ref()
-                    .map(|token_record| token_record.key()),
-                authority: freeze_escrow.key(),
-                payer: ctx.accounts.payer.key(),
-                system_program: system_program_info.key(),
-                sysvar_instructions: sysvar_instructions_info.key(),
-                spl_token_program: token_program.key(),
-                spl_ata_program: spl_ata_program.key(),
-                authorization_rules_program: authorization_rules_program
-                    .as_ref()
-                    .map(|authorization_rules_program| authorization_rules_program.key()),
-                authorization_rules: authorization_rules
-                    .as_ref()
-                    .map(|authorization_rules| authorization_rules.key()),
-            };
-
-            let transfer_in_ix = transfer_in.instruction();
-
-            invoke_signed(&transfer_in_ix, &transfer_accounts, &[&signer])?;
+            TransferV1CpiBuilder::new(token_metadata_program)
+                .authority(&freeze_escrow_info)
+                .token(escrow_ata)
+                .token_owner(&freeze_escrow_info)
+                .destination_token(nft_ata)
+                .destination_owner(nft_owner)
+                .mint(nft_mint)
+                .metadata(nft_metadata)
+                .edition(Some(nft_master_edition))
+                .token_record(escrow_token_record)
+                .destination_token_record(owner_token_record)
+                .payer(&ctx.accounts.payer)
+                .system_program(system_program_info)
+                .sysvar_instructions(sysvar_instructions_info)
+                .spl_token_program(token_program)
+                .spl_ata_program(spl_ata_program)
+                .authorization_rules(authorization_rules)
+                .authorization_rules_program(authorization_rules_program)
+                .invoke_signed(&[&signer])?;
 
             // closes the freeze escrow ATA
 
@@ -940,23 +780,13 @@ pub fn thaw_nft<'info>(
         let is_frozen = nft_token_account.is_frozen();
 
         if is_frozen {
-            invoke_signed(
-                &thaw_delegated_account(
-                    mpl_token_metadata::ID,
-                    freeze_pda.key(),
-                    nft_ata.key(),
-                    nft_master_edition.key(),
-                    nft_mint.key(),
-                ),
-                &[
-                    freeze_pda.to_account_info(),
-                    nft_ata.to_account_info(),
-                    nft_master_edition.to_account_info(),
-                    nft_mint.to_account_info(),
-                    token_program.to_account_info(),
-                ],
-                &[&signer],
-            )?;
+            ThawDelegatedAccountCpiBuilder::new(token_metadata_program)
+                .delegate(freeze_pda)
+                .mint(nft_mint)
+                .edition(nft_master_edition)
+                .token_account(nft_ata)
+                .token_program(token_program)
+                .invoke_signed(&[&signer])?;
             // decreases the freeze counter
             freeze_escrow.frozen_count = freeze_escrow.frozen_count.saturating_sub(1);
         } else {

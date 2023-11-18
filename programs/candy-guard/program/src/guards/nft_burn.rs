@@ -2,11 +2,10 @@ use super::*;
 
 use mpl_candy_machine_core::AccountVersion;
 use mpl_token_metadata::{
-    instruction::{builders::BurnBuilder, burn_nft, BurnArgs, InstructionBuilder},
-    pda::find_token_record_account,
-    state::{Metadata, TokenMetadataAccount, TokenStandard},
+    accounts::{Metadata, TokenRecord},
+    instructions::{BurnNftCpiBuilder, BurnV1CpiBuilder},
+    types::TokenStandard,
 };
-use solana_program::program::invoke;
 
 use crate::{state::GuardType, utils::assert_keys_equal};
 
@@ -61,9 +60,9 @@ impl Condition for NftBurn {
             try_get_account_info(ctx.accounts.remaining, index + 4)?;
         ctx.account_cursor += 3;
 
-        let metadata: Metadata = Metadata::from_account_info(nft_metadata)?;
+        let metadata: Metadata = Metadata::try_from(nft_metadata)?;
         // validates the account information
-        assert_keys_equal(nft_metadata.owner, &mpl_token_metadata::id())?;
+        assert_keys_equal(nft_metadata.owner, &mpl_token_metadata::ID)?;
         assert_keys_equal(&metadata.mint, nft_mint_account.key)?;
 
         if matches!(
@@ -74,7 +73,7 @@ impl Condition for NftBurn {
             ctx.account_cursor += 1;
 
             let (token_record_key, _) =
-                find_token_record_account(nft_mint_account.key, nft_account.key);
+                TokenRecord::find_pda(nft_mint_account.key, nft_account.key);
             assert_keys_equal(&token_record_key, token_record_info.key)?;
         }
 
@@ -98,68 +97,39 @@ impl Condition for NftBurn {
         let nft_mint_collection_metadata = try_get_account_info(ctx.accounts.remaining, index + 4)?;
 
         if matches!(ctx.accounts.candy_machine.version, AccountVersion::V2) {
-            let mut builder = BurnBuilder::new();
-            builder
-                .authority(ctx.accounts.minter.key())
-                .metadata(nft_metadata.key())
-                .edition(nft_edition.key())
-                .mint(nft_mint_account.key())
-                .token(nft_account.key())
-                .collection_metadata(nft_mint_collection_metadata.key());
-
-            let mut burn_infos = vec![
-                ctx.accounts.minter.to_account_info(),
-                nft_metadata.to_account_info(),
-                nft_edition.to_account_info(),
-                nft_mint_account.to_account_info(),
-                nft_account.to_account_info(),
-                nft_mint_collection_metadata.to_account_info(),
-                ctx.accounts.system_program.to_account_info(),
-                ctx.accounts.sysvar_instructions.to_account_info(),
-                ctx.accounts.spl_token_program.to_account_info(),
-            ];
-
-            let metadata: Metadata = Metadata::from_account_info(nft_metadata)?;
+            let metadata: Metadata = Metadata::try_from(nft_metadata)?;
+            let mut burn_cpi = BurnV1CpiBuilder::new(&ctx.accounts.token_metadata_program);
+            burn_cpi
+                .authority(&ctx.accounts.minter)
+                .metadata(nft_metadata)
+                .edition(Some(nft_edition))
+                .mint(nft_mint_account)
+                .token(nft_account)
+                .collection_metadata(Some(nft_mint_collection_metadata))
+                .system_program(&ctx.accounts.system_program)
+                .sysvar_instructions(&ctx.accounts.sysvar_instructions)
+                .spl_token_program(&ctx.accounts.spl_token_program)
+                .amount(1);
 
             if matches!(
                 metadata.token_standard,
                 Some(TokenStandard::ProgrammableNonFungible)
             ) {
                 let token_record_info = try_get_account_info(ctx.accounts.remaining, index + 5)?;
-                builder.token_record(token_record_info.key());
-                burn_infos.push(token_record_info.to_account_info());
+                burn_cpi.token_record(Some(token_record_info));
             }
 
-            let burn_ix = builder
-                .build(BurnArgs::V1 { amount: 1 })
-                .map_err(|_| CandyGuardError::InstructionBuilderFailed)?
-                .instruction();
-
-            invoke(&burn_ix, &burn_infos)?;
+            burn_cpi.invoke()?;
         } else {
-            let burn_nft_infos = vec![
-                nft_metadata.to_account_info(),
-                ctx.accounts.payer.to_account_info(),
-                nft_mint_account.to_account_info(),
-                nft_account.to_account_info(),
-                nft_edition.to_account_info(),
-                ctx.accounts.spl_token_program.to_account_info(),
-                nft_mint_collection_metadata.to_account_info(),
-            ];
-
-            invoke(
-                &burn_nft(
-                    mpl_token_metadata::ID,
-                    nft_metadata.key(),
-                    ctx.accounts.payer.key(),
-                    nft_mint_account.key(),
-                    nft_account.key(),
-                    nft_edition.key(),
-                    ::spl_token::ID,
-                    Some(nft_mint_collection_metadata.key()),
-                ),
-                burn_nft_infos.as_slice(),
-            )?;
+            BurnNftCpiBuilder::new(&ctx.accounts.token_metadata_program)
+                .metadata(nft_metadata)
+                .owner(&ctx.accounts.payer)
+                .mint(nft_mint_account)
+                .token_account(nft_account)
+                .master_edition_account(nft_edition)
+                .collection_metadata(Some(nft_mint_collection_metadata))
+                .spl_token_program(&ctx.accounts.spl_token_program)
+                .invoke()?;
         }
 
         Ok(())

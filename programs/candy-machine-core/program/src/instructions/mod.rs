@@ -23,8 +23,3 @@ pub use set_mint_authority::*;
 pub use set_token_standard::*;
 pub use update::*;
 pub use withdraw::*;
-
-use solana_program::{pubkey, pubkey::Pubkey};
-
-pub(crate) const MPL_TOKEN_AUTH_RULES_PROGRAM: Pubkey =
-    pubkey!("auth9SigNpDKz4sJJ1DfCTuZrZNSAgh9sFD3rboVmgg");

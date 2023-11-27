@@ -117,7 +117,7 @@ pub struct Mint<'info> {
     pub collection_update_authority: UncheckedAccount<'info>,
 
     /// CHECK: account checked in CPI
-    #[account(address = mpl_token_metadata::id())]
+    #[account(address = mpl_token_metadata::ID)]
     pub token_metadata_program: UncheckedAccount<'info>,
 
     pub token_program: Program<'info, Token>,

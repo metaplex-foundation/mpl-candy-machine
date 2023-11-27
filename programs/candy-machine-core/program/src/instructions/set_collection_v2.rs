@@ -1,8 +1,9 @@
 use anchor_lang::{prelude::*, solana_program::sysvar};
-use mpl_token_metadata::state::{Metadata, TokenMetadataAccount};
+use mpl_token_metadata::accounts::Metadata;
 
 use crate::{
-    approve_metadata_delegate, cmp_pubkeys, constants::AUTHORITY_SEED,
+    approve_metadata_delegate, cmp_pubkeys,
+    constants::{AUTHORITY_SEED, MPL_TOKEN_AUTH_RULES_PROGRAM},
     revoke_collection_authority_helper, revoke_metadata_delegate, AccountVersion,
     ApproveMetadataDelegateHelperAccounts, CandyError, CandyMachine,
     RevokeCollectionAuthorityHelperAccounts, RevokeMetadataDelegateHelperAccounts,
@@ -32,6 +33,7 @@ pub fn set_collection_v2(ctx: Context<SetCollectionV2>) -> Result<()> {
         // revoking the existing metadata delegate
 
         let revoke_accounts = RevokeMetadataDelegateHelperAccounts {
+            token_metadata_program: accounts.token_metadata_program.to_account_info(),
             authority_pda: accounts.authority_pda.to_account_info(),
             collection_metadata: accounts.collection_metadata.to_account_info(),
             collection_mint: accounts.collection_mint.to_account_info(),
@@ -52,7 +54,7 @@ pub fn set_collection_v2(ctx: Context<SetCollectionV2>) -> Result<()> {
     } else {
         let collection_metadata_info = &accounts.collection_metadata;
         let collection_metadata: Metadata =
-            Metadata::from_account_info(&collection_metadata_info.to_account_info())?;
+            Metadata::try_from(&collection_metadata_info.to_account_info())?;
 
         // revoking the existing collection authority
 
@@ -77,6 +79,7 @@ pub fn set_collection_v2(ctx: Context<SetCollectionV2>) -> Result<()> {
     // approve a new metadata delegate
 
     let delegate_accounts = ApproveMetadataDelegateHelperAccounts {
+        token_metadata_program: accounts.token_metadata_program.to_account_info(),
         authority_pda: accounts.authority_pda.to_account_info(),
         collection_metadata: accounts.new_collection_metadata.to_account_info(),
         collection_mint: accounts.new_collection_mint.to_account_info(),
@@ -172,7 +175,7 @@ pub struct SetCollectionV2<'info> {
     /// Token Metadata program.
     ///
     /// CHECK: account checked in CPI
-    #[account(address = mpl_token_metadata::id())]
+    #[account(address = mpl_token_metadata::ID)]
     token_metadata_program: UncheckedAccount<'info>,
 
     /// System program.
@@ -187,12 +190,12 @@ pub struct SetCollectionV2<'info> {
     /// Token Authorization Rules program.
     ///
     /// CHECK: account checked in CPI
-    #[account(address = mpl_token_auth_rules::id())]
+    #[account(address = MPL_TOKEN_AUTH_RULES_PROGRAM)]
     authorization_rules_program: Option<UncheckedAccount<'info>>,
 
     /// Token Authorization rules account for the collection metadata (if any).
     ///
     /// CHECK: account constraints checked in account trait
-    #[account(owner = mpl_token_auth_rules::id())]
+    #[account(owner = MPL_TOKEN_AUTH_RULES_PROGRAM)]
     authorization_rules: Option<UncheckedAccount<'info>>,
 }

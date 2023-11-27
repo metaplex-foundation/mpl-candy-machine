@@ -1,6 +1,10 @@
-pub use mpl_token_metadata::state::{
+pub use mpl_token_metadata::{
     MAX_CREATOR_LEN, MAX_CREATOR_LIMIT, MAX_NAME_LENGTH, MAX_SYMBOL_LENGTH, MAX_URI_LENGTH,
 };
+use solana_program::{pubkey, pubkey::Pubkey};
+
+pub const MPL_TOKEN_AUTH_RULES_PROGRAM: Pubkey =
+    pubkey!("auth9SigNpDKz4sJJ1DfCTuZrZNSAgh9sFD3rboVmgg");
 
 // Empty value used for string padding.
 pub const NULL_STRING: &str = "\0";

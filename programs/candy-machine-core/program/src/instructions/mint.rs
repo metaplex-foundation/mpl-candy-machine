@@ -114,7 +114,7 @@ pub struct Mint<'info> {
     /// Token Metadata program.
     ///
     /// CHECK: account checked in CPI
-    #[account(address = mpl_token_metadata::id())]
+    #[account(address = mpl_token_metadata::ID)]
     token_metadata_program: UncheckedAccount<'info>,
 
     /// SPL Token program.

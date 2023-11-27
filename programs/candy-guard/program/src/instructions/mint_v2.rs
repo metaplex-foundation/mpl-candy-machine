@@ -147,7 +147,7 @@ fn validate(ctx: &EvaluationContext) -> Result<()> {
     }
     if !cmp_pubkeys(
         ctx.accounts.collection_metadata.owner,
-        &mpl_token_metadata::id(),
+        &mpl_token_metadata::ID,
     ) {
         return err!(CandyGuardError::IncorrectOwner);
     }
@@ -310,7 +310,7 @@ pub struct MintV2<'info> {
     /// Token Metadata program.
     ///
     /// CHECK: account checked in CPI
-    #[account(address = mpl_token_metadata::id())]
+    #[account(address = mpl_token_metadata::ID)]
     token_metadata_program: UncheckedAccount<'info>,
 
     /// SPL Token program.
@@ -337,12 +337,12 @@ pub struct MintV2<'info> {
     /// Token Authorization Rules program.
     ///
     /// CHECK: account checked in CPI
-    #[account(address = mpl_token_auth_rules::id())]
+    #[account(address = mpl_candy_machine_core::constants::MPL_TOKEN_AUTH_RULES_PROGRAM)]
     authorization_rules_program: Option<UncheckedAccount<'info>>,
 
     /// Token Authorization rules account for the collection metadata (if any).
     ///
     /// CHECK: account constraints checked in account trait
-    #[account(owner = mpl_token_auth_rules::id())]
+    #[account(owner = mpl_candy_machine_core::constants::MPL_TOKEN_AUTH_RULES_PROGRAM)]
     authorization_rules: Option<UncheckedAccount<'info>>,
 }

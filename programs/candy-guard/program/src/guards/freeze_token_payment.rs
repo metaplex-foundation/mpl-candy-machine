@@ -1,7 +1,7 @@
 use super::{freeze_sol_payment::freeze_nft, *};
 
 use anchor_lang::AccountsClose;
-use mpl_token_metadata::state::{Metadata, TokenMetadataAccount};
+use mpl_token_metadata::accounts::Metadata;
 use solana_program::{
     program::{invoke, invoke_signed},
     program_pack::Pack,
@@ -278,7 +278,7 @@ impl Condition for FreezeTokenPayment {
         let account_data = candy_machine_info.data.borrow_mut();
 
         let collection_metadata =
-            Metadata::from_account_info(&ctx.accounts.collection_metadata.to_account_info())?;
+            Metadata::try_from(&ctx.accounts.collection_metadata.to_account_info())?;
 
         let rule_set = ctx
             .accounts

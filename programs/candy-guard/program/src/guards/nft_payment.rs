@@ -1,8 +1,8 @@
-use mpl_candy_machine_core::{assert_edition_from_mint, AccountVersion};
+use mpl_candy_machine_core::{constants::MPL_TOKEN_AUTH_RULES_PROGRAM, AccountVersion};
 use mpl_token_metadata::{
-    instruction::{builders::TransferBuilder, InstructionBuilder, TransferArgs},
-    pda::find_token_record_account,
-    state::{Metadata, ProgrammableConfig, TokenMetadataAccount, TokenStandard},
+    accounts::{MasterEdition, Metadata, TokenRecord},
+    instructions::TransferV1CpiBuilder,
+    types::{ProgrammableConfig, TokenStandard},
 };
 use solana_program::program::invoke;
 use spl_associated_token_account::instruction::create_associated_token_account;
@@ -69,7 +69,7 @@ impl Condition for NftPayment {
             ctx.accounts.minter.key,
         )?;
 
-        let metadata: Metadata = Metadata::from_account_info(nft_metadata)?;
+        let metadata: Metadata = Metadata::try_from(nft_metadata)?;
         assert_keys_equal(&metadata.mint, nft_mint.key)?;
 
         let destination = try_get_account_info(ctx.accounts.remaining, index + 3)?;
@@ -98,16 +98,16 @@ impl Condition for NftPayment {
             Some(TokenStandard::ProgrammableNonFungible)
         ) {
             let nft_master_edition = try_get_account_info(ctx.accounts.remaining, index + 6)?;
-            assert_edition_from_mint(nft_master_edition, nft_mint)?;
+            let (nft_master_edition_key, _) = MasterEdition::find_pda(nft_mint.key);
+            assert_keys_equal(&nft_master_edition_key, nft_master_edition.key)?;
 
             let owner_token_record = try_get_account_info(ctx.accounts.remaining, index + 7)?;
-            let (owner_token_record_key, _) =
-                find_token_record_account(nft_mint.key, nft_account.key);
+            let (owner_token_record_key, _) = TokenRecord::find_pda(nft_mint.key, nft_account.key);
             assert_keys_equal(&owner_token_record_key, owner_token_record.key)?;
 
             let destination_token_record = try_get_account_info(ctx.accounts.remaining, index + 8)?;
             let (destination_token_record_key, _) =
-                find_token_record_account(nft_mint.key, destination_ata.key);
+                TokenRecord::find_pda(nft_mint.key, destination_ata.key);
             assert_keys_equal(&destination_token_record_key, destination_token_record.key)?;
 
             ctx.account_cursor += 3;
@@ -117,7 +117,7 @@ impl Condition for NftPayment {
             }) = metadata.programmable_config
             {
                 let auth_rules_program = try_get_account_info(ctx.accounts.remaining, index + 9)?;
-                assert_keys_equal(auth_rules_program.key, &mpl_token_auth_rules::ID)?;
+                assert_keys_equal(auth_rules_program.key, &MPL_TOKEN_AUTH_RULES_PROGRAM)?;
 
                 let auth_rules = try_get_account_info(ctx.accounts.remaining, index + 10)?;
                 assert_keys_equal(&rule_set, auth_rules.key)?;
@@ -146,33 +146,23 @@ impl Condition for NftPayment {
         let spl_ata_program = try_get_account_info(ctx.accounts.remaining, index + 5)?;
 
         if matches!(ctx.accounts.candy_machine.version, AccountVersion::V2) {
-            let mut transfer_builder = TransferBuilder::new();
+            let mut transfer_cpi = TransferV1CpiBuilder::new(&ctx.accounts.token_metadata_program);
+            transfer_cpi
+                .token(nft_account)
+                .token_owner(&ctx.accounts.minter)
+                .destination_token(destination_ata)
+                .destination_owner(destination)
+                .mint(nft_mint)
+                .metadata(nft_metadata)
+                .authority(&ctx.accounts.minter)
+                .payer(&ctx.accounts.payer)
+                .system_program(&ctx.accounts.system_program)
+                .sysvar_instructions(&ctx.accounts.sysvar_instructions)
+                .spl_token_program(&ctx.accounts.spl_token_program)
+                .spl_ata_program(spl_ata_program)
+                .amount(1);
 
-            transfer_builder
-                .token(nft_account.key())
-                .token_owner(ctx.accounts.minter.key())
-                .destination(destination_ata.key())
-                .destination_owner(destination.key())
-                .mint(nft_mint.key())
-                .metadata(nft_metadata.key())
-                .authority(ctx.accounts.minter.key())
-                .payer(ctx.accounts.payer.key());
-
-            let mut transfer_infos = vec![
-                nft_account.to_account_info(),
-                ctx.accounts.minter.to_account_info(),
-                ctx.accounts.payer.to_account_info(),
-                destination_ata.to_account_info(),
-                destination.to_account_info(),
-                nft_mint.to_account_info(),
-                nft_metadata.to_account_info(),
-                ctx.accounts.system_program.to_account_info(),
-                ctx.accounts.sysvar_instructions.to_account_info(),
-                ctx.accounts.spl_token_program.to_account_info(),
-                spl_ata_program.to_account_info(),
-            ];
-
-            let metadata: Metadata = Metadata::from_account_info(nft_metadata)?;
+            let metadata: Metadata = Metadata::try_from(nft_metadata)?;
 
             if matches!(
                 metadata.token_standard,
@@ -183,14 +173,10 @@ impl Condition for NftPayment {
                 let destination_token_record =
                     try_get_account_info(ctx.accounts.remaining, index + 8)?;
 
-                transfer_builder
-                    .edition(nft_master_edition.key())
-                    .owner_token_record(owner_token_record.key())
-                    .destination_token_record(destination_token_record.key());
-
-                transfer_infos.push(nft_master_edition.to_account_info());
-                transfer_infos.push(owner_token_record.to_account_info());
-                transfer_infos.push(destination_token_record.to_account_info());
+                transfer_cpi
+                    .edition(Some(nft_master_edition))
+                    .token_record(Some(owner_token_record))
+                    .destination_token_record(Some(destination_token_record));
 
                 if let Some(ProgrammableConfig::V1 { rule_set: Some(_) }) =
                     metadata.programmable_config
@@ -199,23 +185,13 @@ impl Condition for NftPayment {
                         try_get_account_info(ctx.accounts.remaining, index + 9)?;
                     let auth_rules = try_get_account_info(ctx.accounts.remaining, index + 10)?;
 
-                    transfer_builder
-                        .authorization_rules_program(auth_rules_program.key())
-                        .authorization_rules(auth_rules.key());
-                    transfer_infos.push(auth_rules_program.to_account_info());
-                    transfer_infos.push(auth_rules.to_account_info());
+                    transfer_cpi
+                        .authorization_rules_program(Some(auth_rules_program))
+                        .authorization_rules(Some(auth_rules));
                 }
             }
 
-            let transfer_ix = transfer_builder
-                .build(TransferArgs::V1 {
-                    amount: 1,
-                    authorization_data: None,
-                })
-                .map_err(|_| CandyGuardError::InstructionBuilderFailed)?
-                .instruction();
-
-            invoke(&transfer_ix, &transfer_infos)?;
+            transfer_cpi.invoke()?;
         } else {
             // creates the ATA to receive the NFT
 

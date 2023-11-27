@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use mpl_token_metadata::state::MAX_SYMBOL_LENGTH;
+use mpl_token_metadata::MAX_SYMBOL_LENGTH;
 
 use crate::{utils::fixed_length_string, CandyError, CandyMachine, CandyMachineData};
 

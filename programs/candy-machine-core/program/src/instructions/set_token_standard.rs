@@ -1,10 +1,10 @@
 use anchor_lang::{prelude::*, solana_program::sysvar};
-use mpl_token_auth_rules::utils::resize_or_reallocate_account_raw;
-use mpl_token_metadata::state::{Metadata, TokenMetadataAccount, TokenStandard};
+use mpl_token_metadata::{accounts::Metadata, types::TokenStandard};
+use mpl_utils::resize_or_reallocate_account_raw;
 
 use crate::{
     approve_metadata_delegate, assert_token_standard, cmp_pubkeys,
-    constants::{AUTHORITY_SEED, RULE_SET_LENGTH, SET, UNSET},
+    constants::{AUTHORITY_SEED, MPL_TOKEN_AUTH_RULES_PROGRAM, RULE_SET_LENGTH, SET, UNSET},
     revoke_collection_authority_helper, AccountVersion, ApproveMetadataDelegateHelperAccounts,
     CandyError, CandyMachine, RevokeCollectionAuthorityHelperAccounts,
 };
@@ -15,7 +15,7 @@ pub fn set_token_standard(ctx: Context<SetTokenStandard>, token_standard: u8) ->
 
     let collection_metadata_info = &accounts.collection_metadata;
     let collection_metadata: Metadata =
-        Metadata::from_account_info(&collection_metadata_info.to_account_info())?;
+        Metadata::try_from(&collection_metadata_info.to_account_info())?;
     // check that the update authority matches the collection update authority
     if !cmp_pubkeys(&collection_metadata.mint, accounts.collection_mint.key) {
         return err!(CandyError::MintMismatch);
@@ -48,6 +48,7 @@ pub fn set_token_standard(ctx: Context<SetTokenStandard>, token_standard: u8) ->
         // approve a new metadata delegate
 
         let delegate_accounts = ApproveMetadataDelegateHelperAccounts {
+            token_metadata_program: accounts.token_metadata_program.to_account_info(),
             authority_pda: accounts.authority_pda.to_account_info(),
             collection_metadata: accounts.collection_metadata.to_account_info(),
             collection_mint: accounts.collection_mint.to_account_info(),
@@ -152,7 +153,7 @@ pub struct SetTokenStandard<'info> {
     /// Authorization rule set to be used by minted NFTs.
     ///
     /// CHECK: must be ownwed by mpl_token_auth_rules
-    #[account(owner = mpl_token_auth_rules::id())]
+    #[account(owner = MPL_TOKEN_AUTH_RULES_PROGRAM)]
     rule_set: Option<UncheckedAccount<'info>>,
 
     /// Collection metadata delegate record.
@@ -184,7 +185,7 @@ pub struct SetTokenStandard<'info> {
     /// Token Metadata program.
     ///
     /// CHECK: account checked in CPI
-    #[account(address = mpl_token_metadata::id())]
+    #[account(address = mpl_token_metadata::ID)]
     token_metadata_program: UncheckedAccount<'info>,
 
     /// System program.
@@ -199,12 +200,12 @@ pub struct SetTokenStandard<'info> {
     /// Token Authorization Rules program.
     ///
     /// CHECK: account checked in CPI
-    #[account(address = mpl_token_auth_rules::id())]
+    #[account(address = MPL_TOKEN_AUTH_RULES_PROGRAM)]
     authorization_rules_program: Option<UncheckedAccount<'info>>,
 
     /// Token Authorization rules account for the collection metadata (if any).
     ///
     /// CHECK: account constraints checked in account trait
-    #[account(owner = mpl_token_auth_rules::id())]
+    #[account(owner = MPL_TOKEN_AUTH_RULES_PROGRAM)]
     authorization_rules: Option<UncheckedAccount<'info>>,
 }

@@ -320,8 +320,8 @@ impl FreezeEscrow {
     /// Prefix used as seed.
     pub const PREFIX_SEED: &'static [u8] = b"freeze_escrow";
 
-    /// Maximum freeze period in seconds (30 days).
-    pub const MAX_FREEZE_TIME: i64 = 60 * 60 * 24 * 30;
+    /// Maximum freeze period in seconds (90 days).
+    pub const MAX_FREEZE_TIME: i64 = 60 * 60 * 24 * 90;
 
     pub fn init(
         &mut self,

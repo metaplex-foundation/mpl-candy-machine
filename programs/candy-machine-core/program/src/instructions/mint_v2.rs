@@ -362,7 +362,13 @@ fn create_and_mint(
 
     MintV1CpiBuilder::new(&accounts.token_metadata_program)
         .token(token_info)
-        .token_owner(Some(&accounts.nft_owner))
+        // if we are initializing a new token account, we need to pass the
+        // token owner; otherwise, we pass `None`
+        .token_owner(if token_info.data_is_empty() {
+            Some(&accounts.nft_owner)
+        } else {
+            None
+        })
         .metadata(&accounts.nft_metadata)
         .master_edition(Some(&accounts.nft_master_edition))
         .mint(&accounts.nft_mint)

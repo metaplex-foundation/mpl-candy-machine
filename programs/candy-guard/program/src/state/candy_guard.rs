@@ -142,6 +142,7 @@ pub enum GuardType {
     ProgramGate,
     Allocation,
     Token2022Payment,
+    Inscription,
 }
 
 impl GuardType {

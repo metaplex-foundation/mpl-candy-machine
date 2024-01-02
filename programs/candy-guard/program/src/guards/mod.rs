@@ -38,6 +38,7 @@ mod end_date;
 mod freeze_sol_payment;
 mod freeze_token_payment;
 mod gatekeeper;
+mod inscription;
 mod mint_limit;
 mod nft_burn;
 mod nft_gate;

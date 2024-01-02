@@ -1233,6 +1233,7 @@ dependencies = [
  "arrayref",
  "mpl-candy-guard-derive",
  "mpl-candy-machine-core",
+ "mpl-inscription",
  "mpl-token-metadata",
  "solana-gateway",
  "solana-program",
@@ -1260,6 +1261,19 @@ dependencies = [
  "solana-program",
  "spl-associated-token-account",
  "spl-token",
+]
+
+[[package]]
+name = "mpl-inscription"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dc78f7c7454821ca77e196630df7c23e373706a5da74964f09689be91ca239af"
+dependencies = [
+ "borsh 0.10.3",
+ "num-derive 0.3.3",
+ "num-traits",
+ "solana-program",
+ "thiserror",
 ]
 
 [[package]]

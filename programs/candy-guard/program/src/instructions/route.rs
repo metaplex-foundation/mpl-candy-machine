@@ -1,7 +1,10 @@
 use anchor_lang::prelude::*;
 use mpl_candy_machine_core::CandyMachine;
 
-use crate::state::{CandyGuard, CandyGuardData, GuardSet, GuardType, DATA_OFFSET};
+use crate::{
+    state::{CandyGuard, CandyGuardData, GuardSet, GuardType, DATA_OFFSET},
+    try_from,
+};
 
 /// Route the transaction to the specified guard. This instruction allows the use of
 /// empty candy guard and candy machine accounts and it is up to individual guard
@@ -12,12 +15,10 @@ pub fn route<'c: 'info, 'info>(
     label: Option<String>,
 ) -> Result<()> {
     // checks if the candy guard account is not empty
-    let info = ctx.accounts.candy_guard.as_ref();
-
-    let candy_guard_account = if info.data_is_empty() {
+    let candy_guard_account = if ctx.accounts.candy_guard.data_is_empty() {
         None
     } else {
-        let account: Account<CandyGuard> = Account::try_from(info)?;
+        let account = try_from!(Account::<CandyGuard>, ctx.accounts.candy_guard)?;
         Some(account)
     };
 
@@ -27,8 +28,7 @@ pub fn route<'c: 'info, 'info>(
     let candy_machine_account = if candy_machine.to_account_info().data_is_empty() {
         None
     } else {
-        let account: Account<CandyMachine> =
-            Account::try_from(ctx.accounts.candy_machine.as_ref())?;
+        let account = try_from!(Account::<CandyMachine>, ctx.accounts.candy_machine)?;
         Some(Box::new(account))
     };
 

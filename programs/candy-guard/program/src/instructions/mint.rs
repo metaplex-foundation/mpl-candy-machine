@@ -11,8 +11,8 @@ use crate::{
 
 use super::{mint_v2::process_mint, MintAccounts, Token};
 
-pub fn mint<'info>(
-    ctx: Context<'_, '_, '_, 'info, Mint<'info>>,
+pub fn mint<'c: 'info, 'info>(
+    ctx: Context<'_, '_, 'c, 'info, Mint<'info>>,
     mint_args: Vec<u8>,
     label: Option<String>,
 ) -> Result<()> {

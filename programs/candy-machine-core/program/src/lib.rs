@@ -147,55 +147,6 @@ pub mod candy_machine_core {
         instructions::set_authority(ctx, new_authority)
     }
 
-    /// Set the collection mint for the candy machine.
-    ///
-    /// # Accounts
-    ///
-    ///   0. `[writable]` Candy Machine account (must be pre-allocated but zero content)
-    ///   1. `[signer]` Candy Machine authority
-    ///   2. `[]` Authority PDA (seeds `["candy_machine", candy machine id]`)
-    ///   3. `[signer]` Payer
-    ///   4. `[]` Collection mint
-    ///   5. `[]` Collection metadata
-    ///   6. `[writable]` Collection authority record
-    ///   7. `[signer]` New collection update authority
-    ///   8. `[]` Collection metadata
-    ///   9. `[]` Collection mint
-    ///   10. `[]` New collection master edition
-    ///   11. `[]` New collection authority record
-    ///   12. `[]` Token Metadata program
-    ///   13. `[]` System program
-    pub fn set_collection(ctx: Context<SetCollection>) -> Result<()> {
-        instructions::set_collection(ctx)
-    }
-
-    /// Set the collection mint for the candy machine.
-    ///
-    /// # Accounts
-    ///
-    ///   0. `[writable]` Candy Machine account (must be pre-allocated but zero content)
-    ///   1. `[signer]` Candy Machine authority
-    ///   2. `[]` Authority PDA (seeds `["candy_machine", candy machine id]`)
-    ///   3. `[signer]` Payer
-    ///   4. `[]` Collection update authority
-    ///   5. `[]` Collection mint
-    ///   6. `[]` Collection metadata
-    ///   7. `[optional, writable]` Metadata delegate record
-    ///   8. `[optional, writable]` Collection authority record
-    ///   9. `[signer]` New collection update authority
-    ///   10. `[]` New collection mint
-    ///   11. `[]` New collection metadata
-    ///   12. `[]` New collection master edition
-    ///   13. `[writable]` New collection metadata delegate record
-    ///   14. `[]` Token Metadata program
-    ///   15. `[]` System program
-    ///   16. `[]` Instructions sysvar account
-    ///   17. `[optional]` Token Authorization Rules program
-    ///   18. `[optional]` Token authorization rules account
-    pub fn set_collection_v2(ctx: Context<SetCollectionV2>) -> Result<()> {
-        instructions::set_collection_v2(ctx)
-    }
-
     /// Set a new mint authority of the candy machine.
     ///
     /// # Accounts

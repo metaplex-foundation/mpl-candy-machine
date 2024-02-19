@@ -58,8 +58,8 @@ impl Guard for FreezeTokenPayment {
     ///  * initialize
     ///  * thaw
     ///  * unlock funds
-    fn instruction<'info>(
-        ctx: &Context<'_, '_, '_, 'info, Route<'info>>,
+    fn instruction<'c: 'info, 'info>(
+        ctx: &Context<'_, '_, 'c, 'info, Route<'info>>,
         route_context: RouteContext<'info>,
         data: Vec<u8>,
     ) -> Result<()> {
@@ -359,8 +359,8 @@ impl Condition for FreezeTokenPayment {
 }
 
 // Helper function to unlocks frozen funds.
-fn unlock_funds<'info>(
-    ctx: &Context<'_, '_, '_, 'info, Route<'info>>,
+fn unlock_funds<'c: 'info, 'info>(
+    ctx: &Context<'_, '_, 'c, 'info, Route<'info>>,
     route_context: RouteContext<'info>,
 ) -> Result<()> {
     let candy_guard_key = &ctx.accounts.candy_guard.key();

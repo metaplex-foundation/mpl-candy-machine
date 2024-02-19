@@ -10,7 +10,7 @@ pub fn initialize(ctx: Context<Initialize>, data: Vec<u8>) -> Result<()> {
 
     let candy_guard = &mut ctx.accounts.candy_guard;
     candy_guard.base = ctx.accounts.base.key();
-    candy_guard.bump = *ctx.bumps.get("candy_guard").unwrap();
+    candy_guard.bump = ctx.bumps.candy_guard;
     candy_guard.authority = ctx.accounts.authority.key();
 
     let account_info = candy_guard.to_account_info();

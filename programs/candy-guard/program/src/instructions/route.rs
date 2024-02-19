@@ -6,18 +6,18 @@ use crate::state::{CandyGuard, CandyGuardData, GuardSet, GuardType, DATA_OFFSET}
 /// Route the transaction to the specified guard. This instruction allows the use of
 /// empty candy guard and candy machine accounts and it is up to individual guard
 /// instructions to validate whether the instruction can be executed or not.
-pub fn route<'info>(
-    ctx: Context<'_, '_, '_, 'info, Route<'info>>,
+pub fn route<'c: 'info, 'info>(
+    ctx: Context<'_, '_, 'c, 'info, Route<'info>>,
     args: RouteArgs,
     label: Option<String>,
 ) -> Result<()> {
     // checks if the candy guard account is not empty
+    let info = ctx.accounts.candy_guard.as_ref();
 
-    let candy_guard = &ctx.accounts.candy_guard;
-    let candy_guard_account = if candy_guard.to_account_info().data_is_empty() {
+    let candy_guard_account = if info.data_is_empty() {
         None
     } else {
-        let account: Account<CandyGuard> = Account::try_from(&candy_guard.to_account_info())?;
+        let account: Account<CandyGuard> = Account::try_from(info)?;
         Some(account)
     };
 
@@ -27,7 +27,8 @@ pub fn route<'info>(
     let candy_machine_account = if candy_machine.to_account_info().data_is_empty() {
         None
     } else {
-        let account: Account<CandyMachine> = Account::try_from(&candy_machine.to_account_info())?;
+        let account: Account<CandyMachine> =
+            Account::try_from(ctx.accounts.candy_machine.as_ref())?;
         Some(Box::new(account))
     };
 

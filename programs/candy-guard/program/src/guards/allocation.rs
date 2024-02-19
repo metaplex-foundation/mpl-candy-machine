@@ -45,8 +45,8 @@ impl Guard for Allocation {
     ///                   candy guard pubkey, candy machine pubkey]`).
     ///   1. `[signer]` Candy Guard authority.
     ///   2. `[]` System program account.
-    fn instruction<'info>(
-        ctx: &Context<'_, '_, '_, 'info, Route<'info>>,
+    fn instruction<'c: 'info, 'info>(
+        ctx: &Context<'_, '_, 'c, 'info, Route<'info>>,
         route_context: RouteContext<'info>,
         _data: Vec<u8>,
     ) -> Result<()> {

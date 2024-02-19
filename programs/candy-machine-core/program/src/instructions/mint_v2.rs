@@ -83,7 +83,7 @@ pub fn mint_v2<'info>(ctx: Context<'_, '_, '_, 'info, MintV2<'info>>) -> Result<
     process_mint(
         &mut ctx.accounts.candy_machine,
         accounts,
-        ctx.bumps["authority_pda"],
+        ctx.bumps.authority_pda,
     )
 }
 

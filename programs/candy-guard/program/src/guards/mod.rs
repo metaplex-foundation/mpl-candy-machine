@@ -15,7 +15,6 @@ pub use bot_tax::BotTax;
 pub use end_date::EndDate;
 pub use freeze_sol_payment::{FreezeEscrow, FreezeInstruction, FreezeSolPayment};
 pub use freeze_token_payment::FreezeTokenPayment;
-pub use gatekeeper::Gatekeeper;
 pub use mint_limit::{MintCounter, MintLimit};
 pub use nft_burn::NftBurn;
 pub use nft_gate::NftGate;
@@ -37,7 +36,6 @@ mod bot_tax;
 mod end_date;
 mod freeze_sol_payment;
 mod freeze_token_payment;
-mod gatekeeper;
 mod mint_limit;
 mod nft_burn;
 mod nft_gate;
@@ -105,8 +103,8 @@ pub trait Guard: Condition + AnchorSerialize + AnchorDeserialize {
 
     /// Executes an instruction. This function is called from the `route` instruction
     /// handler.
-    fn instruction<'info>(
-        _ctx: &Context<'_, '_, '_, 'info, Route<'info>>,
+    fn instruction<'c: 'info, 'info>(
+        _ctx: &Context<'_, '_, 'c, 'info, Route<'info>>,
         _route_context: RouteContext<'info>,
         _data: Vec<u8>,
     ) -> Result<()> {
@@ -156,7 +154,7 @@ pub trait Guard: Condition + AnchorSerialize + AnchorDeserialize {
         Ok(())
     }
 }
-pub struct EvaluationContext<'b, 'c, 'info> {
+pub struct EvaluationContext<'b, 'c: 'info, 'info> {
     /// Accounts required to mint an NFT.
     pub(crate) accounts: MintAccounts<'b, 'c, 'info>,
 

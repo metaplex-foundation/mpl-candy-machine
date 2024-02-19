@@ -1,12 +1,12 @@
 use anchor_lang::{prelude::*, solana_program::sysvar};
 use mpl_token_metadata::{accounts::Metadata, types::TokenStandard};
-use mpl_utils::resize_or_reallocate_account_raw;
 
 use crate::{
     approve_metadata_delegate, assert_token_standard, cmp_pubkeys,
     constants::{AUTHORITY_SEED, MPL_TOKEN_AUTH_RULES_PROGRAM, RULE_SET_LENGTH, SET, UNSET},
-    revoke_collection_authority_helper, AccountVersion, ApproveMetadataDelegateHelperAccounts,
-    CandyError, CandyMachine, RevokeCollectionAuthorityHelperAccounts,
+    resize_or_reallocate_account_raw, revoke_collection_authority_helper, AccountVersion,
+    ApproveMetadataDelegateHelperAccounts, CandyError, CandyMachine,
+    RevokeCollectionAuthorityHelperAccounts,
 };
 
 pub fn set_token_standard(ctx: Context<SetTokenStandard>, token_standard: u8) -> Result<()> {
@@ -41,7 +41,7 @@ pub fn set_token_standard(ctx: Context<SetTokenStandard>, token_standard: u8) ->
         revoke_collection_authority_helper(
             revoke_accounts,
             candy_machine.key(),
-            *ctx.bumps.get("authority_pda").unwrap(),
+            ctx.bumps.authority_pda,
             collection_metadata.token_standard,
         )?;
 

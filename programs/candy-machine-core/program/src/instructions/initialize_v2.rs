@@ -1,12 +1,12 @@
 use anchor_lang::{prelude::*, solana_program::sysvar, Discriminator};
 use mpl_token_metadata::{types::TokenStandard, MAX_SYMBOL_LENGTH};
-use mpl_utils::resize_or_reallocate_account_raw;
 
 use crate::{
     approve_metadata_delegate, assert_token_standard,
     constants::{
         AUTHORITY_SEED, HIDDEN_SECTION, MPL_TOKEN_AUTH_RULES_PROGRAM, RULE_SET_LENGTH, SET,
     },
+    resize_or_reallocate_account_raw,
     state::{CandyMachine, CandyMachineData},
     utils::fixed_length_string,
     AccountVersion, ApproveMetadataDelegateHelperAccounts,

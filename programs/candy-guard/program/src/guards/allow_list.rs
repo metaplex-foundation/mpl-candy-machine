@@ -59,8 +59,8 @@ impl Guard for AllowList {
     ///                   payer/minter key, candy guard pubkey, candy machine pubkey]`).
     ///   1. `[]` System program account.
     ///   2. `[optional]` Minter account.
-    fn instruction<'info>(
-        ctx: &Context<'_, '_, '_, 'info, Route<'info>>,
+    fn instruction<'c: 'info, 'info>(
+        ctx: &Context<'_, '_, 'c, 'info, Route<'info>>,
         route_context: RouteContext<'info>,
         data: Vec<u8>,
     ) -> Result<()> {

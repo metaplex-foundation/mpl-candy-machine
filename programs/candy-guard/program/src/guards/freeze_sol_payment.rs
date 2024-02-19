@@ -65,8 +65,8 @@ impl Guard for FreezeSolPayment {
     ///  * initialize
     ///  * thaw
     ///  * unlock funds
-    fn instruction<'info>(
-        ctx: &Context<'_, '_, '_, 'info, Route<'info>>,
+    fn instruction<'c: 'info, 'info>(
+        ctx: &Context<'_, '_, 'c, 'info, Route<'info>>,
         route_context: RouteContext<'info>,
         data: Vec<u8>,
     ) -> Result<()> {
@@ -495,8 +495,8 @@ pub fn freeze_nft(
 }
 
 /// Helper function to initialize the freeze pda.
-pub fn initialize_freeze<'info>(
-    ctx: &Context<'_, '_, '_, 'info, Route<'info>>,
+pub fn initialize_freeze<'a, 'b, 'c: 'info, 'info>(
+    ctx: &Context<'_, '_, 'c, 'info, Route<'info>>,
     route_context: RouteContext,
     data: Vec<u8>,
     destination: Pubkey,
@@ -597,8 +597,8 @@ pub fn initialize_freeze<'info>(
 }
 
 /// Helper function to thaw an nft.
-pub fn thaw_nft<'info>(
-    ctx: &Context<'_, '_, '_, 'info, Route<'info>>,
+pub fn thaw_nft<'a, 'b, 'c: 'info, 'info>(
+    ctx: &Context<'_, '_, 'c, 'info, Route<'info>>,
     route_context: RouteContext,
     _data: Vec<u8>,
 ) -> Result<()> {
@@ -831,8 +831,8 @@ pub fn thaw_nft<'info>(
 }
 
 /// Helper function to unlock funds.
-fn unlock_funds<'info>(
-    ctx: &Context<'_, '_, '_, 'info, Route<'info>>,
+fn unlock_funds<'a, 'b, 'c: 'info, 'info>(
+    ctx: &Context<'_, '_, 'c, 'info, Route<'info>>,
     route_context: RouteContext,
     _data: Vec<u8>,
 ) -> Result<()> {

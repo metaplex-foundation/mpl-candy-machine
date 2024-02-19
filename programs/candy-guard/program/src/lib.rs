@@ -22,8 +22,8 @@ pub mod candy_guard {
     }
 
     /// Mint an NFT from a candy machine wrapped in the candy guard.
-    pub fn mint<'info>(
-        ctx: Context<'_, '_, '_, 'info, Mint<'info>>,
+    pub fn mint<'c: 'info, 'info>(
+        ctx: Context<'_, '_, 'c, 'info, Mint<'info>>,
         mint_args: Vec<u8>,
         label: Option<String>,
     ) -> Result<()> {
@@ -31,8 +31,8 @@ pub mod candy_guard {
     }
 
     /// Mint an NFT from a candy machine wrapped in the candy guard.
-    pub fn mint_v2<'info>(
-        ctx: Context<'_, '_, '_, 'info, MintV2<'info>>,
+    pub fn mint_v2<'c: 'info, 'info>(
+        ctx: Context<'_, '_, 'c, 'info, MintV2<'info>>,
         mint_args: Vec<u8>,
         label: Option<String>,
     ) -> Result<()> {
@@ -40,8 +40,8 @@ pub mod candy_guard {
     }
 
     /// Route the transaction to a guard instruction.
-    pub fn route<'info>(
-        ctx: Context<'_, '_, '_, 'info, Route<'info>>,
+    pub fn route<'c: 'info, 'info>(
+        ctx: Context<'_, '_, 'c, 'info, Route<'info>>,
         args: RouteArgs,
         label: Option<String>,
     ) -> Result<()> {

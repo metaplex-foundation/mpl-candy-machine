@@ -15,8 +15,6 @@ export * from './mintFromCandyMachine';
 export * from './mintFromCandyMachineV2';
 export * from './setCandyGuardAuthority';
 export * from './setCandyMachineAuthority';
-export * from './setCollection';
-export * from './setCollectionV2';
 export * from './setMintAuthority';
 export * from './setTokenStandard';
 export * from './unwrap';

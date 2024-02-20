@@ -86,6 +86,8 @@ pub struct GuardSet {
     pub third_party_signer: Option<ThirdPartySigner>,
     /// Token gate guard (restrict access to holders of a specific token).
     pub token_gate: Option<TokenGate>,
+    /// Gatekeeper guard (captcha challenge).
+    pub gatekeeper: Option<Gatekeeper>,
     /// End date guard (set an end date to stop the mint).
     pub end_date: Option<EndDate>,
     /// Allow list guard (curated list of allowed addresses).
@@ -125,6 +127,7 @@ pub enum GuardType {
     StartDate,
     ThirdPartySigner,
     TokenGate,
+    Gatekeeper,
     EndDate,
     AllowList,
     MintLimit,

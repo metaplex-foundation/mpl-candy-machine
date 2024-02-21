@@ -4,20 +4,17 @@ import {
   createMintWithAssociatedToken,
   setComputeUnitLimit,
 } from '@metaplex-foundation/mpl-toolbox';
-import { findCollectionAuthorityRecordPda } from '@metaplex-foundation/mpl-token-metadata';
 import { generateSigner, transactionBuilder } from '@metaplex-foundation/umi';
 import test from 'ava';
 import {
   CandyMachine,
   fetchCandyMachine,
-  findCandyMachineAuthorityPda,
   mintFromCandyMachineV2,
 } from '../src';
 import {
   assertSuccessfulMint,
   createCollectionNft,
   createUmi,
-  createV1,
   createV2,
 } from './_setup';
 
@@ -172,46 +169,4 @@ test('it cannot mint directly from a candy machine if we are not the mint author
   // And the candy machine stayed the same.
   const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
   t.like(candyMachineAccount, <CandyMachine>{ itemsRedeemed: 0n });
-});
-
-test('it can mint from a candy machine v1', async (t) => {
-  // Given a loaded candy machine v1.
-  const umi = await createUmi();
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
-  const candyMachineSigner = await createV1(umi, {
-    collectionMint,
-    configLines: [
-      { name: 'Degen #1', uri: 'https://example.com/degen/1' },
-      { name: 'Degen #2', uri: 'https://example.com/degen/2' },
-    ],
-  });
-  const candyMachine = candyMachineSigner.publicKey;
-
-  // When mint from it directly usint the mint v2 instruction.
-  const mint = generateSigner(umi);
-  const owner = generateSigner(umi).publicKey;
-  await transactionBuilder()
-    .add(createMintWithAssociatedToken(umi, { mint, owner, amount: 1 }))
-    .add(
-      mintFromCandyMachineV2(umi, {
-        candyMachine,
-        mintAuthority: umi.identity,
-        nftMint: mint.publicKey,
-        nftOwner: owner,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
-        // We have to explicitly provide the collection authority record
-        // because v2 defaults to the new way of deriving delegate records.
-        collectionDelegateRecord: findCollectionAuthorityRecordPda(umi, {
-          mint: collectionMint,
-          collectionAuthority: findCandyMachineAuthorityPda(umi, {
-            candyMachine,
-          })[0],
-        }),
-      })
-    )
-    .sendAndConfirm(umi);
-
-  // Then the mint was successful.
-  await assertSuccessfulMint(t, umi, { mint, owner });
 });

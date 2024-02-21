@@ -33,25 +33,6 @@ pub mod candy_machine_core {
         instructions::add_config_lines(ctx, index, config_lines)
     }
 
-    /// Initialize the candy machine account with the specified data.
-    ///
-    /// # Accounts
-    ///
-    ///   0. `[writable]` Candy Machine account (must be pre-allocated but zero content)
-    ///   1. `[writable]` Authority PDA (seeds `["candy_machine", candy machine id]`)
-    ///   2. `[]` Candy Machine authority
-    ///   3. `[signer]` Payer
-    ///   4. `[]` Collection metadata
-    ///   5. `[]` Collection mint
-    ///   6. `[]` Collection master edition
-    ///   7. `[signer]` Collection update authority
-    ///   8. `[writable]` Collection authority record
-    ///   9. `[]` Token Metadata program
-    ///   10. `[]` System program
-    pub fn initialize(ctx: Context<Initialize>, data: CandyMachineData) -> Result<()> {
-        instructions::initialize(ctx, data)
-    }
-
     /// Initialize the candy machine account with the specified data and token standard.
     ///
     /// # Accounts

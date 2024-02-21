@@ -42,7 +42,6 @@ import {
   GuardSetArgs,
   addConfigLines,
   createCandyGuard as baseCreateCandyGuard,
-  createCandyMachine as baseCreateCandyMachine,
   createCandyMachineV2 as baseCreateCandyMachineV2,
   findCandyGuardPda,
   mplCandyMachine,
@@ -184,48 +183,6 @@ export const createMintWithHolders = async (
   await builder.sendAndConfirm(umi);
 
   return [mint, ...atas];
-};
-
-export const createV1 = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
-  umi: Umi,
-  input: Partial<Parameters<typeof baseCreateCandyMachine>[1]> &
-    Partial<
-      CandyGuardDataArgs<DA extends undefined ? DefaultGuardSetArgs : DA>
-    > & { configLineIndex?: number; configLines?: ConfigLine[] } = {}
-) => {
-  const candyMachine = input.candyMachine ?? generateSigner(umi);
-  const collectionMint =
-    input.collectionMint ?? (await createCollectionNft(umi)).publicKey;
-  let builder = transactionBuilder().add(
-    await baseCreateCandyMachine(umi, {
-      ...defaultCandyMachineData(umi),
-      ...input,
-      itemsAvailable: input.itemsAvailable ?? input.configLines?.length ?? 100,
-      candyMachine,
-      collectionMint,
-    })
-  );
-
-  if (input.configLines !== undefined) {
-    builder = builder.add(
-      addConfigLines(umi, {
-        authority: input.collectionUpdateAuthority ?? umi.identity,
-        candyMachine: candyMachine.publicKey,
-        index: input.configLineIndex ?? 0,
-        configLines: input.configLines,
-      })
-    );
-  }
-
-  if (input.guards !== undefined || input.groups !== undefined) {
-    const candyGuard = findCandyGuardPda(umi, { base: candyMachine.publicKey });
-    builder = builder
-      .add(baseCreateCandyGuard<DA>(umi, { ...input, base: candyMachine }))
-      .add(wrap(umi, { candyMachine: candyMachine.publicKey, candyGuard }));
-  }
-
-  await builder.sendAndConfirm(umi);
-  return candyMachine;
 };
 
 export const createV2 = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(

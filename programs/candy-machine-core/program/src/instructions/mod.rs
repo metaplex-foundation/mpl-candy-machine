@@ -1,5 +1,4 @@
 pub mod add_config_lines;
-pub mod initialize;
 pub mod initialize_v2;
 pub mod mint;
 pub mod mint_v2;
@@ -10,7 +9,6 @@ pub mod update;
 pub mod withdraw;
 
 pub use add_config_lines::*;
-pub use initialize::*;
 pub use initialize_v2::*;
 pub use mint::*;
 pub use mint_v2::*;

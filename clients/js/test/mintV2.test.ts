@@ -2,7 +2,6 @@
 import {
   TokenStandard,
   fetchDigitalAsset,
-  findCollectionAuthorityRecordPda,
 } from '@metaplex-foundation/mpl-token-metadata';
 import {
   createAssociatedToken,
@@ -22,17 +21,11 @@ import {
 } from '@metaplex-foundation/umi';
 import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
 import test from 'ava';
-import {
-  CandyMachine,
-  fetchCandyMachine,
-  findCandyMachineAuthorityPda,
-  mintV2,
-} from '../src';
+import { CandyMachine, fetchCandyMachine, mintV2 } from '../src';
 import {
   assertSuccessfulMint,
   createCollectionNft,
   createUmi,
-  createV1,
   createV2,
   tomorrow,
   yesterday,
@@ -184,55 +177,6 @@ test('it can mint to an explicit public key that is not the payer nor the minter
 
   // Then the mint was successful.
   await assertSuccessfulMint(t, umi, { mint, owner, name: 'Degen #1' });
-});
-
-test('it can mint from a candy guard attached to a candy machine v1', async (t) => {
-  // Given a candy machine v1 with a candy guard that has no guards.
-  const umi = await createUmi();
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
-  const candyMachineSigner = await createV1(umi, {
-    collectionMint,
-    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
-    guards: {},
-  });
-  const candyMachine = candyMachineSigner.publicKey;
-
-  // When we mint from it.
-  const mint = generateSigner(umi);
-  const minter = generateSigner(umi);
-  await transactionBuilder()
-    .add(
-      createMintWithAssociatedToken(umi, {
-        mint,
-        owner: minter.publicKey,
-        amount: 1,
-      })
-    )
-    .add(
-      mintV2(umi, {
-        candyMachine,
-        minter,
-        nftMint: mint,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
-        // We have to explicitly provide the collection authority record
-        // because v2 defaults to the new way of deriving delegate records.
-        collectionDelegateRecord: findCollectionAuthorityRecordPda(umi, {
-          mint: collectionMint,
-          collectionAuthority: findCandyMachineAuthorityPda(umi, {
-            candyMachine,
-          })[0],
-        }),
-      })
-    )
-    .sendAndConfirm(umi);
-
-  // Then the mint was successful.
-  await assertSuccessfulMint(t, umi, { mint, owner: minter, name: 'Degen #1' });
-
-  // And the candy machine was updated.
-  const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
-  t.like(candyMachineAccount, <CandyMachine>{ itemsRedeemed: 1n });
 });
 
 test('it can mint from a candy guard with guards', async (t) => {

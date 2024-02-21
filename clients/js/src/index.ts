@@ -7,7 +7,6 @@ export * from './programs';
 export * from './constants';
 export * from './create';
 export * from './createCandyGuard';
-export * from './createCandyMachine';
 export * from './createCandyMachineV2';
 export * from './createLutForCandyMachine';
 export * from './errors';

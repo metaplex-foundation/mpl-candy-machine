@@ -1,7 +1,6 @@
 /* eslint-disable no-promise-executor-return */
 import {
   MetadataDelegateRole,
-  findCollectionAuthorityRecordPda,
   findMasterEditionPda,
   findMetadataDelegateRecordPda,
   findMetadataPda,
@@ -27,7 +26,6 @@ import {
   assertSuccessfulMint,
   createCollectionNft,
   createUmi,
-  createV1,
   createV2,
 } from './_setup';
 
@@ -108,31 +106,6 @@ test('it can create a LUT for a candy machine v2', async (t) => {
   await new Promise((resolve) => setTimeout(resolve, 1000));
   await builderWithLut.sendAndConfirm(umi);
   await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
-});
-
-test('it can create a LUT for a candy machine v1', async (t) => {
-  // Given a candy machine v1 with a candy guard.
-  const umi = await createUmi();
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
-  const { publicKey: candyMachine } = await createV1(umi, {
-    collectionMint,
-    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
-    guards: {},
-  });
-
-  // When we create a LUT for the candy machine.
-  const recentSlot = await umi.rpc.getSlot({ commitment: 'finalized' });
-  const [, lut] = await createLutForCandyMachine(umi, recentSlot, candyMachine);
-
-  // Then we expect the LUT addresses to contain the legacy collection authority Record.
-  const [collectionAuthorityPda] = findCandyMachineAuthorityPda(umi, {
-    candyMachine,
-  });
-  const [collectionAuthorityRecord] = findCollectionAuthorityRecordPda(umi, {
-    mint: collectionMint,
-    collectionAuthority: collectionAuthorityPda,
-  });
-  t.true(lut.addresses.includes(collectionAuthorityRecord));
 });
 
 test('it can create a LUT for a candy machine with no candy guard', async (t) => {

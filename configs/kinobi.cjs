@@ -308,9 +308,6 @@ kinobi.update(
 // Update instructions.
 kinobi.update(
   new k.UpdateInstructionsVisitor({
-    "mplCandyMachineCore.initialize": {
-      name: "initializeCandyMachine",
-    },
     "mplCandyGuard.initialize": {
       name: "createCandyGuard",
       internal: true,
@@ -416,7 +413,6 @@ kinobi.update(
 // Unwrap candyMachineData defined type but only for initialize instructions.
 kinobi.update(
   new k.UnwrapTypeDefinedLinksVisitor([
-    "initializeCandyMachine.candyMachineData",
     "initializeCandyMachineV2.candyMachineData",
   ])
 );
@@ -432,7 +428,6 @@ const defaultInitialCandyMachineData = {
 };
 kinobi.update(
   new k.SetStructDefaultValuesVisitor({
-    initializeCandyMachineInstructionData: defaultInitialCandyMachineData,
     initializeCandyMachineV2InstructionData: defaultInitialCandyMachineData,
   })
 );
@@ -442,7 +437,6 @@ const percentAmount = { kind: "Amount", identifier: "%", decimals: 2 };
 kinobi.update(
   new k.SetNumberWrappersVisitor({
     "candyMachineData.sellerFeeBasisPoints": percentAmount,
-    "initializeCandyMachineInstructionData.sellerFeeBasisPoints": percentAmount,
     "initializeCandyMachineV2InstructionData.sellerFeeBasisPoints":
       percentAmount,
     "startDate.date": { kind: "DateTime" },

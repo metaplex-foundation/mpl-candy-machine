@@ -7,10 +7,6 @@
  */
 
 import {
-  TokenStandardArgs,
-  getTokenStandardSerializer,
-} from '@metaplex-foundation/mpl-token-metadata';
-import {
   Account,
   Context,
   Pda,
@@ -33,12 +29,6 @@ import {
   CandyMachineAccountData,
   getCandyMachineAccountDataSerializer,
 } from '../../hooked';
-import {
-  AccountVersionArgs,
-  CandyMachineDataArgs,
-  getAccountVersionSerializer,
-  getCandyMachineDataSerializer,
-} from '../types';
 
 /** Candy machine state and config data. */
 export type CandyMachine = Account<CandyMachineAccountData>;
@@ -111,27 +101,27 @@ export function getCandyMachineGpaBuilder(
   return gpaBuilder(context, programId)
     .registerFields<{
       discriminator: Array<number>;
-      version: AccountVersionArgs;
-      tokenStandard: TokenStandardArgs;
+      version: number;
       features: Array<number>;
       authority: PublicKey;
       mintAuthority: PublicKey;
-      collectionMint: PublicKey;
       itemsRedeemed: number | bigint;
-      data: CandyMachineDataArgs;
+      itemsAvailable: number | bigint;
     }>({
       discriminator: [0, array(u8(), { size: 8 })],
-      version: [8, getAccountVersionSerializer()],
-      tokenStandard: [9, getTokenStandardSerializer()],
-      features: [null, array(u8(), { size: 6 })],
-      authority: [null, publicKeySerializer()],
-      mintAuthority: [null, publicKeySerializer()],
-      collectionMint: [null, publicKeySerializer()],
-      itemsRedeemed: [null, u64()],
-      data: [null, getCandyMachineDataSerializer()],
+      version: [8, u8()],
+      features: [9, array(u8(), { size: 6 })],
+      authority: [15, publicKeySerializer()],
+      mintAuthority: [47, publicKeySerializer()],
+      itemsRedeemed: [79, u64()],
+      itemsAvailable: [87, u64()],
     })
     .deserializeUsing<CandyMachine>((account) =>
       deserializeCandyMachine(account)
     )
     .whereField('discriminator', [51, 173, 177, 113, 25, 241, 109, 189]);
+}
+
+export function getCandyMachineSize(): number {
+  return 95;
 }

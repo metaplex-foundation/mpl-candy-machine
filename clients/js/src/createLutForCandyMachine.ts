@@ -1,11 +1,4 @@
-import {
-  MetadataDelegateRole,
-  findCollectionAuthorityRecordPda,
-  findMasterEditionPda,
-  findMetadataDelegateRecordPda,
-  findMetadataPda,
-  getMplTokenMetadataProgramId,
-} from '@metaplex-foundation/mpl-token-metadata';
+import { getMplTokenMetadataProgramId } from '@metaplex-foundation/mpl-token-metadata';
 import {
   createLut,
   getSysvar,
@@ -21,11 +14,9 @@ import {
   uniquePublicKeys,
 } from '@metaplex-foundation/umi';
 import {
-  AccountVersion,
   fetchCandyMachine,
   getMplCandyMachineCoreProgramId,
 } from './generated';
-import { findCandyMachineAuthorityPda } from './hooked';
 
 export const createLutForCandyMachine = async (
   context: Pick<Context, 'rpc' | 'eddsa' | 'programs' | 'identity' | 'payer'>,
@@ -53,33 +44,12 @@ export const getLutAddressesForCandyMachine = async (
   collectionUpdateAuthority?: PublicKey
 ): Promise<PublicKey[]> => {
   const candyMachineAccount = await fetchCandyMachine(context, candyMachine);
-  const { mintAuthority, collectionMint } = candyMachineAccount;
+  const { mintAuthority } = candyMachineAccount;
   collectionUpdateAuthority ??= context.identity.publicKey;
-  const [collectionAuthorityPda] = findCandyMachineAuthorityPda(context, {
-    candyMachine,
-  });
-  const [delegateRecordV1] = findCollectionAuthorityRecordPda(context, {
-    mint: collectionMint,
-    collectionAuthority: collectionAuthorityPda,
-  });
-  const [delegateRecordV2] = findMetadataDelegateRecordPda(context, {
-    mint: collectionMint,
-    delegateRole: MetadataDelegateRole.Collection,
-    updateAuthority: collectionUpdateAuthority,
-    delegate: collectionAuthorityPda,
-  });
 
   return uniquePublicKeys([
     candyMachine,
     mintAuthority,
-    collectionMint,
-    findMetadataPda(context, { mint: collectionMint })[0],
-    findMasterEditionPda(context, { mint: collectionMint })[0],
-    collectionUpdateAuthority,
-    findCandyMachineAuthorityPda(context, { candyMachine })[0],
-    candyMachineAccount.version === AccountVersion.V1
-      ? delegateRecordV1
-      : delegateRecordV2,
     getSysvar('instructions'),
     getSysvar('slotHashes'),
     getSplTokenProgramId(context),

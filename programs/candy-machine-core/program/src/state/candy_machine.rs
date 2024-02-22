@@ -32,11 +32,10 @@ impl CandyMachine {
     /// Gets the size of the candy machine given the number of items.
     pub fn get_size(item_count: u64) -> usize {
         CANDY_MACHINE_SIZE
-            + 4
-            + (CONFIG_LINE_SIZE * item_count as usize)
-            + (item_count as usize / 8)
-            + 1
-            + (4 * item_count as usize)
+            + 4 // number of items inserted
+            + (CONFIG_LINE_SIZE * item_count as usize) // config lines
+            + (item_count as usize / 8) + 1 // bit mask tracking added lines
+            + 4 + (4 * item_count as usize) // mint indices
     }
 }
 

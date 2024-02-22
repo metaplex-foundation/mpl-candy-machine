@@ -6,22 +6,14 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-export * from './accountVersion';
 export * from './addressGate';
 export * from './allocation';
 export * from './allowList';
 export * from './botTax';
-export * from './candyMachineData';
 export * from './configLine';
-export * from './configLineSettings';
-export * from './creator';
 export * from './endDate';
-export * from './freezeInstruction';
-export * from './freezeSolPayment';
-export * from './freezeTokenPayment';
 export * from './gatekeeper';
 export * from './guardType';
-export * from './hiddenSettings';
 export * from './mintLimit';
 export * from './nftBurn';
 export * from './nftGate';

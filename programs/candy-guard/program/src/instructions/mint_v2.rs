@@ -9,7 +9,7 @@ use crate::{
     state::{CandyGuard, CandyGuardData, GuardSet, DATA_OFFSET, SEED},
 };
 
-use super::{AssociatedToken, MintAccounts, Token};
+use super::{MintAccounts, Token};
 
 pub fn mint_v2<'c: 'info, 'info>(
     ctx: Context<'_, '_, 'c, 'info, MintV2<'info>>,
@@ -21,7 +21,7 @@ pub fn mint_v2<'c: 'info, 'info>(
         candy_machine: &ctx.accounts.candy_machine,
         _candy_machine_program: ctx.accounts.candy_machine_program.to_account_info(),
         payer: ctx.accounts.payer.to_account_info(),
-        buyer: ctx.accounts.minter.to_account_info(),
+        buyer: ctx.accounts.buyer.to_account_info(),
         recent_slothashes: ctx.accounts.recent_slothashes.to_account_info(),
         spl_token_program: ctx.accounts.spl_token_program.to_account_info(),
         system_program: ctx.accounts.system_program.to_account_info(),
@@ -144,84 +144,13 @@ pub struct MintV2<'info> {
     #[account(mut, constraint = candy_guard.key() == candy_machine.mint_authority)]
     candy_machine: Box<Account<'info, CandyMachine>>,
 
-    /// Candy Machine authority account.
-    ///
-    /// CHECK: account constraints checked in CPI
-    #[account(mut)]
-    candy_machine_authority_pda: UncheckedAccount<'info>,
-
     /// Payer for the mint (SOL) fees.
     #[account(mut)]
     payer: Signer<'info>,
 
     /// Minter account for validation and non-SOL fees.
     #[account(mut)]
-    minter: Signer<'info>,
-
-    /// Mint account of the NFT. The account will be initialized if necessary.
-    ///
-    /// Must be a signer if:
-    ///   * the nft_mint account does not exist.
-    ///
-    /// CHECK: account checked in CPI
-    #[account(mut)]
-    nft_mint: UncheckedAccount<'info>,
-
-    /// Mint authority of the NFT before the authority gets transfer to the master edition account.
-    ///
-    /// If nft_mint account exists:
-    ///   * it must match the mint authority of nft_mint.
-    nft_mint_authority: Signer<'info>,
-
-    /// Metadata account of the NFT. This account must be uninitialized.
-    ///
-    /// CHECK: account checked in CPI
-    #[account(mut)]
-    nft_metadata: UncheckedAccount<'info>,
-
-    /// Master edition account of the NFT. The account will be initialized if necessary.
-    ///
-    /// CHECK: account checked in CPI
-    #[account(mut)]
-    nft_master_edition: UncheckedAccount<'info>,
-
-    /// Destination token account (required for pNFT).
-    ///
-    /// CHECK: account checked in CPI
-    #[account(mut)]
-    token: Option<UncheckedAccount<'info>>,
-
-    /// Token record (required for pNFT).
-    ///
-    /// CHECK: account checked in CPI
-    #[account(mut)]
-    token_record: Option<UncheckedAccount<'info>>,
-
-    /// Collection authority or metadata delegate record.
-    ///
-    /// CHECK: account checked in CPI
-    collection_delegate_record: UncheckedAccount<'info>,
-
-    /// Mint account of the collection NFT.
-    ///
-    /// CHECK: account checked in CPI
-    collection_mint: UncheckedAccount<'info>,
-
-    /// Metadata account of the collection NFT.
-    ///
-    /// CHECK: account checked in CPI
-    #[account(mut)]
-    collection_metadata: UncheckedAccount<'info>,
-
-    /// Master edition account of the collection NFT.
-    ///
-    /// CHECK: account checked in CPI
-    collection_master_edition: UncheckedAccount<'info>,
-
-    /// Update authority of the collection NFT.
-    ///
-    /// CHECK: account checked in CPI
-    collection_update_authority: UncheckedAccount<'info>,
+    buyer: Signer<'info>,
 
     /// Token Metadata program.
     ///
@@ -231,10 +160,6 @@ pub struct MintV2<'info> {
 
     /// SPL Token program.
     spl_token_program: Program<'info, Token>,
-
-    /// SPL Associated Token program.
-    spl_ata_program: Option<Program<'info, AssociatedToken>>,
-    buyer: Signer<'info>,
 
     /// System program.
     system_program: Program<'info, System>,
@@ -250,16 +175,4 @@ pub struct MintV2<'info> {
     /// CHECK: account constraints checked in account trait
     #[account(address = sysvar::slot_hashes::id())]
     recent_slothashes: UncheckedAccount<'info>,
-
-    /// Token Authorization Rules program.
-    ///
-    /// CHECK: account checked in CPI
-    #[account(address = mpl_candy_machine_core::constants::MPL_TOKEN_AUTH_RULES_PROGRAM)]
-    authorization_rules_program: Option<UncheckedAccount<'info>>,
-
-    /// Token Authorization rules account for the collection metadata (if any).
-    ///
-    /// CHECK: account constraints checked in account trait
-    #[account(owner = mpl_candy_machine_core::constants::MPL_TOKEN_AUTH_RULES_PROGRAM)]
-    authorization_rules: Option<UncheckedAccount<'info>>,
 }

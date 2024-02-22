@@ -6,18 +6,21 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+import { PublicKey } from '@metaplex-foundation/umi';
 import {
   Serializer,
-  string,
+  publicKey as publicKeySerializer,
   struct,
 } from '@metaplex-foundation/umi/serializers';
 
 /** Config line struct for storing asset (NFT) data pre-mint. */
 export type ConfigLine = {
-  /** Name of the asset. */
-  name: string;
-  /** URI to JSON metadata. */
-  uri: string;
+  /** Mint account of the asset. */
+  mint: PublicKey;
+  /** Wallet that submitted the asset for sale. */
+  seller: PublicKey;
+  /** Wallet that will receive the asset upon sale. Empty until drawn. */
+  buyer: PublicKey;
 };
 
 export type ConfigLineArgs = ConfigLine;
@@ -28,8 +31,9 @@ export function getConfigLineSerializer(): Serializer<
 > {
   return struct<ConfigLine>(
     [
-      ['name', string()],
-      ['uri', string()],
+      ['mint', publicKeySerializer()],
+      ['seller', publicKeySerializer()],
+      ['buyer', publicKeySerializer()],
     ],
     { description: 'ConfigLine' }
   ) as Serializer<ConfigLineArgs, ConfigLine>;

@@ -6,11 +6,6 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import {
-  TokenStandard,
-  TokenStandardArgs,
-  getTokenStandardSerializer,
-} from '@metaplex-foundation/mpl-token-metadata';
 import { PublicKey } from '@metaplex-foundation/umi';
 import {
   Serializer,
@@ -21,53 +16,37 @@ import {
   u64,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import {
-  AccountVersion,
-  AccountVersionArgs,
-  CandyMachineData,
-  CandyMachineDataArgs,
-  getAccountVersionSerializer,
-  getCandyMachineDataSerializer,
-} from '.';
 
 /** Candy machine state and config data. */
 export type CandyMachineAccountData = {
   discriminator: Array<number>;
   /** Version of the account. */
-  version: AccountVersion;
-  /** Token standard to mint NFTs. */
-  tokenStandard: TokenStandard;
+  version: number;
   /** Features flags. */
   features: Array<number>;
   /** Authority address. */
   authority: PublicKey;
   /** Authority address allowed to mint from the candy machine. */
   mintAuthority: PublicKey;
-  /** The collection mint for the candy machine. */
-  collectionMint: PublicKey;
   /** Number of assets redeemed. */
   itemsRedeemed: bigint;
-  /** Candy machine configuration data. */
-  data: CandyMachineData;
+  /** Number of assets available. */
+  itemsAvailable: bigint;
 };
 
 export type CandyMachineAccountDataArgs = {
   /** Version of the account. */
-  version: AccountVersionArgs;
-  /** Token standard to mint NFTs. */
-  tokenStandard: TokenStandardArgs;
+  version: number;
   /** Features flags. */
   features: Array<number>;
   /** Authority address. */
   authority: PublicKey;
   /** Authority address allowed to mint from the candy machine. */
   mintAuthority: PublicKey;
-  /** The collection mint for the candy machine. */
-  collectionMint: PublicKey;
   /** Number of assets redeemed. */
   itemsRedeemed: number | bigint;
-  /** Candy machine configuration data. */
-  data: CandyMachineDataArgs;
+  /** Number of assets available. */
+  itemsAvailable: number | bigint;
 };
 
 export function getCandyMachineAccountDataSerializer(): Serializer<
@@ -82,14 +61,12 @@ export function getCandyMachineAccountDataSerializer(): Serializer<
     struct<CandyMachineAccountData>(
       [
         ['discriminator', array(u8(), { size: 8 })],
-        ['version', getAccountVersionSerializer()],
-        ['tokenStandard', getTokenStandardSerializer()],
+        ['version', u8()],
         ['features', array(u8(), { size: 6 })],
         ['authority', publicKeySerializer()],
         ['mintAuthority', publicKeySerializer()],
-        ['collectionMint', publicKeySerializer()],
         ['itemsRedeemed', u64()],
-        ['data', getCandyMachineDataSerializer()],
+        ['itemsAvailable', u64()],
       ],
       { description: 'CandyMachineAccountData' }
     ),

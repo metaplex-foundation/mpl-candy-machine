@@ -7,58 +7,26 @@
  */
 
 import {
-  MetadataDelegateRole,
-  TokenStandard,
-  TokenStandardArgs,
-  findMasterEditionPda,
-  findMetadataDelegateRecordPda,
-  findMetadataPda,
-  getTokenStandardSerializer,
-} from '@metaplex-foundation/mpl-token-metadata';
-import {
-  Amount,
   Context,
-  Option,
-  OptionOrNullable,
   Pda,
   PublicKey,
   Signer,
   TransactionBuilder,
-  mapAmountSerializer,
-  none,
-  publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import {
   Serializer,
   array,
-  bool,
   mapSerializer,
-  option,
-  string,
   struct,
-  u16,
   u64,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import { findCandyMachineAuthorityPda } from '../../hooked';
 import {
   ResolvedAccount,
   ResolvedAccountsWithIndices,
-  expectPublicKey,
   getAccountMetasAndSigners,
 } from '../shared';
-import {
-  ConfigLineSettings,
-  ConfigLineSettingsArgs,
-  Creator,
-  CreatorArgs,
-  HiddenSettings,
-  HiddenSettingsArgs,
-  getConfigLineSettingsSerializer,
-  getCreatorSerializer,
-  getHiddenSettingsSerializer,
-} from '../types';
 
 // Accounts.
 export type InitializeCandyMachineV2InstructionAccounts = {
@@ -70,12 +38,6 @@ export type InitializeCandyMachineV2InstructionAccounts = {
 
   candyMachine: PublicKey | Pda;
   /**
-   * Authority PDA used to verify minted NFTs to the collection.
-   *
-   */
-
-  authorityPda?: PublicKey | Pda;
-  /**
    * Candy Machine authority. This is the address that controls the upate of the candy machine.
    *
    */
@@ -83,110 +45,16 @@ export type InitializeCandyMachineV2InstructionAccounts = {
   authority?: PublicKey | Pda;
   /** Payer of the transaction. */
   payer?: Signer;
-  /**
-   * Authorization rule set to be used by minted NFTs.
-   *
-   */
-
-  ruleSet?: PublicKey | Pda;
-  /**
-   * Metadata account of the collection.
-   *
-   */
-
-  collectionMetadata?: PublicKey | Pda;
-  /**
-   * Mint account of the collection.
-   *
-   */
-
-  collectionMint: PublicKey | Pda;
-  /**
-   * Master Edition account of the collection.
-   *
-   */
-
-  collectionMasterEdition?: PublicKey | Pda;
-  /**
-   * Update authority of the collection. This needs to be a signer so the candy
-   * machine can approve a delegate to verify minted NFTs to the collection.
-   */
-
-  collectionUpdateAuthority: Signer;
-  /**
-   * Metadata delegate record. The delegate is used to verify NFTs.
-   *
-   */
-
-  collectionDelegateRecord?: PublicKey | Pda;
-  /**
-   * Token Metadata program.
-   *
-   */
-
-  tokenMetadataProgram?: PublicKey | Pda;
-  /** System program. */
-  systemProgram?: PublicKey | Pda;
-  /**
-   * Instructions sysvar account.
-   *
-   */
-
-  sysvarInstructions?: PublicKey | Pda;
-  /**
-   * Token Authorization Rules program.
-   *
-   */
-
-  authorizationRulesProgram?: PublicKey | Pda;
-  /**
-   * Token Authorization rules account for the collection metadata (if any).
-   *
-   */
-
-  authorizationRules?: PublicKey | Pda;
 };
 
 // Data.
 export type InitializeCandyMachineV2InstructionData = {
   discriminator: Array<number>;
-  /** Number of assets available */
-  itemsAvailable: bigint;
-  /** Symbol for the asset */
-  symbol: string;
-  /** Secondary sales royalty basis points (0-10000) */
-  sellerFeeBasisPoints: Amount<'%', 2>;
-  /** Max supply of each individual asset (default 0) */
-  maxEditionSupply: bigint;
-  /** Indicates if the asset is mutable or not (default yes) */
-  isMutable: boolean;
-  /** List of creators */
-  creators: Array<Creator>;
-  /** Config line settings */
-  configLineSettings: Option<ConfigLineSettings>;
-  /** Hidden setttings */
-  hiddenSettings: Option<HiddenSettings>;
-  tokenStandard: TokenStandard;
+  itemCount: bigint;
 };
 
 export type InitializeCandyMachineV2InstructionDataArgs = {
-  /** Number of assets available */
-  itemsAvailable: number | bigint;
-  /** Symbol for the asset */
-  symbol?: string;
-  /** Secondary sales royalty basis points (0-10000) */
-  sellerFeeBasisPoints: Amount<'%', 2>;
-  /** Max supply of each individual asset (default 0) */
-  maxEditionSupply?: number | bigint;
-  /** Indicates if the asset is mutable or not (default yes) */
-  isMutable?: boolean;
-  /** List of creators */
-  creators: Array<CreatorArgs>;
-  /** Config line settings */
-  configLineSettings?: OptionOrNullable<ConfigLineSettingsArgs>;
-  /** Hidden setttings */
-  hiddenSettings?: OptionOrNullable<HiddenSettingsArgs>;
-  tokenStandard: TokenStandardArgs;
+  itemCount: number | bigint;
 };
 
 export function getInitializeCandyMachineV2InstructionDataSerializer(): Serializer<
@@ -201,26 +69,13 @@ export function getInitializeCandyMachineV2InstructionDataSerializer(): Serializ
     struct<InitializeCandyMachineV2InstructionData>(
       [
         ['discriminator', array(u8(), { size: 8 })],
-        ['itemsAvailable', u64()],
-        ['symbol', string()],
-        ['sellerFeeBasisPoints', mapAmountSerializer(u16(), '%', 2)],
-        ['maxEditionSupply', u64()],
-        ['isMutable', bool()],
-        ['creators', array(getCreatorSerializer())],
-        ['configLineSettings', option(getConfigLineSettingsSerializer())],
-        ['hiddenSettings', option(getHiddenSettingsSerializer())],
-        ['tokenStandard', getTokenStandardSerializer()],
+        ['itemCount', u64()],
       ],
       { description: 'InitializeCandyMachineV2InstructionData' }
     ),
     (value) => ({
       ...value,
       discriminator: [67, 153, 175, 39, 218, 16, 38, 32],
-      symbol: value.symbol ?? '',
-      maxEditionSupply: value.maxEditionSupply ?? 0,
-      isMutable: value.isMutable ?? true,
-      configLineSettings: value.configLineSettings ?? none(),
-      hiddenSettings: value.hiddenSettings ?? none(),
     })
   ) as Serializer<
     InitializeCandyMachineV2InstructionDataArgs,
@@ -234,7 +89,7 @@ export type InitializeCandyMachineV2InstructionArgs =
 
 // Instruction.
 export function initializeCandyMachineV2(
-  context: Pick<Context, 'eddsa' | 'identity' | 'payer' | 'programs'>,
+  context: Pick<Context, 'identity' | 'payer' | 'programs'>,
   input: InitializeCandyMachineV2InstructionAccounts &
     InitializeCandyMachineV2InstructionArgs
 ): TransactionBuilder {
@@ -251,122 +106,19 @@ export function initializeCandyMachineV2(
       isWritable: true,
       value: input.candyMachine ?? null,
     },
-    authorityPda: {
-      index: 1,
-      isWritable: true,
-      value: input.authorityPda ?? null,
-    },
-    authority: { index: 2, isWritable: false, value: input.authority ?? null },
-    payer: { index: 3, isWritable: true, value: input.payer ?? null },
-    ruleSet: { index: 4, isWritable: false, value: input.ruleSet ?? null },
-    collectionMetadata: {
-      index: 5,
-      isWritable: true,
-      value: input.collectionMetadata ?? null,
-    },
-    collectionMint: {
-      index: 6,
-      isWritable: false,
-      value: input.collectionMint ?? null,
-    },
-    collectionMasterEdition: {
-      index: 7,
-      isWritable: false,
-      value: input.collectionMasterEdition ?? null,
-    },
-    collectionUpdateAuthority: {
-      index: 8,
-      isWritable: true,
-      value: input.collectionUpdateAuthority ?? null,
-    },
-    collectionDelegateRecord: {
-      index: 9,
-      isWritable: true,
-      value: input.collectionDelegateRecord ?? null,
-    },
-    tokenMetadataProgram: {
-      index: 10,
-      isWritable: false,
-      value: input.tokenMetadataProgram ?? null,
-    },
-    systemProgram: {
-      index: 11,
-      isWritable: false,
-      value: input.systemProgram ?? null,
-    },
-    sysvarInstructions: {
-      index: 12,
-      isWritable: false,
-      value: input.sysvarInstructions ?? null,
-    },
-    authorizationRulesProgram: {
-      index: 13,
-      isWritable: false,
-      value: input.authorizationRulesProgram ?? null,
-    },
-    authorizationRules: {
-      index: 14,
-      isWritable: false,
-      value: input.authorizationRules ?? null,
-    },
+    authority: { index: 1, isWritable: false, value: input.authority ?? null },
+    payer: { index: 2, isWritable: true, value: input.payer ?? null },
   };
 
   // Arguments.
   const resolvedArgs: InitializeCandyMachineV2InstructionArgs = { ...input };
 
   // Default values.
-  if (!resolvedAccounts.authorityPda.value) {
-    resolvedAccounts.authorityPda.value = findCandyMachineAuthorityPda(
-      context,
-      { candyMachine: expectPublicKey(resolvedAccounts.candyMachine.value) }
-    );
-  }
   if (!resolvedAccounts.authority.value) {
     resolvedAccounts.authority.value = context.identity.publicKey;
   }
   if (!resolvedAccounts.payer.value) {
     resolvedAccounts.payer.value = context.payer;
-  }
-  if (!resolvedAccounts.collectionMetadata.value) {
-    resolvedAccounts.collectionMetadata.value = findMetadataPda(context, {
-      mint: expectPublicKey(resolvedAccounts.collectionMint.value),
-    });
-  }
-  if (!resolvedAccounts.collectionMasterEdition.value) {
-    resolvedAccounts.collectionMasterEdition.value = findMasterEditionPda(
-      context,
-      { mint: expectPublicKey(resolvedAccounts.collectionMint.value) }
-    );
-  }
-  if (!resolvedAccounts.collectionDelegateRecord.value) {
-    resolvedAccounts.collectionDelegateRecord.value =
-      findMetadataDelegateRecordPda(context, {
-        mint: expectPublicKey(resolvedAccounts.collectionMint.value),
-        delegateRole: MetadataDelegateRole.Collection,
-        updateAuthority: expectPublicKey(
-          resolvedAccounts.collectionUpdateAuthority.value
-        ),
-        delegate: expectPublicKey(resolvedAccounts.authorityPda.value),
-      });
-  }
-  if (!resolvedAccounts.tokenMetadataProgram.value) {
-    resolvedAccounts.tokenMetadataProgram.value = context.programs.getPublicKey(
-      'mplTokenMetadata',
-      'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'
-    );
-    resolvedAccounts.tokenMetadataProgram.isWritable = false;
-  }
-  if (!resolvedAccounts.systemProgram.value) {
-    resolvedAccounts.systemProgram.value = context.programs.getPublicKey(
-      'splSystem',
-      '11111111111111111111111111111111'
-    );
-    resolvedAccounts.systemProgram.isWritable = false;
-  }
-  if (!resolvedAccounts.sysvarInstructions.value) {
-    resolvedAccounts.sysvarInstructions.value = publicKey(
-      'Sysvar1nstructions1111111111111111111111111'
-    );
   }
 
   // Accounts in order.

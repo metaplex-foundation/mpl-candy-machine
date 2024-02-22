@@ -7,13 +7,6 @@
  */
 
 import {
-  MetadataDelegateRole,
-  findMasterEditionPda,
-  findMetadataDelegateRecordPda,
-  findMetadataPda,
-} from '@metaplex-foundation/mpl-token-metadata';
-import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-toolbox';
-import {
   Context,
   Pda,
   PublicKey,
@@ -29,11 +22,9 @@ import {
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import { findCandyMachineAuthorityPda } from '../../hooked';
 import {
   ResolvedAccount,
   ResolvedAccountsWithIndices,
-  expectPublicKey,
   getAccountMetasAndSigners,
 } from '../shared';
 
@@ -41,13 +32,6 @@ import {
 export type MintFromCandyMachineV2InstructionAccounts = {
   /** Candy machine account. */
   candyMachine: PublicKey | Pda;
-  /**
-   * Candy machine authority account. This is the account that holds a delegate
-   * to verify an item into the collection.
-   *
-   */
-
-  authorityPda?: PublicKey | Pda;
   /** Candy machine mint authority (mint only allowed for the mint_authority). */
   mintAuthority: Signer;
   /** Payer for the transaction and account allocation (rent). */
@@ -57,105 +41,15 @@ export type MintFromCandyMachineV2InstructionAccounts = {
    *
    */
 
-  nftOwner: PublicKey | Pda;
-  /**
-   * Mint account of the NFT. The account will be initialized if necessary.
-   *
-   */
-
-  nftMint: PublicKey | Pda | Signer;
-  /** Mint authority of the NFT. In most cases this will be the owner of the NFT. */
-  nftMintAuthority?: Signer;
-  /**
-   * Metadata account of the NFT. This account must be uninitialized.
-   *
-   */
-
-  nftMetadata?: PublicKey | Pda;
-  /**
-   * Master edition account of the NFT. The account will be initialized if necessary.
-   *
-   */
-
-  nftMasterEdition?: PublicKey | Pda;
-  /**
-   * Destination token account (required for pNFT).
-   *
-   */
-
-  token?: PublicKey | Pda;
-  /**
-   * Token record (required for pNFT).
-   *
-   */
-
-  tokenRecord?: PublicKey | Pda;
-  /**
-   * Collection authority or metadata delegate record.
-   *
-   */
-
-  collectionDelegateRecord?: PublicKey | Pda;
-  /**
-   * Mint account of the collection NFT.
-   *
-   */
-
-  collectionMint: PublicKey | Pda;
-  /**
-   * Metadata account of the collection NFT.
-   *
-   */
-
-  collectionMetadata?: PublicKey | Pda;
-  /**
-   * Master edition account of the collection NFT.
-   *
-   */
-
-  collectionMasterEdition?: PublicKey | Pda;
-  /**
-   * Update authority of the collection NFT.
-   *
-   */
-
-  collectionUpdateAuthority: PublicKey | Pda;
-  /**
-   * Token Metadata program.
-   *
-   */
-
-  tokenMetadataProgram?: PublicKey | Pda;
-  /** SPL Token program. */
-  splTokenProgram?: PublicKey | Pda;
-  /** SPL Associated Token program. */
-  splAtaProgram?: PublicKey | Pda;
+  buyer: PublicKey | Pda;
   /** System program. */
   systemProgram?: PublicKey | Pda;
-  /**
-   * Instructions sysvar account.
-   *
-   */
-
-  sysvarInstructions?: PublicKey | Pda;
   /**
    * SlotHashes sysvar cluster data.
    *
    */
 
   recentSlothashes?: PublicKey | Pda;
-  /**
-   * Token Authorization Rules program.
-   *
-   */
-
-  authorizationRulesProgram?: PublicKey | Pda;
-  /**
-   * Token Authorization rules account for the collection metadata (if any).
-   *
-   */
-
-  authorizationRules?: PublicKey | Pda;
 };
 
 // Data.
@@ -190,7 +84,7 @@ export function getMintFromCandyMachineV2InstructionDataSerializer(): Serializer
 
 // Instruction.
 export function mintFromCandyMachineV2(
-  context: Pick<Context, 'eddsa' | 'identity' | 'payer' | 'programs'>,
+  context: Pick<Context, 'payer' | 'programs'>,
   input: MintFromCandyMachineV2InstructionAccounts
 ): TransactionBuilder {
   // Program ID.
@@ -206,178 +100,28 @@ export function mintFromCandyMachineV2(
       isWritable: true,
       value: input.candyMachine ?? null,
     },
-    authorityPda: {
-      index: 1,
-      isWritable: true,
-      value: input.authorityPda ?? null,
-    },
     mintAuthority: {
-      index: 2,
+      index: 1,
       isWritable: false,
       value: input.mintAuthority ?? null,
     },
-    payer: { index: 3, isWritable: true, value: input.payer ?? null },
-    nftOwner: { index: 4, isWritable: false, value: input.nftOwner ?? null },
-    nftMint: { index: 5, isWritable: true, value: input.nftMint ?? null },
-    nftMintAuthority: {
-      index: 6,
-      isWritable: false,
-      value: input.nftMintAuthority ?? null,
-    },
-    nftMetadata: {
-      index: 7,
-      isWritable: true,
-      value: input.nftMetadata ?? null,
-    },
-    nftMasterEdition: {
-      index: 8,
-      isWritable: true,
-      value: input.nftMasterEdition ?? null,
-    },
-    token: { index: 9, isWritable: true, value: input.token ?? null },
-    tokenRecord: {
-      index: 10,
-      isWritable: true,
-      value: input.tokenRecord ?? null,
-    },
-    collectionDelegateRecord: {
-      index: 11,
-      isWritable: false,
-      value: input.collectionDelegateRecord ?? null,
-    },
-    collectionMint: {
-      index: 12,
-      isWritable: false,
-      value: input.collectionMint ?? null,
-    },
-    collectionMetadata: {
-      index: 13,
-      isWritable: true,
-      value: input.collectionMetadata ?? null,
-    },
-    collectionMasterEdition: {
-      index: 14,
-      isWritable: false,
-      value: input.collectionMasterEdition ?? null,
-    },
-    collectionUpdateAuthority: {
-      index: 15,
-      isWritable: false,
-      value: input.collectionUpdateAuthority ?? null,
-    },
-    tokenMetadataProgram: {
-      index: 16,
-      isWritable: false,
-      value: input.tokenMetadataProgram ?? null,
-    },
-    splTokenProgram: {
-      index: 17,
-      isWritable: false,
-      value: input.splTokenProgram ?? null,
-    },
-    splAtaProgram: {
-      index: 18,
-      isWritable: false,
-      value: input.splAtaProgram ?? null,
-    },
+    payer: { index: 2, isWritable: true, value: input.payer ?? null },
+    buyer: { index: 3, isWritable: false, value: input.buyer ?? null },
     systemProgram: {
-      index: 19,
+      index: 4,
       isWritable: false,
       value: input.systemProgram ?? null,
     },
-    sysvarInstructions: {
-      index: 20,
-      isWritable: false,
-      value: input.sysvarInstructions ?? null,
-    },
     recentSlothashes: {
-      index: 21,
+      index: 5,
       isWritable: false,
       value: input.recentSlothashes ?? null,
-    },
-    authorizationRulesProgram: {
-      index: 22,
-      isWritable: false,
-      value: input.authorizationRulesProgram ?? null,
-    },
-    authorizationRules: {
-      index: 23,
-      isWritable: false,
-      value: input.authorizationRules ?? null,
     },
   };
 
   // Default values.
-  if (!resolvedAccounts.authorityPda.value) {
-    resolvedAccounts.authorityPda.value = findCandyMachineAuthorityPda(
-      context,
-      { candyMachine: expectPublicKey(resolvedAccounts.candyMachine.value) }
-    );
-  }
   if (!resolvedAccounts.payer.value) {
     resolvedAccounts.payer.value = context.payer;
-  }
-  if (!resolvedAccounts.nftMintAuthority.value) {
-    resolvedAccounts.nftMintAuthority.value = context.identity;
-  }
-  if (!resolvedAccounts.nftMetadata.value) {
-    resolvedAccounts.nftMetadata.value = findMetadataPda(context, {
-      mint: expectPublicKey(resolvedAccounts.nftMint.value),
-    });
-  }
-  if (!resolvedAccounts.nftMasterEdition.value) {
-    resolvedAccounts.nftMasterEdition.value = findMasterEditionPda(context, {
-      mint: expectPublicKey(resolvedAccounts.nftMint.value),
-    });
-  }
-  if (!resolvedAccounts.token.value) {
-    resolvedAccounts.token.value = findAssociatedTokenPda(context, {
-      mint: expectPublicKey(resolvedAccounts.nftMint.value),
-      owner: expectPublicKey(resolvedAccounts.nftOwner.value),
-    });
-  }
-  if (!resolvedAccounts.collectionDelegateRecord.value) {
-    resolvedAccounts.collectionDelegateRecord.value =
-      findMetadataDelegateRecordPda(context, {
-        mint: expectPublicKey(resolvedAccounts.collectionMint.value),
-        delegateRole: MetadataDelegateRole.Collection,
-        updateAuthority: expectPublicKey(
-          resolvedAccounts.collectionUpdateAuthority.value
-        ),
-        delegate: expectPublicKey(resolvedAccounts.authorityPda.value),
-      });
-  }
-  if (!resolvedAccounts.collectionMetadata.value) {
-    resolvedAccounts.collectionMetadata.value = findMetadataPda(context, {
-      mint: expectPublicKey(resolvedAccounts.collectionMint.value),
-    });
-  }
-  if (!resolvedAccounts.collectionMasterEdition.value) {
-    resolvedAccounts.collectionMasterEdition.value = findMasterEditionPda(
-      context,
-      { mint: expectPublicKey(resolvedAccounts.collectionMint.value) }
-    );
-  }
-  if (!resolvedAccounts.tokenMetadataProgram.value) {
-    resolvedAccounts.tokenMetadataProgram.value = context.programs.getPublicKey(
-      'mplTokenMetadata',
-      'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'
-    );
-    resolvedAccounts.tokenMetadataProgram.isWritable = false;
-  }
-  if (!resolvedAccounts.splTokenProgram.value) {
-    resolvedAccounts.splTokenProgram.value = context.programs.getPublicKey(
-      'splToken',
-      'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
-    );
-    resolvedAccounts.splTokenProgram.isWritable = false;
-  }
-  if (!resolvedAccounts.splAtaProgram.value) {
-    resolvedAccounts.splAtaProgram.value = context.programs.getPublicKey(
-      'splAssociatedToken',
-      'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'
-    );
-    resolvedAccounts.splAtaProgram.isWritable = false;
   }
   if (!resolvedAccounts.systemProgram.value) {
     resolvedAccounts.systemProgram.value = context.programs.getPublicKey(
@@ -385,11 +129,6 @@ export function mintFromCandyMachineV2(
       '11111111111111111111111111111111'
     );
     resolvedAccounts.systemProgram.isWritable = false;
-  }
-  if (!resolvedAccounts.sysvarInstructions.value) {
-    resolvedAccounts.sysvarInstructions.value = publicKey(
-      'Sysvar1nstructions1111111111111111111111111'
-    );
   }
   if (!resolvedAccounts.recentSlothashes.value) {
     resolvedAccounts.recentSlothashes.value = publicKey(

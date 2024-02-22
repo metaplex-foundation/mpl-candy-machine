@@ -10,10 +10,6 @@ import {
   BotTaxArgs,
   EndDate,
   EndDateArgs,
-  FreezeSolPayment,
-  FreezeSolPaymentArgs,
-  FreezeTokenPayment,
-  FreezeTokenPaymentArgs,
   Gatekeeper,
   GatekeeperArgs,
   MintLimit,
@@ -51,14 +47,6 @@ import {
 } from '../guards/guardSet';
 import { AllocationMintArgs, AllocationRouteArgs } from './allocation';
 import { AllowListMintArgs, AllowListRouteArgs } from './allowList';
-import {
-  FreezeSolPaymentMintArgs,
-  FreezeSolPaymentRouteArgs,
-} from './freezeSolPayment';
-import {
-  FreezeTokenPaymentMintArgs,
-  FreezeTokenPaymentRouteArgs,
-} from './freezeTokenPayment';
 import { GatekeeperMintArgs } from './gatekeeper';
 import { MintLimitMintArgs } from './mintLimit';
 import { NftBurnMintArgs } from './nftBurn';
@@ -91,8 +79,6 @@ export type DefaultGuardSetArgs = GuardSetArgs & {
   nftGate: OptionOrNullable<NftGateArgs>;
   nftBurn: OptionOrNullable<NftBurnArgs>;
   tokenBurn: OptionOrNullable<TokenBurnArgs>;
-  freezeSolPayment: OptionOrNullable<FreezeSolPaymentArgs>;
-  freezeTokenPayment: OptionOrNullable<FreezeTokenPaymentArgs>;
   programGate: OptionOrNullable<ProgramGateArgs>;
   allocation: OptionOrNullable<AllocationArgs>;
   token2022Payment: OptionOrNullable<Token2022PaymentArgs>;
@@ -118,8 +104,6 @@ export type DefaultGuardSet = GuardSet & {
   nftGate: Option<NftGate>;
   nftBurn: Option<NftBurn>;
   tokenBurn: Option<TokenBurn>;
-  freezeSolPayment: Option<FreezeSolPayment>;
-  freezeTokenPayment: Option<FreezeTokenPayment>;
   programGate: Option<ProgramGate>;
   allocation: Option<Allocation>;
   token2022Payment: Option<Token2022Payment>;
@@ -145,8 +129,6 @@ export type DefaultGuardSetMintArgs = GuardSetMintArgs & {
   nftGate: OptionOrNullable<NftGateMintArgs>;
   nftBurn: OptionOrNullable<NftBurnMintArgs>;
   tokenBurn: OptionOrNullable<TokenBurnMintArgs>;
-  freezeSolPayment: OptionOrNullable<FreezeSolPaymentMintArgs>;
-  freezeTokenPayment: OptionOrNullable<FreezeTokenPaymentMintArgs>;
   // programGate: no mint settings
   allocation: OptionOrNullable<AllocationMintArgs>;
   token2022Payment: OptionOrNullable<Token2022PaymentMintArgs>;
@@ -172,8 +154,6 @@ export type DefaultGuardSetRouteArgs = GuardSetRouteArgs & {
   // nftGate: no route settings
   // nftBurn: no route settings
   // tokenBurn: no route settings
-  freezeSolPayment: FreezeSolPaymentRouteArgs;
-  freezeTokenPayment: FreezeTokenPaymentRouteArgs;
   // programGate: no route settings
   allocation: AllocationRouteArgs;
   // token2022Payment: no route settings
@@ -197,8 +177,6 @@ export const defaultCandyGuardNames: string[] = [
   'nftGate',
   'nftBurn',
   'tokenBurn',
-  'freezeSolPayment',
-  'freezeTokenPayment',
   'programGate',
   'allocation',
   'token2022Payment',

@@ -1,13 +1,12 @@
 import { createAccount } from '@metaplex-foundation/mpl-toolbox';
 import {
   Context,
-  none,
   Signer,
   transactionBuilder,
   TransactionBuilder,
 } from '@metaplex-foundation/umi';
 import { initializeCandyMachineV2 } from './generated';
-import { getCandyMachineSize } from './hooked';
+import { getCandyMachineSizeForItemCount } from './hooked';
 
 export type CreateCandyMachineV2Input = Omit<
   Parameters<typeof initializeCandyMachineV2>[1],
@@ -21,11 +20,7 @@ export const createCandyMachineV2 = async (
     Pick<Context, 'rpc'>,
   input: CreateCandyMachineV2Input
 ): Promise<TransactionBuilder> => {
-  const space = getCandyMachineSize(
-    input.itemsAvailable,
-    input.configLineSettings ?? none(),
-    input.tokenStandard
-  );
+  const space = getCandyMachineSizeForItemCount(input.itemCount);
   const lamports = await context.rpc.getRent(space);
   return transactionBuilder()
     .add(

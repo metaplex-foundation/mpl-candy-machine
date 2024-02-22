@@ -1,44 +1,16 @@
-import {
-  isProgrammable,
-  TokenStandard,
-} from '@metaplex-foundation/mpl-token-metadata';
-import {
-  isNone,
-  isOption,
-  OptionOrNullable,
-  wrapNullable,
-} from '@metaplex-foundation/umi';
-import { CANDY_MACHINE_HIDDEN_SECTION } from '../constants';
-import { ConfigLineSettingsArgs } from '../generated/types/configLineSettings';
+import { CANDY_MACHINE_SIZE, CONFIG_LINE_SIZE } from '../constants';
 
-export function getCandyMachineSize(
-  itemsAvailable: number | bigint,
-  configLineSettings: OptionOrNullable<
-    Pick<ConfigLineSettingsArgs, 'nameLength' | 'uriLength'>
-  >,
-  tokenStandard = TokenStandard.NonFungible
+export function getCandyMachineSizeForItemCount(
+  itemCount: number | bigint
 ): number {
-  configLineSettings = isOption(configLineSettings)
-    ? configLineSettings
-    : wrapNullable(configLineSettings);
-  const base = isProgrammable(tokenStandard)
-    ? CANDY_MACHINE_HIDDEN_SECTION + 33
-    : CANDY_MACHINE_HIDDEN_SECTION;
-
-  if (isNone(configLineSettings)) {
-    return base;
-  }
-
-  const items = Number(itemsAvailable);
-  const configLineSize =
-    configLineSettings.value.nameLength + configLineSettings.value.uriLength;
+  const items = Number(itemCount);
 
   return Math.ceil(
-    base +
+    CANDY_MACHINE_SIZE +
       // Number of currently items inserted.
       4 +
       // Config line data.
-      items * configLineSize +
+      items * CONFIG_LINE_SIZE +
       // Bit mask to keep track of which ConfigLines have been added.
       (4 + Math.floor(items / 8) + 1) +
       // Mint indices.

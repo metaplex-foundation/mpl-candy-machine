@@ -106,10 +106,6 @@ pub struct GuardSet {
     pub nft_burn: Option<NftBurn>,
     /// Token burn guard (burn a specified amount of spl-token).
     pub token_burn: Option<TokenBurn>,
-    /// Freeze sol payment guard (set the price for the mint in lamports with a freeze period).
-    pub freeze_sol_payment: Option<FreezeSolPayment>,
-    /// Freeze token payment guard (set the price for the mint in spl-token amount with a freeze period).
-    pub freeze_token_payment: Option<FreezeTokenPayment>,
     /// Program gate guard (restricts the programs that can be in a mint transaction).
     pub program_gate: Option<ProgramGate>,
     /// Allocation guard (specify the maximum number of mints in a group).
@@ -137,8 +133,6 @@ pub enum GuardType {
     NftGate,
     NftBurn,
     TokenBurn,
-    FreezeSolPayment,
-    FreezeTokenPayment,
     ProgramGate,
     Allocation,
     Token2022Payment,

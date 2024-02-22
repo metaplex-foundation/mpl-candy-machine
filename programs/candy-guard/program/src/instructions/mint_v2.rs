@@ -5,9 +5,8 @@ use mpl_candy_machine_core::CandyMachine;
 use solana_program::{instruction::Instruction, program::invoke_signed};
 
 use crate::{
-    guards::{CandyGuardError, EvaluationContext},
+    guards::EvaluationContext,
     state::{CandyGuard, CandyGuardData, GuardSet, DATA_OFFSET, SEED},
-    utils::cmp_pubkeys,
 };
 
 use super::{AssociatedToken, MintAccounts, Token};
@@ -20,50 +19,15 @@ pub fn mint_v2<'c: 'info, 'info>(
     let accounts = MintAccounts {
         candy_guard: &ctx.accounts.candy_guard,
         candy_machine: &ctx.accounts.candy_machine,
-        candy_machine_authority_pda: ctx.accounts.candy_machine_authority_pda.to_account_info(),
         _candy_machine_program: ctx.accounts.candy_machine_program.to_account_info(),
-        collection_delegate_record: ctx.accounts.collection_delegate_record.to_account_info(),
-        collection_master_edition: ctx.accounts.collection_master_edition.to_account_info(),
-        collection_metadata: ctx.accounts.collection_metadata.to_account_info(),
-        collection_mint: ctx.accounts.collection_mint.to_account_info(),
-        collection_update_authority: ctx.accounts.collection_update_authority.to_account_info(),
-        nft_master_edition: ctx.accounts.nft_master_edition.to_account_info(),
-        nft_metadata: ctx.accounts.nft_metadata.to_account_info(),
-        nft_mint: ctx.accounts.nft_mint.to_account_info(),
-        nft_mint_authority: ctx.accounts.nft_mint_authority.to_account_info(),
         payer: ctx.accounts.payer.to_account_info(),
-        minter: ctx.accounts.minter.to_account_info(),
+        buyer: ctx.accounts.minter.to_account_info(),
         recent_slothashes: ctx.accounts.recent_slothashes.to_account_info(),
-        spl_ata_program: ctx
-            .accounts
-            .spl_ata_program
-            .as_ref()
-            .map(|spl_ata_program| spl_ata_program.to_account_info()),
         spl_token_program: ctx.accounts.spl_token_program.to_account_info(),
         system_program: ctx.accounts.system_program.to_account_info(),
         sysvar_instructions: ctx.accounts.sysvar_instructions.to_account_info(),
-        token: ctx
-            .accounts
-            .token
-            .as_ref()
-            .map(|token| token.to_account_info()),
         token_metadata_program: ctx.accounts.token_metadata_program.to_account_info(),
-        token_record: ctx
-            .accounts
-            .token_record
-            .as_ref()
-            .map(|token_record| token_record.to_account_info()),
         remaining: ctx.remaining_accounts,
-        authorization_rules_program: ctx
-            .accounts
-            .authorization_rules_program
-            .as_ref()
-            .map(|authorization_rules_program| authorization_rules_program.to_account_info()),
-        authorization_rules: ctx
-            .accounts
-            .authorization_rules
-            .as_ref()
-            .map(|authorization_rules| authorization_rules.to_account_info()),
     };
 
     // evaluation context for this transaction
@@ -96,12 +60,6 @@ pub fn process_mint(
     };
 
     let conditions = guard_set.enabled_conditions();
-
-    // validates the required transaction data
-
-    if let Err(error) = validate(ctx) {
-        return process_error(ctx, &guard_set, error);
-    }
 
     // validates enabled guards (any error at this point is subject to bot tax)
 
@@ -137,24 +95,6 @@ fn process_error(ctx: &EvaluationContext, guard_set: &GuardSet, error: Error) ->
     }
 }
 
-/// Performs a validation of the transaction before executing the guards.
-fn validate(ctx: &EvaluationContext) -> Result<()> {
-    if !cmp_pubkeys(
-        &ctx.accounts.collection_mint.key(),
-        &ctx.accounts.candy_machine.collection_mint,
-    ) {
-        return err!(CandyGuardError::CollectionKeyMismatch);
-    }
-    if !cmp_pubkeys(
-        ctx.accounts.collection_metadata.owner,
-        &mpl_token_metadata::ID,
-    ) {
-        return err!(CandyGuardError::IncorrectOwner);
-    }
-
-    Ok(())
-}
-
 /// Send a mint transaction to the candy machine.
 fn cpi_mint(ctx: &EvaluationContext) -> Result<()> {
     let candy_guard = &ctx.accounts.candy_guard;
@@ -162,39 +102,15 @@ fn cpi_mint(ctx: &EvaluationContext) -> Result<()> {
     // candy machine mint instruction accounts
     let mint_accounts = Box::new(mpl_candy_machine_core::cpi::accounts::MintV2 {
         candy_machine: ctx.accounts.candy_machine.to_account_info(),
-        authority_pda: ctx.accounts.candy_machine_authority_pda.clone(),
         mint_authority: candy_guard.to_account_info(),
         payer: ctx.accounts.payer.clone(),
-        nft_owner: ctx.accounts.minter.clone(),
-        nft_mint: ctx.accounts.nft_mint.clone(),
-        nft_mint_authority: ctx.accounts.nft_mint_authority.clone(),
-        nft_metadata: ctx.accounts.nft_metadata.clone(),
-        nft_master_edition: ctx.accounts.nft_master_edition.clone(),
-        token: ctx.accounts.token.clone(),
-        token_record: ctx.accounts.token_record.clone(),
-        collection_delegate_record: ctx.accounts.collection_delegate_record.clone(),
-        collection_mint: ctx.accounts.collection_mint.clone(),
-        collection_metadata: ctx.accounts.collection_metadata.clone(),
-        collection_master_edition: ctx.accounts.collection_master_edition.clone(),
-        collection_update_authority: ctx.accounts.collection_update_authority.clone(),
-        token_metadata_program: ctx.accounts.token_metadata_program.clone(),
-        spl_token_program: ctx.accounts.spl_token_program.clone(),
-        spl_ata_program: ctx.accounts.spl_ata_program.clone(),
+        buyer: ctx.accounts.buyer.clone(),
         system_program: ctx.accounts.system_program.clone(),
-        sysvar_instructions: ctx.accounts.sysvar_instructions.clone(),
         recent_slothashes: ctx.accounts.recent_slothashes.clone(),
-        authorization_rules_program: ctx.accounts.authorization_rules_program.clone(),
-        authorization_rules: ctx.accounts.authorization_rules.clone(),
     });
 
     let mint_infos = mint_accounts.to_account_infos();
-    let mut mint_metas = mint_accounts.to_account_metas(None);
-
-    mint_metas.iter_mut().for_each(|account_meta| {
-        if account_meta.pubkey == ctx.accounts.nft_mint.key() {
-            account_meta.is_signer = ctx.accounts.nft_mint.is_signer;
-        }
-    });
+    let mint_metas = mint_accounts.to_account_metas(None);
 
     let mint_ix = Instruction {
         program_id: mpl_candy_machine_core::ID,
@@ -318,6 +234,7 @@ pub struct MintV2<'info> {
 
     /// SPL Associated Token program.
     spl_ata_program: Option<Program<'info, AssociatedToken>>,
+    buyer: Signer<'info>,
 
     /// System program.
     system_program: Program<'info, System>,

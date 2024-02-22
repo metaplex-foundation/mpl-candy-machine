@@ -37,7 +37,7 @@ impl Condition for TokenGate {
         // consumes the gate token account
         ctx.account_cursor += 1;
 
-        let account = assert_is_ata(token_gate_account, &ctx.accounts.minter.key(), &self.mint)?;
+        let account = assert_is_ata(token_gate_account, &ctx.accounts.buyer.key(), &self.mint)?;
 
         if account.amount < self.amount {
             return err!(CandyGuardError::NotEnoughTokens);

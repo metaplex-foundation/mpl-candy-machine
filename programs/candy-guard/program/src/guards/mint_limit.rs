@@ -67,7 +67,7 @@ impl Condition for MintLimit {
         ctx.indices.insert("mint_limit_index", ctx.account_cursor);
         ctx.account_cursor += 1;
 
-        let minter = ctx.accounts.minter.key();
+        let minter = ctx.accounts.buyer.key();
         let candy_guard_key = &ctx.accounts.candy_guard.key();
         let candy_machine_key = &ctx.accounts.candy_machine.key();
 
@@ -110,7 +110,7 @@ impl Condition for MintLimit {
             try_get_account_info(ctx.accounts.remaining, ctx.indices["mint_limit_index"])?;
 
         if counter.data_is_empty() {
-            let minter = ctx.accounts.minter.key();
+            let minter = ctx.accounts.buyer.key();
             let candy_guard_key = &ctx.accounts.candy_guard.key();
             let candy_machine_key = &ctx.accounts.candy_machine.key();
 

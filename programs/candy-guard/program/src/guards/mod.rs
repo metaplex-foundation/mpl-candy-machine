@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 pub use anchor_lang::prelude::*;
 
-pub use crate::{errors::CandyGuardError, instructions::mint::*, state::GuardSet};
+pub use crate::{errors::CandyGuardError, instructions::mint_v2::*, state::GuardSet};
 use crate::{
     instructions::{MintAccounts, Route, RouteContext},
     state::CandyGuardData,
@@ -13,8 +13,6 @@ pub use allocation::Allocation;
 pub use allow_list::AllowList;
 pub use bot_tax::BotTax;
 pub use end_date::EndDate;
-pub use freeze_sol_payment::{FreezeEscrow, FreezeInstruction, FreezeSolPayment};
-pub use freeze_token_payment::FreezeTokenPayment;
 pub use gatekeeper::Gatekeeper;
 pub use mint_limit::{MintCounter, MintLimit};
 pub use nft_burn::NftBurn;
@@ -35,8 +33,6 @@ mod allocation;
 mod allow_list;
 mod bot_tax;
 mod end_date;
-mod freeze_sol_payment;
-mod freeze_token_payment;
 mod gatekeeper;
 mod mint_limit;
 mod nft_burn;

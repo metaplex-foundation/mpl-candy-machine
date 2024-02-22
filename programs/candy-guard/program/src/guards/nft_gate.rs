@@ -45,7 +45,7 @@ impl Condition for NftGate {
             nft_account,
             nft_metadata,
             &self.required_collection,
-            ctx.accounts.minter.key,
+            ctx.accounts.buyer.key,
         )
     }
 }

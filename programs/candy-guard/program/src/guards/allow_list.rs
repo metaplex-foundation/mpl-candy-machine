@@ -183,7 +183,7 @@ impl Condition for AllowList {
     ) -> Result<()> {
         let proof_pda = try_get_account_info(ctx.accounts.remaining, ctx.account_cursor)?;
         ctx.account_cursor += 1;
-        let minter = ctx.accounts.minter.key();
+        let minter = ctx.accounts.buyer.key();
 
         // validates the pda
 

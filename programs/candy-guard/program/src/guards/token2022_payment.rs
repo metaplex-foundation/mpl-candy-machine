@@ -66,7 +66,7 @@ impl Condition for Token2022Payment {
         assert_owned_by(token_account_info, &spl_token_2022::ID)?;
         let data = token_account_info.data.borrow();
         let token_account = StateWithExtensions::<Account>::unpack(&data)?;
-        assert_keys_equal(&token_account.base.owner, ctx.accounts.minter.key)?;
+        assert_keys_equal(&token_account.base.owner, ctx.accounts.buyer.key)?;
         assert_keys_equal(&token_account.base.mint, &self.mint)?;
 
         if token_account.base.amount < self.amount {
@@ -107,7 +107,7 @@ impl Condition for Token2022Payment {
                 token_account_info.key,
                 &self.mint,
                 destination_ata.key,
-                ctx.accounts.minter.key,
+                ctx.accounts.buyer.key,
                 &[],
                 self.amount,
                 mint.base.decimals,
@@ -115,7 +115,7 @@ impl Condition for Token2022Payment {
             &[
                 token_account_info.clone(),
                 destination_ata.clone(),
-                ctx.accounts.minter.clone(),
+                ctx.accounts.buyer.clone(),
                 spl_token_2022_program.clone(),
                 mint_info.clone(),
             ],

@@ -342,7 +342,7 @@ impl FreezeEscrow {
     }
 
     pub fn is_thaw_allowed(&self, candy_machine: &CandyMachine, current_timestamp: i64) -> bool {
-        if candy_machine.items_redeemed >= candy_machine.data.items_available {
+        if candy_machine.items_redeemed >= candy_machine.items_available {
             return true;
         } else if let Some(first_mint_time) = self.first_mint_time {
             if current_timestamp >= first_mint_time + self.freeze_period {

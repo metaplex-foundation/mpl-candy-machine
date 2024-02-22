@@ -1,10 +1,9 @@
 use anchor_lang::prelude::*;
 
 use crate::{
-    constants::HIDDEN_SECTION,
+    constants::{CANDY_MACHINE_SIZE, CONFIG_LINE_SIZE},
     get_config_count,
     state::{CandyMachine, ConfigLine},
-    utils::fixed_length_string,
     CandyError,
 };
 
@@ -25,56 +24,12 @@ pub fn add_config_lines(
         .checked_add(config_lines.len() as u32)
         .ok_or(CandyError::NumericalOverflowError)?;
 
-    if total > (candy_machine.data.items_available as u32) {
+    if total > (candy_machine.items_available as u32) {
         return err!(CandyError::IndexGreaterThanLength);
     } else if config_lines.is_empty() {
         // there is nothing to do, so we can stop early
         msg!("Config lines array empty");
         return Ok(());
-    }
-
-    // hidden settings candies do not store config lines
-    if candy_machine.data.hidden_settings.is_some() {
-        return err!(CandyError::HiddenSettingsDoNotHaveConfigLines);
-    }
-
-    let config_line = if let Some(config_line) = &candy_machine.data.config_line_settings {
-        config_line
-    } else {
-        return err!(CandyError::MissingConfigLinesSettings);
-    };
-
-    let name_length = config_line.name_length as usize;
-    let uri_length = config_line.uri_length as usize;
-    let config_line_length = name_length + uri_length;
-
-    // both name and uri can be empty when are using a replacement variable; there is
-    // still a need to call the add_config_lines so their indices are written on the
-    // account for the random index generation
-    if config_line_length > 0 {
-        let mut position = HIDDEN_SECTION + 4 + (index as usize) * config_line_length;
-
-        for line in &config_lines {
-            if name_length > 0 {
-                let name = fixed_length_string(line.name.clone(), name_length)?;
-                let name_bytes = name.as_bytes();
-
-                let name_slice: &mut [u8] = &mut data[position..position + name_length];
-                name_slice.copy_from_slice(name_bytes);
-
-                position += name_length;
-            }
-
-            if uri_length > 0 {
-                let uri = fixed_length_string(line.uri.clone(), uri_length)?;
-                let uri_bytes = uri.as_bytes();
-
-                let uri_slice: &mut [u8] = &mut data[position..position + uri_length];
-                uri_slice.copy_from_slice(uri_bytes);
-
-                position += uri_length;
-            }
-        }
     }
 
     // after adding the config lines, we need to update the mint indices - there are two arrays
@@ -84,11 +39,10 @@ pub fn add_config_lines(
 
     // bit-mask
     let bit_mask_start =
-        HIDDEN_SECTION + 4 + (candy_machine.data.items_available as usize) * config_line_length;
+        CANDY_MACHINE_SIZE + 4 + (candy_machine.items_available as usize) * CONFIG_LINE_SIZE;
     // (unordered) indices for the mint
     let indices_start = bit_mask_start
         + (candy_machine
-            .data
             .items_available
             .checked_div(8)
             .ok_or(CandyError::NumericalOverflowError)?
@@ -142,7 +96,7 @@ pub fn add_config_lines(
     }
 
     // updates the config lines count
-    data[HIDDEN_SECTION..HIDDEN_SECTION + 4].copy_from_slice(&(count as u32).to_le_bytes());
+    data[CANDY_MACHINE_SIZE..CANDY_MACHINE_SIZE + 4].copy_from_slice(&(count as u32).to_le_bytes());
 
     Ok(())
 }

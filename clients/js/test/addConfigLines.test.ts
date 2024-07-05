@@ -1,12 +1,37 @@
-import { none, some, transactionBuilder } from '@metaplex-foundation/umi';
+import {
+  none,
+  publicKey,
+  some,
+  transactionBuilder,
+} from '@metaplex-foundation/umi';
+import { Keypair, PublicKey } from '@solana/web3.js';
 import test from 'ava';
-import { addConfigLines, CandyMachine, fetchCandyMachine } from '../src';
+import {
+  addConfigLines,
+  CandyMachine,
+  fetchCandyMachine,
+  TokenStandard,
+} from '../src';
 import { createV2, createUmi } from './_setup';
 
 test('it can add items to a candy machine', async (t) => {
   // Given a Candy Machine with 5 items.
   const umi = await createUmi();
-  const candyMachine = await createV2(umi, { itemsAvailable: 5 });
+  const candyMachine = await createV2(umi, { itemCount: 5 });
+  const configLines = [
+    {
+      mint: publicKey(Keypair.generate().publicKey),
+      contributor: publicKey(Keypair.generate().publicKey),
+      buyer: publicKey(PublicKey.default),
+      tokenStandard: TokenStandard.NonFungible,
+    },
+    {
+      mint: publicKey(Keypair.generate().publicKey),
+      contributor: publicKey(Keypair.generate().publicKey),
+      buyer: publicKey(PublicKey.default),
+      tokenStandard: TokenStandard.NonFungible,
+    },
+  ];
 
   // When we add two items to the Candy Machine.
   await transactionBuilder()
@@ -14,10 +39,7 @@ test('it can add items to a candy machine', async (t) => {
       addConfigLines(umi, {
         candyMachine: candyMachine.publicKey,
         index: 0,
-        configLines: [
-          { name: 'Degen #1', uri: 'https://example.com/degen/1' },
-          { name: 'Degen #2', uri: 'https://example.com/degen/2' },
-        ],
+        configLines,
       })
     )
     .sendAndConfirm(umi);
@@ -27,20 +49,22 @@ test('it can add items to a candy machine', async (t) => {
     umi,
     candyMachine.publicKey
   );
-  t.like(candyMachineAccount, <CandyMachine>{
+  t.like(candyMachineAccount, {
     itemsLoaded: 2,
     items: [
       {
         index: 0,
         minted: false,
-        name: 'Degen #1',
-        uri: 'https://example.com/degen/1',
+        mint: configLines[0].mint,
+        contributor: configLines[0].contributor,
+        tokenStandard: TokenStandard.NonFungible,
       },
       {
         index: 1,
         minted: false,
-        name: 'Degen #2',
-        uri: 'https://example.com/degen/2',
+        mint: configLines[1].mint,
+        contributor: configLines[1].contributor,
+        tokenStandard: TokenStandard.NonFungible,
       },
     ],
   });

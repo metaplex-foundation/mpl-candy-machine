@@ -19,5 +19,6 @@ pub const CANDY_MACHINE_SIZE: usize = 8           // discriminator
     + 8; // items available
 
 pub const CONFIG_LINE_SIZE: usize = 32// mint
-    + 32 // seller
-    + 32; // winner
+    + 32 // contributor
+    + 32 // winner
+    +1; // token_standard

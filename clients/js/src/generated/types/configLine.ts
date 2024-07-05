@@ -12,18 +12,34 @@ import {
   publicKey as publicKeySerializer,
   struct,
 } from '@metaplex-foundation/umi/serializers';
+import {
+  TokenStandard,
+  TokenStandardArgs,
+  getTokenStandardSerializer,
+} from '.';
 
 /** Config line struct for storing asset (NFT) data pre-mint. */
 export type ConfigLine = {
   /** Mint account of the asset. */
   mint: PublicKey;
   /** Wallet that submitted the asset for sale. */
-  seller: PublicKey;
+  contributor: PublicKey;
   /** Wallet that will receive the asset upon sale. Empty until drawn. */
   buyer: PublicKey;
+  /** Token standard. */
+  tokenStandard: TokenStandard;
 };
 
-export type ConfigLineArgs = ConfigLine;
+export type ConfigLineArgs = {
+  /** Mint account of the asset. */
+  mint: PublicKey;
+  /** Wallet that submitted the asset for sale. */
+  contributor: PublicKey;
+  /** Wallet that will receive the asset upon sale. Empty until drawn. */
+  buyer: PublicKey;
+  /** Token standard. */
+  tokenStandard: TokenStandardArgs;
+};
 
 export function getConfigLineSerializer(): Serializer<
   ConfigLineArgs,
@@ -32,8 +48,9 @@ export function getConfigLineSerializer(): Serializer<
   return struct<ConfigLine>(
     [
       ['mint', publicKeySerializer()],
-      ['seller', publicKeySerializer()],
+      ['contributor', publicKeySerializer()],
       ['buyer', publicKeySerializer()],
+      ['tokenStandard', getTokenStandardSerializer()],
     ],
     { description: 'ConfigLine' }
   ) as Serializer<ConfigLineArgs, ConfigLine>;

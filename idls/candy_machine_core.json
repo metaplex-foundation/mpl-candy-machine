@@ -345,7 +345,7 @@
             "type": "publicKey"
           },
           {
-            "name": "seller",
+            "name": "contributor",
             "docs": [
               "Wallet that submitted the asset for sale."
             ],
@@ -357,6 +357,29 @@
               "Wallet that will receive the asset upon sale. Empty until drawn."
             ],
             "type": "publicKey"
+          },
+          {
+            "name": "tokenStandard",
+            "docs": [
+              "Token standard."
+            ],
+            "type": {
+              "defined": "TokenStandard"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokenStandard",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "NonFungible"
+          },
+          {
+            "name": "Core"
           }
         ]
       }

@@ -45,7 +45,16 @@ pub struct ConfigLine {
     /// Mint account of the asset.
     pub mint: Pubkey,
     /// Wallet that submitted the asset for sale.
-    pub seller: Pubkey,
+    pub contributor: Pubkey,
     /// Wallet that will receive the asset upon sale. Empty until drawn.
     pub buyer: Pubkey,
+    /// Token standard.
+    pub token_standard: TokenStandard,
+}
+
+// Need to include this as it doesn't get picked up from mallow-utils by anchor idl generation
+#[derive(Copy, AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, Debug)]
+pub enum TokenStandard {
+    NonFungible,
+    Core,
 }

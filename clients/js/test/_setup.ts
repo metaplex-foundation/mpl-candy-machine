@@ -193,20 +193,17 @@ export const createV2 = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
     > & { configLineIndex?: number; configLines?: ConfigLine[] } = {}
 ) => {
   const candyMachine = input.candyMachine ?? generateSigner(umi);
-  const collectionMint =
-    input.collectionMint ?? (await createCollectionNft(umi)).publicKey;
   let builder = await baseCreateCandyMachineV2(umi, {
     ...defaultCandyMachineData(umi),
     ...input,
-    itemsAvailable: input.itemsAvailable ?? input.configLines?.length ?? 100,
+    itemCount: input.itemCount ?? input.configLines?.length ?? 100,
     candyMachine,
-    collectionMint,
   });
 
   if (input.configLines !== undefined) {
     builder = builder.add(
       addConfigLines(umi, {
-        authority: input.collectionUpdateAuthority ?? umi.identity,
+        authority: umi.identity,
         candyMachine: candyMachine.publicKey,
         index: input.configLineIndex ?? 0,
         configLines: input.configLines,
@@ -218,7 +215,13 @@ export const createV2 = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
     const candyGuard = findCandyGuardPda(umi, { base: candyMachine.publicKey });
     builder = builder
       .add(baseCreateCandyGuard<DA>(umi, { ...input, base: candyMachine }))
-      .add(wrap(umi, { candyMachine: candyMachine.publicKey, candyGuard }));
+      .add(
+        wrap(umi, {
+          candyMachine: candyMachine.publicKey,
+          candyGuard,
+          candyMachineAuthority: umi.identity,
+        })
+      );
   }
 
   await builder.sendAndConfirm(umi);

@@ -27,3 +27,4 @@ export * from './token2022Payment';
 export * from './tokenBurn';
 export * from './tokenGate';
 export * from './tokenPayment';
+export * from './tokenStandard';

@@ -1,4 +1,3 @@
-import { TokenStandard } from '@metaplex-foundation/mpl-token-metadata';
 import {
   defaultPublicKey,
   none,
@@ -15,6 +14,7 @@ import {
   u32,
   u8,
 } from '@metaplex-foundation/umi/serializers';
+import { TokenStandard } from 'src/generated';
 import { CANDY_MACHINE_HIDDEN_SECTION } from '../constants';
 import {
   CandyMachineAccountData as BaseCandyMachineAccountData,
@@ -127,7 +127,7 @@ export function getCandyMachineAccountDataSerializer(): Serializer<
       hiddenSection.itemsLoadedMap.forEach((loaded, index) => {
         if (!loaded) return;
         const rawItem = hiddenSection.rawConfigLines[index];
-        items.push({
+        const item = {
           index,
           minted: !itemsLeftToMint.includes(index),
           mint: rawItem.mint,
@@ -135,7 +135,8 @@ export function getCandyMachineAccountDataSerializer(): Serializer<
           buyer:
             rawItem.buyer === defaultPublicKey() ? undefined : rawItem.buyer,
           tokenStandard: rawItem.tokenStandard,
-        });
+        };
+        items.push(item);
       });
 
       return {

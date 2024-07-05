@@ -5,6 +5,7 @@
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "scripts": {
+    "dev": "tsc -w -p tsconfig.json",
     "build": "rimraf dist && tsc -p tsconfig.json",
     "build:docs": "typedoc",
     "test": "ava",

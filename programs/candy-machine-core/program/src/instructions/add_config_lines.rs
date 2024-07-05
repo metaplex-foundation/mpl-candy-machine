@@ -32,6 +32,23 @@ pub fn add_config_lines(
         return Ok(());
     }
 
+    let mut position = CANDY_MACHINE_SIZE + 4 + (index as usize) * CONFIG_LINE_SIZE;
+
+    for line in &config_lines {
+        let mint_slice: &mut [u8] = &mut data[position..position + 32];
+        mint_slice.copy_from_slice(&line.mint.to_bytes());
+        position += 32;
+
+        let contributor_slice: &mut [u8] = &mut data[position..position + 32];
+        contributor_slice.copy_from_slice(&line.contributor.to_bytes());
+        // Skip buyer (+32)
+        position += 64;
+
+        let token_standard_slice: &mut [u8] = &mut data[position..position + 1];
+        token_standard_slice.copy_from_slice(&u8::to_be_bytes(line.token_standard as u8));
+        position += 1;
+    }
+
     // after adding the config lines, we need to update the mint indices - there are two arrays
     // controlling this process: (1) a bit-mask array to keep track which config lines are already
     // present on the data; (2) an array with mint indices, where indices are added when the config

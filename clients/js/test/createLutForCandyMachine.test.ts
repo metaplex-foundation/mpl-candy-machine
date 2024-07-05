@@ -1,11 +1,5 @@
 /* eslint-disable no-promise-executor-return */
-import {
-  MetadataDelegateRole,
-  findMasterEditionPda,
-  findMetadataDelegateRecordPda,
-  findMetadataPda,
-  getMplTokenMetadataProgramId,
-} from '@metaplex-foundation/mpl-token-metadata';
+import { getMplTokenMetadataProgramId } from '@metaplex-foundation/mpl-token-metadata';
 import {
   getSplAssociatedTokenProgramId,
   getSplTokenProgramId,
@@ -24,18 +18,16 @@ import {
 } from '../src';
 import {
   assertSuccessfulMint,
-  createCollectionNft,
   createUmi,
   createV2,
+  getNewConfigLine,
 } from './_setup';
 
 test('it can create a LUT for a candy machine v2', async (t) => {
   // Given a candy machine with a candy guard.
   const umi = await createUmi();
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
-    collectionMint,
-    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    configLines: [getNewConfigLine()],
     guards: {},
   });
 
@@ -46,9 +38,6 @@ test('it can create a LUT for a candy machine v2', async (t) => {
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mint,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
       })
     );
 
@@ -70,17 +59,8 @@ test('it can create a LUT for a candy machine v2', async (t) => {
     [
       candyMachine,
       findCandyGuardPda(umi, { base: candyMachine })[0],
-      collectionMint,
-      findMetadataPda(umi, { mint: collectionMint })[0],
-      findMasterEditionPda(umi, { mint: collectionMint })[0],
       umi.identity.publicKey,
       collectionAuthorityPda,
-      findMetadataDelegateRecordPda(umi, {
-        mint: collectionMint,
-        delegateRole: MetadataDelegateRole.Collection,
-        updateAuthority: umi.identity.publicKey,
-        delegate: collectionAuthorityPda,
-      })[0],
       getSysvar('instructions'),
       getSysvar('slotHashes'),
       getSplTokenProgramId(umi),
@@ -111,10 +91,9 @@ test('it can create a LUT for a candy machine v2', async (t) => {
 test('it can create a LUT for a candy machine with no candy guard', async (t) => {
   // Given a candy machine with no candy guard.
   const umi = await createUmi();
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
+
   const { publicKey: candyMachine } = await createV2(umi, {
-    collectionMint,
-    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    configLines: [getNewConfigLine()],
   });
 
   // And a custom mint authority.

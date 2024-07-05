@@ -27,7 +27,6 @@ test('it can create a candy machine with an associated candy guard', async (t) =
   const candyMachine = generateSigner(umi);
   const destination = generateSigner(umi).publicKey;
   const createInstructions = await create(umi, {
-    itemCount: 1,
     candyMachine,
     guards: {
       botTax: some({ lamports: sol(0.01), lastInstruction: true }),

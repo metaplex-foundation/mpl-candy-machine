@@ -7,27 +7,14 @@ import {
   fetchCandyMachine,
   TokenStandard,
 } from '../src';
-import { createV2, createUmi } from './_setup';
+import { createV2, createUmi, getNewConfigLine } from './_setup';
 
 test('it can add items to a candy machine', async (t) => {
   // Given a Candy Machine with 5 items.
   const umi = await createUmi();
   const candyMachine = await createV2(umi, { itemCount: 5 });
 
-  const configLines = [
-    {
-      mint: publicKey(Keypair.generate().publicKey),
-      contributor: publicKey(Keypair.generate().publicKey),
-      buyer: publicKey(PublicKey.default),
-      tokenStandard: TokenStandard.NonFungible,
-    },
-    {
-      mint: publicKey(Keypair.generate().publicKey),
-      contributor: publicKey(Keypair.generate().publicKey),
-      buyer: publicKey(PublicKey.default),
-      tokenStandard: TokenStandard.NonFungible,
-    },
-  ];
+  const configLines = [getNewConfigLine(), getNewConfigLine()];
 
   // When we add two items to the Candy Machine.
   await transactionBuilder()
@@ -74,20 +61,7 @@ test('it can append additional items to a candy machine', async (t) => {
   const umi = await createUmi();
   const candyMachine = await createV2(umi, { itemCount: 2 });
 
-  const configLines = [
-    {
-      mint: publicKey(Keypair.generate().publicKey),
-      contributor: publicKey(Keypair.generate().publicKey),
-      buyer: publicKey(PublicKey.default),
-      tokenStandard: TokenStandard.NonFungible,
-    },
-    {
-      mint: publicKey(Keypair.generate().publicKey),
-      contributor: publicKey(Keypair.generate().publicKey),
-      buyer: publicKey(PublicKey.default),
-      tokenStandard: TokenStandard.NonFungible,
-    },
-  ];
+  const configLines = [getNewConfigLine(), getNewConfigLine()];
 
   await transactionBuilder()
     .add(
@@ -150,20 +124,7 @@ test('it cannot add items that would make the candy machine exceed the maximum c
       addConfigLines(umi, {
         candyMachine: candyMachine.publicKey,
         index: 0,
-        configLines: [
-          {
-            mint: publicKey(Keypair.generate().publicKey),
-            contributor: publicKey(Keypair.generate().publicKey),
-            buyer: publicKey(PublicKey.default),
-            tokenStandard: TokenStandard.NonFungible,
-          },
-          {
-            mint: publicKey(Keypair.generate().publicKey),
-            contributor: publicKey(Keypair.generate().publicKey),
-            buyer: publicKey(PublicKey.default),
-            tokenStandard: TokenStandard.NonFungible,
-          },
-        ],
+        configLines: [getNewConfigLine(), getNewConfigLine()],
       })
     )
     .sendAndConfirm(umi);
@@ -183,20 +144,7 @@ test('it cannot add items once the candy machine is fully loaded', async (t) => 
       addConfigLines(umi, {
         candyMachine: candyMachine.publicKey,
         index: 0,
-        configLines: [
-          {
-            mint: publicKey(Keypair.generate().publicKey),
-            contributor: publicKey(Keypair.generate().publicKey),
-            buyer: publicKey(PublicKey.default),
-            tokenStandard: TokenStandard.NonFungible,
-          },
-          {
-            mint: publicKey(Keypair.generate().publicKey),
-            contributor: publicKey(Keypair.generate().publicKey),
-            buyer: publicKey(PublicKey.default),
-            tokenStandard: TokenStandard.NonFungible,
-          },
-        ],
+        configLines: [getNewConfigLine(), getNewConfigLine()],
       })
     )
     .sendAndConfirm(umi);
@@ -207,14 +155,7 @@ test('it cannot add items once the candy machine is fully loaded', async (t) => 
       addConfigLines(umi, {
         candyMachine: candyMachine.publicKey,
         index: 2,
-        configLines: [
-          {
-            mint: publicKey(Keypair.generate().publicKey),
-            contributor: publicKey(Keypair.generate().publicKey),
-            buyer: publicKey(PublicKey.default),
-            tokenStandard: TokenStandard.NonFungible,
-          },
-        ],
+        configLines: [getNewConfigLine()],
       })
     )
     .sendAndConfirm(umi);
@@ -229,20 +170,7 @@ test('it can add items to a custom offset and override existing items', async (t
   // Given an existing Candy Machine with 2 items loaded and capacity of 3 items.
   const umi = await createUmi();
   const candyMachine = await createV2(umi, { itemCount: 3 });
-  const configLines = [
-    {
-      mint: publicKey(Keypair.generate().publicKey),
-      contributor: publicKey(Keypair.generate().publicKey),
-      buyer: publicKey(PublicKey.default),
-      tokenStandard: TokenStandard.NonFungible,
-    },
-    {
-      mint: publicKey(Keypair.generate().publicKey),
-      contributor: publicKey(Keypair.generate().publicKey),
-      buyer: publicKey(PublicKey.default),
-      tokenStandard: TokenStandard.NonFungible,
-    },
-  ];
+  const configLines = [getNewConfigLine(), getNewConfigLine()];
   await transactionBuilder()
     .add(
       addConfigLines(umi, {
@@ -254,20 +182,7 @@ test('it can add items to a custom offset and override existing items', async (t
     .sendAndConfirm(umi);
 
   // When we add 2 items to the Candy Machine at index 1.
-  const overrideConfigLines = [
-    {
-      mint: publicKey(Keypair.generate().publicKey),
-      contributor: publicKey(Keypair.generate().publicKey),
-      buyer: publicKey(PublicKey.default),
-      tokenStandard: TokenStandard.NonFungible,
-    },
-    {
-      mint: publicKey(Keypair.generate().publicKey),
-      contributor: publicKey(Keypair.generate().publicKey),
-      buyer: publicKey(PublicKey.default),
-      tokenStandard: TokenStandard.NonFungible,
-    },
-  ];
+  const overrideConfigLines = [getNewConfigLine(), getNewConfigLine()];
   await transactionBuilder()
     .add(
       addConfigLines(umi, {
@@ -324,39 +239,13 @@ test('it can override all items of a candy machine', async (t) => {
       addConfigLines(umi, {
         candyMachine: candyMachine.publicKey,
         index: 0,
-        configLines: [
-          {
-            mint: publicKey(Keypair.generate().publicKey),
-            contributor: publicKey(Keypair.generate().publicKey),
-            buyer: publicKey(PublicKey.default),
-            tokenStandard: TokenStandard.NonFungible,
-          },
-          {
-            mint: publicKey(Keypair.generate().publicKey),
-            contributor: publicKey(Keypair.generate().publicKey),
-            buyer: publicKey(PublicKey.default),
-            tokenStandard: TokenStandard.NonFungible,
-          },
-        ],
+        configLines: [getNewConfigLine(), getNewConfigLine()],
       })
     )
     .sendAndConfirm(umi);
 
   // When we add 2 new items to the Candy Machine at index 0.
-  const configLines = [
-    {
-      mint: publicKey(Keypair.generate().publicKey),
-      contributor: publicKey(Keypair.generate().publicKey),
-      buyer: publicKey(PublicKey.default),
-      tokenStandard: TokenStandard.NonFungible,
-    },
-    {
-      mint: publicKey(Keypair.generate().publicKey),
-      contributor: publicKey(Keypair.generate().publicKey),
-      buyer: publicKey(PublicKey.default),
-      tokenStandard: TokenStandard.NonFungible,
-    },
-  ];
+  const configLines = [getNewConfigLine(), getNewConfigLine()];
   await transactionBuilder()
     .add(
       addConfigLines(umi, {
@@ -400,12 +289,9 @@ test('it will safely ignore any pre-set buyer', async (t) => {
   const umi = await createUmi();
   const candyMachine = await createV2(umi, { itemCount: 1 });
 
-  const configLine = {
-    mint: publicKey(Keypair.generate().publicKey),
-    contributor: publicKey(Keypair.generate().publicKey),
+  const configLine = getNewConfigLine({
     buyer: publicKey(Keypair.generate().publicKey),
-    tokenStandard: TokenStandard.NonFungible,
-  };
+  });
 
   // When we add one item to the Candy Machine.
   await transactionBuilder()

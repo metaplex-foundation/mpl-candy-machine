@@ -1,7 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import {
   DigitalAssetWithToken,
-  TokenStandard,
+  TokenStandard as MplTokenStandard,
   createNft as baseCreateNft,
   createProgrammableNft as baseCreateProgrammableNft,
   fetchDigitalAssetWithAssociatedToken,
@@ -24,6 +24,7 @@ import {
   TransactionSignature,
   Umi,
   assertAccountExists,
+  defaultPublicKey,
   generateSigner,
   now,
   percentAmount,
@@ -32,6 +33,7 @@ import {
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import { createUmi as basecreateUmi } from '@metaplex-foundation/umi-bundle-tests';
+import { Keypair } from '@solana/web3.js';
 import { Assertions } from 'ava';
 import {
   CandyGuardDataArgs,
@@ -40,6 +42,7 @@ import {
   CreateCandyGuardInstructionDataArgs,
   DefaultGuardSetArgs,
   GuardSetArgs,
+  TokenStandard,
   addConfigLines,
   createCandyGuard as baseCreateCandyGuard,
   createCandyMachineV2 as baseCreateCandyMachineV2,
@@ -235,7 +238,7 @@ export const defaultAssetData = () => ({
 export const defaultCandyMachineData = (
   context: Pick<Context, 'identity'>
 ) => ({
-  tokenStandard: TokenStandard.NonFungible,
+  tokenStandard: MplTokenStandard.NonFungible,
   collectionUpdateAuthority: context.identity,
   itemCount: 100,
   sellerFeeBasisPoints: percentAmount(10, 2),
@@ -281,7 +284,7 @@ export const assertSuccessfulMint = async (
     mint: PublicKey | Signer;
     owner: PublicKey | Signer;
     token?: PublicKey;
-    tokenStandard?: TokenStandard;
+    tokenStandard?: MplTokenStandard;
     name?: string | RegExp;
     uri?: string | RegExp;
   }
@@ -375,3 +378,13 @@ export const assertBurnedNft = async (
 
 export const yesterday = (): DateTime => now() - 3600n * 24n;
 export const tomorrow = (): DateTime => now() + 3600n * 24n;
+
+export const getNewConfigLine = (
+  overrides?: Partial<ConfigLine>
+): ConfigLine => ({
+  mint: publicKey(Keypair.generate().publicKey),
+  contributor: publicKey(Keypair.generate().publicKey),
+  buyer: defaultPublicKey(),
+  tokenStandard: TokenStandard.NonFungible,
+  ...overrides,
+});

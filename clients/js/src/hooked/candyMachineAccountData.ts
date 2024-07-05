@@ -25,7 +25,6 @@ import {
 export type CandyMachineAccountData = BaseCandyMachineAccountData & {
   itemsLoaded: number;
   items: CandyMachineItem[];
-  ruleSet: Option<PublicKey>;
 };
 
 export type CandyMachineAccountDataArgs = BaseCandyMachineAccountDataArgs;
@@ -83,11 +82,6 @@ export function getCandyMachineAccountDataSerializer(): Serializer<
     (base, bytes, offset) => {
       const slice = bytes.slice(offset + CANDY_MACHINE_HIDDEN_SECTION);
 
-      const deserializeRuleSet = (
-        ruleBytes: Uint8Array,
-        ruleOffset = 0
-      ): [Option<PublicKey>, number] => [none(), ruleOffset];
-
       const itemsAvailable = Number(base.itemsAvailable);
       const itemsMinted = Number(base.itemsRedeemed);
       const itemsRemaining = itemsAvailable - itemsMinted;
@@ -116,8 +110,7 @@ export function getCandyMachineAccountDataSerializer(): Serializer<
           ['itemsLeftToMint', array(u32(), { size: itemsAvailable })],
         ]);
 
-      const [hiddenSection, hiddenSectionOffset] =
-        hiddenSectionSerializer.deserialize(slice);
+      const [hiddenSection] = hiddenSectionSerializer.deserialize(slice);
 
       const itemsLeftToMint = hiddenSection.itemsLeftToMint.slice(
         0,
@@ -143,7 +136,6 @@ export function getCandyMachineAccountDataSerializer(): Serializer<
         ...base,
         items,
         itemsLoaded: hiddenSection.itemsLoaded,
-        ruleSet: deserializeRuleSet(slice, hiddenSectionOffset)[0],
       };
     }
   );

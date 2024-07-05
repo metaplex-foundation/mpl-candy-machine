@@ -33,7 +33,7 @@ export type WrapInstructionAccounts = {
   authority?: Signer;
   candyMachine: PublicKey | Pda;
   candyMachineProgram?: PublicKey | Pda;
-  candyMachineAuthority: Signer;
+  candyMachineAuthority?: Signer;
 };
 
 // Data.
@@ -102,6 +102,9 @@ export function wrap(
       'CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR'
     );
     resolvedAccounts.candyMachineProgram.isWritable = false;
+  }
+  if (!resolvedAccounts.candyMachineAuthority.value) {
+    resolvedAccounts.candyMachineAuthority.value = context.identity;
   }
 
   // Accounts in order.

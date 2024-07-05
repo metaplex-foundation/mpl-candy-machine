@@ -14,7 +14,7 @@ test('it can update the data of a candy machine', async (t) => {
   const umi = await createUmi();
   const creatorA = generateSigner(umi).publicKey;
   const candyMachine = await createV2(umi, {
-    itemsAvailable: 1000,
+    itemCount: 1000,
     symbol: 'OLD',
     sellerFeeBasisPoints: percentAmount(1),
     maxEditionSupply: 1n,
@@ -36,7 +36,7 @@ test('it can update the data of a candy machine', async (t) => {
       updateCandyMachine(umi, {
         candyMachine: candyMachine.publicKey,
         data: {
-          itemsAvailable: 1000, // Cannot be updated.
+          itemCount: 1000, // Cannot be updated.
           symbol: 'NEW',
           sellerFeeBasisPoints: percentAmount(2),
           maxEditionSupply: 2,
@@ -64,7 +64,7 @@ test('it can update the data of a candy machine', async (t) => {
   );
   t.like(candyMachineAccount, <CandyMachine>{
     data: {
-      itemsAvailable: 1000n,
+      itemCount: 1000n,
       symbol: 'NEW',
       sellerFeeBasisPoints: percentAmount(2),
       maxEditionSupply: 2n,
@@ -86,7 +86,7 @@ test('it cannot update the number of items when using config line settings', asy
   // Given a Candy Machine using config line settings with 1000 items.
   const umi = await createUmi();
   const candyMachine = await createV2(umi, {
-    itemsAvailable: 1000,
+    itemCount: 1000,
     configLineSettings: some({
       prefixName: 'My NFT #',
       nameLength: 4,
@@ -105,7 +105,7 @@ test('it cannot update the number of items when using config line settings', asy
     .add(
       updateCandyMachine(umi, {
         candyMachine: candyMachine.publicKey,
-        data: { ...originalData, itemsAvailable: 2000 },
+        data: { ...originalData, itemCount: 2000 },
       })
     )
     .sendAndConfirm(umi);
@@ -118,7 +118,7 @@ test('it can update the number of items when using hidden settings', async (t) =
   // Given a Candy Machine using hidden settings with 1000 items.
   const umi = await createUmi();
   const candyMachine = await createV2(umi, {
-    itemsAvailable: 1000,
+    itemCount: 1000,
     configLineSettings: none(),
     hiddenSettings: some({
       name: 'My NFT #$ID+1$',
@@ -136,7 +136,7 @@ test('it can update the number of items when using hidden settings', async (t) =
     .add(
       updateCandyMachine(umi, {
         candyMachine: candyMachine.publicKey,
-        data: { ...originalData, itemsAvailable: 2000 },
+        data: { ...originalData, itemCount: 2000 },
       })
     )
     .sendAndConfirm(umi);
@@ -147,7 +147,7 @@ test('it can update the number of items when using hidden settings', async (t) =
     candyMachine.publicKey
   );
   t.like(candyMachineAccount, <CandyMachine>{
-    data: { itemsAvailable: 2000n },
+    data: { itemCount: 2000n },
   });
 });
 
@@ -155,7 +155,7 @@ test('it can update the hidden settings of a candy machine', async (t) => {
   // Given a Candy Machine using the following hidden settings.
   const umi = await createUmi();
   const candyMachine = await createV2(umi, {
-    itemsAvailable: 1000,
+    itemCount: 1000,
     configLineSettings: none(),
     hiddenSettings: some({
       name: 'My Old NFT #$ID+1$',
@@ -205,7 +205,7 @@ test('it cannot go from hidden settings to config line settings', async (t) => {
   // Given a Candy Machine using the following hidden settings.
   const umi = await createUmi();
   const candyMachine = await createV2(umi, {
-    itemsAvailable: 1000,
+    itemCount: 1000,
     configLineSettings: none(),
     hiddenSettings: some({
       name: 'My NFT #$ID+1$',
@@ -246,7 +246,7 @@ test('it cannot go from config line settings to hidden settings', async (t) => {
   // Given a Candy Machine using the following config line settings.
   const umi = await createUmi();
   const candyMachine = await createV2(umi, {
-    itemsAvailable: 1000,
+    itemCount: 1000,
     hiddenSettings: none(),
     configLineSettings: some({
       prefixName: 'My NFT #',

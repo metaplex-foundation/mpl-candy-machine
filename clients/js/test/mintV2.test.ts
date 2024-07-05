@@ -416,7 +416,7 @@ test('it cannot mint from a candy machine that is not fully loaded', async (t) =
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
-    itemsAvailable: 2,
+    itemCount: 2,
     configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
     guards: {},
   });
@@ -487,7 +487,7 @@ test('it can mint from a candy machine using hidden settings', async (t) => {
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
-    itemsAvailable: 100,
+    itemCount: 100,
     configLineSettings: none(),
     hiddenSettings: {
       name: 'Degen #$ID+1$',

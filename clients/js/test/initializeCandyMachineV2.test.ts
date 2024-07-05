@@ -48,7 +48,7 @@ test('it can initialize a new candy machine account', async (t) => {
         candyMachine: candyMachine.publicKey,
         collectionMint: collectionMint.publicKey,
         collectionUpdateAuthority: umi.identity,
-        itemsAvailable: 100,
+        itemCount: 100,
         tokenStandard: TokenStandard.NonFungible,
         sellerFeeBasisPoints: percentAmount(1.23),
         creators: [
@@ -79,7 +79,7 @@ test('it can initialize a new candy machine account', async (t) => {
     tokenStandard: TokenStandard.NonFungible,
     itemsRedeemed: 0n,
     data: {
-      itemsAvailable: 100n,
+      itemCount: 100n,
       symbol: '',
       sellerFeeBasisPoints: percentAmount(1.23),
       maxEditionSupply: 0n,

@@ -32,7 +32,7 @@ export type UnwrapInstructionAccounts = {
   candyGuard: PublicKey | Pda;
   authority?: Signer;
   candyMachine: PublicKey | Pda;
-  candyMachineAuthority: Signer;
+  candyMachineAuthority?: Signer;
   candyMachineProgram?: PublicKey | Pda;
 };
 
@@ -96,6 +96,9 @@ export function unwrap(
   // Default values.
   if (!resolvedAccounts.authority.value) {
     resolvedAccounts.authority.value = context.identity;
+  }
+  if (!resolvedAccounts.candyMachineAuthority.value) {
+    resolvedAccounts.candyMachineAuthority.value = context.identity;
   }
   if (!resolvedAccounts.candyMachineProgram.value) {
     resolvedAccounts.candyMachineProgram.value = context.programs.getPublicKey(

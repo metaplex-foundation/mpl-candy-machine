@@ -1,4 +1,5 @@
 import {
+  Context,
   transactionBuilder,
   TransactionBuilder,
 } from '@metaplex-foundation/umi';
@@ -17,9 +18,10 @@ export type CreateInput<DA extends GuardSetArgs = DefaultGuardSetArgs> =
     CreateCandyGuardInstructionDataArgs<DA>;
 
 export const create = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
-  context: Parameters<typeof createCandyMachineV2>[0] & {
-    guards: GuardRepository;
-  },
+  context: Parameters<typeof createCandyMachineV2>[0] &
+    Pick<Context, 'eddsa'> & {
+      guards: GuardRepository;
+    },
   input: CreateInput<DA extends undefined ? DefaultGuardSetArgs : DA>
 ): Promise<TransactionBuilder> => {
   const { guards, groups, ...rest } = input;

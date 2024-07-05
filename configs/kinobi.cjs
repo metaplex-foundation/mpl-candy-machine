@@ -137,6 +137,12 @@ kinobi.update(
   ])
 );
 
+const defaultsToCandyMachineAuthorityPda = (candyMachine = "candyMachine") =>
+  k.pdaDefault("candyMachineAuthority", {
+    importFrom: "hooked",
+    seeds: { candyMachine: k.accountDefault(candyMachine) },
+  });
+
 const defaultsToCandyGuardPda = (base = "base") =>
   k.pdaDefault("candyGuard", {
     importFrom: "hooked",
@@ -149,6 +155,21 @@ kinobi.update(
     {
       ...k.publicKeyDefault("SysvarS1otHashes111111111111111111111111111"),
       account: /^recentSlothashes$/,
+      ignoreIfOptional: true,
+    },
+    {
+      ...k.identityDefault(),
+      account: "candyMachineAuthority",
+      ignoreIfOptional: true,
+    },
+    {
+      ...defaultsToCandyMachineAuthorityPda(),
+      account: "authorityPda",
+      ignoreIfOptional: true,
+    },
+    {
+      ...defaultsToCandyMachineAuthorityPda(),
+      account: "candyMachineAuthorityPda",
       ignoreIfOptional: true,
     },
   ])

@@ -203,7 +203,6 @@ export const createV2 = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
   if (input.configLines !== undefined) {
     builder = builder.add(
       addConfigLines(umi, {
-        authority: umi.identity,
         candyMachine: candyMachine.publicKey,
         index: input.configLineIndex ?? 0,
         configLines: input.configLines,
@@ -219,7 +218,6 @@ export const createV2 = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
         wrap(umi, {
           candyMachine: candyMachine.publicKey,
           candyGuard,
-          candyMachineAuthority: umi.identity,
         })
       );
   }
@@ -239,7 +237,7 @@ export const defaultCandyMachineData = (
 ) => ({
   tokenStandard: TokenStandard.NonFungible,
   collectionUpdateAuthority: context.identity,
-  itemsAvailable: 100,
+  itemCount: 100,
   sellerFeeBasisPoints: percentAmount(10, 2),
   creators: [
     {

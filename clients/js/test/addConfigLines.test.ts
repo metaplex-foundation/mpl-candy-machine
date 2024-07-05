@@ -1,10 +1,4 @@
-import {
-  assertAccountExists,
-  none,
-  publicKey,
-  some,
-  transactionBuilder,
-} from '@metaplex-foundation/umi';
+import { publicKey, transactionBuilder } from '@metaplex-foundation/umi';
 import { Keypair, PublicKey } from '@solana/web3.js';
 import test from 'ava';
 import {

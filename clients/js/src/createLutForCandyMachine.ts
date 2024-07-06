@@ -17,18 +17,19 @@ import {
   fetchCandyMachine,
   getMplCandyMachineCoreProgramId,
 } from './generated';
+import { findCandyGuardPda } from './hooked';
 
 export const createLutForCandyMachine = async (
   context: Pick<Context, 'rpc' | 'eddsa' | 'programs' | 'identity' | 'payer'>,
   recentSlot: number,
   candyMachine: PublicKey,
-  collectionUpdateAuthority?: PublicKey,
-  lutAuthority?: Signer
+  lutAuthority?: Signer,
+  candyMachineAuthority?: PublicKey
 ): Promise<[TransactionBuilder, AddressLookupTableInput]> => {
   const addresses = await getLutAddressesForCandyMachine(
     context,
     candyMachine,
-    collectionUpdateAuthority
+    candyMachineAuthority
   );
 
   return createLut(context, {
@@ -41,14 +42,16 @@ export const createLutForCandyMachine = async (
 export const getLutAddressesForCandyMachine = async (
   context: Pick<Context, 'rpc' | 'eddsa' | 'programs' | 'identity'>,
   candyMachine: PublicKey,
-  collectionUpdateAuthority?: PublicKey
+  candyMachineAuthority?: PublicKey
 ): Promise<PublicKey[]> => {
   const candyMachineAccount = await fetchCandyMachine(context, candyMachine);
   const { mintAuthority } = candyMachineAccount;
-  collectionUpdateAuthority ??= context.identity.publicKey;
+  candyMachineAuthority ??= context.identity.publicKey;
 
   return uniquePublicKeys([
     candyMachine,
+    findCandyGuardPda(context, { base: candyMachine })[0],
+    context.identity.publicKey,
     mintAuthority,
     getSysvar('instructions'),
     getSysvar('slotHashes'),

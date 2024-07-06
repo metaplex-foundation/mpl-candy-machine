@@ -65,9 +65,8 @@ export function mintV2<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
   const program = context.programs.get<CandyGuardProgram>('mplCandyGuard');
   const candyMachine = publicKey(input.candyMachine, false);
   const mintContext: MintContext = {
-    minter: input.minter ?? context.identity,
+    minter: input.buyer ?? context.identity,
     payer: input.payer ?? context.payer,
-    mint: publicKey(input.nftMint, false),
     candyMachine,
     candyGuard: publicKey(
       input.candyGuard ?? findCandyGuardPda(context, { base: candyMachine }),
@@ -78,25 +77,8 @@ export function mintV2<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
     MA extends undefined ? DefaultGuardSetMintArgs : MA
   >(context, program, mintContext, mintArgs);
 
-  // Default token Record value.
-  const tokenStandard = input.tokenStandard ?? TokenStandard.NonFungible;
-  const defaultTokenRecord = isProgrammable(tokenStandard)
-    ? findTokenRecordPda(context, {
-        mint: publicKey(input.nftMint, false),
-        token: publicKey(
-          input.token ??
-            findAssociatedTokenPda(context, {
-              mint: publicKey(input.nftMint),
-              owner: publicKey(input.minter ?? context.identity),
-            }),
-          false
-        ),
-      })
-    : undefined;
-
   const ix = baseMintV2(context, {
     ...rest,
-    tokenRecord: input.tokenRecord ?? defaultTokenRecord,
     mintArgs: data,
     group,
   }).items[0];
@@ -104,17 +86,7 @@ export function mintV2<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
   const [keys, signers] = parseGuardRemainingAccounts(remainingAccounts);
   ix.instruction.keys.push(...keys);
   ix.signers.push(...signers);
-  ix.bytesCreatedOnChain =
-    METADATA_SIZE + MASTER_EDITION_SIZE + 2 * ACCOUNT_HEADER_SIZE;
-
-  if (isSigner(input.nftMint)) {
-    ix.bytesCreatedOnChain +=
-      getMintSize() + getTokenSize() + 2 * ACCOUNT_HEADER_SIZE;
-  }
-
-  if (isProgrammable(tokenStandard)) {
-    ix.bytesCreatedOnChain += getTokenRecordSize() + ACCOUNT_HEADER_SIZE;
-  }
+  ix.bytesCreatedOnChain = 0;
 
   return transactionBuilder([ix]);
 }

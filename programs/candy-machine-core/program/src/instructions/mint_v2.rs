@@ -112,7 +112,7 @@ pub fn set_config_line_buyer(
     // (2) retrieve the config line at the mint_index position
     let buyer_position = CANDY_MACHINE_SIZE + 4 + value_to_use * CONFIG_LINE_SIZE 
         + 32 // mint
-        + 32; // seller
+        + 32; // contributor
 
     // Set the buyer on the config line
     account_data[buyer_position..buyer_position + 32].copy_from_slice(&buyer.to_bytes());

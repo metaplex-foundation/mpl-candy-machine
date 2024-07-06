@@ -35,8 +35,6 @@ export type MintContext = {
   minter: Signer;
   /** The wallet to use for SOL fees. */
   payer: Signer;
-  /** The mint account of the NFT being minted. */
-  mint: PublicKey;
   /** The address of the Candy Machine we are using. */
   candyMachine: PublicKey;
   /** The address of the Candy Guard we are using. */

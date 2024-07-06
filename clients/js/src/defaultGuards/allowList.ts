@@ -56,7 +56,7 @@ export const allowListGuardManifest: GuardManifest<
         isWritable: false,
         publicKey: findAllowListProofPda(context, {
           merkleRoot: args.merkleRoot,
-          user: mintContext.minter.publicKey,
+          user: mintContext.buyer.publicKey,
           candyMachine: mintContext.candyMachine,
           candyGuard: mintContext.candyGuard,
         })[0],
@@ -70,14 +70,14 @@ export const allowListGuardManifest: GuardManifest<
         isWritable: true,
         publicKey: findAllowListProofPda(context, {
           merkleRoot: args.merkleRoot,
-          user: publicKey(args.minter ?? routeContext.payer),
+          user: publicKey(args.buyer ?? routeContext.payer),
           candyMachine: routeContext.candyMachine,
           candyGuard: routeContext.candyGuard,
         })[0],
       },
       { isWritable: false, publicKey: getSplSystemProgramId(context) },
-      ...(args.minter !== undefined
-        ? [{ isWritable: false, publicKey: publicKey(args.minter) }]
+      ...(args.buyer !== undefined
+        ? [{ isWritable: false, publicKey: publicKey(args.buyer) }]
         : []),
     ],
   }),
@@ -125,5 +125,5 @@ export type AllowListRouteArgs = AllowListArgs & {
    * Here, we allow it to be a Signer for backwards compatibility
    * but the account will not be used as a signer.
    */
-  minter?: PublicKey | Signer;
+  buyer?: PublicKey | Signer;
 };

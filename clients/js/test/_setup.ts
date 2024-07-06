@@ -357,7 +357,6 @@ export const assertItemBought = async (
 export const assertBotTax = async (
   t: Assertions,
   umi: Umi,
-  mint: Signer | PublicKey,
   signature: TransactionSignature,
   extraRegex?: RegExp
 ) => {
@@ -366,8 +365,6 @@ export const assertBotTax = async (
   const logs = transaction!.meta.logs.join('');
   t.regex(logs, /Candy Guard Botting is taxed/);
   if (extraRegex !== undefined) t.regex(logs, extraRegex);
-  const [metadata] = findMetadataPda(umi, { mint: publicKey(mint) });
-  t.false(await umi.rpc.accountExists(metadata));
 };
 
 export const assertBurnedNft = async (

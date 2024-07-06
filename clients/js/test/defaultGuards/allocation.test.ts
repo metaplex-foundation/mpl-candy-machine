@@ -15,18 +15,17 @@ import {
 } from '../../src';
 import {
   assertBotTax,
-  assertSuccessfulMint,
-  createCollectionNft,
+  assertItemBought,
   createUmi,
   createV2,
+  getNewConfigLine,
 } from '../_setup';
 
 test('it allows minting when the allocation limit is not reached', async (t) => {
   // Given a loaded Candy Machine with an allocation limit of 5.
   const umi = await createUmi();
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
+
   const { publicKey: candyMachine } = await createV2(umi, {
-    collectionMint,
     configLines: [getNewConfigLine(), getNewConfigLine()],
     guards: {
       allocation: some({ id: 1, limit: 5 }),
@@ -48,22 +47,20 @@ test('it allows minting when the allocation limit is not reached', async (t) => 
     .sendAndConfirm(umi);
 
   // When we mint from it.
-  const mint = generateSigner(umi);
+
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mint,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
+
         mintArgs: { allocation: some({ id: 1 }) },
       })
     )
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
+  await assertItemBought(t, umi, { candyMachine });
 
   // And the mint tracker PDA was incremented.
   const trackerPda = findAllocationTrackerPda(umi, {
@@ -78,9 +75,8 @@ test('it allows minting when the allocation limit is not reached', async (t) => 
 test('it forbids minting when the allocation limit is reached', async (t) => {
   // Given a loaded Candy Machine with an allocation limit of 1.
   const umi = await createUmi();
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
+
   const { publicKey: candyMachine } = await createV2(umi, {
-    collectionMint,
     configLines: [getNewConfigLine(), getNewConfigLine()],
     guards: {
       allocation: some({ id: 1, limit: 1 }),
@@ -102,15 +98,13 @@ test('it forbids minting when the allocation limit is reached', async (t) => {
     .sendAndConfirm(umi);
 
   // And we already minted from it.
-  const mint = generateSigner(umi);
+
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mint,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
+
         mintArgs: { allocation: some({ id: 1 }) },
       })
     )
@@ -122,9 +116,7 @@ test('it forbids minting when the allocation limit is reached', async (t) => {
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mint,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
+
         mintArgs: { allocation: some({ id: 1 }) },
       })
     )
@@ -137,9 +129,8 @@ test('it forbids minting when the allocation limit is reached', async (t) => {
 test('the allocation limit is local to each id', async (t) => {
   // Given a loaded Candy Machine with two allocation limits of 1.
   const umi = await createUmi();
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
+
   const { publicKey: candyMachine } = await createV2(umi, {
-    collectionMint,
     configLines: [getNewConfigLine(), getNewConfigLine()],
     guards: {},
     groups: [
@@ -184,37 +175,29 @@ test('the allocation limit is local to each id', async (t) => {
     )
     .sendAndConfirm(umi);
 
-  // And minter A already minted their NFT.
-  const minterA = generateSigner(umi);
-  const mintA = generateSigner(umi);
+  // And buyer A already minted their NFT.
+  const buyerA = generateSigner(umi);
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mintA,
-        minter: minterA,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
+        buyer: buyerA,
         mintArgs: { allocation: some({ id: 1 }) },
         group: some('GROUPA'),
       })
     )
     .sendAndConfirm(umi);
-  await assertSuccessfulMint(t, umi, { mint: mintA, owner: minterA });
+  await assertItemBought(t, umi, { candyMachine, buyer: buyerA.publicKey });
 
-  // When minter B mints from the same Candy Machine but from a different group.
-  const minterB = generateSigner(umi);
-  const mintB = generateSigner(umi);
+  // When buyer B mints from the same Candy Machine but from a different group.
+  const buyerB = generateSigner(umi);
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mintB,
-        minter: minterB,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
+        buyer: buyerB,
         mintArgs: { allocation: some({ id: 2 }) },
         group: some('GROUPB'),
       })
@@ -222,15 +205,14 @@ test('the allocation limit is local to each id', async (t) => {
     .sendAndConfirm(umi);
 
   // Then minting was successful as the limit is per id.
-  await assertSuccessfulMint(t, umi, { mint: mintB, owner: minterB });
+  await assertItemBought(t, umi, { candyMachine, buyer: buyerB.publicKey });
 });
 
 test('it charges a bot tax when trying to mint after the limit', async (t) => {
   // Given a loaded Candy Machine with an allocation limit of 1 and a bot tax guard.
   const umi = await createUmi();
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
+
   const { publicKey: candyMachine } = await createV2(umi, {
-    collectionMint,
     configLines: [getNewConfigLine(), getNewConfigLine()],
     guards: {
       botTax: some({ lamports: sol(0.1), lastInstruction: true }),
@@ -253,35 +235,29 @@ test('it charges a bot tax when trying to mint after the limit', async (t) => {
     .sendAndConfirm(umi);
 
   // And the identity already minted their NFT.
-  const mintA = generateSigner(umi);
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mintA,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
+
         mintArgs: { allocation: some({ id: 1 }) },
       })
     )
     .sendAndConfirm(umi);
 
   // When the identity tries to mint from the same Candy Machine again.
-  const mintB = generateSigner(umi);
   const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mintB,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
+
         mintArgs: { allocation: some({ id: 1 }) },
       })
     )
     .sendAndConfirm(umi);
 
   // Then we expect a bot tax error.
-  await assertBotTax(t, umi, mintB, signature, /Allocation limit was reached/);
+  await assertBotTax(t, umi, signature, /Allocation limit was reached/);
 });

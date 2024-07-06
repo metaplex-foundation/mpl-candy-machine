@@ -10,11 +10,12 @@ import {
 import test from 'ava';
 import { mintV2 } from '../../src';
 import {
-  assertSuccessfulMint,
+  assertItemBought,
   createCollectionNft,
   createMintWithHolders,
   createUmi,
   createV2,
+  getNewConfigLine,
 } from '../_setup';
 
 test('it transfers Token2022 tokens from the payer to the destination', async (t) => {
@@ -38,9 +39,8 @@ test('it transfers Token2022 tokens from the payer to the destination', async (t
   );
 
   // And a loaded Candy Machine with a token2022Payment guard that requires 5 tokens.
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
+
   const { publicKey: candyMachine } = await createV2(umi, {
-    collectionMint,
     configLines: [getNewConfigLine()],
     guards: {
       token2022Payment: some({
@@ -52,15 +52,13 @@ test('it transfers Token2022 tokens from the payer to the destination', async (t
   });
 
   // When we mint from it.
-  const mint = generateSigner(umi);
+
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mint,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
+
         mintArgs: {
           token2022Payment: some({ mint: tokenMint.publicKey, destinationAta }),
         },
@@ -69,7 +67,7 @@ test('it transfers Token2022 tokens from the payer to the destination', async (t
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
+  await assertItemBought(t, umi, { candyMachine });
 
   // And the treasury token received 5 tokens.
   const destinationTokenAccount = await fetchToken(umi, destinationAta);

@@ -42,7 +42,7 @@ export const gatekeeperGuardManifest: GuardManifest<
     const tokenAccount =
       args?.tokenAccount ??
       context.eddsa.findPda(gatewayProgramId, [
-        publicKey().serialize(mintContext.minter),
+        publicKey().serialize(mintContext.buyer),
         string({ size: 'variable' }).serialize('gateway'),
         new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0]),
         publicKey().serialize(args.gatekeeperNetwork),

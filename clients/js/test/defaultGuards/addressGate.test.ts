@@ -9,19 +9,17 @@ import test from 'ava';
 import { mintV2 } from '../../src';
 import {
   assertBotTax,
-  assertSuccessfulMint,
-  createCollectionNft,
+  assertItemBought,
   createUmi,
   createV2,
+  getNewConfigLine,
 } from '../_setup';
 
 test('it allows minting from a specific address only', async (t) => {
   // Given a loaded Candy Machine with an addressGate guard.
   const umi = await createUmi();
   const allowedAddress = generateSigner(umi);
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
-    collectionMint,
     configLines: [getNewConfigLine()],
     guards: {
       addressGate: some({ address: allowedAddress.publicKey }),
@@ -29,30 +27,29 @@ test('it allows minting from a specific address only', async (t) => {
   });
 
   // When the allowed address mints from it.
-  const mint = generateSigner(umi);
+
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mint,
-        minter: allowedAddress,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
+        buyer: allowedAddress,
       })
     )
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertSuccessfulMint(t, umi, { mint, owner: allowedAddress });
+  await assertItemBought(t, umi, {
+    candyMachine,
+    buyer: allowedAddress.publicKey,
+  });
 });
 
 test('it forbids minting from anyone else', async (t) => {
   // Given a candy machine with an addressGate guard.
   const umi = await createUmi();
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
+
   const { publicKey: candyMachine } = await createV2(umi, {
-    collectionMint,
     configLines: [getNewConfigLine()],
     guards: {
       addressGate: some({ address: generateSigner(umi).publicKey }),
@@ -60,17 +57,13 @@ test('it forbids minting from anyone else', async (t) => {
   });
 
   // When another wallet tries to mint from it.
-  const mint = generateSigner(umi);
   const unauthorizedMinter = generateSigner(umi);
   const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mint,
-        minter: unauthorizedMinter,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
+        buyer: unauthorizedMinter,
       })
     )
     .sendAndConfirm(umi);
@@ -82,9 +75,8 @@ test('it forbids minting from anyone else', async (t) => {
 test('it charges a bot tax when trying to mint using the wrong address', async (t) => {
   // Given a candy machine with an addressGate guard and a bot tax.
   const umi = await createUmi();
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
+
   const { publicKey: candyMachine } = await createV2(umi, {
-    collectionMint,
     configLines: [getNewConfigLine()],
     guards: {
       botTax: some({ lamports: sol(0.01), lastInstruction: true }),
@@ -93,21 +85,18 @@ test('it charges a bot tax when trying to mint using the wrong address', async (
   });
 
   // When another wallet tries to mint from it.
-  const mint = generateSigner(umi);
+
   const unauthorizedMinter = generateSigner(umi);
   const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mint,
-        minter: unauthorizedMinter,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
+        buyer: unauthorizedMinter,
       })
     )
     .sendAndConfirm(umi);
 
   // Then we expect a silent bot tax error.
-  await assertBotTax(t, umi, mint, signature, /AddressNotAuthorized/);
+  await assertBotTax(t, umi, signature, /AddressNotAuthorized/);
 });

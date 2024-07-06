@@ -21,7 +21,7 @@ export const tokenBurnGuardManifest: GuardManifest<
   mintParser: (context, mintContext, args) => {
     const [tokenAccount] = findAssociatedTokenPda(context, {
       mint: args.mint,
-      owner: mintContext.minter.publicKey,
+      owner: mintContext.buyer.publicKey,
     });
     return {
       data: new Uint8Array(),

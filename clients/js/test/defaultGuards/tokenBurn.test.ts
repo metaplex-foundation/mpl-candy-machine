@@ -1,5 +1,6 @@
 import {
   generateSigner,
+  publicKey,
   sol,
   some,
   transactionBuilder,
@@ -13,10 +14,11 @@ import {
 } from '@metaplex-foundation/mpl-toolbox';
 import {
   assertBotTax,
-  assertSuccessfulMint,
+  assertItemBought,
   createCollectionNft,
   createUmi,
   createV2,
+  getNewConfigLine,
 } from '../_setup';
 import { mintV2 } from '../../src';
 
@@ -35,9 +37,8 @@ test('it burns a specific token to allow minting', async (t) => {
     .sendAndConfirm(umi);
 
   // And a loaded Candy Machine with the tokenBurn guard.
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
+
   const { publicKey: candyMachine } = await createV2(umi, {
-    collectionMint,
     configLines: [getNewConfigLine()],
     guards: {
       tokenBurn: some({ mint: tokenMint.publicKey, amount: 1 }),
@@ -45,15 +46,13 @@ test('it burns a specific token to allow minting', async (t) => {
   });
 
   // When the payer mints from it.
-  const mint = generateSigner(umi);
+
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mint,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
+
         mintArgs: {
           tokenBurn: some({ mint: tokenMint.publicKey }),
         },
@@ -62,7 +61,7 @@ test('it burns a specific token to allow minting', async (t) => {
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
+  await assertItemBought(t, umi, { candyMachine });
 
   // And the payer's token was burned.
   const tokenAccount = await fetchToken(
@@ -75,42 +74,40 @@ test('it burns a specific token to allow minting', async (t) => {
   t.is(tokenAccount.amount, 0n);
 });
 
-test('it allows minting even when the payer is different from the minter', async (t) => {
-  // Given an explicit minter with one token.
+test('it allows minting even when the payer is different from the buyer', async (t) => {
+  // Given an explicit buyer with one token.
   const umi = await createUmi();
-  const minter = generateSigner(umi);
+  const buyer = generateSigner(umi);
   const tokenMint = generateSigner(umi);
   await transactionBuilder()
     .add(
       createMintWithAssociatedToken(umi, {
         mint: tokenMint,
-        owner: minter.publicKey,
+        owner: buyer.publicKey,
         amount: 1,
       })
     )
     .sendAndConfirm(umi);
 
   // And a loaded Candy Machine with the tokenBurn guard.
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
+
   const { publicKey: candyMachine } = await createV2(umi, {
-    collectionMint,
     configLines: [getNewConfigLine()],
     guards: {
       tokenBurn: some({ mint: tokenMint.publicKey, amount: 1 }),
     },
   });
 
-  // When the minter mints from it.
-  const mint = generateSigner(umi);
+  // When the buyer mints from it.
+
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mint,
-        minter,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
+
+        buyer,
+
         mintArgs: {
           tokenBurn: some({ mint: tokenMint.publicKey }),
         },
@@ -119,14 +116,14 @@ test('it allows minting even when the payer is different from the minter', async
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertSuccessfulMint(t, umi, { mint, owner: minter });
+  await assertItemBought(t, umi, { candyMachine, buyer: publicKey(buyer) });
 
-  // And the minter's token was burned.
+  // And the buyer's token was burned.
   const tokenAccount = await fetchToken(
     umi,
     findAssociatedTokenPda(umi, {
       mint: tokenMint.publicKey,
-      owner: minter.publicKey,
+      owner: buyer.publicKey,
     })
   );
   t.is(tokenAccount.amount, 0n);
@@ -147,9 +144,8 @@ test('it may burn multiple tokens from a specific mint', async (t) => {
     .sendAndConfirm(umi);
 
   // And a loaded Candy Machine with the tokenBurn guard that requires 5 tokens.
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
+
   const { publicKey: candyMachine } = await createV2(umi, {
-    collectionMint,
     configLines: [getNewConfigLine()],
     guards: {
       tokenBurn: some({ mint: tokenMint.publicKey, amount: 5 }),
@@ -157,15 +153,13 @@ test('it may burn multiple tokens from a specific mint', async (t) => {
   });
 
   // When the payer mints from it.
-  const mint = generateSigner(umi);
+
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mint,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
+
         mintArgs: {
           tokenBurn: some({ mint: tokenMint.publicKey }),
         },
@@ -174,7 +168,7 @@ test('it may burn multiple tokens from a specific mint', async (t) => {
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
+  await assertItemBought(t, umi, { candyMachine });
 
   // And the payer lost 5 tokens.
   const tokenAccount = await fetchToken(
@@ -202,9 +196,8 @@ test('it fails to mint if there are not enough tokens to burn', async (t) => {
     .sendAndConfirm(umi);
 
   // And a loaded Candy Machine with the tokenBurn guard that requires 2 tokens.
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
+
   const { publicKey: candyMachine } = await createV2(umi, {
-    collectionMint,
     configLines: [getNewConfigLine()],
     guards: {
       tokenBurn: some({ mint: tokenMint.publicKey, amount: 2 }),
@@ -212,15 +205,13 @@ test('it fails to mint if there are not enough tokens to burn', async (t) => {
   });
 
   // When the payer tries to mint from it.
-  const mint = generateSigner(umi);
+
   const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mint,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
+
         mintArgs: {
           tokenBurn: some({ mint: tokenMint.publicKey }),
         },
@@ -257,9 +248,8 @@ test('it charges a bot tax when trying to mint without the required amount of to
     .sendAndConfirm(umi);
 
   // And a loaded Candy Machine with a botTax guard and a tokenBurn guard that requires 2 tokens.
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
+
   const { publicKey: candyMachine } = await createV2(umi, {
-    collectionMint,
     configLines: [getNewConfigLine()],
     guards: {
       botTax: some({ lamports: sol(0.1), lastInstruction: true }),
@@ -268,15 +258,13 @@ test('it charges a bot tax when trying to mint without the required amount of to
   });
 
   // When the payer tries to mint from it.
-  const mint = generateSigner(umi);
+
   const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mint,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
+
         mintArgs: {
           tokenBurn: some({ mint: tokenMint.publicKey }),
         },
@@ -285,7 +273,7 @@ test('it charges a bot tax when trying to mint without the required amount of to
     .sendAndConfirm(umi);
 
   // Then we expect a silent bot tax error.
-  await assertBotTax(t, umi, mint, signature, /NotEnoughTokens/);
+  await assertBotTax(t, umi, signature, /NotEnoughTokens/);
 
   // And the payer still has one token.
   const tokenAccount = await fetchToken(

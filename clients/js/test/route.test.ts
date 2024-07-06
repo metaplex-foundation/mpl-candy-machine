@@ -18,9 +18,9 @@ import { createUmi, createV2 } from './_setup';
 test('it can call the route instruction of a specific guard', async (t) => {
   // Given a candy machine with an allow list guard.
   const umi = await createUmi();
-  const minter = generateSigner(umi).publicKey;
+  const buyer = generateSigner(umi).publicKey;
   const allowedWallets = [
-    minter,
+    buyer,
     'Ur1CbWSGsXCdedknRbJsEk7urwAvu1uddmQv51nAnXB',
     'GjwcWFQYzemBtpUoN5fMAP2FZviTtMRWCmrppGuTthJS',
     '2vjCrmEFiN9CLLhiqy8u1JPh48av8Zpzp3kNkdTtirYG',
@@ -31,13 +31,13 @@ test('it can call the route instruction of a specific guard', async (t) => {
   });
 
   // When we call the route instruction of the allow list guard.
-  const merkleProof = getMerkleProof(allowedWallets, minter);
+  const merkleProof = getMerkleProof(allowedWallets, buyer);
   await transactionBuilder()
     .add(
       route(umi, {
         candyMachine,
         guard: 'allowList',
-        routeArgs: { path: 'proof', merkleRoot, merkleProof, minter },
+        routeArgs: { path: 'proof', merkleRoot, merkleProof, buyer },
       })
     )
     .sendAndConfirm(umi);
@@ -45,7 +45,7 @@ test('it can call the route instruction of a specific guard', async (t) => {
   // Then the allow list proof PDA was created.
   const [allowListProofPda] = findAllowListProofPda(umi, {
     merkleRoot,
-    user: minter,
+    user: buyer,
     candyMachine,
     candyGuard: findCandyGuardPda(umi, { base: candyMachine })[0],
   });

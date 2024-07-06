@@ -4,6 +4,7 @@ import {
 } from '@metaplex-foundation/mpl-toolbox';
 import {
   generateSigner,
+  publicKey,
   sol,
   some,
   transactionBuilder,
@@ -12,11 +13,12 @@ import test from 'ava';
 import { mintV2 } from '../../src';
 import {
   assertBotTax,
-  assertSuccessfulMint,
+  assertItemBought,
   createCollectionNft,
   createMintWithHolders,
   createUmi,
   createV2,
+  getNewConfigLine,
 } from '../_setup';
 
 test('it transfers tokens from the payer to the destination', async (t) => {
@@ -36,9 +38,8 @@ test('it transfers tokens from the payer to the destination', async (t) => {
   );
 
   // And a loaded Candy Machine with a tokenPayment guard that requires 5 tokens.
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
+
   const { publicKey: candyMachine } = await createV2(umi, {
-    collectionMint,
     configLines: [getNewConfigLine()],
     guards: {
       tokenPayment: some({
@@ -50,15 +51,13 @@ test('it transfers tokens from the payer to the destination', async (t) => {
   });
 
   // When we mint from it.
-  const mint = generateSigner(umi);
+
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mint,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
+
         mintArgs: {
           tokenPayment: some({ mint: tokenMint.publicKey, destinationAta }),
         },
@@ -67,7 +66,7 @@ test('it transfers tokens from the payer to the destination', async (t) => {
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
+  await assertItemBought(t, umi, { candyMachine });
 
   // And the treasury token received 5 tokens.
   const destinationTokenAccount = await fetchToken(umi, destinationAta);
@@ -78,27 +77,26 @@ test('it transfers tokens from the payer to the destination', async (t) => {
   t.is(payerTokenAccount.amount, 7n);
 });
 
-test('it allows minting even when the payer is different from the minter', async (t) => {
+test('it allows minting even when the payer is different from the buyer', async (t) => {
   // Given a mint account such that:
   // - The destination treasury has 100 tokens.
-  // - An explicit minter has 12 tokens.
+  // - An explicit buyer has 12 tokens.
   const umi = await createUmi();
-  const minter = generateSigner(umi);
+  const buyer = generateSigner(umi);
   const destination = generateSigner(umi).publicKey;
-  const [tokenMint, destinationAta, minterAta] = await createMintWithHolders(
+  const [tokenMint, destinationAta, buyerAta] = await createMintWithHolders(
     umi,
     {
       holders: [
         { owner: destination, amount: 100 },
-        { owner: minter, amount: 12 },
+        { owner: buyer, amount: 12 },
       ],
     }
   );
 
   // And a loaded Candy Machine with a tokenPayment guard that requires 5 tokens.
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
+
   const { publicKey: candyMachine } = await createV2(umi, {
-    collectionMint,
     configLines: [getNewConfigLine()],
     guards: {
       tokenPayment: some({
@@ -109,17 +107,16 @@ test('it allows minting even when the payer is different from the minter', async
     },
   });
 
-  // When the minter mints from it.
-  const mint = generateSigner(umi);
+  // When the buyer mints from it.
+
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mint,
-        minter,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
+
+        buyer,
+
         mintArgs: {
           tokenPayment: some({ mint: tokenMint.publicKey, destinationAta }),
         },
@@ -128,15 +125,15 @@ test('it allows minting even when the payer is different from the minter', async
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertSuccessfulMint(t, umi, { mint, owner: minter });
+  await assertItemBought(t, umi, { candyMachine, buyer: publicKey(buyer) });
 
   // And the treasury token received 5 tokens.
   const destinationTokenAccount = await fetchToken(umi, destinationAta);
   t.is(destinationTokenAccount.amount, 105n);
 
-  // And the minter lost 5 tokens.
-  const minterTokenAccount = await fetchToken(umi, minterAta);
-  t.is(minterTokenAccount.amount, 7n);
+  // And the buyer lost 5 tokens.
+  const buyerTokenAccount = await fetchToken(umi, buyerAta);
+  t.is(buyerTokenAccount.amount, 7n);
 });
 
 test('it fails if the payer does not have enough tokens', async (t) => {
@@ -154,9 +151,8 @@ test('it fails if the payer does not have enough tokens', async (t) => {
   );
 
   // And a loaded Candy Machine with a tokenPayment guard that requires 5 tokens.
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
+
   const { publicKey: candyMachine } = await createV2(umi, {
-    collectionMint,
     configLines: [getNewConfigLine()],
     guards: {
       tokenPayment: some({
@@ -168,15 +164,13 @@ test('it fails if the payer does not have enough tokens', async (t) => {
   });
 
   // When we try to mint from it.
-  const mint = generateSigner(umi);
+
   const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mint,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
+
         mintArgs: {
           tokenPayment: some({ mint: tokenMint.publicKey, destinationAta }),
         },
@@ -207,9 +201,8 @@ test('it charges a bot tax if the payer does not have enough tokens', async (t) 
   );
 
   // And a loaded Candy Machine with a bot tax guard and a tokenPayment guard that requires 5 tokens.
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
+
   const { publicKey: candyMachine } = await createV2(umi, {
-    collectionMint,
     configLines: [getNewConfigLine()],
     guards: {
       botTax: some({ lamports: sol(0.1), lastInstruction: true }),
@@ -222,15 +215,13 @@ test('it charges a bot tax if the payer does not have enough tokens', async (t) 
   });
 
   // When we try to mint from it.
-  const mint = generateSigner(umi);
+
   const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mint,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
+
         mintArgs: {
           tokenPayment: some({ mint: tokenMint.publicKey, destinationAta }),
         },
@@ -239,7 +230,7 @@ test('it charges a bot tax if the payer does not have enough tokens', async (t) 
     .sendAndConfirm(umi);
 
   // Then we expect a silent bot tax error.
-  await assertBotTax(t, umi, mint, signature, /NotEnoughTokens/);
+  await assertBotTax(t, umi, signature, /NotEnoughTokens/);
 
   // And the payer still has 4 tokens.
   const payerTokenAccount = await fetchToken(umi, identityAta);

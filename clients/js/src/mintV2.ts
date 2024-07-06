@@ -65,7 +65,7 @@ export function mintV2<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
   const program = context.programs.get<CandyGuardProgram>('mplCandyGuard');
   const candyMachine = publicKey(input.candyMachine, false);
   const mintContext: MintContext = {
-    minter: input.buyer ?? context.identity,
+    buyer: input.buyer ?? context.identity,
     payer: input.payer ?? context.payer,
     candyMachine,
     candyGuard: publicKey(

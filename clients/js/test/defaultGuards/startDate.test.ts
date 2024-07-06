@@ -9,10 +9,11 @@ import test from 'ava';
 import { mintV2 } from '../../src';
 import {
   assertBotTax,
-  assertSuccessfulMint,
+  assertItemBought,
   createCollectionNft,
   createUmi,
   createV2,
+  getNewConfigLine,
   tomorrow,
   yesterday,
 } from '../_setup';
@@ -20,9 +21,8 @@ import {
 test('it allows minting after the start date', async (t) => {
   // Given a candy machine with a start date in the past.
   const umi = await createUmi();
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
+
   const { publicKey: candyMachine } = await createV2(umi, {
-    collectionMint,
     configLines: [getNewConfigLine()],
     guards: {
       startDate: some({ date: yesterday() }),
@@ -30,29 +30,25 @@ test('it allows minting after the start date', async (t) => {
   });
 
   // When we mint from it.
-  const mint = generateSigner(umi);
+
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mint,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
     .sendAndConfirm(umi);
 
   // Then the mint was successful.
-  await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
+  await assertItemBought(t, umi, { candyMachine });
 });
 
 test('it forbids minting before the start date', async (t) => {
   // Given a candy machine with a start date in the future.
   const umi = await createUmi();
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
+
   const { publicKey: candyMachine } = await createV2(umi, {
-    collectionMint,
     configLines: [getNewConfigLine()],
     guards: {
       startDate: some({ date: tomorrow() }),
@@ -60,15 +56,12 @@ test('it forbids minting before the start date', async (t) => {
   });
 
   // When we try to mint from it.
-  const mint = generateSigner(umi);
+
   const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mint,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
     .sendAndConfirm(umi);
@@ -80,9 +73,8 @@ test('it forbids minting before the start date', async (t) => {
 test('it charges a bot tax when trying to mint before the start date', async (t) => {
   // Given a candy machine with a bot tax and start date in the future.
   const umi = await createUmi();
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
+
   const { publicKey: candyMachine } = await createV2(umi, {
-    collectionMint,
     configLines: [getNewConfigLine()],
     guards: {
       botTax: some({ lamports: sol(0.01), lastInstruction: true }),
@@ -91,19 +83,16 @@ test('it charges a bot tax when trying to mint before the start date', async (t)
   });
 
   // When we mint from it.
-  const mint = generateSigner(umi);
+
   const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mint,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
     .sendAndConfirm(umi);
 
   // Then we expect a silent bot tax error.
-  await assertBotTax(t, umi, mint, signature, /MintNotLive/);
+  await assertBotTax(t, umi, signature, /MintNotLive/);
 });

@@ -24,7 +24,6 @@ import test from 'ava';
 import { CandyMachine, fetchCandyMachine, mintV2 } from '../src';
 import {
   assertItemBought,
-  assertSuccessfulMint,
   createCollectionNft,
   createUmi,
   createV2,

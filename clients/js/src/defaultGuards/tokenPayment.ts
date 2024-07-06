@@ -25,7 +25,7 @@ export const tokenPaymentGuardManifest: GuardManifest<
   mintParser: (context, mintContext, args) => {
     const [sourceAta] = findAssociatedTokenPda(context, {
       mint: args.mint,
-      owner: mintContext.minter.publicKey,
+      owner: mintContext.buyer.publicKey,
     });
     return {
       data: new Uint8Array(),

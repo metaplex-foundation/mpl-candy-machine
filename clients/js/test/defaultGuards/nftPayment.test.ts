@@ -18,13 +18,14 @@ import test from 'ava';
 import { mintV2 } from '../../src';
 import {
   assertBotTax,
-  assertSuccessfulMint,
+  assertItemBought,
   createCollectionNft,
   createNft,
   createUmi,
   createV2,
   createVerifiedNft,
   createVerifiedProgrammableNft,
+  getNewConfigLine,
 } from '../_setup';
 
 test('it transfers an NFT from the payer to the destination', async (t) => {
@@ -35,9 +36,8 @@ test('it transfers an NFT from the payer to the destination', async (t) => {
   const { publicKey: requiredCollection } = await createCollectionNft(umi, {
     authority: requiredCollectionAuthority,
   });
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
+
   const { publicKey: candyMachine } = await createV2(umi, {
-    collectionMint,
     configLines: [getNewConfigLine()],
     guards: {
       nftPayment: some({ requiredCollection, destination }),
@@ -52,15 +52,13 @@ test('it transfers an NFT from the payer to the destination', async (t) => {
   });
 
   // When the payer mints from it using its NFT to pay.
-  const mint = generateSigner(umi);
+
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mint,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
+
         mintArgs: {
           nftPayment: some({
             tokenStandard: TokenStandard.NonFungible,
@@ -74,7 +72,7 @@ test('it transfers an NFT from the payer to the destination', async (t) => {
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
+  await assertItemBought(t, umi, { candyMachine });
 
   // And the NFT now belongs to the NFT destination.
   const updatedNft = await fetchDigitalAssetWithAssociatedToken(
@@ -85,7 +83,7 @@ test('it transfers an NFT from the payer to the destination', async (t) => {
   t.deepEqual(updatedNft.token.owner, destination);
 });
 
-test('it allows minting even when the payer is different from the minter', async (t) => {
+test('it allows minting even when the payer is different from the buyer', async (t) => {
   // Given a loaded Candy Machine with an nftPayment guard on a required collection.
   const umi = await createUmi();
   const destination = generateSigner(umi).publicKey;
@@ -93,34 +91,32 @@ test('it allows minting even when the payer is different from the minter', async
   const { publicKey: requiredCollection } = await createCollectionNft(umi, {
     authority: requiredCollectionAuthority,
   });
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
+
   const { publicKey: candyMachine } = await createV2(umi, {
-    collectionMint,
     configLines: [getNewConfigLine()],
     guards: {
       nftPayment: some({ requiredCollection, destination }),
     },
   });
 
-  // And given a separate minter owns an NFT from that collection.
-  const minter = generateSigner(umi);
+  // And given a separate buyer owns an NFT from that collection.
+  const buyer = generateSigner(umi);
   const nftToSend = await createVerifiedNft(umi, {
-    tokenOwner: minter.publicKey,
+    tokenOwner: buyer.publicKey,
     collectionMint: requiredCollection,
     collectionAuthority: requiredCollectionAuthority,
   });
 
-  // When the minter mints from it using its NFT to pay.
-  const mint = generateSigner(umi);
+  // When the buyer mints from it using its NFT to pay.
+
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mint,
-        minter,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
+
+        buyer,
+
         mintArgs: {
           nftPayment: some({
             tokenStandard: TokenStandard.NonFungible,
@@ -134,7 +130,7 @@ test('it allows minting even when the payer is different from the minter', async
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertSuccessfulMint(t, umi, { mint, owner: minter });
+  await assertItemBought(t, umi, { candyMachine, buyer: publicKey(buyer) });
 
   // And the NFT now belongs to the NFT destination.
   const updatedNft = await fetchDigitalAssetWithAssociatedToken(
@@ -153,9 +149,8 @@ test('it works when the provided NFT is not on an associated token account', asy
   const { publicKey: requiredCollection } = await createCollectionNft(umi, {
     authority: requiredCollectionAuthority,
   });
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
+
   const { publicKey: candyMachine } = await createV2(umi, {
-    collectionMint,
     configLines: [getNewConfigLine()],
     guards: {
       nftPayment: some({ requiredCollection, destination }),
@@ -186,15 +181,13 @@ test('it works when the provided NFT is not on an associated token account', asy
 
   // When the payer mints from it using its NFT to pay
   // whilst providing the token address.
-  const mint = generateSigner(umi);
+
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mint,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
+
         mintArgs: {
           nftPayment: some({
             tokenStandard: TokenStandard.NonFungible,
@@ -209,7 +202,7 @@ test('it works when the provided NFT is not on an associated token account', asy
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
+  await assertItemBought(t, umi, { candyMachine });
 
   // And the NFT now belongs to the NFT destination.
   const updatedNft = await fetchDigitalAssetWithAssociatedToken(
@@ -228,9 +221,8 @@ test('it fails if the payer does not own the right NFT', async (t) => {
   const { publicKey: requiredCollection } = await createCollectionNft(umi, {
     authority: requiredCollectionAuthority,
   });
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
+
   const { publicKey: candyMachine } = await createV2(umi, {
-    collectionMint,
     configLines: [getNewConfigLine()],
     guards: {
       nftPayment: some({ requiredCollection, destination }),
@@ -243,15 +235,13 @@ test('it fails if the payer does not own the right NFT', async (t) => {
   });
 
   // When the identity tries to mint from it using its NFT to pay.
-  const mint = generateSigner(umi);
+
   const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mint,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
+
         mintArgs: {
           nftPayment: some({
             tokenStandard: TokenStandard.NonFungible,
@@ -276,9 +266,8 @@ test('it fails if the payer tries to provide an NFT from an unverified collectio
   const { publicKey: requiredCollection } = await createCollectionNft(umi, {
     authority: requiredCollectionAuthority,
   });
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
+
   const { publicKey: candyMachine } = await createV2(umi, {
-    collectionMint,
     configLines: [getNewConfigLine()],
     guards: {
       nftPayment: some({ requiredCollection, destination }),
@@ -292,15 +281,13 @@ test('it fails if the payer tries to provide an NFT from an unverified collectio
   });
 
   // When the identity tries to mint from it using its NFT to pay.
-  const mint = generateSigner(umi);
+
   const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mint,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
+
         mintArgs: {
           nftPayment: some({
             tokenStandard: TokenStandard.NonFungible,
@@ -325,9 +312,8 @@ test('it charges a bot tax when trying to pay with the wrong NFT', async (t) => 
   const { publicKey: requiredCollection } = await createCollectionNft(umi, {
     authority: requiredCollectionAuthority,
   });
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
+
   const { publicKey: candyMachine } = await createV2(umi, {
-    collectionMint,
     configLines: [getNewConfigLine()],
     guards: {
       botTax: some({ lamports: sol(0.1), lastInstruction: true }),
@@ -341,15 +327,13 @@ test('it charges a bot tax when trying to pay with the wrong NFT', async (t) => 
   });
 
   // When the identity tries to mint from it using its NFT to pay.
-  const mint = generateSigner(umi);
+
   const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mint,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
+
         mintArgs: {
           nftPayment: some({
             tokenStandard: TokenStandard.NonFungible,
@@ -363,7 +347,7 @@ test('it charges a bot tax when trying to pay with the wrong NFT', async (t) => 
     .sendAndConfirm(umi);
 
   // Then we expect a bot tax error.
-  await assertBotTax(t, umi, mint, signature, /InvalidNftCollection/);
+  await assertBotTax(t, umi, signature, /InvalidNftCollection/);
 });
 
 test('it transfers a Programmable NFT from the payer to the destination', async (t) => {
@@ -374,9 +358,8 @@ test('it transfers a Programmable NFT from the payer to the destination', async 
   const { publicKey: requiredCollection } = await createCollectionNft(umi, {
     authority: requiredCollectionAuthority,
   });
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
+
   const { publicKey: candyMachine } = await createV2(umi, {
-    collectionMint,
     configLines: [getNewConfigLine()],
     guards: {
       nftPayment: some({ requiredCollection, destination }),
@@ -392,15 +375,13 @@ test('it transfers a Programmable NFT from the payer to the destination', async 
   });
 
   // When the payer mints from it using its NFT to pay.
-  const mint = generateSigner(umi);
+
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 800_000 }))
     .add(
       mintV2(umi, {
         candyMachine,
-        nftMint: mint,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
+
         mintArgs: {
           nftPayment: some({
             tokenStandard: TokenStandard.ProgrammableNonFungible,
@@ -415,7 +396,7 @@ test('it transfers a Programmable NFT from the payer to the destination', async 
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertSuccessfulMint(t, umi, { mint, owner: umi.identity });
+  await assertItemBought(t, umi, { candyMachine });
 
   // And the NFT now belongs to the NFT destination.
   const updatedNft = await fetchDigitalAssetWithAssociatedToken(

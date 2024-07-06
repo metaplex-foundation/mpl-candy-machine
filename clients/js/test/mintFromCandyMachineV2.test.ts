@@ -13,7 +13,6 @@ import {
 } from '../src';
 import {
   assertItemBought,
-  assertSuccessfulMint,
   createCollectionNft,
   createUmi,
   createV2,

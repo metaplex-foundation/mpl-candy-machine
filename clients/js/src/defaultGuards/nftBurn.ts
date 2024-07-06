@@ -31,7 +31,7 @@ export const nftBurnGuardManifest: GuardManifest<
       args.tokenAccount ??
       findAssociatedTokenPda(context, {
         mint: args.mint,
-        owner: mintContext.minter.publicKey,
+        owner: mintContext.buyer.publicKey,
       })[0];
     const [nftMetadata] = findMetadataPda(context, { mint: args.mint });
     const [nftMasterEdition] = findMasterEditionPda(context, {

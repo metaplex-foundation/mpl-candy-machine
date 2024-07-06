@@ -23,7 +23,7 @@ export const nftGateGuardManifest: GuardManifest<
       args.tokenAccount ??
       findAssociatedTokenPda(context, {
         mint: args.mint,
-        owner: mintContext.minter.publicKey,
+        owner: mintContext.buyer.publicKey,
       })[0];
     const [tokenMetadata] = findMetadataPda(context, { mint: args.mint });
     return {

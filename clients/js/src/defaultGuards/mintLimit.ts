@@ -29,7 +29,7 @@ export const mintLimitGuardManifest: GuardManifest<
       {
         publicKey: findMintCounterPda(context, {
           id: args.id,
-          user: mintContext.minter.publicKey,
+          user: mintContext.buyer.publicKey,
           candyMachine: mintContext.candyMachine,
           candyGuard: mintContext.candyGuard,
         })[0],

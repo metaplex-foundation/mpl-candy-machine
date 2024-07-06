@@ -41,7 +41,7 @@ export type MintFromCandyMachineV2InstructionAccounts = {
    *
    */
 
-  buyer: PublicKey | Pda;
+  buyer?: PublicKey | Pda;
   /** System program. */
   systemProgram?: PublicKey | Pda;
   /**
@@ -84,7 +84,7 @@ export function getMintFromCandyMachineV2InstructionDataSerializer(): Serializer
 
 // Instruction.
 export function mintFromCandyMachineV2(
-  context: Pick<Context, 'payer' | 'programs'>,
+  context: Pick<Context, 'identity' | 'payer' | 'programs'>,
   input: MintFromCandyMachineV2InstructionAccounts
 ): TransactionBuilder {
   // Program ID.
@@ -122,6 +122,9 @@ export function mintFromCandyMachineV2(
   // Default values.
   if (!resolvedAccounts.payer.value) {
     resolvedAccounts.payer.value = context.payer;
+  }
+  if (!resolvedAccounts.buyer.value) {
+    resolvedAccounts.buyer.value = context.identity.publicKey;
   }
   if (!resolvedAccounts.systemProgram.value) {
     resolvedAccounts.systemProgram.value = context.programs.getPublicKey(

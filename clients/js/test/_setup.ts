@@ -46,6 +46,7 @@ import {
   addConfigLines,
   createCandyGuard as baseCreateCandyGuard,
   createCandyMachineV2 as baseCreateCandyMachineV2,
+  fetchCandyMachine,
   findCandyGuardPda,
   mplCandyMachine,
   wrap,
@@ -333,6 +334,24 @@ export const assertSuccessfulMint = async (
   // Uri.
   if (typeof uri === 'string') t.is(nft.metadata.uri, uri);
   else if (uri !== undefined) t.regex(nft.metadata.uri, uri);
+};
+
+export const assertItemBought = async (
+  t: Assertions,
+  umi: Umi,
+  input: {
+    candyMachine: PublicKey;
+    buyer?: PublicKey;
+    count?: number;
+  }
+) => {
+  const candyMachineAccount = await fetchCandyMachine(umi, input.candyMachine);
+
+  const buyerCount = candyMachineAccount.items.filter(
+    (item) => item.buyer === (input.buyer ?? umi.identity.publicKey)
+  ).length;
+
+  t.is(buyerCount, input.count ?? 1);
 };
 
 export const assertBotTax = async (

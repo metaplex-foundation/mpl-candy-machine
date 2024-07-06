@@ -12,151 +12,56 @@ import {
   mintFromCandyMachineV2,
 } from '../src';
 import {
+  assertItemBought,
   assertSuccessfulMint,
   createCollectionNft,
   createUmi,
   createV2,
+  getNewConfigLine,
 } from './_setup';
 
 test('it can mint directly from a candy machine as the mint authority', async (t) => {
   // Given a loaded candy machine.
   const umi = await createUmi();
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
   const candyMachineSigner = await createV2(umi, {
-    collectionMint,
-    configLines: [
-      { name: 'Degen #1', uri: 'https://example.com/degen/1' },
-      { name: 'Degen #2', uri: 'https://example.com/degen/2' },
-    ],
+    configLines: [getNewConfigLine(), getNewConfigLine()],
   });
   const candyMachine = candyMachineSigner.publicKey;
 
   // When we mint a new NFT directly from the candy machine as the mint authority.
-  const mint = generateSigner(umi);
-  const owner = generateSigner(umi).publicKey;
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 400000 }))
     .add(
       mintFromCandyMachineV2(umi, {
         candyMachine,
         mintAuthority: umi.identity,
-        nftOwner: owner,
-        nftMint: mint,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
     .sendAndConfirm(umi);
 
   // Then the mint was successful.
-  await assertSuccessfulMint(t, umi, { mint, owner });
+  await assertItemBought(t, umi, { candyMachine });
 
   // And the candy machine was updated.
   const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
   t.like(candyMachineAccount, <CandyMachine>{ itemsRedeemed: 1n });
 });
 
-test('it can mint whilst creating the mint and token accounts beforehand', async (t) => {
-  // Given a loaded candy machine.
-  const umi = await createUmi();
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
-  const candyMachineSigner = await createV2(umi, {
-    collectionMint,
-    configLines: [
-      { name: 'Degen #1', uri: 'https://example.com/degen/1' },
-      { name: 'Degen #2', uri: 'https://example.com/degen/2' },
-    ],
-  });
-  const candyMachine = candyMachineSigner.publicKey;
-
-  // When we mint a new NFT directly from the candy machine as the mint authority.
-  const mint = generateSigner(umi);
-  const owner = generateSigner(umi).publicKey;
-  await transactionBuilder()
-    .add(createMint(umi, { mint }))
-    .add(createAssociatedToken(umi, { mint: mint.publicKey, owner }))
-    .add(
-      mintFromCandyMachineV2(umi, {
-        candyMachine,
-        mintAuthority: umi.identity,
-        nftOwner: owner,
-        nftMint: mint.publicKey,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
-      })
-    )
-    .sendAndConfirm(umi);
-
-  // Then the mint was successful.
-  await assertSuccessfulMint(t, umi, { mint, owner });
-});
-
-test('it can mint whilst creating only the mint account beforehand', async (t) => {
-  // Given a loaded candy machine.
-  const umi = await createUmi();
-  const collectionMint = (await createCollectionNft(umi)).publicKey;
-  const candyMachineSigner = await createV2(umi, {
-    collectionMint,
-    configLines: [
-      { name: 'Degen #1', uri: 'https://example.com/degen/1' },
-      { name: 'Degen #2', uri: 'https://example.com/degen/2' },
-    ],
-  });
-  const candyMachine = candyMachineSigner.publicKey;
-
-  // When we mint a new NFT directly from the candy machine as the mint authority.
-  const mint = generateSigner(umi);
-  const owner = generateSigner(umi).publicKey;
-  await transactionBuilder()
-    .add(createMint(umi, { mint }))
-    .add(
-      mintFromCandyMachineV2(umi, {
-        candyMachine,
-        mintAuthority: umi.identity,
-        nftOwner: owner,
-        nftMint: mint.publicKey,
-        collectionMint,
-        collectionUpdateAuthority: umi.identity.publicKey,
-      })
-    )
-    .sendAndConfirm(umi);
-
-  // Then the mint was successful.
-  await assertSuccessfulMint(t, umi, { mint, owner });
-});
-
 test('it cannot mint directly from a candy machine if we are not the mint authority', async (t) => {
   // Given a loaded candy machine with a mint authority A.
   const umi = await createUmi();
-  const mintAuthorityA = generateSigner(umi);
-  const collectionMint = await createCollectionNft(umi, {
-    authority: mintAuthorityA,
-  });
   const candyMachineSigner = await createV2(umi, {
-    authority: mintAuthorityA.publicKey,
-    collectionMint: collectionMint.publicKey,
-    collectionUpdateAuthority: mintAuthorityA,
-    configLines: [
-      { name: 'Degen #1', uri: 'https://example.com/degen/1' },
-      { name: 'Degen #2', uri: 'https://example.com/degen/2' },
-    ],
+    configLines: [getNewConfigLine(), getNewConfigLine()],
   });
   const candyMachine = candyMachineSigner.publicKey;
 
   // When we try to mint directly from the candy machine as mint authority B.
   const mintAuthorityB = generateSigner(umi);
-  const mint = generateSigner(umi);
-  const owner = generateSigner(umi).publicKey;
   const promise = transactionBuilder()
-    .add(createMintWithAssociatedToken(umi, { mint, owner, amount: 1 }))
     .add(
       mintFromCandyMachineV2(umi, {
         candyMachine,
         mintAuthority: mintAuthorityB,
-        nftMint: mint.publicKey,
-        nftOwner: owner,
-        collectionMint: collectionMint.publicKey,
-        collectionUpdateAuthority: umi.identity.publicKey,
       })
     )
     .sendAndConfirm(umi);

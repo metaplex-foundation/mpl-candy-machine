@@ -190,6 +190,9 @@ kinobi.update(
     "mplCandyMachineCore.initializeV2": { name: "initializeCandyMachineV2" },
     "mplCandyMachineCore.mintV2": {
       name: "mintFromCandyMachineV2",
+      accounts: {
+        buyer: { defaultsTo: k.identityDefault() },
+      },
     },
     "mplCandyGuard.mintV2": {
       internal: true,

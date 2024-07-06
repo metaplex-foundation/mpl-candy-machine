@@ -38,7 +38,7 @@ test('it burns a specific token to allow minting', async (t) => {
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
-    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    configLines: [getNewConfigLine()],
     guards: {
       tokenBurn: some({ mint: tokenMint.publicKey, amount: 1 }),
     },
@@ -94,7 +94,7 @@ test('it allows minting even when the payer is different from the minter', async
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
-    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    configLines: [getNewConfigLine()],
     guards: {
       tokenBurn: some({ mint: tokenMint.publicKey, amount: 1 }),
     },
@@ -150,7 +150,7 @@ test('it may burn multiple tokens from a specific mint', async (t) => {
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
-    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    configLines: [getNewConfigLine()],
     guards: {
       tokenBurn: some({ mint: tokenMint.publicKey, amount: 5 }),
     },
@@ -205,7 +205,7 @@ test('it fails to mint if there are not enough tokens to burn', async (t) => {
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
-    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    configLines: [getNewConfigLine()],
     guards: {
       tokenBurn: some({ mint: tokenMint.publicKey, amount: 2 }),
     },
@@ -260,7 +260,7 @@ test('it charges a bot tax when trying to mint without the required amount of to
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
-    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    configLines: [getNewConfigLine()],
     guards: {
       botTax: some({ lamports: sol(0.1), lastInstruction: true }),
       tokenBurn: some({ mint: tokenMint.publicKey, amount: 2 }),

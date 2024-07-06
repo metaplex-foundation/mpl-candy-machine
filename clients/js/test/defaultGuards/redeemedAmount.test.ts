@@ -21,10 +21,7 @@ test('it allows minting until a threshold of NFTs have been redeemed', async (t)
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
-    configLines: [
-      { name: 'Degen #1', uri: 'https://example.com/degen/1' },
-      { name: 'Degen #1', uri: 'https://example.com/degen/1' },
-    ],
+    configLines: [getNewConfigLine(), getNewConfigLine()],
     guards: {
       redeemedAmount: some({ maximum: 1 }),
     },
@@ -54,10 +51,7 @@ test('it forbids minting once the redeemed threshold has been reached', async (t
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
-    configLines: [
-      { name: 'Degen #1', uri: 'https://example.com/degen/1' },
-      { name: 'Degen #1', uri: 'https://example.com/degen/1' },
-    ],
+    configLines: [getNewConfigLine(), getNewConfigLine()],
     guards: {
       redeemedAmount: some({ maximum: 1 }),
     },
@@ -103,10 +97,7 @@ test('it charges a bot tax when trying to mint once the threshold has been reach
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
-    configLines: [
-      { name: 'Degen #1', uri: 'https://example.com/degen/1' },
-      { name: 'Degen #1', uri: 'https://example.com/degen/1' },
-    ],
+    configLines: [getNewConfigLine(), getNewConfigLine()],
     guards: {
       botTax: some({ lamports: sol(0.1), lastInstruction: true }),
       redeemedAmount: some({ maximum: 1 }),

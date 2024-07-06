@@ -41,7 +41,7 @@ test('it transfers Token2022 tokens from the payer to the destination', async (t
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
-    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    configLines: [getNewConfigLine()],
     guards: {
       token2022Payment: some({
         mint: tokenMint.publicKey,

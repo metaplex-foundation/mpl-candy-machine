@@ -22,7 +22,7 @@ test('it allows minting when the third party signer is provided', async (t) => {
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
-    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    configLines: [getNewConfigLine()],
     guards: {
       thirdPartySigner: some({ signerKey: thirdPartySigner.publicKey }),
     },
@@ -56,7 +56,7 @@ test('it forbids minting when the third party signer is wrong', async (t) => {
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
-    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    configLines: [getNewConfigLine()],
     guards: {
       thirdPartySigner: some({ signerKey: thirdPartySigner.publicKey }),
     },
@@ -91,7 +91,7 @@ test('it charges a bot tax when trying to mint using the wrong third party signe
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
-    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    configLines: [getNewConfigLine()],
     guards: {
       botTax: some({ lamports: sol(0.1), lastInstruction: true }),
       thirdPartySigner: some({ signerKey: thirdPartySigner.publicKey }),

@@ -26,10 +26,7 @@ test('it allows minting when the mint limit is not reached', async (t) => {
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
-    configLines: [
-      { name: 'Degen #1', uri: 'https://example.com/degen/1' },
-      { name: 'Degen #2', uri: 'https://example.com/degen/2' },
-    ],
+    configLines: [getNewConfigLine(), getNewConfigLine()],
     guards: {
       mintLimit: some({ id: 1, limit: 5 }),
     },
@@ -70,10 +67,7 @@ test('it allows minting even when the payer is different from the minter', async
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
-    configLines: [
-      { name: 'Degen #1', uri: 'https://example.com/degen/1' },
-      { name: 'Degen #2', uri: 'https://example.com/degen/2' },
-    ],
+    configLines: [getNewConfigLine(), getNewConfigLine()],
     guards: {
       mintLimit: some({ id: 1, limit: 5 }),
     },
@@ -116,10 +110,7 @@ test('it forbids minting when the mint limit is reached', async (t) => {
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
-    configLines: [
-      { name: 'Degen #1', uri: 'https://example.com/degen/1' },
-      { name: 'Degen #2', uri: 'https://example.com/degen/2' },
-    ],
+    configLines: [getNewConfigLine(), getNewConfigLine()],
     guards: {
       mintLimit: some({ id: 42, limit: 1 }),
     },
@@ -164,10 +155,7 @@ test('the mint limit is local to each wallet', async (t) => {
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
-    configLines: [
-      { name: 'Degen #1', uri: 'https://example.com/degen/1' },
-      { name: 'Degen #2', uri: 'https://example.com/degen/2' },
-    ],
+    configLines: [getNewConfigLine(), getNewConfigLine()],
     guards: {
       mintLimit: some({ id: 42, limit: 1 }),
     },
@@ -218,10 +206,7 @@ test('it charges a bot tax when trying to mint after the limit', async (t) => {
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
-    configLines: [
-      { name: 'Degen #1', uri: 'https://example.com/degen/1' },
-      { name: 'Degen #2', uri: 'https://example.com/degen/2' },
-    ],
+    configLines: [getNewConfigLine(), getNewConfigLine()],
     guards: {
       botTax: some({ lamports: sol(0.1), lastInstruction: true }),
       mintLimit: some({ id: 42, limit: 1 }),

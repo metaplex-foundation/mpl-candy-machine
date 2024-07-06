@@ -16,7 +16,12 @@ import {
   mintV2,
   setMintAuthority,
 } from '../src';
-import { createUmi, createV2, getNewConfigLine } from './_setup';
+import {
+  assertItemBought,
+  createUmi,
+  createV2,
+  getNewConfigLine,
+} from './_setup';
 
 test('it can create a LUT for a candy machine v2', async (t) => {
   // Given a candy machine with a candy guard.
@@ -75,11 +80,7 @@ test('it can create a LUT for a candy machine v2', async (t) => {
   await new Promise((resolve) => setTimeout(resolve, 1000));
   await builderWithLut.sendAndConfirm(umi);
 
-  const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
-  const buyerConfigLine = candyMachineAccount.items.find(
-    (item) => item.buyer === umi.identity.publicKey
-  );
-  t.truthy(buyerConfigLine);
+  assertItemBought(t, umi, { candyMachine });
 });
 
 test('it can create a LUT for a candy machine with no candy guard', async (t) => {

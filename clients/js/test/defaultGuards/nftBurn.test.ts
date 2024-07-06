@@ -37,7 +37,7 @@ test('it burns a specific NFT to allow minting', async (t) => {
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
-    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    configLines: [getNewConfigLine()],
     guards: {
       nftBurn: some({ requiredCollection }),
     },
@@ -89,7 +89,7 @@ test('it allows minting even when the payer is different from the minter', async
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
-    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    configLines: [getNewConfigLine()],
     guards: {
       nftBurn: some({ requiredCollection }),
     },
@@ -131,7 +131,7 @@ test('it fails if there is not valid NFT to burn', async (t) => {
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
-    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    configLines: [getNewConfigLine()],
     guards: {
       nftBurn: some({ requiredCollection }),
     },
@@ -171,7 +171,7 @@ test('it charges a bot tax when trying to mint using the wrong NFT', async (t) =
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
-    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    configLines: [getNewConfigLine()],
     guards: {
       botTax: some({ lamports: sol(0.01), lastInstruction: true }),
       nftBurn: some({ requiredCollection }),
@@ -221,7 +221,7 @@ test('it burns a specific Programmable NFT to allow minting', async (t) => {
   const collectionMint = (await createCollectionNft(umi)).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
     collectionMint,
-    configLines: [{ name: 'Degen #1', uri: 'https://example.com/degen/1' }],
+    configLines: [getNewConfigLine()],
     guards: {
       nftBurn: some({ requiredCollection }),
     },

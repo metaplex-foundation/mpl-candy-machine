@@ -548,6 +548,19 @@ export class CmInvalidCollectionError extends ProgramError {
 codeToErrorMap.set(0x1792, CmInvalidCollectionError);
 nameToErrorMap.set('InvalidCollection', CmInvalidCollectionError);
 
+/** GumballMachineLive: Gumball machine live */
+export class CmGumballMachineLiveError extends ProgramError {
+  readonly name: string = 'GumballMachineLive';
+
+  readonly code: number = 0x1793; // 6035
+
+  constructor(program: Program, cause?: Error) {
+    super('Gumball machine live', program, cause);
+  }
+}
+codeToErrorMap.set(0x1793, CmGumballMachineLiveError);
+nameToErrorMap.set('GumballMachineLive', CmGumballMachineLiveError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

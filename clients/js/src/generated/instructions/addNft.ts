@@ -39,6 +39,8 @@ import {
 export type AddNftInstructionAccounts = {
   /** Candy Machine account. */
   candyMachine: PublicKey | Pda;
+  /** Candy machine mint authority (add only allowed for the mint_authority). */
+  mintAuthority?: Signer;
   authorityPda?: PublicKey | Pda;
   /** Seller of the nft */
   seller?: Signer;
@@ -99,28 +101,33 @@ export function addNft(
       isWritable: true,
       value: input.candyMachine ?? null,
     },
-    authorityPda: {
+    mintAuthority: {
       index: 1,
+      isWritable: false,
+      value: input.mintAuthority ?? null,
+    },
+    authorityPda: {
+      index: 2,
       isWritable: true,
       value: input.authorityPda ?? null,
     },
-    seller: { index: 2, isWritable: false, value: input.seller ?? null },
-    mint: { index: 3, isWritable: false, value: input.mint ?? null },
+    seller: { index: 3, isWritable: false, value: input.seller ?? null },
+    mint: { index: 4, isWritable: false, value: input.mint ?? null },
     tokenAccount: {
-      index: 4,
+      index: 5,
       isWritable: true,
       value: input.tokenAccount ?? null,
     },
-    metadata: { index: 5, isWritable: false, value: input.metadata ?? null },
-    edition: { index: 6, isWritable: false, value: input.edition ?? null },
-    allowlist: { index: 7, isWritable: false, value: input.allowlist ?? null },
+    metadata: { index: 6, isWritable: false, value: input.metadata ?? null },
+    edition: { index: 7, isWritable: false, value: input.edition ?? null },
+    allowlist: { index: 8, isWritable: false, value: input.allowlist ?? null },
     tokenProgram: {
-      index: 8,
+      index: 9,
       isWritable: false,
       value: input.tokenProgram ?? null,
     },
     tokenMetadataProgram: {
-      index: 9,
+      index: 10,
       isWritable: false,
       value: input.tokenMetadataProgram ?? null,
     },
@@ -130,6 +137,9 @@ export function addNft(
   const resolvedArgs: AddNftInstructionArgs = { ...input };
 
   // Default values.
+  if (!resolvedAccounts.mintAuthority.value) {
+    resolvedAccounts.mintAuthority.value = context.identity;
+  }
   if (!resolvedAccounts.authorityPda.value) {
     resolvedAccounts.authorityPda.value = findCandyMachineAuthorityPda(
       context,

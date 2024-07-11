@@ -187,6 +187,11 @@ kinobi.update(
       ignoreIfOptional: true,
     },
     {
+      ...k.identityDefault(),
+      account: "mintAuthority",
+      ignoreIfOptional: true,
+    },
+    {
       ...defaultsToCandyMachineAuthorityPda(),
       account: "authorityPda",
       ignoreIfOptional: true,

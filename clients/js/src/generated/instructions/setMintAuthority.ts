@@ -34,7 +34,7 @@ export type SetMintAuthorityInstructionAccounts = {
   /** Candy Machine authority */
   authority?: Signer;
   /** New candy machine authority */
-  mintAuthority: Signer;
+  mintAuthority?: Signer;
 };
 
 // Data.
@@ -94,6 +94,9 @@ export function setMintAuthority(
   // Default values.
   if (!resolvedAccounts.authority.value) {
     resolvedAccounts.authority.value = context.identity;
+  }
+  if (!resolvedAccounts.mintAuthority.value) {
+    resolvedAccounts.mintAuthority.value = context.identity;
   }
 
   // Accounts in order.

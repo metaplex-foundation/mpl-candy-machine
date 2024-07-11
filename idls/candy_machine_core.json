@@ -22,6 +22,14 @@
           ]
         },
         {
+          "name": "mintAuthority",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "Candy machine mint authority (add only allowed for the mint_authority)."
+          ]
+        },
+        {
           "name": "authorityPda",
           "isMut": true,
           "isSigner": false
@@ -95,6 +103,14 @@
           "isSigner": false,
           "docs": [
             "Candy Machine account."
+          ]
+        },
+        {
+          "name": "mintAuthority",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "Candy machine mint authority (add only allowed for the mint_authority)."
           ]
         },
         {
@@ -697,6 +713,11 @@
       "code": 6034,
       "name": "InvalidCollection",
       "msg": "Invalid collection"
+    },
+    {
+      "code": 6035,
+      "name": "GumballMachineLive",
+      "msg": "Gumball machine live"
     }
   ],
   "metadata": {

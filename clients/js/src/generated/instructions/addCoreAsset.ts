@@ -34,6 +34,8 @@ import {
 export type AddCoreAssetInstructionAccounts = {
   /** Candy Machine account. */
   candyMachine: PublicKey | Pda;
+  /** Candy machine mint authority (add only allowed for the mint_authority). */
+  mintAuthority?: Signer;
   authorityPda?: PublicKey | Pda;
   /** Seller of the asset. */
   seller?: Signer;
@@ -97,22 +99,27 @@ export function addCoreAsset(
       isWritable: true,
       value: input.candyMachine ?? null,
     },
-    authorityPda: {
+    mintAuthority: {
       index: 1,
+      isWritable: false,
+      value: input.mintAuthority ?? null,
+    },
+    authorityPda: {
+      index: 2,
       isWritable: true,
       value: input.authorityPda ?? null,
     },
-    seller: { index: 2, isWritable: false, value: input.seller ?? null },
-    asset: { index: 3, isWritable: true, value: input.asset ?? null },
-    collection: { index: 4, isWritable: true, value: input.collection ?? null },
-    allowlist: { index: 5, isWritable: false, value: input.allowlist ?? null },
+    seller: { index: 3, isWritable: false, value: input.seller ?? null },
+    asset: { index: 4, isWritable: true, value: input.asset ?? null },
+    collection: { index: 5, isWritable: true, value: input.collection ?? null },
+    allowlist: { index: 6, isWritable: false, value: input.allowlist ?? null },
     mplCoreProgram: {
-      index: 6,
+      index: 7,
       isWritable: false,
       value: input.mplCoreProgram ?? null,
     },
     systemProgram: {
-      index: 7,
+      index: 8,
       isWritable: false,
       value: input.systemProgram ?? null,
     },
@@ -122,6 +129,9 @@ export function addCoreAsset(
   const resolvedArgs: AddCoreAssetInstructionArgs = { ...input };
 
   // Default values.
+  if (!resolvedAccounts.mintAuthority.value) {
+    resolvedAccounts.mintAuthority.value = context.identity;
+  }
   if (!resolvedAccounts.authorityPda.value) {
     resolvedAccounts.authorityPda.value = findCandyMachineAuthorityPda(
       context,

@@ -19,8 +19,15 @@ use mpl_core::{
 #[derive(Accounts)]
 pub struct AddCoreAsset<'info> {
     /// Candy Machine account.
-    #[account(mut)]
+    #[account(
+        mut,
+        constraint = candy_machine.items_redeemed == 0 @ CandyError::GumballMachineLive,
+        has_one = mint_authority
+    )]
     candy_machine: Account<'info, CandyMachine>,
+
+    /// Candy machine mint authority (add only allowed for the mint_authority).
+    mint_authority: Signer<'info>,
 
     /// CHECK: Safe due to seeds constraint
     #[account(

@@ -106,4 +106,7 @@ pub enum CandyError {
 
     #[msg("Invalid collection")]
     InvalidCollection,
+
+    #[msg("Gumball machine live")]
+    GumballMachineLive,
 }

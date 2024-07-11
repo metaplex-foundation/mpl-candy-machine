@@ -2,17 +2,15 @@ use anchor_lang::prelude::*;
 
 use crate::{
     constants::{CANDY_MACHINE_SIZE, CONFIG_LINE_SIZE},
-    get_config_count,
-    state::{CandyMachine, ConfigLine},
-    CandyError,
+    get_config_count, CandyError, CandyMachine, ConfigLineInput, TokenStandard,
 };
 
 pub fn add_config_lines(
-    ctx: Context<AddConfigLines>,
+    candy_machine: &mut Account<CandyMachine>,
     index: u32,
-    config_lines: Vec<ConfigLine>,
+    config_lines: Vec<ConfigLineInput>,
+    token_standard: TokenStandard,
 ) -> Result<()> {
-    let candy_machine = &mut ctx.accounts.candy_machine;
     let account_info = candy_machine.to_account_info();
     // mutable reference to the account data (config lines are written in the
     // 'hidden' section of the data array)
@@ -39,13 +37,13 @@ pub fn add_config_lines(
         mint_slice.copy_from_slice(&line.mint.to_bytes());
         position += 32;
 
-        let contributor_slice: &mut [u8] = &mut data[position..position + 32];
-        contributor_slice.copy_from_slice(&line.contributor.to_bytes());
+        let seller_slice: &mut [u8] = &mut data[position..position + 32];
+        seller_slice.copy_from_slice(&line.seller.to_bytes());
         // Skip buyer (+32)
         position += 64;
 
         let token_standard_slice: &mut [u8] = &mut data[position..position + 1];
-        token_standard_slice.copy_from_slice(&u8::to_be_bytes(line.token_standard as u8));
+        token_standard_slice.copy_from_slice(&u8::to_be_bytes(token_standard as u8));
         position += 1;
     }
 
@@ -116,15 +114,4 @@ pub fn add_config_lines(
     data[CANDY_MACHINE_SIZE..CANDY_MACHINE_SIZE + 4].copy_from_slice(&(count as u32).to_le_bytes());
 
     Ok(())
-}
-
-/// Add multiple config lines to a candy machine.
-#[derive(Accounts)]
-pub struct AddConfigLines<'info> {
-    /// Candy Machine account.
-    #[account(mut, has_one = authority)]
-    candy_machine: Account<'info, CandyMachine>,
-
-    /// Autority of the candy machine.
-    authority: Signer<'info>,
 }

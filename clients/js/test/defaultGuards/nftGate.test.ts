@@ -42,7 +42,7 @@ test('it allows minting when the payer owns an NFT from a certain collection', a
   // And a loaded Candy Machine with an nftGate guard.
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       nftGate: some({ requiredCollection }),
     },
@@ -84,7 +84,7 @@ test('it allows minting even when the payer is different from the buyer', async 
   // And a loaded Candy Machine with an nftGate guard.
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       nftGate: some({ requiredCollection }),
     },
@@ -141,7 +141,7 @@ test('it allows minting when the NFT is not on an associated token account', asy
   // And a loaded Candy Machine with an nftGate guard.
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       nftGate: some({ requiredCollection }),
     },
@@ -205,7 +205,7 @@ test('it forbids minting when the payer does not own an NFT from a certain colle
   // And a loaded Candy Machine with an nftGate guard on that collection.
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       nftGate: some({ requiredCollection }),
     },
@@ -250,7 +250,7 @@ test('it forbids minting when the payer tries to provide an NFT from the wrong c
   });
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       nftGate: some({ requiredCollection: requiredCollectionB }),
     },
@@ -289,7 +289,7 @@ test('it forbids minting when the payer tries to provide an NFT from an unverifi
   // And a loaded Candy Machine with an nftGate guard.
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       nftGate: some({ requiredCollection }),
     },
@@ -320,7 +320,7 @@ test('it charges a bot tax when trying to mint without owning the right NFT', as
   const { publicKey: requiredCollection } = await createCollectionNft(umi);
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       botTax: some({ lamports: sol(0.1), lastInstruction: true }),
       nftGate: some({ requiredCollection }),

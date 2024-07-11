@@ -22,9 +22,11 @@ import {
   u64,
   u8,
 } from '@metaplex-foundation/umi/serializers';
+import { findCandyMachineAuthorityPda } from '../../hooked';
 import {
   ResolvedAccount,
   ResolvedAccountsWithIndices,
+  expectPublicKey,
   getAccountMetasAndSigners,
 } from '../shared';
 
@@ -37,6 +39,12 @@ export type InitializeCandyMachineV2InstructionAccounts = {
    */
 
   candyMachine: PublicKey | Pda;
+  /**
+   * Authority PDA used to verify minted NFTs to the collection.
+   *
+   */
+
+  authorityPda?: PublicKey | Pda;
   /**
    * Candy Machine authority. This is the address that controls the upate of the candy machine.
    *
@@ -89,7 +97,7 @@ export type InitializeCandyMachineV2InstructionArgs =
 
 // Instruction.
 export function initializeCandyMachineV2(
-  context: Pick<Context, 'identity' | 'payer' | 'programs'>,
+  context: Pick<Context, 'eddsa' | 'identity' | 'payer' | 'programs'>,
   input: InitializeCandyMachineV2InstructionAccounts &
     InitializeCandyMachineV2InstructionArgs
 ): TransactionBuilder {
@@ -106,14 +114,25 @@ export function initializeCandyMachineV2(
       isWritable: true,
       value: input.candyMachine ?? null,
     },
-    authority: { index: 1, isWritable: false, value: input.authority ?? null },
-    payer: { index: 2, isWritable: true, value: input.payer ?? null },
+    authorityPda: {
+      index: 1,
+      isWritable: true,
+      value: input.authorityPda ?? null,
+    },
+    authority: { index: 2, isWritable: false, value: input.authority ?? null },
+    payer: { index: 3, isWritable: true, value: input.payer ?? null },
   };
 
   // Arguments.
   const resolvedArgs: InitializeCandyMachineV2InstructionArgs = { ...input };
 
   // Default values.
+  if (!resolvedAccounts.authorityPda.value) {
+    resolvedAccounts.authorityPda.value = findCandyMachineAuthorityPda(
+      context,
+      { candyMachine: expectPublicKey(resolvedAccounts.candyMachine.value) }
+    );
+  }
   if (!resolvedAccounts.authority.value) {
     resolvedAccounts.authority.value = context.identity.publicKey;
   }

@@ -20,7 +20,7 @@ test('it allows minting from a specific address only', async (t) => {
   const umi = await createUmi();
   const allowedAddress = generateSigner(umi);
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       addressGate: some({ address: allowedAddress.publicKey }),
     },
@@ -50,7 +50,7 @@ test('it forbids minting from anyone else', async (t) => {
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       addressGate: some({ address: generateSigner(umi).publicKey }),
     },
@@ -77,7 +77,7 @@ test('it charges a bot tax when trying to mint using the wrong address', async (
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       botTax: some({ lamports: sol(0.01), lastInstruction: true }),
       addressGate: some({ address: generateSigner(umi).publicKey }),

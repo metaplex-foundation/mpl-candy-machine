@@ -23,7 +23,7 @@ export type ConfigLine = {
   /** Mint account of the asset. */
   mint: PublicKey;
   /** Wallet that submitted the asset for sale. */
-  contributor: PublicKey;
+  seller: PublicKey;
   /** Wallet that will receive the asset upon sale. Empty until drawn. */
   buyer: PublicKey;
   /** Token standard. */
@@ -34,7 +34,7 @@ export type ConfigLineArgs = {
   /** Mint account of the asset. */
   mint: PublicKey;
   /** Wallet that submitted the asset for sale. */
-  contributor: PublicKey;
+  seller: PublicKey;
   /** Wallet that will receive the asset upon sale. Empty until drawn. */
   buyer: PublicKey;
   /** Token standard. */
@@ -48,7 +48,7 @@ export function getConfigLineSerializer(): Serializer<
   return struct<ConfigLine>(
     [
       ['mint', publicKeySerializer()],
-      ['contributor', publicKeySerializer()],
+      ['seller', publicKeySerializer()],
       ['buyer', publicKeySerializer()],
       ['tokenStandard', getTokenStandardSerializer()],
     ],

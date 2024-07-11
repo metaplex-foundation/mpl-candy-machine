@@ -10,6 +10,7 @@ pub use utils::*;
 pub mod constants;
 pub mod errors;
 mod instructions;
+mod processors;
 mod state;
 mod utils;
 
@@ -19,18 +20,24 @@ declare_id!("CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR");
 pub mod candy_machine_core {
     use super::*;
 
-    /// Add the configuration (name + uri) of each NFT to the account data.
+    /// Add legacy NFTs to the gumball machine.
     ///
     /// # Accounts
     ///
     ///   0. `[writable]` Candy Machine account
     ///   1. `[signer]` Candy Machine authority
-    pub fn add_config_lines(
-        ctx: Context<AddConfigLines>,
-        index: u32,
-        config_lines: Vec<ConfigLine>,
-    ) -> Result<()> {
-        instructions::add_config_lines(ctx, index, config_lines)
+    pub fn add_nft(ctx: Context<AddNft>, index: u32) -> Result<()> {
+        instructions::add_nft(ctx, index)
+    }
+
+    /// Add Core assets to the gumball machine.
+    ///
+    /// # Accounts
+    ///
+    ///   0. `[writable]` Candy Machine account
+    ///   1. `[signer]` Candy Machine authority
+    pub fn add_core_asset(ctx: Context<AddCoreAsset>, index: u32) -> Result<()> {
+        instructions::add_core_asset(ctx, index)
     }
 
     /// Initialize the candy machine account with the specified data.

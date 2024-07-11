@@ -23,7 +23,7 @@ test('it allows minting before the end date', async (t) => {
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       endDate: some({ date: tomorrow() }),
     },
@@ -49,7 +49,7 @@ test('it forbids minting after the end date', async (t) => {
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       endDate: some({ date: yesterday() }),
     },
@@ -75,7 +75,7 @@ test('it charges a bot tax when trying to mint after the end date', async (t) =>
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       botTax: some({ lamports: sol(0.01), lastInstruction: true }),
       endDate: some({ date: yesterday() }),

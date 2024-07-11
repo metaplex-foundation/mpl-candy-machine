@@ -21,7 +21,7 @@ test('it does nothing if all conditions are valid', async (t) => {
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       botTax: some({ lamports: sol(0.01), lastInstruction: true }),
     },
@@ -47,7 +47,7 @@ test('it optionally charges a bot tax if the mint instruction is not the last on
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       botTax: some({ lamports: sol(0.01), lastInstruction: true }),
     },

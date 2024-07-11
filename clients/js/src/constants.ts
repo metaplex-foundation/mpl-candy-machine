@@ -18,7 +18,7 @@ export const CANDY_MACHINE_SIZE =
 
 export const CONFIG_LINE_SIZE =
   32 + // mint
-  32 + // contributor
+  32 + // seller
   32 + // buyer
   1; // token standard
 

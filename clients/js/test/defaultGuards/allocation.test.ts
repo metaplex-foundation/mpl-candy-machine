@@ -26,7 +26,7 @@ test('it allows minting when the allocation limit is not reached', async (t) => 
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine(), getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi), await getNewConfigLine(umi)],
     guards: {
       allocation: some({ id: 1, limit: 5 }),
     },
@@ -77,7 +77,7 @@ test('it forbids minting when the allocation limit is reached', async (t) => {
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine(), getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi), await getNewConfigLine(umi)],
     guards: {
       allocation: some({ id: 1, limit: 1 }),
     },
@@ -131,7 +131,7 @@ test('the allocation limit is local to each id', async (t) => {
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine(), getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi), await getNewConfigLine(umi)],
     guards: {},
     groups: [
       {
@@ -213,7 +213,7 @@ test('it charges a bot tax when trying to mint after the limit', async (t) => {
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine(), getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi), await getNewConfigLine(umi)],
     guards: {
       botTax: some({ lamports: sol(0.1), lastInstruction: true }),
       allocation: some({ id: 1, limit: 1 }),

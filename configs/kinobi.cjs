@@ -137,17 +137,41 @@ kinobi.update(
   ])
 );
 
+const defaultsToAssociatedTokenPda = (mint = "mint", owner = "owner") =>
+  k.pdaDefault("associatedToken", {
+    importFrom: "mplEssentials",
+    seeds: { mint: k.accountDefault(mint), owner: k.accountDefault(owner) },
+  });
 const defaultsToCandyMachineAuthorityPda = (candyMachine = "candyMachine") =>
   k.pdaDefault("candyMachineAuthority", {
     importFrom: "hooked",
     seeds: { candyMachine: k.accountDefault(candyMachine) },
   });
-
 const defaultsToCandyGuardPda = (base = "base") =>
   k.pdaDefault("candyGuard", {
     importFrom: "hooked",
     seeds: { base: k.accountDefault(base) },
   });
+const defaultsToMetadataPda = (mint = "mint") =>
+  k.pdaDefault("metadata", {
+    importFrom: "mplTokenMetadata",
+    seeds: { mint: k.accountDefault(mint) },
+  });
+const defaultsToMasterEditionPda = (mint = "mint") =>
+  k.pdaDefault("masterEdition", {
+    importFrom: "mplTokenMetadata",
+    seeds: { mint: k.accountDefault(mint) },
+  });
+const defaultsToSplAssociatedTokenProgram = () =>
+  k.programDefault(
+    "splAssociatedToken",
+    "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+  );
+const defaultsToMplCoreProgram = () =>
+  k.programDefault(
+    "mplCoreProgram",
+    "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d"
+  );
 
 // Automatically recognize account default values.
 kinobi.update(
@@ -172,6 +196,26 @@ kinobi.update(
       account: "candyMachineAuthorityPda",
       ignoreIfOptional: true,
     },
+    {
+      ...defaultsToMetadataPda("mint"),
+      account: "metadata",
+      ignoreIfOptional: true,
+    },
+    {
+      ...defaultsToMasterEditionPda("mint"),
+      account: "edition",
+      ignoreIfOptional: true,
+    },
+    {
+      ...defaultsToAssociatedTokenPda("mint", "seller"),
+      account: "tokenAccount",
+      ignoreIfOptional: true,
+    },
+    {
+      ...defaultsToMplCoreProgram(),
+      account: "mplCoreProgram",
+      ignoreIfOptional: true,
+    },
   ])
 );
 
@@ -188,6 +232,18 @@ kinobi.update(
       },
     },
     "mplCandyMachineCore.initializeV2": { name: "initializeCandyMachineV2" },
+    "mplCandyMachineCore.addNft": {
+      name: "addNft",
+      accounts: {
+        seller: { defaultsTo: k.identityDefault() },
+      },
+    },
+    "mplCandyMachineCore.addCoreAsset": {
+      name: "addCoreAsset",
+      accounts: {
+        seller: { defaultsTo: k.identityDefault() },
+      },
+    },
     "mplCandyMachineCore.mintV2": {
       name: "mintFromCandyMachineV2",
       accounts: {

@@ -6,7 +6,8 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-export * from './addConfigLines';
+export * from './addCoreAsset';
+export * from './addNft';
 export * from './deleteCandyGuard';
 export * from './deleteCandyMachine';
 export * from './initializeCandyMachineV2';

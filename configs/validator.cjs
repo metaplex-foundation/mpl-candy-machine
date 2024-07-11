@@ -51,6 +51,11 @@ module.exports = {
         programId: "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
         deployPath: getProgram("spl_token_2022.so"),
       },
+      {
+        label: "MPL Core",
+        programId: "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d",
+        deployPath: getProgram("mpl_core.so"),
+      },
     ],
     accounts: [
       {

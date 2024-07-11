@@ -41,7 +41,7 @@ test('it transfers Token2022 tokens from the payer to the destination', async (t
   // And a loaded Candy Machine with a token2022Payment guard that requires 5 tokens.
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       token2022Payment: some({
         mint: tokenMint.publicKey,

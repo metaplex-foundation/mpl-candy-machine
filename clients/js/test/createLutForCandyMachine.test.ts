@@ -27,7 +27,7 @@ test('it can create a LUT for a candy machine v2', async (t) => {
   // Given a candy machine with a candy guard.
   const umi = await createUmi();
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {},
   });
 
@@ -88,7 +88,7 @@ test('it can create a LUT for a candy machine with no candy guard', async (t) =>
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
   });
 
   // And a custom mint authority.

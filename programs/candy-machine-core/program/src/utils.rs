@@ -1,5 +1,10 @@
 use anchor_lang::prelude::*;
 use arrayref::array_ref;
+use mpl_core::{types::UpdateAuthority, Asset, Collection};
+use mpl_token_metadata::{
+    accounts::{Edition, MasterEdition},
+    types::Key,
+};
 use solana_program::{
     account_info::AccountInfo,
     program_memory::sol_memcmp,
@@ -38,6 +43,40 @@ pub fn assert_initialized<T: Pack + IsInitialized>(account_info: &AccountInfo) -
     }
 }
 
+pub fn assert_is_non_printable_edition(account: &AccountInfo) -> Result<()> {
+    // Make sure we're listing a printed edition or a 1/1 master edition
+    let edition = Edition::try_from(account);
+
+    if edition.is_err() {
+        return err!(CandyError::InvalidEditionAccount);
+    }
+
+    if edition.unwrap().key != Key::EditionV1 {
+        let master_edition = MasterEdition::try_from(account);
+        if master_edition.is_err() {
+            return err!(CandyError::InvalidEditionAccount);
+        }
+
+        let master_edition_unwrapped = master_edition.unwrap();
+        require!(
+            master_edition_unwrapped.max_supply.is_some()
+                && master_edition_unwrapped.max_supply.unwrap() == 0,
+            CandyError::InvalidMasterEditionSupply
+        );
+    }
+
+    Ok(())
+}
+
+pub fn assert_keys_equal(key1: Pubkey, key2: Pubkey, error_message: &str) -> Result<()> {
+    if key1 != key2 {
+        msg!("{}: actual: {} expected: {}", error_message, key1, key2);
+        return err!(CandyError::PublicKeyMismatch);
+    }
+
+    Ok(())
+}
+
 /// Return the current number of lines written to the account.
 pub fn get_config_count(data: &[u8]) -> Result<usize> {
     Ok(u32::from_le_bytes(*array_ref![data, CANDY_MACHINE_SIZE, 4]) as usize)
@@ -45,6 +84,33 @@ pub fn get_config_count(data: &[u8]) -> Result<usize> {
 
 pub fn cmp_pubkeys(a: &Pubkey, b: &Pubkey) -> bool {
     sol_memcmp(a.as_ref(), b.as_ref(), PUBKEY_BYTES) == 0
+}
+
+pub fn get_core_asset_update_authority<'info>(
+    asset_info: &AccountInfo<'info>,
+    collection_info: Option<&AccountInfo<'info>>,
+) -> Result<(Option<Pubkey>, Box<Asset>)> {
+    // Considered a primary sale if owner is the update authority (most likely creator)
+    let asset = Box::<Asset>::try_from(asset_info)?;
+    match asset.base.update_authority {
+        UpdateAuthority::Address(address) => {
+            return Ok((Some(address), asset));
+        }
+        UpdateAuthority::Collection(collection_key) => {
+            if let Some(collection_info) = collection_info {
+                assert_keys_equal(
+                    *collection_info.key,
+                    collection_key,
+                    "Invalid collection key",
+                )?;
+                let collection = Box::<Collection>::try_from(collection_info)?;
+                return Ok((Some(collection.base.update_authority), asset));
+            } else {
+                return Ok((None, asset));
+            }
+        }
+        UpdateAuthority::None => return Ok((None, asset)),
+    }
 }
 
 #[cfg(test)]

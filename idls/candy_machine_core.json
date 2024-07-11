@@ -3,9 +3,9 @@
   "name": "candy_machine_core",
   "instructions": [
     {
-      "name": "addConfigLines",
+      "name": "addNft",
       "docs": [
-        "Add the configuration (name + uri) of each NFT to the account data.",
+        "Add legacy NFTs to the gumball machine.",
         "",
         "# Accounts",
         "",
@@ -22,26 +22,129 @@
           ]
         },
         {
-          "name": "authority",
+          "name": "authorityPda",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "seller",
           "isMut": false,
           "isSigner": true,
           "docs": [
-            "Autority of the candy machine."
+            "Seller of the nft"
           ]
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "metadata",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "edition",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "allowlist",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
         }
       ],
       "args": [
         {
           "name": "index",
           "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "addCoreAsset",
+      "docs": [
+        "Add Core assets to the gumball machine.",
+        "",
+        "# Accounts",
+        "",
+        "0. `[writable]` Candy Machine account",
+        "1. `[signer]` Candy Machine authority"
+      ],
+      "accounts": [
+        {
+          "name": "candyMachine",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Candy Machine account."
+          ]
         },
         {
-          "name": "configLines",
-          "type": {
-            "vec": {
-              "defined": "ConfigLine"
-            }
-          }
+          "name": "authorityPda",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "seller",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "Seller of the asset."
+          ]
+        },
+        {
+          "name": "asset",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "collection",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Core asset's collection if it's part of one."
+          ]
+        },
+        {
+          "name": "allowlist",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "mplCoreProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "index",
+          "type": "u32"
         }
       ]
     },
@@ -64,6 +167,15 @@
           "docs": [
             "Candy Machine account. The account space must be allocated to allow accounts larger",
             "than 10kb.",
+            ""
+          ]
+        },
+        {
+          "name": "authorityPda",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Authority PDA used to verify minted NFTs to the collection.",
             ""
           ]
         },
@@ -330,6 +442,31 @@
   ],
   "types": [
     {
+      "name": "ConfigLineInput",
+      "docs": [
+        "Config line struct for storing asset (NFT) data pre-mint."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "docs": [
+              "Mint account of the asset."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "seller",
+            "docs": [
+              "Wallet that submitted the asset for sale."
+            ],
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
       "name": "ConfigLine",
       "docs": [
         "Config line struct for storing asset (NFT) data pre-mint."
@@ -345,7 +482,7 @@
             "type": "publicKey"
           },
           {
-            "name": "contributor",
+            "name": "seller",
             "docs": [
               "Wallet that submitted the asset for sale."
             ],
@@ -535,6 +672,31 @@
       "code": 6029,
       "name": "InvalidAccountVersion",
       "msg": "Invalid account version"
+    },
+    {
+      "code": 6030,
+      "name": "NotPrimarySale",
+      "msg": "Not a primary sale asset"
+    },
+    {
+      "code": 6031,
+      "name": "InvalidEditionAccount",
+      "msg": "Invalid edition account"
+    },
+    {
+      "code": 6032,
+      "name": "InvalidMasterEditionSupply",
+      "msg": "Invalid master edition supply"
+    },
+    {
+      "code": 6033,
+      "name": "PublicKeyMismatch",
+      "msg": "Public key mismatch"
+    },
+    {
+      "code": 6034,
+      "name": "InvalidCollection",
+      "msg": "Invalid collection"
     }
   ],
   "metadata": {

@@ -1,6 +1,9 @@
 use anchor_lang::{prelude::*, Discriminator};
 
-use crate::{constants::CANDY_MACHINE_SIZE, state::CandyMachine};
+use crate::{
+    constants::{AUTHORITY_SEED, CANDY_MACHINE_SIZE},
+    state::CandyMachine,
+};
 
 pub fn initialize_v2(ctx: Context<InitializeV2>, item_count: u64) -> Result<()> {
     let candy_machine_account = &mut ctx.accounts.candy_machine;
@@ -40,6 +43,16 @@ pub struct InitializeV2<'info> {
         constraint = candy_machine.to_account_info().owner == __program_id && candy_machine.to_account_info().data_len() >= CandyMachine::get_size(item_count)
     )]
     candy_machine: UncheckedAccount<'info>,
+
+    /// Authority PDA used to verify minted NFTs to the collection.
+    ///
+    /// CHECK: account checked in seeds constraint
+    #[account(
+        mut,
+        seeds = [AUTHORITY_SEED.as_bytes(), candy_machine.to_account_info().key.as_ref()],
+        bump
+    )]
+    authority_pda: UncheckedAccount<'info>,
 
     /// Candy Machine authority. This is the address that controls the upate of the candy machine.
     ///

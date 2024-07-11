@@ -25,7 +25,7 @@ test('it transfers SOL from the payer to the destination', async (t) => {
   const destination = generateSigner(umi).publicKey;
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       solPayment: some({ lamports: sol(1), destination }),
     },
@@ -67,7 +67,7 @@ test('it fails if the payer does not have enough funds', async (t) => {
   const destination = generateSigner(umi).publicKey;
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       solPayment: some({ lamports: sol(5), destination }),
     },
@@ -103,7 +103,7 @@ test('it charges a bot tax if the payer does not have enough funds', async (t) =
   const destination = generateSigner(umi).publicKey;
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       botTax: some({ lamports: sol(0.1), lastInstruction: true }),
       solPayment: some({ lamports: sol(5), destination }),

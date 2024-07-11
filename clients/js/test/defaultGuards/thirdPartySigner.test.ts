@@ -22,7 +22,7 @@ test('it allows minting when the third party signer is provided', async (t) => {
   const thirdPartySigner = generateSigner(umi);
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       thirdPartySigner: some({ signerKey: thirdPartySigner.publicKey }),
     },
@@ -53,7 +53,7 @@ test('it forbids minting when the third party signer is wrong', async (t) => {
   const thirdPartySigner = generateSigner(umi);
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       thirdPartySigner: some({ signerKey: thirdPartySigner.publicKey }),
     },
@@ -85,7 +85,7 @@ test('it charges a bot tax when trying to mint using the wrong third party signe
   const thirdPartySigner = generateSigner(umi);
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       botTax: some({ lamports: sol(0.1), lastInstruction: true }),
       thirdPartySigner: some({ signerKey: thirdPartySigner.publicKey }),

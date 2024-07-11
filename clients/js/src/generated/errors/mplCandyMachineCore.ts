@@ -480,6 +480,74 @@ export class CmInvalidAccountVersionError extends ProgramError {
 codeToErrorMap.set(0x178d, CmInvalidAccountVersionError);
 nameToErrorMap.set('InvalidAccountVersion', CmInvalidAccountVersionError);
 
+/** NotPrimarySale: Not a primary sale asset */
+export class CmNotPrimarySaleError extends ProgramError {
+  readonly name: string = 'NotPrimarySale';
+
+  readonly code: number = 0x178e; // 6030
+
+  constructor(program: Program, cause?: Error) {
+    super('Not a primary sale asset', program, cause);
+  }
+}
+codeToErrorMap.set(0x178e, CmNotPrimarySaleError);
+nameToErrorMap.set('NotPrimarySale', CmNotPrimarySaleError);
+
+/** InvalidEditionAccount: Invalid edition account */
+export class CmInvalidEditionAccountError extends ProgramError {
+  readonly name: string = 'InvalidEditionAccount';
+
+  readonly code: number = 0x178f; // 6031
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid edition account', program, cause);
+  }
+}
+codeToErrorMap.set(0x178f, CmInvalidEditionAccountError);
+nameToErrorMap.set('InvalidEditionAccount', CmInvalidEditionAccountError);
+
+/** InvalidMasterEditionSupply: Invalid master edition supply */
+export class CmInvalidMasterEditionSupplyError extends ProgramError {
+  readonly name: string = 'InvalidMasterEditionSupply';
+
+  readonly code: number = 0x1790; // 6032
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid master edition supply', program, cause);
+  }
+}
+codeToErrorMap.set(0x1790, CmInvalidMasterEditionSupplyError);
+nameToErrorMap.set(
+  'InvalidMasterEditionSupply',
+  CmInvalidMasterEditionSupplyError
+);
+
+/** PublicKeyMismatch: Public key mismatch */
+export class CmPublicKeyMismatchError extends ProgramError {
+  readonly name: string = 'PublicKeyMismatch';
+
+  readonly code: number = 0x1791; // 6033
+
+  constructor(program: Program, cause?: Error) {
+    super('Public key mismatch', program, cause);
+  }
+}
+codeToErrorMap.set(0x1791, CmPublicKeyMismatchError);
+nameToErrorMap.set('PublicKeyMismatch', CmPublicKeyMismatchError);
+
+/** InvalidCollection: Invalid collection */
+export class CmInvalidCollectionError extends ProgramError {
+  readonly name: string = 'InvalidCollection';
+
+  readonly code: number = 0x1792; // 6034
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid collection', program, cause);
+  }
+}
+codeToErrorMap.set(0x1792, CmInvalidCollectionError);
+nameToErrorMap.set('InvalidCollection', CmInvalidCollectionError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

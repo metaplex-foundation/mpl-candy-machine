@@ -27,7 +27,7 @@ test('it allows minting when the mint limit is not reached', async (t) => {
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine(), getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi), await getNewConfigLine(umi)],
     guards: {
       mintLimit: some({ id: 1, limit: 5 }),
     },
@@ -65,7 +65,7 @@ test('it allows minting even when the payer is different from the buyer', async 
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine(), getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi), await getNewConfigLine(umi)],
     guards: {
       mintLimit: some({ id: 1, limit: 5 }),
     },
@@ -106,7 +106,7 @@ test('it forbids minting when the mint limit is reached', async (t) => {
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine(), getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi), await getNewConfigLine(umi)],
     guards: {
       mintLimit: some({ id: 42, limit: 1 }),
     },
@@ -145,7 +145,7 @@ test('the mint limit is local to each wallet', async (t) => {
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine(), getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi), await getNewConfigLine(umi)],
     guards: {
       mintLimit: some({ id: 42, limit: 1 }),
     },
@@ -193,7 +193,7 @@ test('it charges a bot tax when trying to mint after the limit', async (t) => {
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine(), getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi), await getNewConfigLine(umi)],
     guards: {
       botTax: some({ lamports: sol(0.1), lastInstruction: true }),
       mintLimit: some({ id: 42, limit: 1 }),

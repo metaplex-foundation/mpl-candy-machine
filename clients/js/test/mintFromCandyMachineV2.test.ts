@@ -23,7 +23,7 @@ test('it can mint directly from a candy machine as the mint authority', async (t
   // Given a loaded candy machine.
   const umi = await createUmi();
   const candyMachineSigner = await createV2(umi, {
-    configLines: [getNewConfigLine(), getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi), await getNewConfigLine(umi)],
   });
   const candyMachine = candyMachineSigner.publicKey;
 
@@ -50,7 +50,7 @@ test('it cannot mint directly from a candy machine if we are not the mint author
   // Given a loaded candy machine with a mint authority A.
   const umi = await createUmi();
   const candyMachineSigner = await createV2(umi, {
-    configLines: [getNewConfigLine(), getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi), await getNewConfigLine(umi)],
   });
   const candyMachine = candyMachineSigner.publicKey;
 

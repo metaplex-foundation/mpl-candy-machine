@@ -21,7 +21,7 @@ test('it allows minting until a threshold of NFTs have been redeemed', async (t)
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine(), getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi), await getNewConfigLine(umi)],
     guards: {
       redeemedAmount: some({ maximum: 1 }),
     },
@@ -47,7 +47,7 @@ test('it forbids minting once the redeemed threshold has been reached', async (t
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine(), getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi), await getNewConfigLine(umi)],
     guards: {
       redeemedAmount: some({ maximum: 1 }),
     },
@@ -86,7 +86,7 @@ test('it charges a bot tax when trying to mint once the threshold has been reach
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine(), getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi), await getNewConfigLine(umi)],
     guards: {
       botTax: some({ lamports: sol(0.1), lastInstruction: true }),
       redeemedAmount: some({ maximum: 1 }),

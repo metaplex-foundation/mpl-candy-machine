@@ -91,4 +91,19 @@ pub enum CandyError {
 
     #[msg("Invalid account version")]
     InvalidAccountVersion,
+
+    #[msg("Not a primary sale asset")]
+    NotPrimarySale,
+
+    #[msg("Invalid edition account")]
+    InvalidEditionAccount,
+
+    #[msg("Invalid master edition supply")]
+    InvalidMasterEditionSupply,
+
+    #[msg("Public key mismatch")]
+    PublicKeyMismatch,
+
+    #[msg("Invalid collection")]
+    InvalidCollection,
 }

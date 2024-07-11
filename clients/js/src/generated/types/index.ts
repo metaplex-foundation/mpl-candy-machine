@@ -11,6 +11,7 @@ export * from './allocation';
 export * from './allowList';
 export * from './botTax';
 export * from './configLine';
+export * from './configLineInput';
 export * from './endDate';
 export * from './gatekeeper';
 export * from './guardType';

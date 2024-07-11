@@ -41,11 +41,20 @@ impl CandyMachine {
 
 /// Config line struct for storing asset (NFT) data pre-mint.
 #[derive(AnchorSerialize, AnchorDeserialize, Debug)]
+pub struct ConfigLineInput {
+    /// Mint account of the asset.
+    pub mint: Pubkey,
+    /// Wallet that submitted the asset for sale.
+    pub seller: Pubkey,
+}
+
+/// Config line struct for storing asset (NFT) data pre-mint.
+#[derive(AnchorSerialize, AnchorDeserialize, Debug)]
 pub struct ConfigLine {
     /// Mint account of the asset.
     pub mint: Pubkey,
     /// Wallet that submitted the asset for sale.
-    pub contributor: Pubkey,
+    pub seller: Pubkey,
     /// Wallet that will receive the asset upon sale. Empty until drawn.
     pub buyer: Pubkey,
     /// Token standard.

@@ -9,6 +9,7 @@ import {
   findMetadataPda,
   verifyCollectionV1,
 } from '@metaplex-foundation/mpl-token-metadata';
+import { create as baseCreateCoreAsset } from '@metaplex-foundation/mpl-core';
 import {
   createAssociatedToken,
   createMint,
@@ -38,12 +39,13 @@ import { Assertions } from 'ava';
 import {
   CandyGuardDataArgs,
   ConfigLine,
+  ConfigLineInput,
   CreateCandyGuardInstructionAccounts,
   CreateCandyGuardInstructionDataArgs,
   DefaultGuardSetArgs,
   GuardSetArgs,
   TokenStandard,
-  addConfigLines,
+  addNft,
   createCandyGuard as baseCreateCandyGuard,
   createCandyMachineV2 as baseCreateCandyMachineV2,
   fetchCandyMachine,
@@ -71,6 +73,20 @@ export const createNft = async (
   }).sendAndConfirm(umi);
 
   return mint;
+};
+
+export const createCoreAsset = async (
+  umi: Umi,
+  input: Partial<Parameters<typeof baseCreateCoreAsset>[1]> = {}
+): Promise<Signer> => {
+  const asset = generateSigner(umi);
+  await baseCreateCoreAsset(umi, {
+    asset,
+    ...defaultAssetData(),
+    ...input,
+  }).sendAndConfirm(umi);
+
+  return asset;
 };
 
 export const createProgrammableNft = async (
@@ -206,7 +222,7 @@ export const createV2 = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
 
   if (input.configLines !== undefined) {
     builder = builder.add(
-      addConfigLines(umi, {
+      addNft(umi, {
         candyMachine: candyMachine.publicKey,
         index: input.configLineIndex ?? 0,
         configLines: input.configLines,
@@ -395,12 +411,11 @@ export const assertBurnedNft = async (
 export const yesterday = (): DateTime => now() - 3600n * 24n;
 export const tomorrow = (): DateTime => now() + 3600n * 24n;
 
-export const getNewConfigLine = (
-  overrides?: Partial<ConfigLine>
-): ConfigLine => ({
-  mint: publicKey(Keypair.generate().publicKey),
-  contributor: publicKey(Keypair.generate().publicKey),
-  buyer: defaultPublicKey(),
-  tokenStandard: TokenStandard.NonFungible,
+export const getNewConfigLine = async (
+  umi: Umi,
+  overrides?: Partial<ConfigLineInput>
+): Promise<ConfigLineInput> => ({
+  mint: (await createNft(umi)).publicKey,
+  seller: publicKey(Keypair.generate().publicKey),
   ...overrides,
 });

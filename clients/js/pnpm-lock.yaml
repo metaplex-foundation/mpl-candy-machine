@@ -1,6 +1,13 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 dependencies:
+  '@metaplex-foundation/mpl-core':
+    specifier: ^1.0.2
+    version: 1.0.2(@metaplex-foundation/umi@0.8.2)(@noble/hashes@1.2.0)
   '@metaplex-foundation/mpl-token-metadata':
     specifier: 3.0.0-alpha.27
     version: 3.0.0-alpha.27(@metaplex-foundation/umi@0.8.2)
@@ -1940,6 +1947,16 @@ packages:
   /@metaplex-foundation/cusper@0.0.2:
     resolution: {integrity: sha512-S9RulC2fFCFOQraz61bij+5YCHhSO9llJegK8c8Y6731fSi6snUSQJdCUqYS8AIgR0TKbQvdvgSyIIdbDFZbBA==}
     dev: true
+
+  /@metaplex-foundation/mpl-core@1.0.2(@metaplex-foundation/umi@0.8.2)(@noble/hashes@1.2.0):
+    resolution: {integrity: sha512-pDv0MKBlVuLNmgamAdbPsVfbslsc9Xgn3im11KQcmSAB8kmBQTQAiatDQfLb/f0+H2zl2P6Zvv0cPdvaipdrlg==}
+    peerDependencies:
+      '@metaplex-foundation/umi': '>=0.8.2 < 1'
+      '@noble/hashes': ^1.3.1
+    dependencies:
+      '@metaplex-foundation/umi': 0.8.2
+      '@noble/hashes': 1.2.0
+    dev: false
 
   /@metaplex-foundation/mpl-token-auth-rules@1.2.0:
     resolution: {integrity: sha512-UkfBkYEdenefIKxE2L15j9ZHUJYYRQoDqNqDawh5DxdemmVV3GLnIlbMilr/HLXyXb2eMAOUdl5XgZFwKYN5EA==}
@@ -6944,6 +6961,7 @@ packages:
 
   /node-addon-api@1.7.2:
     resolution: {integrity: sha512-ibPK3iA+vaY1eEjESkQkM0BbCqFOaZMiXRTtdB0u7b4djtY6JnsjvPdUHVMg6xQt3B8fpTTWHI9A+ADjM9frzg==}
+    requiresBuild: true
     dev: true
     optional: true
 

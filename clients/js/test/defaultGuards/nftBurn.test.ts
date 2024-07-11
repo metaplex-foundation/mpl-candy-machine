@@ -38,7 +38,7 @@ test('it burns a specific NFT to allow minting', async (t) => {
   // And a loaded Candy Machine with an nftBurn guard on that collection.
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       nftBurn: some({ requiredCollection }),
     },
@@ -87,7 +87,7 @@ test('it allows minting even when the payer is different from the buyer', async 
   // And a loaded Candy Machine with an nftBurn guard on that collection.
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       nftBurn: some({ requiredCollection }),
     },
@@ -127,7 +127,7 @@ test('it fails if there is not valid NFT to burn', async (t) => {
   const requiredCollection = (await createCollectionNft(umi)).publicKey;
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       nftBurn: some({ requiredCollection }),
     },
@@ -164,7 +164,7 @@ test('it charges a bot tax when trying to mint using the wrong NFT', async (t) =
   const requiredCollection = (await createCollectionNft(umi)).publicKey;
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       botTax: some({ lamports: sol(0.01), lastInstruction: true }),
       nftBurn: some({ requiredCollection }),
@@ -211,7 +211,7 @@ test('it burns a specific Programmable NFT to allow minting', async (t) => {
   // And a loaded Candy Machine with an nftBurn guard on that collection.
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       nftBurn: some({ requiredCollection }),
     },

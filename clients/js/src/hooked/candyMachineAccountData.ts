@@ -48,7 +48,7 @@ export type CandyMachineItem = {
   readonly mint: string;
 
   /** The URI of the NFT to be, pointing to some off-chain JSON Metadata. */
-  readonly contributor: string;
+  readonly seller: string;
 
   readonly buyer?: string;
 
@@ -59,7 +59,7 @@ type CandyMachineHiddenSection = {
   itemsLoaded: number;
   rawConfigLines: {
     mint: PublicKey;
-    contributor: PublicKey;
+    seller: PublicKey;
     buyer: PublicKey;
     tokenStandard: TokenStandard;
   }[];
@@ -94,12 +94,12 @@ export function getCandyMachineAccountDataSerializer(): Serializer<
             array(
               struct<{
                 mint: PublicKey;
-                contributor: PublicKey;
+                seller: PublicKey;
                 buyer: PublicKey;
                 tokenStandard: TokenStandard;
               }>([
                 ['mint', publicKey()],
-                ['contributor', publicKey()],
+                ['seller', publicKey()],
                 ['buyer', publicKey()],
                 ['tokenStandard', u8()],
               ]),
@@ -124,7 +124,7 @@ export function getCandyMachineAccountDataSerializer(): Serializer<
           index,
           minted: !itemsLeftToMint.includes(index),
           mint: rawItem.mint,
-          contributor: rawItem.contributor,
+          seller: rawItem.seller,
           buyer:
             rawItem.buyer === defaultPublicKey() ? undefined : rawItem.buyer,
           tokenStandard: rawItem.tokenStandard,

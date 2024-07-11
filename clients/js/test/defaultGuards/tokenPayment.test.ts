@@ -40,7 +40,7 @@ test('it transfers tokens from the payer to the destination', async (t) => {
   // And a loaded Candy Machine with a tokenPayment guard that requires 5 tokens.
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       tokenPayment: some({
         mint: tokenMint.publicKey,
@@ -97,7 +97,7 @@ test('it allows minting even when the payer is different from the buyer', async 
   // And a loaded Candy Machine with a tokenPayment guard that requires 5 tokens.
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       tokenPayment: some({
         mint: tokenMint.publicKey,
@@ -153,7 +153,7 @@ test('it fails if the payer does not have enough tokens', async (t) => {
   // And a loaded Candy Machine with a tokenPayment guard that requires 5 tokens.
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       tokenPayment: some({
         mint: tokenMint.publicKey,
@@ -203,7 +203,7 @@ test('it charges a bot tax if the payer does not have enough tokens', async (t) 
   // And a loaded Candy Machine with a bot tax guard and a tokenPayment guard that requires 5 tokens.
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       botTax: some({ lamports: sol(0.1), lastInstruction: true }),
       tokenPayment: some({

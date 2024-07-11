@@ -37,7 +37,7 @@ test('it can mint from a candy guard with no guards', async (t) => {
   const umi = await createUmi();
 
   const candyMachineSigner = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {},
     groups: [],
   });
@@ -69,7 +69,7 @@ test('it can mint from a candy guard with guards', async (t) => {
 
   const destination = generateSigner(umi).publicKey;
   const candyMachineSigner = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       botTax: { lamports: sol(0.01), lastInstruction: true },
       solPayment: { lamports: sol(2), destination },
@@ -112,7 +112,7 @@ test('it can mint from a candy guard with groups', async (t) => {
 
   const destination = generateSigner(umi).publicKey;
   const candyMachineSigner = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {
       botTax: { lamports: sol(0.01), lastInstruction: true },
       solPayment: { lamports: sol(2), destination },
@@ -148,7 +148,7 @@ test('it cannot mint using the default guards if the candy guard has groups', as
 
   const destination = generateSigner(umi).publicKey;
   const candyMachineSigner = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: { solPayment: { lamports: sol(2), destination } },
     groups: [
       { label: 'GROUP1', guards: { startDate: { date: yesterday() } } },
@@ -181,7 +181,7 @@ test('it cannot mint from a group if the provided group label does not exist', a
 
   const destination = generateSigner(umi).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: { solPayment: { lamports: sol(2), destination } },
     groups: [{ label: 'GROUP1', guards: { startDate: { date: yesterday() } } }],
   });
@@ -210,7 +210,7 @@ test('it can mint using an explicit payer', async (t) => {
 
   const destination = generateSigner(umi).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: { solPayment: { lamports: sol(2), destination } },
   });
 
@@ -270,7 +270,7 @@ test('it cannot mint from a candy machine that is not fully loaded', async (t) =
 
   const { publicKey: candyMachine } = await createV2(umi, {
     itemCount: 2,
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {},
   });
 
@@ -295,7 +295,7 @@ test('it cannot mint from a candy machine that has been fully minted', async (t)
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [getNewConfigLine()],
+    configLines: [await getNewConfigLine(umi)],
     guards: {},
   });
 
@@ -329,7 +329,7 @@ test('it can mint from a candy machine in a random order', async (t) => {
   const umi = await createUmi();
 
   const indices = Array.from({ length: 5 }, (x, i) => i);
-  const configLines = indices.map(() => getNewConfigLine());
+  const configLines = indices.map(() => await getNewConfigLine(umi));
   const { publicKey: candyMachine } = await createV2(umi, {
     configLines,
     guards: {},

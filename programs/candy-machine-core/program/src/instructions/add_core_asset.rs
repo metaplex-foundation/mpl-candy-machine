@@ -1,6 +1,6 @@
 use crate::{
     constants::AUTHORITY_SEED, get_core_asset_update_authority, state::CandyMachine, CandyError,
-    ConfigLineInput, TokenStandard,
+    ConfigLineInput, GumballState, TokenStandard,
 };
 use anchor_lang::prelude::*;
 use mpl_core::{
@@ -21,13 +21,9 @@ pub struct AddCoreAsset<'info> {
     /// Candy Machine account.
     #[account(
         mut,
-        constraint = candy_machine.items_redeemed == 0 @ CandyError::GumballMachineLive,
-        has_one = mint_authority
+        constraint = candy_machine.state != GumballState::SaleStarted @ CandyError::InvalidState,
     )]
     candy_machine: Account<'info, CandyMachine>,
-
-    /// Candy machine mint authority (add only allowed for the mint_authority).
-    mint_authority: Signer<'info>,
 
     /// CHECK: Safe due to seeds constraint
     #[account(

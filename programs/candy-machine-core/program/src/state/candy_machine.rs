@@ -4,28 +4,28 @@ use crate::constants::{CANDY_MACHINE_SIZE, CONFIG_LINE_SIZE};
 
 /// Candy machine state and config data.
 #[account]
-#[derive(Default, Debug)]
+#[derive(Debug)]
 pub struct CandyMachine {
     /// Version of the account.
     pub version: u8,
-    /// Features flags.
-    pub features: [u8; 6],
     /// Authority address.
     pub authority: Pubkey,
     /// Authority address allowed to mint from the candy machine.
     pub mint_authority: Pubkey,
     /// Number of assets redeemed.
     pub items_redeemed: u64,
-    /// Number of assets available.
-    pub items_available: u64,
+    /// True if the authority has finalized details, which prevents adding more nfts.
+    pub state: GumballState,
+    /// User-defined settings
+    pub settings: GumballSettings,
     // hidden data section to avoid deserialisation:
     //
     // - (u32) how many actual lines of data there are currently (eventually
     //   equals items available)
-    // - (CONFIG_LINE_SIZE * items_available)
+    // - (CONFIG_LINE_SIZE * item_capacity)
     // - (item_available / 8) + 1 bit mask to keep track of which ConfigLines
     //   have been added
-    // - (u32 * items_available) mint indices
+    // - (u32 * item_capacity) mint indices
 }
 
 impl CandyMachine {
@@ -66,4 +66,27 @@ pub struct ConfigLine {
 pub enum TokenStandard {
     NonFungible,
     Core,
+}
+
+#[derive(Copy, AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, Debug)]
+pub enum GumballState {
+    None,             // Can update details, but cannot invite sellers
+    DetailsFinalized, // Cannot update details, can invite sellers
+    SaleStarted,      // Cannot update details, cannot invite sellers, cannot add items
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, Debug)]
+pub struct GumballSettings {
+    /// Uri of off-chain metadata
+    pub uri: [u8; 200],
+    /// Number of assets that can be added.
+    pub item_capacity: u64,
+    /// Max number of items that can be added by a single seller.
+    pub items_per_seller: u16,
+    /// Merkle root hash for sellers who can add items to the machine.
+    pub sellers_merkle_root: Option<Pubkey>,
+    /// Fee basis points paid to the machine authority.
+    pub curator_fee_bps: u16,
+    /// True if the front end should hide items that have been sold.
+    pub hide_sold_items: bool,
 }

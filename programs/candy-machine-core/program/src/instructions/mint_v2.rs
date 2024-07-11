@@ -4,10 +4,10 @@ use solana_program::sysvar;
 
 use crate::{
     constants::{
-        CONFIG_LINE_SIZE, CANDY_MACHINE_SIZE
+        CANDY_MACHINE_SIZE, CONFIG_LINE_SIZE
     },
     utils::*,
-    CandyError, CandyMachine
+    CandyError, CandyMachine, GumballState
 };
 
 /// Accounts to mint an NFT.
@@ -38,7 +38,7 @@ pub(crate) fn process_mint(
     accounts: MintAccounts,
 ) -> Result<()> {
     // are there items to be minted?
-    if candy_machine.items_redeemed >= candy_machine.items_available {
+    if candy_machine.items_redeemed >= candy_machine.settings.item_capacity {
         return err!(CandyError::CandyMachineEmpty);
     }
 
@@ -52,7 +52,7 @@ pub(crate) fn process_mint(
     let seed = u64::from_le_bytes(*most_recent).saturating_sub(clock.unix_timestamp as u64);
 
     let remainder: usize = seed
-        .checked_rem(candy_machine.items_available - candy_machine.items_redeemed)
+        .checked_rem(candy_machine.settings.item_capacity - candy_machine.items_redeemed)
         .ok_or(CandyError::NumericalOverflowError)? as usize;
 
     set_config_line_buyer(
@@ -86,16 +86,16 @@ pub fn set_config_line_buyer(
 
     // validates that all config lines were added to the candy machine
     let config_count = get_config_count(&account_data)? as u64;
-    if config_count != candy_machine.items_available {
+    if config_count != candy_machine.settings.item_capacity {
         return err!(CandyError::NotFullyLoaded);
     }
 
     // (1) determine the mint index (index is a random index on the available indices array)
-    let items_available = candy_machine.items_available;
+    let item_capacity = candy_machine.settings.item_capacity;
     let indices_start = CANDY_MACHINE_SIZE
         + 4 // config line count
-        + (items_available as usize) * CONFIG_LINE_SIZE
-        + (items_available
+        + (item_capacity as usize) * CONFIG_LINE_SIZE
+        + (item_capacity
             .checked_div(8)
             .ok_or(CandyError::NumericalOverflowError)?
             + 1) as usize;
@@ -103,7 +103,7 @@ pub fn set_config_line_buyer(
     let mint_index = indices_start + index * 4;
     let value_to_use = u32::from_le_bytes(*array_ref![account_data, mint_index, 4]) as usize;
     // calculates the last available index and retrieves the value at that position
-    let last_index = indices_start + ((items_available - mint_number - 1) * 4) as usize;
+    let last_index = indices_start + ((item_capacity - mint_number - 1) * 4) as usize;
     let last_value = u32::from_le_bytes(*array_ref![account_data, last_index, 4]);
     // swap-remove: this guarantees that we remove the used mint index from the available array
     // in a constant time O(1) no matter how big the indices array is
@@ -124,7 +124,11 @@ pub fn set_config_line_buyer(
 #[derive(Accounts)]
 pub struct MintV2<'info> {
     /// Candy machine account.
-    #[account(mut, has_one = mint_authority)]
+    #[account(
+        mut, 
+        has_one = mint_authority,
+        constraint = candy_machine.state == GumballState::SaleStarted @ CandyError::InvalidState
+    )]
     candy_machine: Box<Account<'info, CandyMachine>>,
 
     /// Candy machine mint authority (mint only allowed for the mint_authority).

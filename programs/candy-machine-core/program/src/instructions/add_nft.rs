@@ -1,6 +1,6 @@
 use crate::{
     assert_is_non_printable_edition, constants::AUTHORITY_SEED, state::CandyMachine, CandyError,
-    ConfigLineInput, Token, TokenStandard,
+    ConfigLineInput, GumballState, Token, TokenStandard,
 };
 use anchor_lang::prelude::*;
 use mpl_token_metadata::{
@@ -16,13 +16,9 @@ pub struct AddNft<'info> {
     /// Candy Machine account.
     #[account(
         mut,
-        constraint = candy_machine.items_redeemed == 0 @ CandyError::GumballMachineLive,
-        has_one = mint_authority
+        constraint = candy_machine.state != GumballState::SaleStarted @ CandyError::InvalidState,
     )]
     candy_machine: Account<'info, CandyMachine>,
-
-    /// Candy machine mint authority (add only allowed for the mint_authority).
-    mint_authority: Signer<'info>,
 
     /// CHECK: Safe due to seeds constraint
     #[account(

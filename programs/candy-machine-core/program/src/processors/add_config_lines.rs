@@ -22,7 +22,7 @@ pub fn add_config_lines(
         .checked_add(config_lines.len() as u32)
         .ok_or(CandyError::NumericalOverflowError)?;
 
-    if total > (candy_machine.items_available as u32) {
+    if total > (candy_machine.settings.item_capacity as u32) {
         return err!(CandyError::IndexGreaterThanLength);
     } else if config_lines.is_empty() {
         // there is nothing to do, so we can stop early
@@ -54,11 +54,12 @@ pub fn add_config_lines(
 
     // bit-mask
     let bit_mask_start =
-        CANDY_MACHINE_SIZE + 4 + (candy_machine.items_available as usize) * CONFIG_LINE_SIZE;
+        CANDY_MACHINE_SIZE + 4 + (candy_machine.settings.item_capacity as usize) * CONFIG_LINE_SIZE;
     // (unordered) indices for the mint
     let indices_start = bit_mask_start
         + (candy_machine
-            .items_available
+            .settings
+            .item_capacity
             .checked_div(8)
             .ok_or(CandyError::NumericalOverflowError)?
             + 1) as usize;

@@ -1,15 +1,6 @@
 export const CANDY_MACHINE_HIDDEN_SECTION =
   8 + // discriminator
   1 + // version
-  6 + // features
-  32 + // authority
-  32 + // mint authority
-  8 + // items redeemed
-  8; // items available (config data)
-
-export const CANDY_MACHINE_SIZE =
-  8 + // discriminator
-  1 + // version
   32 + // authority
   32 + // mint authority
   8 + // items redeemed
@@ -20,6 +11,8 @@ export const CANDY_MACHINE_SIZE =
   33 + // add items merkle root
   2 + // curator fee bps
   1; // hide sold items
+
+export const CANDY_MACHINE_SIZE = CANDY_MACHINE_HIDDEN_SECTION;
 
 export const CONFIG_LINE_SIZE =
   32 + // mint

@@ -307,3 +307,57 @@ test('it can remove another seller nft as the gumball authority', async (t) => {
     delegate: none(),
   });
 });
+
+test('it can remove own nft as non gumball authority', async (t) => {
+  // Given a Candy Machine with one nft.
+  const umi = await createUmi();
+  const otherSellerUmi = await createUmi();
+  const candyMachine = await createV2(umi, { settings: { itemCapacity: 1 } });
+  const nft = await createNft(otherSellerUmi);
+
+  // When we add an nft to the Candy Machine.
+  await transactionBuilder()
+    .add(
+      addNft(otherSellerUmi, {
+        candyMachine: candyMachine.publicKey,
+        mint: nft.publicKey,
+      })
+    )
+    .sendAndConfirm(otherSellerUmi);
+
+  // Then remove the nft as the candy machine authority
+  await transactionBuilder()
+    .add(
+      removeNft(otherSellerUmi, {
+        candyMachine: candyMachine.publicKey,
+        index: 0,
+        mint: nft.publicKey,
+      })
+    )
+    .sendAndConfirm(otherSellerUmi);
+
+  // Then the Candy Machine has been updated properly.
+  const candyMachineAccount = await fetchCandyMachine(
+    umi,
+    candyMachine.publicKey
+  );
+
+  t.like(candyMachineAccount, <Pick<CandyMachine, 'itemsLoaded' | 'items'>>{
+    itemsLoaded: 0,
+    items: [],
+  });
+
+  // Then nft is unfrozen and revoked
+  const tokenAccount = await fetchToken(
+    umi,
+    findAssociatedTokenPda(umi, {
+      mint: nft.publicKey,
+      owner: otherSellerUmi.identity.publicKey,
+    })[0]
+  );
+  t.like(tokenAccount, {
+    state: TokenState.Initialized,
+    owner: otherSellerUmi.identity.publicKey,
+    delegate: none(),
+  });
+});

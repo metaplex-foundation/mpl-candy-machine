@@ -292,3 +292,51 @@ test('it can remove another seller core asset as the gumball authority', async (
     owner: otherSellerUmi.identity.publicKey,
   });
 });
+
+test('it can remove own asset as non gumball authority', async (t) => {
+  // Given a Candy Machine with one nft.
+  const umi = await createUmi();
+  const otherSellerUmi = await createUmi();
+  const candyMachine = await createV2(umi, { settings: { itemCapacity: 1 } });
+  const coreAsset = await createCoreAsset(otherSellerUmi);
+
+  // When we add an nft to the Candy Machine.
+  await transactionBuilder()
+    .add(
+      addCoreAsset(otherSellerUmi, {
+        candyMachine: candyMachine.publicKey,
+        asset: coreAsset.publicKey,
+      })
+    )
+    .sendAndConfirm(otherSellerUmi);
+
+  // Then remove the nft as the candy machine authority
+  await transactionBuilder()
+    .add(
+      removeCoreAsset(otherSellerUmi, {
+        candyMachine: candyMachine.publicKey,
+        index: 0,
+        asset: coreAsset.publicKey,
+      })
+    )
+    .sendAndConfirm(otherSellerUmi);
+
+  // Then the Candy Machine has been updated properly.
+  const candyMachineAccount = await fetchCandyMachine(
+    umi,
+    candyMachine.publicKey
+  );
+
+  t.like(candyMachineAccount, <Pick<CandyMachine, 'itemsLoaded' | 'items'>>{
+    itemsLoaded: 0,
+    items: [],
+  });
+
+  // Then nft is unfrozen and revoked
+  const asset = await fetchAssetV1(umi, coreAsset.publicKey);
+  t.like(asset, <AssetV1>{
+    freezeDelegate: undefined,
+    transferDelegate: undefined,
+    owner: otherSellerUmi.identity.publicKey,
+  });
+});

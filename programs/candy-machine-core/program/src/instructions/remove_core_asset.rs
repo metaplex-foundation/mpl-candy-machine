@@ -37,9 +37,6 @@ pub struct RemoveCoreAsset<'info> {
     #[account(mut)]
     collection: Option<UncheckedAccount<'info>>,
 
-    /// CHECK: Safe due to processor check
-    allowlist: Option<UncheckedAccount<'info>>,
-
     /// CHECK: Safe due to address constraint
     #[account(address = mpl_core::ID)]
     mpl_core_program: UncheckedAccount<'info>,

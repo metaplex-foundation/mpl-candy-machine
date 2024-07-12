@@ -1,21 +1,21 @@
 import {
   Account,
+  assertAccountExists,
   Context,
+  deserializeAccount,
+  gpaBuilder,
   Pda,
   PublicKey,
+  publicKey as toPublicKey,
   RpcAccount,
   RpcGetAccountOptions,
   RpcGetAccountsOptions,
-  assertAccountExists,
-  deserializeAccount,
-  gpaBuilder,
-  publicKey as toPublicKey,
 } from '@metaplex-foundation/umi';
 import {
-  Serializer,
   array,
   mapSerializer,
   publicKey as publicKeySerializer,
+  Serializer,
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
@@ -23,11 +23,11 @@ import { DefaultGuardSet, DefaultGuardSetArgs } from '../defaultGuards';
 import { findCandyGuardPda } from '../generated/accounts/candyGuard';
 import {
   CandyGuardProgram,
+  getGuardGroupSerializer,
+  getGuardSetSerializer,
   GuardRepository,
   GuardSet,
   GuardSetArgs,
-  getGuardGroupSerializer,
-  getGuardSetSerializer,
 } from '../guards';
 import { CandyGuardData, CandyGuardDataArgs } from './candyGuardData';
 

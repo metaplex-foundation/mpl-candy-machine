@@ -8,22 +8,22 @@
 
 import {
   Account,
+  assertAccountExists,
   Context,
+  deserializeAccount,
+  gpaBuilder,
   Pda,
   PublicKey,
+  publicKey as toPublicKey,
   RpcAccount,
   RpcGetAccountOptions,
   RpcGetAccountsOptions,
-  assertAccountExists,
-  deserializeAccount,
-  gpaBuilder,
-  publicKey as toPublicKey,
 } from '@metaplex-foundation/umi';
 import {
-  Serializer,
   array,
   mapSerializer,
   publicKey as publicKeySerializer,
+  Serializer,
   string,
   struct,
   u8,

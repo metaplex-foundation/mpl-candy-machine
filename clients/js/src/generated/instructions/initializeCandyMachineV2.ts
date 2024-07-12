@@ -15,21 +15,21 @@ import {
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import {
-  Serializer,
   array,
   mapSerializer,
+  Serializer,
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import {
+  getAccountMetasAndSigners,
   ResolvedAccount,
   ResolvedAccountsWithIndices,
-  getAccountMetasAndSigners,
 } from '../shared';
 import {
+  getGumballSettingsSerializer,
   GumballSettings,
   GumballSettingsArgs,
-  getGumballSettingsSerializer,
 } from '../types';
 
 // Accounts.

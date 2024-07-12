@@ -8,16 +8,16 @@
 
 import {
   Account,
+  assertAccountExists,
   Context,
+  deserializeAccount,
+  gpaBuilder,
   Pda,
   PublicKey,
+  publicKey as toPublicKey,
   RpcAccount,
   RpcGetAccountOptions,
   RpcGetAccountsOptions,
-  assertAccountExists,
-  deserializeAccount,
-  gpaBuilder,
-  publicKey as toPublicKey,
 } from '@metaplex-foundation/umi';
 import {
   array,
@@ -30,10 +30,10 @@ import {
   getCandyMachineAccountDataSerializer,
 } from '../../hooked';
 import {
-  GumballSettingsArgs,
-  GumballStateArgs,
   getGumballSettingsSerializer,
   getGumballStateSerializer,
+  GumballSettingsArgs,
+  GumballStateArgs,
 } from '../types';
 
 /** Candy machine state and config data. */

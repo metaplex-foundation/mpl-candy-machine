@@ -11,7 +11,6 @@ import test from 'ava';
 import { mintV2 } from '../../src';
 import {
   assertItemBought,
-  createCollectionNft,
   createMintWithHolders,
   createUmi,
   createV2,

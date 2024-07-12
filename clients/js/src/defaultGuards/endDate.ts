@@ -1,4 +1,4 @@
-import { getEndDateSerializer, EndDate, EndDateArgs } from '../generated';
+import { EndDate, EndDateArgs, getEndDateSerializer } from '../generated';
 import { GuardManifest, noopParser } from '../guards';
 
 /**

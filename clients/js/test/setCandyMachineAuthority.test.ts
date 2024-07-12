@@ -9,7 +9,7 @@ import {
   fetchCandyMachine,
   setCandyMachineAuthority,
 } from '../src';
-import { createV2, createUmi } from './_setup';
+import { createUmi, createV2 } from './_setup';
 
 test('it can update the authority of a candy machine v2', async (t) => {
   // Given a Candy Machine using authority A.

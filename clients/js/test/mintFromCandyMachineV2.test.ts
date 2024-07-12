@@ -1,9 +1,4 @@
-import {
-  createAssociatedToken,
-  createMint,
-  createMintWithAssociatedToken,
-  setComputeUnitLimit,
-} from '@metaplex-foundation/mpl-toolbox';
+import { setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
 import { generateSigner, transactionBuilder } from '@metaplex-foundation/umi';
 import test from 'ava';
 import {
@@ -13,7 +8,6 @@ import {
 } from '../src';
 import {
   assertItemBought,
-  createCollectionNft,
   createUmi,
   createV2,
   getNewConfigLine,

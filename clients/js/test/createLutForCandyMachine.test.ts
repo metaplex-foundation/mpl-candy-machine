@@ -10,7 +10,6 @@ import { generateSigner, transactionBuilder } from '@metaplex-foundation/umi';
 import test from 'ava';
 import {
   createLutForCandyMachine,
-  fetchCandyMachine,
   findCandyGuardPda,
   getMplCandyMachineCoreProgramId,
   mintV2,

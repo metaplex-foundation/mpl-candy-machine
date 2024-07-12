@@ -4,9 +4,9 @@ import {
 } from '@metaplex-foundation/umi/serializers';
 import { MaximumOfFiveAdditionalProgramsError } from '../errors';
 import {
+  getProgramGateSerializer,
   ProgramGate,
   ProgramGateArgs,
-  getProgramGateSerializer,
 } from '../generated';
 import { GuardManifest, noopParser } from '../guards';
 

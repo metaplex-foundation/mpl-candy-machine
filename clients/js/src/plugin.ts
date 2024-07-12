@@ -2,8 +2,8 @@ import { mplTokenMetadata } from '@metaplex-foundation/mpl-token-metadata';
 import { UmiPlugin } from '@metaplex-foundation/umi';
 import {
   addressGateGuardManifest,
-  allowListGuardManifest,
   allocationGuardManifest,
+  allowListGuardManifest,
   botTaxGuardManifest,
   defaultCandyGuardNames,
   endDateGuardManifest,

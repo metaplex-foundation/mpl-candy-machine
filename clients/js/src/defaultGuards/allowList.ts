@@ -1,5 +1,5 @@
 import { getSplSystemProgramId } from '@metaplex-foundation/mpl-toolbox';
-import { PublicKey, Signer, publicKey } from '@metaplex-foundation/umi';
+import { PublicKey, publicKey, Signer } from '@metaplex-foundation/umi';
 import { array, bytes } from '@metaplex-foundation/umi/serializers';
 import {
   AllowList,

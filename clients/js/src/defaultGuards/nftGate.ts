@@ -1,5 +1,5 @@
-import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-toolbox';
 import { findMetadataPda } from '@metaplex-foundation/mpl-token-metadata';
+import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-toolbox';
 import { PublicKey } from '@metaplex-foundation/umi';
 import { getNftGateSerializer, NftGate, NftGateArgs } from '../generated';
 import { GuardManifest, noopParser } from '../guards';

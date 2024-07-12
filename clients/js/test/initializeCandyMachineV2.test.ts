@@ -1,21 +1,16 @@
 import { createAccountWithRent } from '@metaplex-foundation/mpl-toolbox';
-import { TokenStandard } from '@metaplex-foundation/mpl-token-metadata';
 import {
   generateSigner,
-  none,
-  percentAmount,
   publicKey,
-  some,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import test from 'ava';
 import {
   CandyMachine,
-  Creator,
   fetchCandyMachine,
   initializeCandyMachineV2,
 } from '../src';
-import { createCollectionNft, createUmi } from './_setup';
+import { createUmi } from './_setup';
 
 /**
  * Note that most of the tests for the "initializeCandyMachineV2" instructions are

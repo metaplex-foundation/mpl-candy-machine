@@ -8,10 +8,10 @@
 
 import { Option, OptionOrNullable } from '@metaplex-foundation/umi';
 import {
-  Serializer,
   bool,
   bytes,
   option,
+  Serializer,
   string,
   struct,
   u16,

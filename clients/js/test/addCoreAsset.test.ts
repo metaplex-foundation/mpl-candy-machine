@@ -1,5 +1,5 @@
-import { generateSigner, transactionBuilder } from '@metaplex-foundation/umi';
 import { AssetV1, fetchAssetV1, transfer } from '@metaplex-foundation/mpl-core';
+import { generateSigner, transactionBuilder } from '@metaplex-foundation/umi';
 import test from 'ava';
 import {
   addCoreAsset,
@@ -10,7 +10,7 @@ import {
   getMerkleRoot,
   TokenStandard,
 } from '../src';
-import { createV2, createUmi, createCoreAsset } from './_setup';
+import { createCoreAsset, createUmi, createV2 } from './_setup';
 
 test('it can add core assets to a candy machine', async (t) => {
   // Given a Candy Machine with 5 core assets.

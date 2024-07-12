@@ -1,5 +1,5 @@
-import { MerkleTree } from 'merkletreejs';
 import { keccak_256 } from '@noble/hashes/sha3';
+import { MerkleTree } from 'merkletreejs';
 
 /**
  * Describes the required data input for

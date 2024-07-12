@@ -1,16 +1,10 @@
 import { addMemo, setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
-import {
-  generateSigner,
-  sol,
-  some,
-  transactionBuilder,
-} from '@metaplex-foundation/umi';
+import { sol, some, transactionBuilder } from '@metaplex-foundation/umi';
 import test from 'ava';
 import { mintV2 } from '../../src';
 import {
   assertBotTax,
   assertItemBought,
-  createCollectionNft,
   createUmi,
   createV2,
   getNewConfigLine,

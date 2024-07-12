@@ -1,22 +1,22 @@
 import {
-  findAssociatedTokenPda,
-  getSplAssociatedTokenProgramId,
-} from '@metaplex-foundation/mpl-toolbox';
-import {
   findMasterEditionPda,
   findMetadataPda,
   findTokenRecordPda,
   isProgrammable,
   TokenStandard,
 } from '@metaplex-foundation/mpl-token-metadata';
+import {
+  findAssociatedTokenPda,
+  getSplAssociatedTokenProgramId,
+} from '@metaplex-foundation/mpl-toolbox';
 import { PublicKey } from '@metaplex-foundation/umi';
-import { getMplTokenAuthRulesProgramId } from '../programs';
 import {
   getNftPaymentSerializer,
   NftPayment,
   NftPaymentArgs,
 } from '../generated';
 import { GuardManifest, GuardRemainingAccount, noopParser } from '../guards';
+import { getMplTokenAuthRulesProgramId } from '../programs';
 
 /**
  * The nftPayment guard allows minting by charging the

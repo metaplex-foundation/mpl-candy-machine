@@ -7,8 +7,8 @@
  */
 
 import {
-  Serializer,
   bytes,
+  Serializer,
   struct,
 } from '@metaplex-foundation/umi/serializers';
 

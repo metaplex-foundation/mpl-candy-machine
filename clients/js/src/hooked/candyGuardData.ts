@@ -1,17 +1,17 @@
 import {
-  Serializer,
   array,
+  Serializer,
   struct,
 } from '@metaplex-foundation/umi/serializers';
 import {
   CandyGuardProgram,
+  getGuardGroupSerializer,
+  getGuardSetSerializer,
   GuardGroup,
   GuardGroupArgs,
   GuardRepository,
   GuardSet,
   GuardSetArgs,
-  getGuardGroupSerializer,
-  getGuardSetSerializer,
 } from '../guards';
 
 export type CandyGuardData<D extends GuardSet> = {

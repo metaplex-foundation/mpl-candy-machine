@@ -8,14 +8,14 @@
 
 import { PublicKey } from '@metaplex-foundation/umi';
 import {
-  Serializer,
   publicKey as publicKeySerializer,
+  Serializer,
   struct,
 } from '@metaplex-foundation/umi/serializers';
 import {
+  getTokenStandardSerializer,
   TokenStandard,
   TokenStandardArgs,
-  getTokenStandardSerializer,
 } from '.';
 
 /** Config line struct for storing asset (NFT) data pre-mint. */

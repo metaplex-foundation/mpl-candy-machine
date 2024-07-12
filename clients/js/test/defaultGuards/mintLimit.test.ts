@@ -16,7 +16,6 @@ import {
 import {
   assertBotTax,
   assertItemBought,
-  createCollectionNft,
   createUmi,
   createV2,
   getNewConfigLine,

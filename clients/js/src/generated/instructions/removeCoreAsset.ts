@@ -15,19 +15,19 @@ import {
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import {
-  Serializer,
   array,
   mapSerializer,
+  Serializer,
   struct,
   u32,
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import { findCandyMachineAuthorityPda } from '../../hooked';
 import {
-  ResolvedAccount,
-  ResolvedAccountsWithIndices,
   expectPublicKey,
   getAccountMetasAndSigners,
+  ResolvedAccount,
+  ResolvedAccountsWithIndices,
 } from '../shared';
 
 // Accounts.

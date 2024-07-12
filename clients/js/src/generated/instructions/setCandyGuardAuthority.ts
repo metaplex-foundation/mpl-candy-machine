@@ -15,17 +15,17 @@ import {
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import {
-  Serializer,
   array,
   mapSerializer,
   publicKey as publicKeySerializer,
+  Serializer,
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import {
+  getAccountMetasAndSigners,
   ResolvedAccount,
   ResolvedAccountsWithIndices,
-  getAccountMetasAndSigners,
 } from '../shared';
 
 // Accounts.

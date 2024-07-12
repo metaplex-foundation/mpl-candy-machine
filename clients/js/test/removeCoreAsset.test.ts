@@ -1,5 +1,5 @@
+import { AssetV1, fetchAssetV1 } from '@metaplex-foundation/mpl-core';
 import { generateSigner, transactionBuilder } from '@metaplex-foundation/umi';
-import { AssetV1, fetchAssetV1, plugin } from '@metaplex-foundation/mpl-core';
 import test from 'ava';
 import {
   addCoreAsset,
@@ -8,7 +8,7 @@ import {
   removeCoreAsset,
   TokenStandard,
 } from '../src';
-import { createV2, createUmi, createCoreAsset } from './_setup';
+import { createCoreAsset, createUmi, createV2 } from './_setup';
 
 test('it can remove core asset from a candy machine', async (t) => {
   // Given a Candy Machine with 5 coreAssets.

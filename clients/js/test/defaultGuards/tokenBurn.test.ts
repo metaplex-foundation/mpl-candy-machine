@@ -1,4 +1,10 @@
 import {
+  createMintWithAssociatedToken,
+  fetchToken,
+  findAssociatedTokenPda,
+  setComputeUnitLimit,
+} from '@metaplex-foundation/mpl-toolbox';
+import {
   generateSigner,
   publicKey,
   sol,
@@ -6,21 +12,14 @@ import {
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import test from 'ava';
-import {
-  createMintWithAssociatedToken,
-  fetchToken,
-  findAssociatedTokenPda,
-  setComputeUnitLimit,
-} from '@metaplex-foundation/mpl-toolbox';
+import { mintV2 } from '../../src';
 import {
   assertBotTax,
   assertItemBought,
-  createCollectionNft,
   createUmi,
   createV2,
   getNewConfigLine,
 } from '../_setup';
-import { mintV2 } from '../../src';
 
 test('it burns a specific token to allow minting', async (t) => {
   // Given a payer with one token.

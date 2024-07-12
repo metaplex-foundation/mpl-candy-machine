@@ -1,9 +1,9 @@
 import { getMplTokenMetadataProgramId } from '@metaplex-foundation/mpl-token-metadata';
 import {
   createLut,
-  getSysvar,
   getSplAssociatedTokenProgramId,
   getSplTokenProgramId,
+  getSysvar,
 } from '@metaplex-foundation/mpl-toolbox';
 import {
   AddressLookupTableInput,

@@ -8,12 +8,12 @@
 
 import {
   AccountMeta,
+  isPda,
   isSigner,
   Pda,
   publicKey,
   PublicKey,
   Signer,
-  isPda,
 } from '@metaplex-foundation/umi';
 
 /**

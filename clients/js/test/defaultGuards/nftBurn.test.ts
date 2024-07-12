@@ -1,3 +1,4 @@
+import { TokenStandard } from '@metaplex-foundation/mpl-token-metadata';
 import { setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
 import {
   generateSigner,
@@ -7,7 +8,6 @@ import {
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import test from 'ava';
-import { TokenStandard } from '@metaplex-foundation/mpl-token-metadata';
 import { mintV2 } from '../../src';
 import {
   assertBotTax,

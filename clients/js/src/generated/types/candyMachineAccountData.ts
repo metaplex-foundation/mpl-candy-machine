@@ -8,21 +8,21 @@
 
 import { PublicKey } from '@metaplex-foundation/umi';
 import {
-  Serializer,
   array,
   mapSerializer,
   publicKey as publicKeySerializer,
+  Serializer,
   struct,
   u64,
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import {
+  getGumballSettingsSerializer,
+  getGumballStateSerializer,
   GumballSettings,
   GumballSettingsArgs,
   GumballState,
   GumballStateArgs,
-  getGumballSettingsSerializer,
-  getGumballStateSerializer,
 } from '.';
 
 /** Candy machine state and config data. */

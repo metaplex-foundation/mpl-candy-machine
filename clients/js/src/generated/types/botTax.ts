@@ -6,10 +6,10 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { SolAmount, mapAmountSerializer } from '@metaplex-foundation/umi';
+import { mapAmountSerializer, SolAmount } from '@metaplex-foundation/umi';
 import {
-  Serializer,
   bool,
+  Serializer,
   struct,
   u64,
 } from '@metaplex-foundation/umi/serializers';

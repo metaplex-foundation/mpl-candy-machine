@@ -6,7 +6,7 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Serializer, scalarEnum } from '@metaplex-foundation/umi/serializers';
+import { scalarEnum, Serializer } from '@metaplex-foundation/umi/serializers';
 
 export enum TokenStandard {
   NonFungible,

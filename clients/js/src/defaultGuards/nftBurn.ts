@@ -1,4 +1,3 @@
-import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-toolbox';
 import {
   findMasterEditionPda,
   findMetadataPda,
@@ -6,6 +5,7 @@ import {
   isProgrammable,
   TokenStandard,
 } from '@metaplex-foundation/mpl-token-metadata';
+import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-toolbox';
 import { PublicKey } from '@metaplex-foundation/umi';
 import { getNftBurnSerializer, NftBurn, NftBurnArgs } from '../generated';
 import { GuardManifest, GuardRemainingAccount, noopParser } from '../guards';

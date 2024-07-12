@@ -1,7 +1,7 @@
 import { transactionBuilder } from '@metaplex-foundation/umi';
 import test from 'ava';
 import { deleteCandyMachine } from '../src';
-import { createV2, createUmi } from './_setup';
+import { createUmi, createV2 } from './_setup';
 
 test('it can delete a candy machine V2', async (t) => {
   // Given an existing candy machine.

@@ -8,8 +8,8 @@ import {
 import test from 'ava';
 import {
   fetchAllocationTracker,
-  findCandyGuardPda,
   findAllocationTrackerPda,
+  findCandyGuardPda,
   mintV2,
   route,
 } from '../../src';

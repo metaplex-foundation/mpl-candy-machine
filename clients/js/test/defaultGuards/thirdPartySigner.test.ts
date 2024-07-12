@@ -10,7 +10,6 @@ import { mintV2 } from '../../src';
 import {
   assertBotTax,
   assertItemBought,
-  createCollectionNft,
   createUmi,
   createV2,
   getNewConfigLine,

@@ -1,15 +1,15 @@
 /* eslint-disable import/no-extraneous-dependencies */
+import { create as baseCreateCoreAsset } from '@metaplex-foundation/mpl-core';
 import {
-  DigitalAssetWithToken,
-  TokenStandard as MplTokenStandard,
   createNft as baseCreateNft,
   createProgrammableNft as baseCreateProgrammableNft,
+  DigitalAssetWithToken,
   fetchDigitalAssetWithAssociatedToken,
   findMasterEditionPda,
   findMetadataPda,
+  TokenStandard as MplTokenStandard,
   verifyCollectionV1,
 } from '@metaplex-foundation/mpl-token-metadata';
-import { create as baseCreateCoreAsset } from '@metaplex-foundation/mpl-core';
 import {
   createAssociatedToken,
   createMint,
@@ -17,42 +17,37 @@ import {
   mintTokensTo,
 } from '@metaplex-foundation/mpl-toolbox';
 import {
-  Context,
-  DateTime,
-  PublicKey,
-  PublicKeyInput,
-  Signer,
-  TransactionSignature,
-  Umi,
   assertAccountExists,
-  defaultPublicKey,
+  DateTime,
   generateSigner,
   none,
   now,
   percentAmount,
+  PublicKey,
   publicKey,
+  PublicKeyInput,
+  Signer,
   some,
   transactionBuilder,
+  TransactionSignature,
+  Umi,
 } from '@metaplex-foundation/umi';
 import { createUmi as basecreateUmi } from '@metaplex-foundation/umi-bundle-tests';
 import { Keypair } from '@solana/web3.js';
 import { Assertions } from 'ava';
 import {
   CandyGuardDataArgs,
-  ConfigLine,
   ConfigLineInput,
+  createCandyGuard as baseCreateCandyGuard,
   CreateCandyGuardInstructionAccounts,
   CreateCandyGuardInstructionDataArgs,
+  createCandyMachineV2 as baseCreateCandyMachineV2,
   DefaultGuardSetArgs,
+  fetchCandyMachine,
+  findCandyGuardPda,
   GuardSetArgs,
   GumballSettings,
   GumballSettingsArgs,
-  TokenStandard,
-  addNft,
-  createCandyGuard as baseCreateCandyGuard,
-  createCandyMachineV2 as baseCreateCandyMachineV2,
-  fetchCandyMachine,
-  findCandyGuardPda,
   mplCandyMachine,
   wrap,
 } from '../src';

@@ -1,14 +1,14 @@
 import {
+  fetchToken,
+  findAssociatedTokenPda,
+  TokenState,
+} from '@metaplex-foundation/mpl-toolbox';
+import {
   generateSigner,
   none,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import test from 'ava';
-import {
-  fetchToken,
-  findAssociatedTokenPda,
-  TokenState,
-} from '@metaplex-foundation/mpl-toolbox';
 import {
   addNft,
   CandyMachine,
@@ -16,7 +16,7 @@ import {
   removeNft,
   TokenStandard,
 } from '../src';
-import { createV2, createUmi, createNft } from './_setup';
+import { createNft, createUmi, createV2 } from './_setup';
 
 test('it can remove nfts from a candy machine', async (t) => {
   // Given a Candy Machine with 5 nfts.

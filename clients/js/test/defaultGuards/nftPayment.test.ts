@@ -1,12 +1,12 @@
 import {
+  fetchDigitalAssetWithAssociatedToken,
+  TokenStandard,
+} from '@metaplex-foundation/mpl-token-metadata';
+import {
   createMint,
   createToken,
   setComputeUnitLimit,
 } from '@metaplex-foundation/mpl-toolbox';
-import {
-  TokenStandard,
-  fetchDigitalAssetWithAssociatedToken,
-} from '@metaplex-foundation/mpl-token-metadata';
 import {
   generateSigner,
   publicKey,

@@ -53,6 +53,7 @@
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-prettier": "^4.2.1",
     "prettier": "^2.5.1",
+    "prettier-plugin-organize-imports": "^4.0.0",
     "rimraf": "^3.0.2",
     "typedoc": "^0.23.16",
     "typedoc-plugin-expand-object-like-types": "^0.1.2",

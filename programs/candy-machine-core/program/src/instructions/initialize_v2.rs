@@ -1,16 +1,30 @@
 use anchor_lang::{prelude::*, Discriminator};
+use mpl_token_metadata::MAX_URI_LENGTH;
 
-use crate::{constants::CANDY_MACHINE_SIZE, state::CandyMachine, GumballSettings, GumballState};
+use crate::{
+    constants::CANDY_MACHINE_SIZE, state::CandyMachine, CandyError, GumballSettings, GumballState,
+};
 
 pub fn initialize_v2(ctx: Context<InitializeV2>, settings: GumballSettings) -> Result<()> {
     let candy_machine_account = &mut ctx.accounts.candy_machine;
+
+    if settings.uri.len() >= MAX_URI_LENGTH - 4 {
+        return err!(CandyError::UriTooLong);
+    }
+
+    // Details are considered finalized once sellers are invited
+    let state = if settings.sellers_merkle_root.is_some() {
+        GumballState::DetailsFinalized
+    } else {
+        GumballState::None
+    };
 
     let candy_machine = CandyMachine {
         version: 0,
         authority: ctx.accounts.authority.key(),
         mint_authority: ctx.accounts.authority.key(),
         items_redeemed: 0,
-        state: GumballState::None,
+        state,
         settings,
     };
 
@@ -28,7 +42,7 @@ pub fn initialize_v2(ctx: Context<InitializeV2>, settings: GumballSettings) -> R
 
 /// Initializes a new candy machine.
 #[derive(Accounts)]
-#[instruction(item_count: u64)]
+#[instruction(settings: GumballSettings)]
 pub struct InitializeV2<'info> {
     /// Candy Machine account. The account space must be allocated to allow accounts larger
     /// than 10kb.
@@ -37,7 +51,7 @@ pub struct InitializeV2<'info> {
     #[account(
         zero,
         rent_exempt = skip,
-        constraint = candy_machine.to_account_info().owner == __program_id && candy_machine.to_account_info().data_len() >= CandyMachine::get_size(item_count)
+        constraint = candy_machine.to_account_info().owner == __program_id && candy_machine.to_account_info().data_len() >= CandyMachine::get_size(settings.item_capacity)
     )]
     candy_machine: UncheckedAccount<'info>,
 

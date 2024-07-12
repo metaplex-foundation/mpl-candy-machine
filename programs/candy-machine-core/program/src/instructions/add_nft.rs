@@ -54,7 +54,7 @@ pub struct AddNft<'info> {
     token_metadata_program: UncheckedAccount<'info>,
 }
 
-pub fn add_nft(ctx: Context<AddNft>, index: u32) -> Result<()> {
+pub fn add_nft(ctx: Context<AddNft>) -> Result<()> {
     // Validate that the nft is a primary sale
     let metadata_account = &ctx.accounts.metadata.to_account_info();
     let metadata = Metadata::try_from(metadata_account)?;
@@ -65,6 +65,8 @@ pub fn add_nft(ctx: Context<AddNft>, index: u32) -> Result<()> {
     require!(!metadata.primary_sale_happened, CandyError::NotPrimarySale);
 
     assert_is_non_printable_edition(&ctx.accounts.edition.to_account_info())?;
+
+    // TODO: Validate the seller with the allowlist if not the candy machine authority
 
     let token_program = &ctx.accounts.token_program.to_account_info();
     let token_account = &ctx.accounts.token_account.to_account_info();
@@ -110,13 +112,12 @@ pub fn add_nft(ctx: Context<AddNft>, index: u32) -> Result<()> {
     .invoke_signed(&[&auth_seeds])?;
 
     let candy_machine = &mut ctx.accounts.candy_machine;
-    crate::processors::add_config_lines(
+    crate::processors::add_config_line(
         candy_machine,
-        index,
-        vec![ConfigLineInput {
+        ConfigLineInput {
             mint: ctx.accounts.mint.key(),
             seller: ctx.accounts.seller.key(),
-        }],
+        },
         TokenStandard::NonFungible,
     )?;
 

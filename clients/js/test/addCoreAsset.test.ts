@@ -1,10 +1,6 @@
 import { generateSigner, transactionBuilder } from '@metaplex-foundation/umi';
+import { fetchAssetV1, transfer } from '@metaplex-foundation/mpl-core';
 import test from 'ava';
-import {
-  findMetadataPda,
-  updatePrimarySaleHappenedViaToken,
-} from '@metaplex-foundation/mpl-token-metadata';
-import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-toolbox';
 import {
   addCoreAsset,
   CandyMachine,
@@ -12,12 +8,11 @@ import {
   TokenStandard,
 } from '../src';
 import { createV2, createUmi, createCoreAsset } from './_setup';
-import { fetchAssetV1, transfer } from '@metaplex-foundation/mpl-core';
 
 test('it can add core assets to a candy machine', async (t) => {
   // Given a Candy Machine with 5 core assets.
   const umi = await createUmi();
-  const candyMachine = await createV2(umi, { itemCount: 5 });
+  const candyMachine = await createV2(umi, { settings: { itemCapacity: 5 } });
   const coreAsset = await createCoreAsset(umi);
 
   // When we add an coreAsset to the Candy Machine.
@@ -25,7 +20,6 @@ test('it can add core assets to a candy machine', async (t) => {
     .add(
       addCoreAsset(umi, {
         candyMachine: candyMachine.publicKey,
-        index: 0,
         asset: coreAsset.publicKey,
       })
     )
@@ -55,7 +49,7 @@ test('it can add core assets to a candy machine', async (t) => {
 test('it can append additional core assets to a candy machine', async (t) => {
   // Given a Candy Machine with 5 core assets.
   const umi = await createUmi();
-  const candyMachine = await createV2(umi, { itemCount: 2 });
+  const candyMachine = await createV2(umi, { settings: { itemCapacity: 2 } });
   const coreAssets = await Promise.all([
     createCoreAsset(umi),
     createCoreAsset(umi),
@@ -65,7 +59,6 @@ test('it can append additional core assets to a candy machine', async (t) => {
     .add(
       addCoreAsset(umi, {
         candyMachine: candyMachine.publicKey,
-        index: 0,
         asset: coreAssets[0].publicKey,
       })
     )
@@ -76,7 +69,6 @@ test('it can append additional core assets to a candy machine', async (t) => {
     .add(
       addCoreAsset(umi, {
         candyMachine: candyMachine.publicKey,
-        index: 1,
         asset: coreAssets[1].publicKey,
       })
     )
@@ -114,7 +106,7 @@ test('it can append additional core assets to a candy machine', async (t) => {
 test('it cannot add core assets that would make the candy machine exceed the maximum capacity', async (t) => {
   // Given an existing Candy Machine with a capacity of 1 item.
   const umi = await createUmi();
-  const candyMachine = await createV2(umi, { itemCount: 1 });
+  const candyMachine = await createV2(umi, { settings: { itemCapacity: 1 } });
   const coreAssets = await Promise.all([
     createCoreAsset(umi),
     createCoreAsset(umi),
@@ -125,14 +117,12 @@ test('it cannot add core assets that would make the candy machine exceed the max
     .add(
       addCoreAsset(umi, {
         candyMachine: candyMachine.publicKey,
-        index: 0,
         asset: coreAssets[0].publicKey,
       })
     )
     .add(
       addCoreAsset(umi, {
         candyMachine: candyMachine.publicKey,
-        index: 1,
         asset: coreAssets[1].publicKey,
       })
     )
@@ -147,14 +137,13 @@ test('it cannot add core assets that would make the candy machine exceed the max
 test('it cannot add core assets once the candy machine is fully loaded', async (t) => {
   // Given an existing Candy Machine with 2 core assets loaded and a capacity of 2 core assets.
   const umi = await createUmi();
-  const candyMachine = await createV2(umi, { itemCount: 1 });
+  const candyMachine = await createV2(umi, { settings: { itemCapacity: 1 } });
   const coreAsset = await createCoreAsset(umi);
 
   await transactionBuilder()
     .add(
       addCoreAsset(umi, {
         candyMachine: candyMachine.publicKey,
-        index: 0,
         asset: coreAsset.publicKey,
       })
     )
@@ -165,7 +154,6 @@ test('it cannot add core assets once the candy machine is fully loaded', async (
     .add(
       addCoreAsset(umi, {
         candyMachine: candyMachine.publicKey,
-        index: 2,
         asset: (await createCoreAsset(umi)).publicKey,
       })
     )
@@ -177,152 +165,10 @@ test('it cannot add core assets once the candy machine is fully loaded', async (
   });
 });
 
-test('it can add core assets to a custom offset and override existing core assets', async (t) => {
-  // Given an existing Candy Machine with 2 core assets loaded and capacity of 3 core assets.
-  const umi = await createUmi();
-  const candyMachine = await createV2(umi, { itemCount: 3 });
-  const coreAssets = await Promise.all([
-    createCoreAsset(umi),
-    createCoreAsset(umi),
-  ]);
-
-  await transactionBuilder()
-    .add(
-      addCoreAsset(umi, {
-        candyMachine: candyMachine.publicKey,
-        index: 0,
-        asset: coreAssets[0].publicKey,
-      })
-    )
-    .add(
-      addCoreAsset(umi, {
-        candyMachine: candyMachine.publicKey,
-        index: 1,
-        asset: coreAssets[1].publicKey,
-      })
-    )
-    .sendAndConfirm(umi);
-
-  // When we add 2 coreAssets to the Candy Machine at index 1.
-  const newNft = await createCoreAsset(umi);
-  await transactionBuilder()
-    .add(
-      addCoreAsset(umi, {
-        candyMachine: candyMachine.publicKey,
-        index: 1,
-        asset: newNft.publicKey,
-      })
-    )
-    .sendAndConfirm(umi);
-
-  // Then the Candy Machine has been updated properly.
-  const candyMachineAccount = await fetchCandyMachine(
-    umi,
-    candyMachine.publicKey
-  );
-  t.like(candyMachineAccount, <Pick<CandyMachine, 'itemsLoaded' | 'items'>>{
-    itemsLoaded: 2,
-    items: [
-      {
-        index: 0,
-        minted: false,
-        mint: coreAssets[0].publicKey,
-        seller: umi.identity.publicKey,
-        buyer: undefined,
-        tokenStandard: TokenStandard.Core,
-      },
-      {
-        index: 1,
-        minted: false,
-        mint: newNft.publicKey,
-        seller: umi.identity.publicKey,
-        buyer: undefined,
-        tokenStandard: TokenStandard.Core,
-      },
-    ],
-  });
-});
-
-test('it can override all core assets of a candy machine', async (t) => {
-  // Given an fully loaded Candy Machine with 2 core assets.
-  const umi = await createUmi();
-  const candyMachine = await createV2(umi, { itemCount: 2 });
-  const oldAssets = await Promise.all([
-    createCoreAsset(umi),
-    createCoreAsset(umi),
-  ]);
-
-  await transactionBuilder()
-    .add(
-      addCoreAsset(umi, {
-        candyMachine: candyMachine.publicKey,
-        index: 0,
-        asset: oldAssets[0].publicKey,
-      })
-    )
-    .add(
-      addCoreAsset(umi, {
-        candyMachine: candyMachine.publicKey,
-        index: 1,
-        asset: oldAssets[1].publicKey,
-      })
-    )
-    .sendAndConfirm(umi);
-
-  // When we add 2 new core assets to the Candy Machine at index 0.
-  const coreAssets = await Promise.all([
-    createCoreAsset(umi),
-    createCoreAsset(umi),
-  ]);
-  await transactionBuilder()
-    .add(
-      addCoreAsset(umi, {
-        candyMachine: candyMachine.publicKey,
-        index: 0,
-        asset: coreAssets[0].publicKey,
-      })
-    )
-    .add(
-      addCoreAsset(umi, {
-        candyMachine: candyMachine.publicKey,
-        index: 1,
-        asset: coreAssets[1].publicKey,
-      })
-    )
-    .sendAndConfirm(umi);
-
-  // Then all coreAssets have been overriden.
-  const candyMachineAccount = await fetchCandyMachine(
-    umi,
-    candyMachine.publicKey
-  );
-  t.like(candyMachineAccount, <Pick<CandyMachine, 'itemsLoaded' | 'items'>>{
-    itemsLoaded: 2,
-    items: [
-      {
-        index: 0,
-        minted: false,
-        mint: coreAssets[0].publicKey,
-        seller: umi.identity.publicKey,
-        buyer: undefined,
-        tokenStandard: TokenStandard.Core,
-      },
-      {
-        index: 1,
-        minted: false,
-        mint: coreAssets[1].publicKey,
-        seller: umi.identity.publicKey,
-        buyer: undefined,
-        tokenStandard: TokenStandard.Core,
-      },
-    ],
-  });
-});
-
 test('it cannot add core assets that are on the secondary market', async (t) => {
   // Given a Candy Machine with 5 core assets.
   const umi = await createUmi();
-  const candyMachine = await createV2(umi, { itemCount: 1 });
+  const candyMachine = await createV2(umi, { settings: { itemCapacity: 1 } });
   const coreAssets = await Promise.all([createCoreAsset(umi)]);
   const asset = await fetchAssetV1(umi, coreAssets[0].publicKey);
 
@@ -336,7 +182,6 @@ test('it cannot add core assets that are on the secondary market', async (t) => 
     .add(
       addCoreAsset(umi, {
         candyMachine: candyMachine.publicKey,
-        index: 0,
         asset: coreAssets[0].publicKey,
       })
     )

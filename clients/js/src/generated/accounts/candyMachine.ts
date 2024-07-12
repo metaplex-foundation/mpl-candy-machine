@@ -29,6 +29,12 @@ import {
   CandyMachineAccountData,
   getCandyMachineAccountDataSerializer,
 } from '../../hooked';
+import {
+  GumballSettingsArgs,
+  GumballStateArgs,
+  getGumballSettingsSerializer,
+  getGumballStateSerializer,
+} from '../types';
 
 /** Candy machine state and config data. */
 export type CandyMachine = Account<CandyMachineAccountData>;
@@ -102,26 +108,22 @@ export function getCandyMachineGpaBuilder(
     .registerFields<{
       discriminator: Array<number>;
       version: number;
-      features: Array<number>;
       authority: PublicKey;
       mintAuthority: PublicKey;
       itemsRedeemed: number | bigint;
-      itemsAvailable: number | bigint;
+      state: GumballStateArgs;
+      settings: GumballSettingsArgs;
     }>({
       discriminator: [0, array(u8(), { size: 8 })],
       version: [8, u8()],
-      features: [9, array(u8(), { size: 6 })],
-      authority: [15, publicKeySerializer()],
-      mintAuthority: [47, publicKeySerializer()],
-      itemsRedeemed: [79, u64()],
-      itemsAvailable: [87, u64()],
+      authority: [9, publicKeySerializer()],
+      mintAuthority: [41, publicKeySerializer()],
+      itemsRedeemed: [73, u64()],
+      state: [81, getGumballStateSerializer()],
+      settings: [82, getGumballSettingsSerializer()],
     })
     .deserializeUsing<CandyMachine>((account) =>
       deserializeCandyMachine(account)
     )
     .whereField('discriminator', [51, 173, 177, 113, 25, 241, 109, 189]);
-}
-
-export function getCandyMachineSize(): number {
-  return 95;
 }

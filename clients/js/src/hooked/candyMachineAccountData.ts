@@ -1,9 +1,4 @@
-import {
-  defaultPublicKey,
-  none,
-  Option,
-  PublicKey,
-} from '@metaplex-foundation/umi';
+import { defaultPublicKey, PublicKey } from '@metaplex-foundation/umi';
 import {
   array,
   bitArray,
@@ -82,7 +77,7 @@ export function getCandyMachineAccountDataSerializer(): Serializer<
     (base, bytes, offset) => {
       const slice = bytes.slice(offset + CANDY_MACHINE_HIDDEN_SECTION);
 
-      const itemsAvailable = Number(base.itemsAvailable);
+      const itemsAvailable = Number(base.settings.itemCapacity);
       const itemsMinted = Number(base.itemsRedeemed);
       const itemsRemaining = itemsAvailable - itemsMinted;
 

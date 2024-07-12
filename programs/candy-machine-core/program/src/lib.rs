@@ -26,8 +26,8 @@ pub mod candy_machine_core {
     ///
     ///   0. `[writable]` Candy Machine account
     ///   1. `[signer]` Candy Machine authority
-    pub fn add_nft(ctx: Context<AddNft>, index: u32) -> Result<()> {
-        instructions::add_nft(ctx, index)
+    pub fn add_nft(ctx: Context<AddNft>) -> Result<()> {
+        instructions::add_nft(ctx)
     }
 
     /// Add Core assets to the gumball machine.
@@ -36,8 +36,28 @@ pub mod candy_machine_core {
     ///
     ///   0. `[writable]` Candy Machine account
     ///   1. `[signer]` Candy Machine authority
-    pub fn add_core_asset(ctx: Context<AddCoreAsset>, index: u32) -> Result<()> {
-        instructions::add_core_asset(ctx, index)
+    pub fn add_core_asset(ctx: Context<AddCoreAsset>) -> Result<()> {
+        instructions::add_core_asset(ctx)
+    }
+
+    /// Remove legacy NFT from the gumball machine.
+    ///
+    /// # Accounts
+    ///
+    ///   0. `[writable]` Candy Machine account
+    ///   1. `[signer]` Candy Machine authority
+    pub fn remove_nft(ctx: Context<RemoveNft>, index: u32) -> Result<()> {
+        instructions::remove_nft(ctx, index)
+    }
+
+    /// Remove Core asset from the gumball machine.
+    ///
+    /// # Accounts
+    ///
+    ///   0. `[writable]` Candy Machine account
+    ///   1. `[signer]` Candy Machine authority
+    pub fn remove_core_asset(ctx: Context<RemoveCoreAsset>, index: u32) -> Result<()> {
+        instructions::remove_core_asset(ctx, index)
     }
 
     /// Initialize the candy machine account with the specified data.

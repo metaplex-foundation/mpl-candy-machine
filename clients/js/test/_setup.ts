@@ -27,6 +27,7 @@ import {
   assertAccountExists,
   defaultPublicKey,
   generateSigner,
+  none,
   now,
   percentAmount,
   publicKey,
@@ -44,6 +45,8 @@ import {
   CreateCandyGuardInstructionDataArgs,
   DefaultGuardSetArgs,
   GuardSetArgs,
+  GumballSettings,
+  GumballSettingsArgs,
   TokenStandard,
   addNft,
   createCandyGuard as baseCreateCandyGuard,
@@ -207,28 +210,24 @@ export const createMintWithHolders = async (
 
 export const createV2 = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
   umi: Umi,
-  input: Partial<Parameters<typeof baseCreateCandyMachineV2>[1]> &
-    Partial<
+  input: Omit<
+    Partial<Parameters<typeof baseCreateCandyMachineV2>[1]>,
+    'settings'
+  > & {
+    settings?: Partial<GumballSettingsArgs>;
+  } & Partial<
       CandyGuardDataArgs<DA extends undefined ? DefaultGuardSetArgs : DA>
-    > & { configLineIndex?: number; configLines?: ConfigLine[] } = {}
+    > = {}
 ) => {
   const candyMachine = input.candyMachine ?? generateSigner(umi);
   let builder = await baseCreateCandyMachineV2(umi, {
-    ...defaultCandyMachineData(umi),
     ...input,
-    itemCount: input.itemCount ?? input.configLines?.length ?? 100,
+    settings: {
+      ...defaultGumballSettings(),
+      ...input.settings,
+    },
     candyMachine,
   });
-
-  if (input.configLines !== undefined) {
-    builder = builder.add(
-      addNft(umi, {
-        candyMachine: candyMachine.publicKey,
-        index: input.configLineIndex ?? 0,
-        configLines: input.configLines,
-      })
-    );
-  }
 
   if (input.guards !== undefined || input.groups !== undefined) {
     const candyGuard = findCandyGuardPda(umi, { base: candyMachine.publicKey });
@@ -252,27 +251,13 @@ export const defaultAssetData = () => ({
   uri: 'https://example.com/my-asset.json',
 });
 
-export const defaultCandyMachineData = (
-  context: Pick<Context, 'identity'>
-) => ({
-  tokenStandard: MplTokenStandard.NonFungible,
-  collectionUpdateAuthority: context.identity,
-  itemCount: 100,
-  sellerFeeBasisPoints: percentAmount(10, 2),
-  creators: [
-    {
-      address: context.identity.publicKey,
-      verified: true,
-      percentageShare: 100,
-    },
-  ],
-  configLineSettings: some({
-    prefixName: '',
-    nameLength: 32,
-    prefixUri: '',
-    uriLength: 200,
-    isSequential: false,
-  }),
+export const defaultGumballSettings = (): GumballSettings => ({
+  itemCapacity: 100n,
+  uri: 'https://example.com/candy-machine.json',
+  itemsPerSeller: 3,
+  sellersMerkleRoot: none(),
+  curatorFeeBps: 500,
+  hideSoldItems: false,
 });
 
 export const createCandyGuard = async <

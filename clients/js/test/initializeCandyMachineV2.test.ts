@@ -41,7 +41,7 @@ test('it can initialize a new candy machine account', async (t) => {
     .add(
       initializeCandyMachineV2(umi, {
         candyMachine: candyMachine.publicKey,
-        itemCount: 20,
+        itemCapacity: 20,
       })
     )
     .sendAndConfirm(umi);

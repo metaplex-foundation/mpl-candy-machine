@@ -16,37 +16,45 @@ import {
   u64,
   u8,
 } from '@metaplex-foundation/umi/serializers';
+import {
+  GumballSettings,
+  GumballSettingsArgs,
+  GumballState,
+  GumballStateArgs,
+  getGumballSettingsSerializer,
+  getGumballStateSerializer,
+} from '.';
 
 /** Candy machine state and config data. */
 export type CandyMachineAccountData = {
   discriminator: Array<number>;
   /** Version of the account. */
   version: number;
-  /** Features flags. */
-  features: Array<number>;
   /** Authority address. */
   authority: PublicKey;
   /** Authority address allowed to mint from the candy machine. */
   mintAuthority: PublicKey;
   /** Number of assets redeemed. */
   itemsRedeemed: bigint;
-  /** Number of assets available. */
-  itemsAvailable: bigint;
+  /** True if the authority has finalized details, which prevents adding more nfts. */
+  state: GumballState;
+  /** User-defined settings */
+  settings: GumballSettings;
 };
 
 export type CandyMachineAccountDataArgs = {
   /** Version of the account. */
   version: number;
-  /** Features flags. */
-  features: Array<number>;
   /** Authority address. */
   authority: PublicKey;
   /** Authority address allowed to mint from the candy machine. */
   mintAuthority: PublicKey;
   /** Number of assets redeemed. */
   itemsRedeemed: number | bigint;
-  /** Number of assets available. */
-  itemsAvailable: number | bigint;
+  /** True if the authority has finalized details, which prevents adding more nfts. */
+  state: GumballStateArgs;
+  /** User-defined settings */
+  settings: GumballSettingsArgs;
 };
 
 export function getCandyMachineAccountDataSerializer(): Serializer<
@@ -62,11 +70,11 @@ export function getCandyMachineAccountDataSerializer(): Serializer<
       [
         ['discriminator', array(u8(), { size: 8 })],
         ['version', u8()],
-        ['features', array(u8(), { size: 6 })],
         ['authority', publicKeySerializer()],
         ['mintAuthority', publicKeySerializer()],
         ['itemsRedeemed', u64()],
-        ['itemsAvailable', u64()],
+        ['state', getGumballStateSerializer()],
+        ['settings', getGumballSettingsSerializer()],
       ],
       { description: 'CandyMachineAccountData' }
     ),

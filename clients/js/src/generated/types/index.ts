@@ -15,6 +15,8 @@ export * from './configLineInput';
 export * from './endDate';
 export * from './gatekeeper';
 export * from './guardType';
+export * from './gumballSettings';
+export * from './gumballState';
 export * from './mintLimit';
 export * from './nftBurn';
 export * from './nftGate';

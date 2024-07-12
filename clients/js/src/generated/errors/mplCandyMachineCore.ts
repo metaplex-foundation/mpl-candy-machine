@@ -548,18 +548,73 @@ export class CmInvalidCollectionError extends ProgramError {
 codeToErrorMap.set(0x1792, CmInvalidCollectionError);
 nameToErrorMap.set('InvalidCollection', CmInvalidCollectionError);
 
-/** GumballMachineLive: Gumball machine live */
-export class CmGumballMachineLiveError extends ProgramError {
-  readonly name: string = 'GumballMachineLive';
+/** GumballMachineDetailsFinalized: Gumball machine detailed finalized */
+export class CmGumballMachineDetailsFinalizedError extends ProgramError {
+  readonly name: string = 'GumballMachineDetailsFinalized';
 
   readonly code: number = 0x1793; // 6035
 
   constructor(program: Program, cause?: Error) {
-    super('Gumball machine live', program, cause);
+    super('Gumball machine detailed finalized', program, cause);
   }
 }
-codeToErrorMap.set(0x1793, CmGumballMachineLiveError);
-nameToErrorMap.set('GumballMachineLive', CmGumballMachineLiveError);
+codeToErrorMap.set(0x1793, CmGumballMachineDetailsFinalizedError);
+nameToErrorMap.set(
+  'GumballMachineDetailsFinalized',
+  CmGumballMachineDetailsFinalizedError
+);
+
+/** InvalidState: Invalid state */
+export class CmInvalidStateError extends ProgramError {
+  readonly name: string = 'InvalidState';
+
+  readonly code: number = 0x1794; // 6036
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid state', program, cause);
+  }
+}
+codeToErrorMap.set(0x1794, CmInvalidStateError);
+nameToErrorMap.set('InvalidState', CmInvalidStateError);
+
+/** InvalidAuthority: Invalid authority */
+export class CmInvalidAuthorityError extends ProgramError {
+  readonly name: string = 'InvalidAuthority';
+
+  readonly code: number = 0x1795; // 6037
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid authority', program, cause);
+  }
+}
+codeToErrorMap.set(0x1795, CmInvalidAuthorityError);
+nameToErrorMap.set('InvalidAuthority', CmInvalidAuthorityError);
+
+/** InvalidMint: Invalid mint */
+export class CmInvalidMintError extends ProgramError {
+  readonly name: string = 'InvalidMint';
+
+  readonly code: number = 0x1796; // 6038
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid mint', program, cause);
+  }
+}
+codeToErrorMap.set(0x1796, CmInvalidMintError);
+nameToErrorMap.set('InvalidMint', CmInvalidMintError);
+
+/** UriTooLong: URI too long */
+export class CmUriTooLongError extends ProgramError {
+  readonly name: string = 'UriTooLong';
+
+  readonly code: number = 0x1797; // 6039
+
+  constructor(program: Program, cause?: Error) {
+    super('URI too long', program, cause);
+  }
+}
+codeToErrorMap.set(0x1797, CmUriTooLongError);
+nameToErrorMap.set('UriTooLong', CmUriTooLongError);
 
 /**
  * Attempts to resolve a custom program error from the provided error code.

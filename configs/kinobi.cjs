@@ -217,8 +217,18 @@ kinobi.update(
       ignoreIfOptional: true,
     },
     {
+      ...defaultsToAssociatedTokenPda("mint", "authorityPda"),
+      account: "tmpTokenAccount",
+      ignoreIfOptional: true,
+    },
+    {
       ...defaultsToMplCoreProgram(),
       account: "mplCoreProgram",
+      ignoreIfOptional: true,
+    },
+    {
+      ...defaultsToSplAssociatedTokenProgram(),
+      account: "associatedTokenProgram",
       ignoreIfOptional: true,
     },
   ])
@@ -241,6 +251,15 @@ kinobi.update(
       name: "addNft",
       accounts: {
         seller: { defaultsTo: k.identityDefault() },
+      },
+    },
+    "mplCandyMachineCore.removeNft": {
+      name: "removeNft",
+      accounts: {
+        authority: { defaultsTo: k.identityDefault() },
+        tokenAccount: {
+          defaultsTo: defaultsToAssociatedTokenPda("mint", "authority"),
+        },
       },
     },
     "mplCandyMachineCore.addCoreAsset": {

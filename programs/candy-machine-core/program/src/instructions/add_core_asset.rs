@@ -55,7 +55,7 @@ pub struct AddCoreAsset<'info> {
     system_program: Program<'info, System>,
 }
 
-pub fn add_core_asset(ctx: Context<AddCoreAsset>, index: u32) -> Result<()> {
+pub fn add_core_asset(ctx: Context<AddCoreAsset>) -> Result<()> {
     let asset_info = &ctx.accounts.asset.to_account_info();
     let seller = &ctx.accounts.seller.to_account_info();
     let mpl_core_program = &ctx.accounts.mpl_core_program.to_account_info();
@@ -79,6 +79,8 @@ pub fn add_core_asset(ctx: Context<AddCoreAsset>, index: u32) -> Result<()> {
         update_authority.is_some() && asset.base.owner == update_authority.unwrap(),
         CandyError::NotPrimarySale
     );
+
+    // TODO: Validate the seller with the allowlist if not the candy machine authority
 
     // Make sure the collection doesn't have any Permanent delegates
     if let Some(collection) = collection {
@@ -177,13 +179,12 @@ pub fn add_core_asset(ctx: Context<AddCoreAsset>, index: u32) -> Result<()> {
     }
 
     let candy_machine = &mut ctx.accounts.candy_machine;
-    crate::processors::add_config_lines(
+    crate::processors::add_config_line(
         candy_machine,
-        index,
-        vec![ConfigLineInput {
+        ConfigLineInput {
             mint: ctx.accounts.asset.key(),
             seller: ctx.accounts.seller.key(),
-        }],
+        },
         TokenStandard::Core,
     )?;
 

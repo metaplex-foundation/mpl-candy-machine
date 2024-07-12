@@ -5,7 +5,7 @@ import {
 } from '@metaplex-foundation/umi';
 import test from 'ava';
 import { CandyMachine, createCandyMachineV2, fetchCandyMachine } from '../src';
-import { createUmi, defaultCandyMachineData } from './_setup';
+import { createUmi, defaultGumballSettings } from './_setup';
 
 test('it can create a candy machine using config line settings', async (t) => {
   // Given an existing collection NFT.
@@ -17,7 +17,7 @@ test('it can create a candy machine using config line settings', async (t) => {
     .add(
       await createCandyMachineV2(umi, {
         candyMachine,
-        itemCount: 100,
+        itemCapacity: 100,
       })
     )
     .sendAndConfirm(umi);
@@ -50,9 +50,9 @@ test("it can create a candy machine that's bigger than 10Kb", async (t) => {
   await transactionBuilder()
     .add(
       await createCandyMachineV2(umi, {
-        ...defaultCandyMachineData(umi),
+        ...defaultGumballSettings(umi),
         candyMachine,
-        itemCount: 20000,
+        itemCapacity: 20000,
       })
     )
     .sendAndConfirm(umi);

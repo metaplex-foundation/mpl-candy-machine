@@ -17,7 +17,7 @@ import {
   GuardGroup,
   GuardSet,
 } from '../src';
-import { createUmi, defaultCandyMachineData } from './_setup';
+import { createUmi, defaultGumballSettings } from './_setup';
 
 test('it can create a candy machine with an associated candy guard', async (t) => {
   // Given an existing collection NFT.
@@ -32,7 +32,7 @@ test('it can create a candy machine with an associated candy guard', async (t) =
       botTax: some({ lamports: sol(0.01), lastInstruction: true }),
       solPayment: some({ lamports: sol(2), destination }),
     },
-    ...defaultCandyMachineData(umi),
+    settings: defaultGumballSettings(),
   });
   await transactionBuilder().add(createInstructions).sendAndConfirm(umi);
 

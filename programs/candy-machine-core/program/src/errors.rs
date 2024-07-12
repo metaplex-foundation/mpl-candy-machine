@@ -112,4 +112,13 @@ pub enum CandyError {
 
     #[msg("Invalid state")]
     InvalidState,
+
+    #[msg("Invalid authority")]
+    InvalidAuthority,
+
+    #[msg("Invalid mint")]
+    InvalidMint,
+
+    #[msg("URI too long")]
+    UriTooLong,
 }

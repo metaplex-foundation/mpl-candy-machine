@@ -2,11 +2,14 @@ use anchor_lang::prelude::*;
 
 use crate::{state::CandyMachine, CandyError, GumballSettings, GumballState};
 
-pub fn update_settings(ctx: Context<UpdateSettings>, settings: GumballSettings) -> Result<()> {
+pub fn update_settings(ctx: Context<UpdateSettings>, mut settings: GumballSettings) -> Result<()> {
+    // TODO: Allow decreasing capacity
+    settings.item_capacity = ctx.accounts.candy_machine.settings.item_capacity;
+
     match ctx.accounts.candy_machine.state {
         GumballState::None => {
             // Can update all settings initially
-            ctx.accounts.candy_machine.settings = settings;
+            ctx.accounts.candy_machine.settings = settings.clone();
 
             // Details are considered finalized once sellers are invited
             if settings.sellers_merkle_root.is_some() {

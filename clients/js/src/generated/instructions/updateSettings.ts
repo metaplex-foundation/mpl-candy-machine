@@ -33,13 +33,8 @@ import {
 } from '../types';
 
 // Accounts.
-export type InitializeCandyMachineV2InstructionAccounts = {
-  /**
-   * Candy Machine account. The account space must be allocated to allow accounts larger
-   * than 10kb.
-   *
-   */
-
+export type UpdateSettingsInstructionAccounts = {
+  /** Candy machine account. */
   candyMachine: PublicKey | Pda;
   /**
    * Candy Machine authority. This is the address that controls the upate of the candy machine.
@@ -52,50 +47,48 @@ export type InitializeCandyMachineV2InstructionAccounts = {
 };
 
 // Data.
-export type InitializeCandyMachineV2InstructionData = {
+export type UpdateSettingsInstructionData = {
   discriminator: Array<number>;
   settings: GumballSettings;
 };
 
-export type InitializeCandyMachineV2InstructionDataArgs = {
+export type UpdateSettingsInstructionDataArgs = {
   settings: GumballSettingsArgs;
 };
 
-export function getInitializeCandyMachineV2InstructionDataSerializer(): Serializer<
-  InitializeCandyMachineV2InstructionDataArgs,
-  InitializeCandyMachineV2InstructionData
+export function getUpdateSettingsInstructionDataSerializer(): Serializer<
+  UpdateSettingsInstructionDataArgs,
+  UpdateSettingsInstructionData
 > {
   return mapSerializer<
-    InitializeCandyMachineV2InstructionDataArgs,
+    UpdateSettingsInstructionDataArgs,
     any,
-    InitializeCandyMachineV2InstructionData
+    UpdateSettingsInstructionData
   >(
-    struct<InitializeCandyMachineV2InstructionData>(
+    struct<UpdateSettingsInstructionData>(
       [
         ['discriminator', array(u8(), { size: 8 })],
         ['settings', getGumballSettingsSerializer()],
       ],
-      { description: 'InitializeCandyMachineV2InstructionData' }
+      { description: 'UpdateSettingsInstructionData' }
     ),
     (value) => ({
       ...value,
-      discriminator: [67, 153, 175, 39, 218, 16, 38, 32],
+      discriminator: [81, 166, 51, 213, 158, 84, 157, 108],
     })
   ) as Serializer<
-    InitializeCandyMachineV2InstructionDataArgs,
-    InitializeCandyMachineV2InstructionData
+    UpdateSettingsInstructionDataArgs,
+    UpdateSettingsInstructionData
   >;
 }
 
 // Args.
-export type InitializeCandyMachineV2InstructionArgs =
-  InitializeCandyMachineV2InstructionDataArgs;
+export type UpdateSettingsInstructionArgs = UpdateSettingsInstructionDataArgs;
 
 // Instruction.
-export function initializeCandyMachineV2(
+export function updateSettings(
   context: Pick<Context, 'identity' | 'payer' | 'programs'>,
-  input: InitializeCandyMachineV2InstructionAccounts &
-    InitializeCandyMachineV2InstructionArgs
+  input: UpdateSettingsInstructionAccounts & UpdateSettingsInstructionArgs
 ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey(
@@ -115,7 +108,7 @@ export function initializeCandyMachineV2(
   };
 
   // Arguments.
-  const resolvedArgs: InitializeCandyMachineV2InstructionArgs = { ...input };
+  const resolvedArgs: UpdateSettingsInstructionArgs = { ...input };
 
   // Default values.
   if (!resolvedAccounts.authority.value) {
@@ -138,8 +131,8 @@ export function initializeCandyMachineV2(
   );
 
   // Data.
-  const data = getInitializeCandyMachineV2InstructionDataSerializer().serialize(
-    resolvedArgs as InitializeCandyMachineV2InstructionDataArgs
+  const data = getUpdateSettingsInstructionDataSerializer().serialize(
+    resolvedArgs as UpdateSettingsInstructionDataArgs
   );
 
   // Bytes Created On Chain.

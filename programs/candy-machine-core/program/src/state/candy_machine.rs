@@ -21,9 +21,9 @@ pub struct CandyMachine {
     // hidden data section to avoid deserialisation:
     //
     // - (u32) how many actual lines of data there are currently (eventually
-    //   equals items available)
+    //   equals item_capacity)
     // - (CONFIG_LINE_SIZE * item_capacity)
-    // - (item_available / 8) + 1 bit mask to keep track of which ConfigLines
+    // - (item_capacity / 8) + 1 bit mask to keep track of which ConfigLines
     //   have been added
     // - (u32 * item_capacity) mint indices
 }
@@ -75,10 +75,10 @@ pub enum GumballState {
     SaleStarted,      // Cannot update details, cannot invite sellers, cannot add items
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, Debug)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug)]
 pub struct GumballSettings {
-    /// Uri of off-chain metadata
-    pub uri: [u8; 200],
+    /// Uri of off-chain metadata, max length 196
+    pub uri: String,
     /// Number of assets that can be added.
     pub item_capacity: u64,
     /// Max number of items that can be added by a single seller.

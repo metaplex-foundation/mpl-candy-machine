@@ -19,6 +19,7 @@ import {
   array,
   mapSerializer,
   struct,
+  u32,
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import { findCandyMachineAuthorityPda } from '../../hooked';
@@ -30,12 +31,12 @@ import {
 } from '../shared';
 
 // Accounts.
-export type AddCoreAssetInstructionAccounts = {
+export type RemoveCoreAssetInstructionAccounts = {
   /** Candy Machine account. */
   candyMachine: PublicKey | Pda;
   authorityPda?: PublicKey | Pda;
   /** Seller of the asset. */
-  seller?: Signer;
+  authority?: Signer;
   asset: PublicKey | Pda;
   /** Core asset's collection if it's part of one. */
   collection?: PublicKey | Pda;
@@ -45,34 +46,46 @@ export type AddCoreAssetInstructionAccounts = {
 };
 
 // Data.
-export type AddCoreAssetInstructionData = { discriminator: Array<number> };
+export type RemoveCoreAssetInstructionData = {
+  discriminator: Array<number>;
+  index: number;
+};
 
-export type AddCoreAssetInstructionDataArgs = {};
+export type RemoveCoreAssetInstructionDataArgs = { index: number };
 
-export function getAddCoreAssetInstructionDataSerializer(): Serializer<
-  AddCoreAssetInstructionDataArgs,
-  AddCoreAssetInstructionData
+export function getRemoveCoreAssetInstructionDataSerializer(): Serializer<
+  RemoveCoreAssetInstructionDataArgs,
+  RemoveCoreAssetInstructionData
 > {
   return mapSerializer<
-    AddCoreAssetInstructionDataArgs,
+    RemoveCoreAssetInstructionDataArgs,
     any,
-    AddCoreAssetInstructionData
+    RemoveCoreAssetInstructionData
   >(
-    struct<AddCoreAssetInstructionData>(
-      [['discriminator', array(u8(), { size: 8 })]],
-      { description: 'AddCoreAssetInstructionData' }
+    struct<RemoveCoreAssetInstructionData>(
+      [
+        ['discriminator', array(u8(), { size: 8 })],
+        ['index', u32()],
+      ],
+      { description: 'RemoveCoreAssetInstructionData' }
     ),
     (value) => ({
       ...value,
-      discriminator: [30, 144, 222, 2, 197, 195, 17, 163],
+      discriminator: [65, 17, 71, 132, 145, 88, 237, 166],
     })
-  ) as Serializer<AddCoreAssetInstructionDataArgs, AddCoreAssetInstructionData>;
+  ) as Serializer<
+    RemoveCoreAssetInstructionDataArgs,
+    RemoveCoreAssetInstructionData
+  >;
 }
 
+// Args.
+export type RemoveCoreAssetInstructionArgs = RemoveCoreAssetInstructionDataArgs;
+
 // Instruction.
-export function addCoreAsset(
+export function removeCoreAsset(
   context: Pick<Context, 'eddsa' | 'identity' | 'programs'>,
-  input: AddCoreAssetInstructionAccounts
+  input: RemoveCoreAssetInstructionAccounts & RemoveCoreAssetInstructionArgs
 ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey(
@@ -92,7 +105,7 @@ export function addCoreAsset(
       isWritable: true,
       value: input.authorityPda ?? null,
     },
-    seller: { index: 2, isWritable: false, value: input.seller ?? null },
+    authority: { index: 2, isWritable: false, value: input.authority ?? null },
     asset: { index: 3, isWritable: true, value: input.asset ?? null },
     collection: { index: 4, isWritable: true, value: input.collection ?? null },
     allowlist: { index: 5, isWritable: false, value: input.allowlist ?? null },
@@ -108,6 +121,9 @@ export function addCoreAsset(
     },
   };
 
+  // Arguments.
+  const resolvedArgs: RemoveCoreAssetInstructionArgs = { ...input };
+
   // Default values.
   if (!resolvedAccounts.authorityPda.value) {
     resolvedAccounts.authorityPda.value = findCandyMachineAuthorityPda(
@@ -115,8 +131,8 @@ export function addCoreAsset(
       { candyMachine: expectPublicKey(resolvedAccounts.candyMachine.value) }
     );
   }
-  if (!resolvedAccounts.seller.value) {
-    resolvedAccounts.seller.value = context.identity;
+  if (!resolvedAccounts.authority.value) {
+    resolvedAccounts.authority.value = context.identity;
   }
   if (!resolvedAccounts.mplCoreProgram.value) {
     resolvedAccounts.mplCoreProgram.value = context.programs.getPublicKey(
@@ -146,7 +162,9 @@ export function addCoreAsset(
   );
 
   // Data.
-  const data = getAddCoreAssetInstructionDataSerializer().serialize({});
+  const data = getRemoveCoreAssetInstructionDataSerializer().serialize(
+    resolvedArgs as RemoveCoreAssetInstructionDataArgs
+  );
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

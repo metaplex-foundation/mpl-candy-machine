@@ -269,7 +269,7 @@ test('it cannot mint from a candy machine that is not fully loaded', async (t) =
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    itemCount: 2,
+    itemCapacity: 2,
     configLines: [await getNewConfigLine(umi)],
     guards: {},
   });

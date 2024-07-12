@@ -8,16 +8,21 @@
 
 import {
   Context,
+  Option,
+  OptionOrNullable,
   Pda,
   PublicKey,
   Signer,
   TransactionBuilder,
+  none,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import {
   Serializer,
   array,
+  bytes,
   mapSerializer,
+  option,
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
@@ -39,15 +44,19 @@ export type AddCoreAssetInstructionAccounts = {
   asset: PublicKey | Pda;
   /** Core asset's collection if it's part of one. */
   collection?: PublicKey | Pda;
-  allowlist?: PublicKey | Pda;
   mplCoreProgram?: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
 };
 
 // Data.
-export type AddCoreAssetInstructionData = { discriminator: Array<number> };
+export type AddCoreAssetInstructionData = {
+  discriminator: Array<number>;
+  sellerProofPath: Option<Array<Uint8Array>>;
+};
 
-export type AddCoreAssetInstructionDataArgs = {};
+export type AddCoreAssetInstructionDataArgs = {
+  sellerProofPath?: OptionOrNullable<Array<Uint8Array>>;
+};
 
 export function getAddCoreAssetInstructionDataSerializer(): Serializer<
   AddCoreAssetInstructionDataArgs,
@@ -59,20 +68,27 @@ export function getAddCoreAssetInstructionDataSerializer(): Serializer<
     AddCoreAssetInstructionData
   >(
     struct<AddCoreAssetInstructionData>(
-      [['discriminator', array(u8(), { size: 8 })]],
+      [
+        ['discriminator', array(u8(), { size: 8 })],
+        ['sellerProofPath', option(array(bytes({ size: 32 })))],
+      ],
       { description: 'AddCoreAssetInstructionData' }
     ),
     (value) => ({
       ...value,
       discriminator: [30, 144, 222, 2, 197, 195, 17, 163],
+      sellerProofPath: value.sellerProofPath ?? none(),
     })
   ) as Serializer<AddCoreAssetInstructionDataArgs, AddCoreAssetInstructionData>;
 }
 
+// Args.
+export type AddCoreAssetInstructionArgs = AddCoreAssetInstructionDataArgs;
+
 // Instruction.
 export function addCoreAsset(
   context: Pick<Context, 'eddsa' | 'identity' | 'programs'>,
-  input: AddCoreAssetInstructionAccounts
+  input: AddCoreAssetInstructionAccounts & AddCoreAssetInstructionArgs
 ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey(
@@ -95,18 +111,20 @@ export function addCoreAsset(
     seller: { index: 2, isWritable: false, value: input.seller ?? null },
     asset: { index: 3, isWritable: true, value: input.asset ?? null },
     collection: { index: 4, isWritable: true, value: input.collection ?? null },
-    allowlist: { index: 5, isWritable: false, value: input.allowlist ?? null },
     mplCoreProgram: {
-      index: 6,
+      index: 5,
       isWritable: false,
       value: input.mplCoreProgram ?? null,
     },
     systemProgram: {
-      index: 7,
+      index: 6,
       isWritable: false,
       value: input.systemProgram ?? null,
     },
   };
+
+  // Arguments.
+  const resolvedArgs: AddCoreAssetInstructionArgs = { ...input };
 
   // Default values.
   if (!resolvedAccounts.authorityPda.value) {
@@ -146,7 +164,9 @@ export function addCoreAsset(
   );
 
   // Data.
-  const data = getAddCoreAssetInstructionDataSerializer().serialize({});
+  const data = getAddCoreAssetInstructionDataSerializer().serialize(
+    resolvedArgs as AddCoreAssetInstructionDataArgs
+  );
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

@@ -44,9 +44,6 @@ pub struct AddNft<'info> {
     /// CHECK: Safe due to freeze
     edition: UncheckedAccount<'info>,
 
-    /// CHECK: Safe due to processor check
-    allowlist: Option<UncheckedAccount<'info>>,
-
     token_program: Program<'info, Token>,
 
     /// CHECK: Safe due to constraint
@@ -54,9 +51,20 @@ pub struct AddNft<'info> {
     token_metadata_program: UncheckedAccount<'info>,
 }
 
-pub fn add_nft(ctx: Context<AddNft>) -> Result<()> {
-    // Validate that the nft is a primary sale
+pub fn add_nft(ctx: Context<AddNft>, seller_proof_path: Option<Vec<[u8; 32]>>) -> Result<()> {
+    let token_program = &ctx.accounts.token_program.to_account_info();
+    let token_account = &ctx.accounts.token_account.to_account_info();
+    let authority_pda = &ctx.accounts.authority_pda.to_account_info();
+    let seller = &ctx.accounts.seller.to_account_info();
     let metadata_account = &ctx.accounts.metadata.to_account_info();
+    let edition = &ctx.accounts.edition.to_account_info();
+    let mint = &ctx.accounts.mint.to_account_info();
+    let candy_machine = &mut ctx.accounts.candy_machine;
+
+    // Validate the seller
+    candy_machine.assert_seller_allowlisted(seller.key(), seller_proof_path)?;
+
+    // Validate that the nft is a primary sale
     let metadata = Metadata::try_from(metadata_account)?;
     require!(
         metadata.mint == ctx.accounts.mint.key(),
@@ -66,14 +74,14 @@ pub fn add_nft(ctx: Context<AddNft>) -> Result<()> {
 
     assert_is_non_printable_edition(&ctx.accounts.edition.to_account_info())?;
 
-    // TODO: Validate the seller with the allowlist if not the candy machine authority
-
-    let token_program = &ctx.accounts.token_program.to_account_info();
-    let token_account = &ctx.accounts.token_account.to_account_info();
-    let authority_pda = &ctx.accounts.authority_pda.to_account_info();
-    let seller = &ctx.accounts.seller.to_account_info();
-    let edition = &ctx.accounts.edition.to_account_info();
-    let mint = &ctx.accounts.mint.to_account_info();
+    crate::processors::add_config_line(
+        candy_machine,
+        ConfigLineInput {
+            mint: ctx.accounts.mint.key(),
+            seller: ctx.accounts.seller.key(),
+        },
+        TokenStandard::NonFungible,
+    )?;
 
     let approve_ix = approve(
         token_program.key,
@@ -110,16 +118,6 @@ pub fn add_nft(ctx: Context<AddNft>) -> Result<()> {
         },
     )
     .invoke_signed(&[&auth_seeds])?;
-
-    let candy_machine = &mut ctx.accounts.candy_machine;
-    crate::processors::add_config_line(
-        candy_machine,
-        ConfigLineInput {
-            mint: ctx.accounts.mint.key(),
-            seller: ctx.accounts.seller.key(),
-        },
-        TokenStandard::NonFungible,
-    )?;
 
     Ok(())
 }

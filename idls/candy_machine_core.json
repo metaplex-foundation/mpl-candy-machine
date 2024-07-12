@@ -55,12 +55,6 @@
           "isSigner": false
         },
         {
-          "name": "allowlist",
-          "isMut": false,
-          "isSigner": false,
-          "isOptional": true
-        },
-        {
           "name": "tokenProgram",
           "isMut": false,
           "isSigner": false
@@ -71,7 +65,21 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "sellerProofPath",
+          "type": {
+            "option": {
+              "vec": {
+                "array": [
+                  "u8",
+                  32
+                ]
+              }
+            }
+          }
+        }
+      ]
     },
     {
       "name": "addCoreAsset",
@@ -120,12 +128,6 @@
           ]
         },
         {
-          "name": "allowlist",
-          "isMut": false,
-          "isSigner": false,
-          "isOptional": true
-        },
-        {
           "name": "mplCoreProgram",
           "isMut": false,
           "isSigner": false
@@ -136,7 +138,21 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "sellerProofPath",
+          "type": {
+            "option": {
+              "vec": {
+                "array": [
+                  "u8",
+                  32
+                ]
+              }
+            }
+          }
+        }
+      ]
     },
     {
       "name": "removeNft",
@@ -268,12 +284,6 @@
           "docs": [
             "Core asset's collection if it's part of one."
           ]
-        },
-        {
-          "name": "allowlist",
-          "isMut": false,
-          "isSigner": false,
-          "isOptional": true
         },
         {
           "name": "mplCoreProgram",
@@ -723,7 +733,12 @@
               "Merkle root hash for sellers who can add items to the machine."
             ],
             "type": {
-              "option": "publicKey"
+              "option": {
+                "array": [
+                  "u8",
+                  32
+                ]
+              }
             }
           },
           {
@@ -975,6 +990,11 @@
       "code": 6039,
       "name": "UriTooLong",
       "msg": "URI too long"
+    },
+    {
+      "code": 6040,
+      "name": "InvalidProofPath",
+      "msg": "Invalid proof path"
     }
   ],
   "metadata": {

@@ -13,16 +13,21 @@ import {
 import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-toolbox';
 import {
   Context,
+  Option,
+  OptionOrNullable,
   Pda,
   PublicKey,
   Signer,
   TransactionBuilder,
+  none,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import {
   Serializer,
   array,
+  bytes,
   mapSerializer,
+  option,
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
@@ -45,15 +50,19 @@ export type AddNftInstructionAccounts = {
   tokenAccount?: PublicKey | Pda;
   metadata?: PublicKey | Pda;
   edition?: PublicKey | Pda;
-  allowlist?: PublicKey | Pda;
   tokenProgram?: PublicKey | Pda;
   tokenMetadataProgram?: PublicKey | Pda;
 };
 
 // Data.
-export type AddNftInstructionData = { discriminator: Array<number> };
+export type AddNftInstructionData = {
+  discriminator: Array<number>;
+  sellerProofPath: Option<Array<Uint8Array>>;
+};
 
-export type AddNftInstructionDataArgs = {};
+export type AddNftInstructionDataArgs = {
+  sellerProofPath?: OptionOrNullable<Array<Uint8Array>>;
+};
 
 export function getAddNftInstructionDataSerializer(): Serializer<
   AddNftInstructionDataArgs,
@@ -61,20 +70,27 @@ export function getAddNftInstructionDataSerializer(): Serializer<
 > {
   return mapSerializer<AddNftInstructionDataArgs, any, AddNftInstructionData>(
     struct<AddNftInstructionData>(
-      [['discriminator', array(u8(), { size: 8 })]],
+      [
+        ['discriminator', array(u8(), { size: 8 })],
+        ['sellerProofPath', option(array(bytes({ size: 32 })))],
+      ],
       { description: 'AddNftInstructionData' }
     ),
     (value) => ({
       ...value,
       discriminator: [55, 57, 85, 145, 81, 134, 220, 223],
+      sellerProofPath: value.sellerProofPath ?? none(),
     })
   ) as Serializer<AddNftInstructionDataArgs, AddNftInstructionData>;
 }
 
+// Args.
+export type AddNftInstructionArgs = AddNftInstructionDataArgs;
+
 // Instruction.
 export function addNft(
   context: Pick<Context, 'eddsa' | 'identity' | 'programs'>,
-  input: AddNftInstructionAccounts
+  input: AddNftInstructionAccounts & AddNftInstructionArgs
 ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey(
@@ -103,18 +119,20 @@ export function addNft(
     },
     metadata: { index: 5, isWritable: false, value: input.metadata ?? null },
     edition: { index: 6, isWritable: false, value: input.edition ?? null },
-    allowlist: { index: 7, isWritable: false, value: input.allowlist ?? null },
     tokenProgram: {
-      index: 8,
+      index: 7,
       isWritable: false,
       value: input.tokenProgram ?? null,
     },
     tokenMetadataProgram: {
-      index: 9,
+      index: 8,
       isWritable: false,
       value: input.tokenMetadataProgram ?? null,
     },
   };
+
+  // Arguments.
+  const resolvedArgs: AddNftInstructionArgs = { ...input };
 
   // Default values.
   if (!resolvedAccounts.authorityPda.value) {
@@ -170,7 +188,9 @@ export function addNft(
   );
 
   // Data.
-  const data = getAddNftInstructionDataSerializer().serialize({});
+  const data = getAddNftInstructionDataSerializer().serialize(
+    resolvedArgs as AddNftInstructionDataArgs
+  );
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

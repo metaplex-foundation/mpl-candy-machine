@@ -121,4 +121,7 @@ pub enum CandyError {
 
     #[msg("URI too long")]
     UriTooLong,
+
+    #[msg("Invalid proof path")]
+    InvalidProofPath,
 }

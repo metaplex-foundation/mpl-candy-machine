@@ -6,12 +6,12 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Option, OptionOrNullable, PublicKey } from '@metaplex-foundation/umi';
+import { Option, OptionOrNullable } from '@metaplex-foundation/umi';
 import {
   Serializer,
   bool,
+  bytes,
   option,
-  publicKey as publicKeySerializer,
   string,
   struct,
   u16,
@@ -26,7 +26,7 @@ export type GumballSettings = {
   /** Max number of items that can be added by a single seller. */
   itemsPerSeller: number;
   /** Merkle root hash for sellers who can add items to the machine. */
-  sellersMerkleRoot: Option<PublicKey>;
+  sellersMerkleRoot: Option<Uint8Array>;
   /** Fee basis points paid to the machine authority. */
   curatorFeeBps: number;
   /** True if the front end should hide items that have been sold. */
@@ -41,7 +41,7 @@ export type GumballSettingsArgs = {
   /** Max number of items that can be added by a single seller. */
   itemsPerSeller: number;
   /** Merkle root hash for sellers who can add items to the machine. */
-  sellersMerkleRoot: OptionOrNullable<PublicKey>;
+  sellersMerkleRoot: OptionOrNullable<Uint8Array>;
   /** Fee basis points paid to the machine authority. */
   curatorFeeBps: number;
   /** True if the front end should hide items that have been sold. */
@@ -57,7 +57,7 @@ export function getGumballSettingsSerializer(): Serializer<
       ['uri', string()],
       ['itemCapacity', u64()],
       ['itemsPerSeller', u16()],
-      ['sellersMerkleRoot', option(publicKeySerializer())],
+      ['sellersMerkleRoot', option(bytes({ size: 32 }))],
       ['curatorFeeBps', u16()],
       ['hideSoldItems', bool()],
     ],

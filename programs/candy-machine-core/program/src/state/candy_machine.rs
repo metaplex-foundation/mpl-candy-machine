@@ -1,6 +1,9 @@
 use anchor_lang::prelude::*;
 
-use crate::constants::{CANDY_MACHINE_SIZE, CONFIG_LINE_SIZE};
+use crate::{
+    constants::{CANDY_MACHINE_SIZE, CONFIG_LINE_SIZE},
+    verify_proof, CandyError,
+};
 
 /// Candy machine state and config data.
 #[account]
@@ -36,6 +39,32 @@ impl CandyMachine {
             + (CONFIG_LINE_SIZE * item_count as usize) // config lines
             + (item_count as usize / 8) + 1 // bit mask tracking added lines
             + 4 + (4 * item_count as usize) // mint indices
+    }
+
+    pub fn assert_seller_allowlisted(
+        &self,
+        seller: Pubkey,
+        seller_proof_path: Option<Vec<[u8; 32]>>,
+    ) -> Result<()> {
+        if seller == self.authority {
+            return Ok(());
+        }
+
+        if seller_proof_path.is_none() || self.settings.sellers_merkle_root.is_none() {
+            return err!(CandyError::InvalidProofPath);
+        }
+
+        let leaf = solana_program::keccak::hashv(&[seller.to_string().as_bytes()]);
+        require!(
+            verify_proof(
+                &seller_proof_path.unwrap()[..],
+                &self.settings.sellers_merkle_root.unwrap(),
+                &leaf.0,
+            ),
+            CandyError::InvalidProofPath
+        );
+
+        Ok(())
     }
 }
 
@@ -84,7 +113,7 @@ pub struct GumballSettings {
     /// Max number of items that can be added by a single seller.
     pub items_per_seller: u16,
     /// Merkle root hash for sellers who can add items to the machine.
-    pub sellers_merkle_root: Option<Pubkey>,
+    pub sellers_merkle_root: Option<[u8; 32]>,
     /// Fee basis points paid to the machine authority.
     pub curator_fee_bps: u16,
     /// True if the front end should hide items that have been sold.

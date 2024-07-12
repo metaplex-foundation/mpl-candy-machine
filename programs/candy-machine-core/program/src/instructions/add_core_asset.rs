@@ -45,9 +45,6 @@ pub struct AddCoreAsset<'info> {
     #[account(mut)]
     collection: Option<UncheckedAccount<'info>>,
 
-    /// CHECK: Safe due to processor check
-    allowlist: Option<UncheckedAccount<'info>>,
-
     /// CHECK: Safe due to address constraint
     #[account(address = mpl_core::ID)]
     mpl_core_program: UncheckedAccount<'info>,
@@ -55,12 +52,19 @@ pub struct AddCoreAsset<'info> {
     system_program: Program<'info, System>,
 }
 
-pub fn add_core_asset(ctx: Context<AddCoreAsset>) -> Result<()> {
+pub fn add_core_asset(
+    ctx: Context<AddCoreAsset>,
+    seller_proof_path: Option<Vec<[u8; 32]>>,
+) -> Result<()> {
     let asset_info = &ctx.accounts.asset.to_account_info();
     let seller = &ctx.accounts.seller.to_account_info();
     let mpl_core_program = &ctx.accounts.mpl_core_program.to_account_info();
     let system_program = &ctx.accounts.system_program.to_account_info();
     let authority_pda_key = ctx.accounts.authority_pda.key();
+    let candy_machine = &mut ctx.accounts.candy_machine;
+
+    // Validate the seller
+    candy_machine.assert_seller_allowlisted(seller.key(), seller_proof_path)?;
 
     let collection_info = if let Some(collection) = &ctx.accounts.collection {
         Some(collection.to_account_info())
@@ -73,14 +77,6 @@ pub fn add_core_asset(ctx: Context<AddCoreAsset>) -> Result<()> {
     } else {
         None
     };
-
-    let (update_authority, asset) = get_core_asset_update_authority(asset_info, collection)?;
-    require!(
-        update_authority.is_some() && asset.base.owner == update_authority.unwrap(),
-        CandyError::NotPrimarySale
-    );
-
-    // TODO: Validate the seller with the allowlist if not the candy machine authority
 
     // Make sure the collection doesn't have any Permanent delegates
     if let Some(collection) = collection {
@@ -108,6 +104,21 @@ pub fn add_core_asset(ctx: Context<AddCoreAsset>) -> Result<()> {
             return err!(CandyError::InvalidCollection);
         }
     }
+
+    let (update_authority, asset) = get_core_asset_update_authority(asset_info, collection)?;
+    require!(
+        update_authority.is_some() && asset.base.owner == update_authority.unwrap(),
+        CandyError::NotPrimarySale
+    );
+
+    crate::processors::add_config_line(
+        candy_machine,
+        ConfigLineInput {
+            mint: ctx.accounts.asset.key(),
+            seller: ctx.accounts.seller.key(),
+        },
+        TokenStandard::Core,
+    )?;
 
     // Approve
     if let Err(_) =
@@ -177,16 +188,6 @@ pub fn add_core_asset(ctx: Context<AddCoreAsset>) -> Result<()> {
             .system_program(system_program)
             .invoke_signed(&[&auth_seeds])?;
     }
-
-    let candy_machine = &mut ctx.accounts.candy_machine;
-    crate::processors::add_config_line(
-        candy_machine,
-        ConfigLineInput {
-            mint: ctx.accounts.asset.key(),
-            seller: ctx.accounts.seller.key(),
-        },
-        TokenStandard::Core,
-    )?;
 
     Ok(())
 }

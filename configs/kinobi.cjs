@@ -268,6 +268,12 @@ kinobi.update(
         seller: { defaultsTo: k.identityDefault() },
       },
     },
+    "mplCandyMachineCore.removeCoreAsset": {
+      name: "removeCoreAsset",
+      accounts: {
+        authority: { defaultsTo: k.identityDefault() },
+      },
+    },
     "mplCandyMachineCore.mintV2": {
       name: "mintFromCandyMachineV2",
       accounts: {
@@ -302,6 +308,14 @@ kinobi.update(
 );
 
 kinobi.update(new k.FlattenInstructionArgsStructVisitor());
+
+const addItemDefaultArgs = { sellerProofPath: k.vNone() };
+kinobi.update(
+  new k.SetStructDefaultValuesVisitor({
+    addNftInstructionData: addItemDefaultArgs,
+    addCoreAssetInstructionData: addItemDefaultArgs,
+  })
+);
 
 // Wrap numbers.
 kinobi.update(

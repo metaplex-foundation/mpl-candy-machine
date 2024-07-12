@@ -40,7 +40,6 @@ export type RemoveCoreAssetInstructionAccounts = {
   asset: PublicKey | Pda;
   /** Core asset's collection if it's part of one. */
   collection?: PublicKey | Pda;
-  allowlist?: PublicKey | Pda;
   mplCoreProgram?: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
 };
@@ -108,14 +107,13 @@ export function removeCoreAsset(
     authority: { index: 2, isWritable: false, value: input.authority ?? null },
     asset: { index: 3, isWritable: true, value: input.asset ?? null },
     collection: { index: 4, isWritable: true, value: input.collection ?? null },
-    allowlist: { index: 5, isWritable: false, value: input.allowlist ?? null },
     mplCoreProgram: {
-      index: 6,
+      index: 5,
       isWritable: false,
       value: input.mplCoreProgram ?? null,
     },
     systemProgram: {
-      index: 7,
+      index: 6,
       isWritable: false,
       value: input.systemProgram ?? null,
     },

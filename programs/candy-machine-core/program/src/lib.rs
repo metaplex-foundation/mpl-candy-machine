@@ -20,46 +20,6 @@ declare_id!("CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR");
 pub mod candy_machine_core {
     use super::*;
 
-    /// Add legacy NFTs to the gumball machine.
-    ///
-    /// # Accounts
-    ///
-    ///   0. `[writable]` Candy Machine account
-    ///   1. `[signer]` Candy Machine authority
-    pub fn add_nft(ctx: Context<AddNft>) -> Result<()> {
-        instructions::add_nft(ctx)
-    }
-
-    /// Add Core assets to the gumball machine.
-    ///
-    /// # Accounts
-    ///
-    ///   0. `[writable]` Candy Machine account
-    ///   1. `[signer]` Candy Machine authority
-    pub fn add_core_asset(ctx: Context<AddCoreAsset>) -> Result<()> {
-        instructions::add_core_asset(ctx)
-    }
-
-    /// Remove legacy NFT from the gumball machine.
-    ///
-    /// # Accounts
-    ///
-    ///   0. `[writable]` Candy Machine account
-    ///   1. `[signer]` Candy Machine authority
-    pub fn remove_nft(ctx: Context<RemoveNft>, index: u32) -> Result<()> {
-        instructions::remove_nft(ctx, index)
-    }
-
-    /// Remove Core asset from the gumball machine.
-    ///
-    /// # Accounts
-    ///
-    ///   0. `[writable]` Candy Machine account
-    ///   1. `[signer]` Candy Machine authority
-    pub fn remove_core_asset(ctx: Context<RemoveCoreAsset>, index: u32) -> Result<()> {
-        instructions::remove_core_asset(ctx, index)
-    }
-
     /// Initialize the candy machine account with the specified data.
     ///
     /// # Accounts
@@ -80,6 +40,49 @@ pub mod candy_machine_core {
     ///   3. `[signer]` Payer
     pub fn update_settings(ctx: Context<UpdateSettings>, settings: GumballSettings) -> Result<()> {
         instructions::update_settings(ctx, settings)
+    }
+
+    /// Add legacy NFTs to the gumball machine.
+    ///
+    /// # Accounts
+    ///
+    ///   0. `[writable]` Candy Machine account
+    ///   1. `[signer]` Candy Machine authority
+    pub fn add_nft(ctx: Context<AddNft>, seller_proof_path: Option<Vec<[u8; 32]>>) -> Result<()> {
+        instructions::add_nft(ctx, seller_proof_path)
+    }
+
+    /// Add Core assets to the gumball machine.
+    ///
+    /// # Accounts
+    ///
+    ///   0. `[writable]` Candy Machine account
+    ///   1. `[signer]` Candy Machine authority
+    pub fn add_core_asset(
+        ctx: Context<AddCoreAsset>,
+        seller_proof_path: Option<Vec<[u8; 32]>>,
+    ) -> Result<()> {
+        instructions::add_core_asset(ctx, seller_proof_path)
+    }
+
+    /// Remove legacy NFT from the gumball machine.
+    ///
+    /// # Accounts
+    ///
+    ///   0. `[writable]` Candy Machine account
+    ///   1. `[signer]` Candy Machine authority
+    pub fn remove_nft(ctx: Context<RemoveNft>, index: u32) -> Result<()> {
+        instructions::remove_nft(ctx, index)
+    }
+
+    /// Remove Core asset from the gumball machine.
+    ///
+    /// # Accounts
+    ///
+    ///   0. `[writable]` Candy Machine account
+    ///   1. `[signer]` Candy Machine authority
+    pub fn remove_core_asset(ctx: Context<RemoveCoreAsset>, index: u32) -> Result<()> {
+        instructions::remove_core_asset(ctx, index)
     }
 
     /// Mint an NFT.

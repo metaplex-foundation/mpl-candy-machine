@@ -616,6 +616,19 @@ export class CmUriTooLongError extends ProgramError {
 codeToErrorMap.set(0x1797, CmUriTooLongError);
 nameToErrorMap.set('UriTooLong', CmUriTooLongError);
 
+/** InvalidProofPath: Invalid proof path */
+export class CmInvalidProofPathError extends ProgramError {
+  readonly name: string = 'InvalidProofPath';
+
+  readonly code: number = 0x1798; // 6040
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid proof path', program, cause);
+  }
+}
+codeToErrorMap.set(0x1798, CmInvalidProofPathError);
+nameToErrorMap.set('InvalidProofPath', CmInvalidProofPathError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

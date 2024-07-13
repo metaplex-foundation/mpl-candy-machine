@@ -10,7 +10,7 @@ pub fn start_sale(ctx: Context<StartSale>) -> Result<()> {
 
     require!(count > 0, CandyError::CandyMachineEmpty);
 
-    candy_machine.state = GumballState::SaleStarted;
+    candy_machine.state = GumballState::SaleLive;
     candy_machine.finalized_items_count = count as u64;
 
     Ok(())
@@ -23,7 +23,7 @@ pub struct StartSale<'info> {
     #[account(
         mut, 
         has_one = authority,
-        constraint = candy_machine.state != GumballState::SaleStarted @ CandyError::InvalidState
+        constraint = candy_machine.state != GumballState::SaleLive @ CandyError::InvalidState
     )]
     candy_machine: Box<Account<'info, CandyMachine>>,
 

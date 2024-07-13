@@ -17,7 +17,7 @@ pub struct MintV2<'info> {
     #[account(
         mut, 
         has_one = mint_authority,
-        constraint = candy_machine.state == GumballState::SaleStarted @ CandyError::InvalidState
+        constraint = candy_machine.state == GumballState::SaleLive @ CandyError::InvalidState
     )]
     candy_machine: Box<Account<'info, CandyMachine>>,
 

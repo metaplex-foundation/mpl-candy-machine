@@ -84,7 +84,7 @@ pub mod candy_machine_core {
         instructions::remove_core_asset(ctx, index)
     }
 
-    /// Allows sales to start.
+    /// Allows minting to begin.
     ///
     /// # Accounts
     ///
@@ -92,6 +92,16 @@ pub mod candy_machine_core {
     ///   1. `[signer]` Candy Machine authority
     pub fn start_sale(ctx: Context<StartSale>) -> Result<()> {
         instructions::start_sale(ctx)
+    }
+
+    /// Disables minting and allows sales to be settled.
+    ///
+    /// # Accounts
+    ///
+    ///   0. `[writable]` Candy Machine account
+    ///   1. `[signer]` Candy Machine authority
+    pub fn end_sale(ctx: Context<EndSale>) -> Result<()> {
+        instructions::end_sale(ctx)
     }
 
     /// Mint an NFT.
@@ -138,7 +148,7 @@ pub mod candy_machine_core {
     ///
     ///   0. `[writable]` Candy Machine account
     ///   1. `[signer]` Candy Machine authority
-    pub fn withdraw(ctx: Context<Withdraw>) -> Result<()> {
-        instructions::withdraw(ctx)
+    pub fn withdraw(ctx: Context<CloseGumballMachine>) -> Result<()> {
+        instructions::close_gumball_machine(ctx)
     }
 }

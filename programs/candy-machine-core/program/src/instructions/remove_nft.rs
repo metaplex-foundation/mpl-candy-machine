@@ -14,7 +14,7 @@ pub struct RemoveNft<'info> {
     /// Candy Machine account.
     #[account(
         mut,
-        constraint = candy_machine.state != GumballState::SaleStarted @ CandyError::InvalidState,
+        constraint = candy_machine.state != GumballState::SaleLive @ CandyError::InvalidState,
     )]
     candy_machine: Account<'info, CandyMachine>,
 

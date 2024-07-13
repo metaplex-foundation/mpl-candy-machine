@@ -48,7 +48,7 @@ pub struct UpdateSettings<'info> {
     #[account(
         mut, 
         has_one = authority,
-        constraint = candy_machine.state != GumballState::SaleStarted @ CandyError::InvalidState
+        constraint = candy_machine.state != GumballState::SaleLive @ CandyError::InvalidState
     )]
     candy_machine: Box<Account<'info, CandyMachine>>,
 

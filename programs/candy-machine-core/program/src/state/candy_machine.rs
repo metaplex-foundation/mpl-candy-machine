@@ -117,9 +117,11 @@ pub enum TokenStandard {
 
 #[derive(Copy, AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, Debug)]
 pub enum GumballState {
-    None,             // Can update details, but cannot invite sellers
-    DetailsFinalized, // Cannot update details, can invite sellers
-    SaleStarted,      // Cannot update details, cannot invite sellers, cannot add items
+    None,             // Initial state
+    DetailsFinalized, // Sellers invited so only some details can be updated
+    SaleLive, // Sale started, can now mint items. Cannot no longer update details or add items.
+    SaleEnded, // Sale ended, can now claim items
+    AllSettled, // All items/proceeds have been settled so the machine can be closed
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug)]

@@ -7,13 +7,7 @@ import {
 } from '@metaplex-foundation/umi';
 import test from 'ava';
 import { mintV2 } from '../../src';
-import {
-  assertBotTax,
-  assertItemBought,
-  createUmi,
-  createV2,
-  getNewConfigLine,
-} from '../_setup';
+import { assertBotTax, assertItemBought, createUmi, createV2 } from '../_setup';
 
 test('it allows minting when the third party signer is provided', async (t) => {
   // Given a loaded Candy Machine with a third party signer guard.
@@ -21,7 +15,13 @@ test('it allows minting when the third party signer is provided', async (t) => {
   const thirdPartySigner = generateSigner(umi);
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       thirdPartySigner: some({ signerKey: thirdPartySigner.publicKey }),
     },
@@ -52,7 +52,13 @@ test('it forbids minting when the third party signer is wrong', async (t) => {
   const thirdPartySigner = generateSigner(umi);
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       thirdPartySigner: some({ signerKey: thirdPartySigner.publicKey }),
     },
@@ -84,7 +90,13 @@ test('it charges a bot tax when trying to mint using the wrong third party signe
   const thirdPartySigner = generateSigner(umi);
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       botTax: some({ lamports: sol(0.1), lastInstruction: true }),
       thirdPartySigner: some({ signerKey: thirdPartySigner.publicKey }),

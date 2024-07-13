@@ -36,6 +36,8 @@ export type CandyMachineAccountData = {
   mintAuthority: PublicKey;
   /** Number of assets redeemed. */
   itemsRedeemed: bigint;
+  /** Number of assets loaded at the time the sale started. */
+  finalizedItemsCount: bigint;
   /** True if the authority has finalized details, which prevents adding more nfts. */
   state: GumballState;
   /** User-defined settings */
@@ -51,6 +53,8 @@ export type CandyMachineAccountDataArgs = {
   mintAuthority: PublicKey;
   /** Number of assets redeemed. */
   itemsRedeemed: number | bigint;
+  /** Number of assets loaded at the time the sale started. */
+  finalizedItemsCount: number | bigint;
   /** True if the authority has finalized details, which prevents adding more nfts. */
   state: GumballStateArgs;
   /** User-defined settings */
@@ -73,6 +77,7 @@ export function getCandyMachineAccountDataSerializer(): Serializer<
         ['authority', publicKeySerializer()],
         ['mintAuthority', publicKeySerializer()],
         ['itemsRedeemed', u64()],
+        ['finalizedItemsCount', u64()],
         ['state', getGumballStateSerializer()],
         ['settings', getGumballSettingsSerializer()],
       ],

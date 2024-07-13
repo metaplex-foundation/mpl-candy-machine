@@ -3,6 +3,92 @@
   "name": "candy_machine_core",
   "instructions": [
     {
+      "name": "initializeV2",
+      "docs": [
+        "Initialize the candy machine account with the specified data.",
+        "",
+        "# Accounts",
+        "",
+        "0. `[writable]` Candy Machine account (must be pre-allocated but zero content)",
+        "2. `[]` Candy Machine authority",
+        "3. `[signer]` Payer"
+      ],
+      "accounts": [
+        {
+          "name": "candyMachine",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Candy Machine account. The account space must be allocated to allow accounts larger",
+            "than 10kb.",
+            ""
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Candy Machine authority. This is the address that controls the upate of the candy machine.",
+            ""
+          ]
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Payer of the transaction."
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "settings",
+          "type": {
+            "defined": "GumballSettings"
+          }
+        }
+      ]
+    },
+    {
+      "name": "updateSettings",
+      "docs": [
+        "Updates gumball machine settings.",
+        "",
+        "# Accounts",
+        "",
+        "0. `[writable]` Candy Machine account",
+        "1. `[signer]` Candy Machine authority"
+      ],
+      "accounts": [
+        {
+          "name": "candyMachine",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Candy machine account."
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Candy Machine authority. This is the address that controls the upate of the candy machine."
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "settings",
+          "type": {
+            "defined": "GumballSettings"
+          }
+        }
+      ]
+    },
+    {
       "name": "addNft",
       "docs": [
         "Add legacy NFTs to the gumball machine.",
@@ -304,64 +390,14 @@
       ]
     },
     {
-      "name": "initializeV2",
+      "name": "startSale",
       "docs": [
-        "Initialize the candy machine account with the specified data.",
+        "Allows sales to start.",
         "",
         "# Accounts",
         "",
-        "0. `[writable]` Candy Machine account (must be pre-allocated but zero content)",
-        "2. `[]` Candy Machine authority",
-        "3. `[signer]` Payer"
-      ],
-      "accounts": [
-        {
-          "name": "candyMachine",
-          "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "Candy Machine account. The account space must be allocated to allow accounts larger",
-            "than 10kb.",
-            ""
-          ]
-        },
-        {
-          "name": "authority",
-          "isMut": false,
-          "isSigner": false,
-          "docs": [
-            "Candy Machine authority. This is the address that controls the upate of the candy machine.",
-            ""
-          ]
-        },
-        {
-          "name": "payer",
-          "isMut": true,
-          "isSigner": true,
-          "docs": [
-            "Payer of the transaction."
-          ]
-        }
-      ],
-      "args": [
-        {
-          "name": "settings",
-          "type": {
-            "defined": "GumballSettings"
-          }
-        }
-      ]
-    },
-    {
-      "name": "updateSettings",
-      "docs": [
-        "Initialize the candy machine account with the specified data.",
-        "",
-        "# Accounts",
-        "",
-        "0. `[writable]` Candy Machine account (must be pre-allocated but zero content)",
-        "2. `[]` Candy Machine authority",
-        "3. `[signer]` Payer"
+        "0. `[writable]` Candy Machine account",
+        "1. `[signer]` Candy Machine authority"
       ],
       "accounts": [
         {
@@ -374,30 +410,14 @@
         },
         {
           "name": "authority",
-          "isMut": false,
-          "isSigner": false,
-          "docs": [
-            "Candy Machine authority. This is the address that controls the upate of the candy machine.",
-            ""
-          ]
-        },
-        {
-          "name": "payer",
           "isMut": true,
           "isSigner": true,
           "docs": [
-            "Payer of the transaction."
+            "Candy Machine authority. This is the address that controls the upate of the candy machine."
           ]
         }
       ],
-      "args": [
-        {
-          "name": "settings",
-          "type": {
-            "defined": "GumballSettings"
-          }
-        }
-      ]
+      "args": []
     },
     {
       "name": "mintV2",
@@ -609,6 +629,13 @@
             "name": "itemsRedeemed",
             "docs": [
               "Number of assets redeemed."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "finalizedItemsCount",
+            "docs": [
+              "Number of assets loaded at the time the sale started."
             ],
             "type": "u64"
           },
@@ -995,6 +1022,11 @@
       "code": 6040,
       "name": "InvalidProofPath",
       "msg": "Invalid proof path"
+    },
+    {
+      "code": 6041,
+      "name": "InvalidSettingUpdate",
+      "msg": "Invalid setting update"
     }
   ],
   "metadata": {

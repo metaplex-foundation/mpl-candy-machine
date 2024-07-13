@@ -16,13 +16,7 @@ import {
   mintV2,
   route,
 } from '../../src';
-import {
-  assertBotTax,
-  assertItemBought,
-  createUmi,
-  createV2,
-  getNewConfigLine,
-} from '../_setup';
+import { assertBotTax, assertItemBought, createUmi, createV2 } from '../_setup';
 
 test('it allows minting from wallets of a predefined list', async (t) => {
   // Given the identity is part of an allow list.
@@ -39,7 +33,13 @@ test('it allows minting from wallets of a predefined list', async (t) => {
   // And given a loaded Candy Machine with the allow list guard.
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       allowList: some({ merkleRoot }),
     },
@@ -92,7 +92,13 @@ test('it is possible to verify the proof and mint in the same transaction if the
   // And given a loaded Candy Machine with the allow list guard.
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       allowList: some({ merkleRoot }),
     },
@@ -143,7 +149,13 @@ test('it allows minting even when the payer is different from the buyer', async 
   // And given a loaded Candy Machine with the allow list guard.
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       allowList: some({ merkleRoot }),
     },
@@ -194,7 +206,13 @@ test('it forbids minting from wallets that are not part of a predefined list', a
   // And given a loaded Candy Machine with the allow list guard.
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       allowList: some({ merkleRoot }),
     },
@@ -235,7 +253,13 @@ test('it forbids minting from wallets that are providing the wrong proof', async
   // And given a loaded Candy Machine with the allow list guard.
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       allowList: some({ merkleRoot }),
     },
@@ -279,7 +303,13 @@ test('it forbids minting if the wallet has not been verified via the route instr
   // And given a loaded Candy Machine with an allow list guard.
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       allowList: some({ merkleRoot }),
     },
@@ -318,7 +348,13 @@ test('it charges a bot tax when trying to mint whilst not verified', async (t) =
   // And given a loaded Candy Machine with an allow list and a bot tax guard.
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       botTax: some({ lamports: sol(0.01), lastInstruction: true }),
       allowList: some({ merkleRoot }),
@@ -359,7 +395,13 @@ test('it creates a proof for a buyer even when the buyer is not a signer', async
   // And given a loaded Candy Machine with the allow list guard.
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       allowList: some({ merkleRoot }),
     },
@@ -423,7 +465,13 @@ test('it creates a proof for the payer when the buyer is not present', async (t)
   // And given a loaded Candy Machine with the allow list guard.
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       allowList: some({ merkleRoot }),
     },

@@ -11,12 +11,19 @@ import {
 } from '@metaplex-foundation/umi';
 import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
 import test from 'ava';
-import { CandyMachine, fetchCandyMachine, mintV2 } from '../src';
+import {
+  addNft,
+  CandyMachine,
+  fetchCandyMachine,
+  mintV2,
+  startSale,
+  TokenStandard,
+} from '../src';
 import {
   assertItemBought,
+  createNft,
   createUmi,
   createV2,
-  getNewConfigLine,
   tomorrow,
   yesterday,
 } from './_setup';
@@ -26,7 +33,13 @@ test('it can mint from a candy guard with no guards', async (t) => {
   const umi = await createUmi();
 
   const candyMachineSigner = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {},
     groups: [],
   });
@@ -58,7 +71,13 @@ test('it can mint from a candy guard with guards', async (t) => {
 
   const destination = generateSigner(umi).publicKey;
   const candyMachineSigner = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       botTax: { lamports: sol(0.01), lastInstruction: true },
       solPayment: { lamports: sol(2), destination },
@@ -101,7 +120,13 @@ test('it can mint from a candy guard with groups', async (t) => {
 
   const destination = generateSigner(umi).publicKey;
   const candyMachineSigner = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       botTax: { lamports: sol(0.01), lastInstruction: true },
       solPayment: { lamports: sol(2), destination },
@@ -137,7 +162,13 @@ test('it cannot mint using the default guards if the candy guard has groups', as
 
   const destination = generateSigner(umi).publicKey;
   const candyMachineSigner = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: { solPayment: { lamports: sol(2), destination } },
     groups: [
       { label: 'GROUP1', guards: { startDate: { date: yesterday() } } },
@@ -170,7 +201,13 @@ test('it cannot mint from a group if the provided group label does not exist', a
 
   const destination = generateSigner(umi).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: { solPayment: { lamports: sol(2), destination } },
     groups: [{ label: 'GROUP1', guards: { startDate: { date: yesterday() } } }],
   });
@@ -199,7 +236,13 @@ test('it can mint using an explicit payer', async (t) => {
 
   const destination = generateSigner(umi).publicKey;
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: { solPayment: { lamports: sol(2), destination } },
   });
 
@@ -228,12 +271,17 @@ test('it can mint using an explicit payer', async (t) => {
   t.true(isEqualToAmount(payerBalance, sol(8), sol(0.1)));
 });
 
-test('it cannot mint from an empty candy machine', async (t) => {
+test('it cannot mint from a candy machine not in sale started state', async (t) => {
   // Given an empty candy machine.
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
     guards: {},
   });
 
@@ -250,33 +298,7 @@ test('it cannot mint from an empty candy machine', async (t) => {
     .sendAndConfirm(umi);
 
   // Then we expect a program error.
-  await t.throwsAsync(promise, { message: /CandyMachineEmpty/ });
-});
-
-test('it cannot mint from a candy machine that is not fully loaded', async (t) => {
-  // Given a candy machine that is 50% loaded.
-  const umi = await createUmi();
-
-  const { publicKey: candyMachine } = await createV2(umi, {
-    itemCapacity: 2,
-    configLines: [await getNewConfigLine(umi)],
-    guards: {},
-  });
-
-  // When we try to mint from it.
-  const buyer = generateSigner(umi);
-  const promise = transactionBuilder()
-    .add(setComputeUnitLimit(umi, { units: 600_000 }))
-    .add(
-      mintV2(umi, {
-        candyMachine,
-        buyer,
-      })
-    )
-    .sendAndConfirm(umi);
-
-  // Then we expect a program error.
-  await t.throwsAsync(promise, { message: /NotFullyLoaded/ });
+  await t.throwsAsync(promise, { message: /InvalidState/ });
 });
 
 test('it cannot mint from a candy machine that has been fully minted', async (t) => {
@@ -284,7 +306,13 @@ test('it cannot mint from a candy machine that has been fully minted', async (t)
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {},
   });
 
@@ -318,11 +346,34 @@ test('it can mint from a candy machine in a random order', async (t) => {
   const umi = await createUmi();
 
   const indices = Array.from({ length: 5 }, (x, i) => i);
-  const configLines = indices.map(() => await getNewConfigLine(umi));
+  const items = (await Promise.all(indices.map(() => createNft(umi)))).map(
+    (item) => ({ id: item.publicKey, tokenStandard: TokenStandard.NonFungible })
+  );
+
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines,
     guards: {},
   });
+
+  await Promise.all(
+    items.map((item) =>
+      transactionBuilder()
+        .add(
+          addNft(umi, {
+            candyMachine,
+            mint: item.id,
+          })
+        )
+        .sendAndConfirm(umi)
+    )
+  );
+
+  await transactionBuilder()
+    .add(
+      startSale(umi, {
+        candyMachine,
+      })
+    )
+    .sendAndConfirm(umi);
 
   // When we mint from it.
   const minted = await drain(umi, candyMachine, indices.length);

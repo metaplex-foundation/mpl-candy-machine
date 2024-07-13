@@ -13,13 +13,7 @@ import {
 } from '@metaplex-foundation/umi';
 import test from 'ava';
 import { mintV2 } from '../../src';
-import {
-  assertBotTax,
-  assertItemBought,
-  createUmi,
-  createV2,
-  getNewConfigLine,
-} from '../_setup';
+import { assertBotTax, assertItemBought, createUmi, createV2 } from '../_setup';
 
 test('it allows minting when the payer owns a specific token', async (t) => {
   // Given a payer with one token.
@@ -38,7 +32,13 @@ test('it allows minting when the payer owns a specific token', async (t) => {
   // And a loaded Candy Machine with the token gate guard.
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       tokenGate: some({ mint: tokenMint.publicKey, amount: 1 }),
     },
@@ -81,7 +81,13 @@ test('it allows minting even when the payer is different from the buyer', async 
   // And a loaded Candy Machine with the token gate guard.
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       tokenGate: some({ mint: tokenMint.publicKey, amount: 1 }),
     },
@@ -125,7 +131,13 @@ test('it allows minting when the payer owns multiple tokens from a specific mint
   // And a loaded Candy Machine with the token gate guard that requires 5 tokens.
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       tokenGate: some({ mint: tokenMint.publicKey, amount: 5 }),
     },
@@ -177,7 +189,13 @@ test('it forbids minting when the owner does not own any required tokens', async
   // And a loaded Candy Machine with the token gate guard.
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       tokenGate: some({ mint: tokenMint.publicKey, amount: 1 }),
     },
@@ -219,7 +237,13 @@ test('it forbids minting when the owner does not own enough tokens', async (t) =
   // And a loaded Candy Machine with the token gate guard that requires 10 tokens.
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       tokenGate: some({ mint: tokenMint.publicKey, amount: 10 }),
     },
@@ -261,7 +285,13 @@ test('it charges a bot tax when trying to mint without the right amount of token
   // And a loaded Candy Machine with the token gate guard and a bot tax guard.
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       botTax: some({ lamports: sol(0.1), lastInstruction: true }),
       tokenGate: some({ mint: tokenMint.publicKey, amount: 1 }),

@@ -12,6 +12,7 @@ pub const GUMBALL_SETTINGS_BYTE_INDEX: usize = 8 // discriminator
     + 32                                      // authority
     + 32                                      // mint authority
     + 8                                       // items redeemed
+    + 8                                       // finalized items count
     + 1; // state
 
 // Determine the start of the account hidden section.

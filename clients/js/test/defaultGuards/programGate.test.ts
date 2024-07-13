@@ -12,13 +12,7 @@ import {
 } from '@metaplex-foundation/umi';
 import test from 'ava';
 import { mintV2 } from '../../src';
-import {
-  assertBotTax,
-  assertItemBought,
-  createUmi,
-  createV2,
-  getNewConfigLine,
-} from '../_setup';
+import { assertBotTax, assertItemBought, createUmi, createV2 } from '../_setup';
 
 test('it allows minting with specified program in transaction', async (t) => {
   // Given a loaded Candy Machine with a programGate guard allowing the memo program.
@@ -26,7 +20,13 @@ test('it allows minting with specified program in transaction', async (t) => {
   const memoProgram = getSplMemoProgramId(umi);
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       programGate: some({ additional: [memoProgram] }),
     },
@@ -54,7 +54,13 @@ test('it allows minting even when the payer is different from the buyer', async 
   const memoProgram = getSplMemoProgramId(umi);
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       programGate: some({ additional: [memoProgram] }),
     },
@@ -85,7 +91,13 @@ test('it forbids minting with unspecified program in transaction', async (t) => 
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       programGate: some({ additional: [] }),
     },
@@ -114,7 +126,13 @@ test('it forbids candy machine creation with more than 5 specified programs', as
   const memoProgram = getSplMemoProgramId(umi);
 
   const promise = createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       programGate: some({ additional: Array(6).fill(memoProgram) }),
     },
@@ -132,7 +150,13 @@ test('it charges a bot tax when minting with unspecified program in transaction'
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       botTax: some({ lamports: sol(0.1), lastInstruction: true }),
       programGate: some({ additional: [] }),

@@ -17,6 +17,8 @@ pub struct CandyMachine {
     pub mint_authority: Pubkey,
     /// Number of assets redeemed.
     pub items_redeemed: u64,
+    /// Number of assets loaded at the time the sale started.
+    pub finalized_items_count: u64,
     /// True if the authority has finalized details, which prevents adding more nfts.
     pub state: GumballState,
     /// User-defined settings
@@ -39,6 +41,22 @@ impl CandyMachine {
             + (CONFIG_LINE_SIZE * item_count as usize) // config lines
             + (item_count as usize / 8) + 1 // bit mask tracking added lines
             + 4 + (4 * item_count as usize) // mint indices
+    }
+
+    pub fn get_loaded_items_bit_mask_position(&self) -> usize {
+        CANDY_MACHINE_SIZE + 4 + (self.settings.item_capacity as usize) * CONFIG_LINE_SIZE
+    }
+
+    pub fn get_mint_indices_position(&self) -> Result<usize> {
+        let position = self.get_loaded_items_bit_mask_position()
+            + (self
+                .settings
+                .item_capacity
+                .checked_div(8)
+                .ok_or(CandyError::NumericalOverflowError)?
+                + 1) as usize;
+
+        Ok(position)
     }
 
     pub fn assert_seller_allowlisted(

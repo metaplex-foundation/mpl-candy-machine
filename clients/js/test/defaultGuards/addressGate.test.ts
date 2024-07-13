@@ -7,20 +7,20 @@ import {
 } from '@metaplex-foundation/umi';
 import test from 'ava';
 import { mintV2 } from '../../src';
-import {
-  assertBotTax,
-  assertItemBought,
-  createUmi,
-  createV2,
-  getNewConfigLine,
-} from '../_setup';
+import { assertBotTax, assertItemBought, createUmi, createV2 } from '../_setup';
 
 test('it allows minting from a specific address only', async (t) => {
   // Given a loaded Candy Machine with an addressGate guard.
   const umi = await createUmi();
   const allowedAddress = generateSigner(umi);
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       addressGate: some({ address: allowedAddress.publicKey }),
     },
@@ -50,7 +50,13 @@ test('it forbids minting from anyone else', async (t) => {
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       addressGate: some({ address: generateSigner(umi).publicKey }),
     },
@@ -77,7 +83,13 @@ test('it charges a bot tax when trying to mint using the wrong address', async (
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       botTax: some({ lamports: sol(0.01), lastInstruction: true }),
       addressGate: some({ address: generateSigner(umi).publicKey }),

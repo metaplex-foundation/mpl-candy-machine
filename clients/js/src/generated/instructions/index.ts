@@ -17,6 +17,7 @@ export * from './removeNft';
 export * from './setCandyGuardAuthority';
 export * from './setCandyMachineAuthority';
 export * from './setMintAuthority';
+export * from './startSale';
 export * from './unwrap';
 export * from './updateSettings';
 export * from './wrap';

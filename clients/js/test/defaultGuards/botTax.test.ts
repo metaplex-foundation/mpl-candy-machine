@@ -2,20 +2,20 @@ import { addMemo, setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
 import { sol, some, transactionBuilder } from '@metaplex-foundation/umi';
 import test from 'ava';
 import { mintV2 } from '../../src';
-import {
-  assertBotTax,
-  assertItemBought,
-  createUmi,
-  createV2,
-  getNewConfigLine,
-} from '../_setup';
+import { assertBotTax, assertItemBought, createUmi, createV2 } from '../_setup';
 
 test('it does nothing if all conditions are valid', async (t) => {
   // Given a candy machine with a bot tax guard.
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       botTax: some({ lamports: sol(0.01), lastInstruction: true }),
     },
@@ -41,7 +41,13 @@ test('it optionally charges a bot tax if the mint instruction is not the last on
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       botTax: some({ lamports: sol(0.01), lastInstruction: true }),
     },

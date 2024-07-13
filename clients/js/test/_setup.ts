@@ -36,6 +36,8 @@ import { createUmi as basecreateUmi } from '@metaplex-foundation/umi-bundle-test
 import { Keypair } from '@solana/web3.js';
 import { Assertions } from 'ava';
 import {
+  addCoreAsset,
+  addNft,
   CandyGuardDataArgs,
   ConfigLineInput,
   createCandyGuard as baseCreateCandyGuard,
@@ -49,6 +51,8 @@ import {
   GumballSettings,
   GumballSettingsArgs,
   mplCandyMachine,
+  startSale,
+  TokenStandard,
   wrap,
 } from '../src';
 
@@ -210,6 +214,8 @@ export const createV2 = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
     'settings'
   > & {
     settings?: Partial<GumballSettingsArgs>;
+    items?: { id: PublicKey; tokenStandard: TokenStandard }[];
+    startSale?: boolean;
   } & Partial<
       CandyGuardDataArgs<DA extends undefined ? DefaultGuardSetArgs : DA>
     > = {}
@@ -234,6 +240,32 @@ export const createV2 = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
           candyGuard,
         })
       );
+  }
+
+  (input.items ?? []).forEach((item) => {
+    if (item.tokenStandard === TokenStandard.NonFungible) {
+      builder = builder.add(
+        addNft(umi, {
+          candyMachine: candyMachine.publicKey,
+          mint: item.id,
+        })
+      );
+    } else {
+      builder = builder.add(
+        addCoreAsset(umi, {
+          candyMachine: candyMachine.publicKey,
+          asset: item.id,
+        })
+      );
+    }
+  });
+
+  if (input.startSale) {
+    builder = builder.add(
+      startSale(umi, {
+        candyMachine: candyMachine.publicKey,
+      })
+    );
   }
 
   await builder.sendAndConfirm(umi);

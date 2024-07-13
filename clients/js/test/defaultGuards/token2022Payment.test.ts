@@ -14,7 +14,6 @@ import {
   createMintWithHolders,
   createUmi,
   createV2,
-  getNewConfigLine,
 } from '../_setup';
 
 test('it transfers Token2022 tokens from the payer to the destination', async (t) => {
@@ -40,7 +39,13 @@ test('it transfers Token2022 tokens from the payer to the destination', async (t
   // And a loaded Candy Machine with a token2022Payment guard that requires 5 tokens.
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       token2022Payment: some({
         mint: tokenMint.publicKey,

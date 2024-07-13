@@ -26,14 +26,9 @@ import {
   ResolvedAccount,
   ResolvedAccountsWithIndices,
 } from '../shared';
-import {
-  getGumballSettingsSerializer,
-  GumballSettings,
-  GumballSettingsArgs,
-} from '../types';
 
 // Accounts.
-export type UpdateSettingsInstructionAccounts = {
+export type StartSaleInstructionAccounts = {
   /** Candy machine account. */
   candyMachine: PublicKey | Pda;
   /** Candy Machine authority. This is the address that controls the upate of the candy machine. */
@@ -41,48 +36,34 @@ export type UpdateSettingsInstructionAccounts = {
 };
 
 // Data.
-export type UpdateSettingsInstructionData = {
-  discriminator: Array<number>;
-  settings: GumballSettings;
-};
+export type StartSaleInstructionData = { discriminator: Array<number> };
 
-export type UpdateSettingsInstructionDataArgs = {
-  settings: GumballSettingsArgs;
-};
+export type StartSaleInstructionDataArgs = {};
 
-export function getUpdateSettingsInstructionDataSerializer(): Serializer<
-  UpdateSettingsInstructionDataArgs,
-  UpdateSettingsInstructionData
+export function getStartSaleInstructionDataSerializer(): Serializer<
+  StartSaleInstructionDataArgs,
+  StartSaleInstructionData
 > {
   return mapSerializer<
-    UpdateSettingsInstructionDataArgs,
+    StartSaleInstructionDataArgs,
     any,
-    UpdateSettingsInstructionData
+    StartSaleInstructionData
   >(
-    struct<UpdateSettingsInstructionData>(
-      [
-        ['discriminator', array(u8(), { size: 8 })],
-        ['settings', getGumballSettingsSerializer()],
-      ],
-      { description: 'UpdateSettingsInstructionData' }
+    struct<StartSaleInstructionData>(
+      [['discriminator', array(u8(), { size: 8 })]],
+      { description: 'StartSaleInstructionData' }
     ),
     (value) => ({
       ...value,
-      discriminator: [81, 166, 51, 213, 158, 84, 157, 108],
+      discriminator: [130, 69, 235, 113, 173, 219, 48, 228],
     })
-  ) as Serializer<
-    UpdateSettingsInstructionDataArgs,
-    UpdateSettingsInstructionData
-  >;
+  ) as Serializer<StartSaleInstructionDataArgs, StartSaleInstructionData>;
 }
 
-// Args.
-export type UpdateSettingsInstructionArgs = UpdateSettingsInstructionDataArgs;
-
 // Instruction.
-export function updateSettings(
+export function startSale(
   context: Pick<Context, 'identity' | 'programs'>,
-  input: UpdateSettingsInstructionAccounts & UpdateSettingsInstructionArgs
+  input: StartSaleInstructionAccounts
 ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey(
@@ -99,9 +80,6 @@ export function updateSettings(
     },
     authority: { index: 1, isWritable: true, value: input.authority ?? null },
   };
-
-  // Arguments.
-  const resolvedArgs: UpdateSettingsInstructionArgs = { ...input };
 
   // Default values.
   if (!resolvedAccounts.authority.value) {
@@ -121,9 +99,7 @@ export function updateSettings(
   );
 
   // Data.
-  const data = getUpdateSettingsInstructionDataSerializer().serialize(
-    resolvedArgs as UpdateSettingsInstructionDataArgs
-  );
+  const data = getStartSaleInstructionDataSerializer().serialize({});
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

@@ -10,13 +10,7 @@ import {
 import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
 import test from 'ava';
 import { mintV2 } from '../../src';
-import {
-  assertBotTax,
-  assertItemBought,
-  createUmi,
-  createV2,
-  getNewConfigLine,
-} from '../_setup';
+import { assertBotTax, assertItemBought, createUmi, createV2 } from '../_setup';
 
 test('it transfers SOL from the payer to the destination', async (t) => {
   // Given a loaded Candy Machine with a solPayment guard.
@@ -24,7 +18,13 @@ test('it transfers SOL from the payer to the destination', async (t) => {
   const destination = generateSigner(umi).publicKey;
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       solPayment: some({ lamports: sol(1), destination }),
     },
@@ -66,7 +66,13 @@ test('it fails if the payer does not have enough funds', async (t) => {
   const destination = generateSigner(umi).publicKey;
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       solPayment: some({ lamports: sol(5), destination }),
     },
@@ -102,7 +108,13 @@ test('it charges a bot tax if the payer does not have enough funds', async (t) =
   const destination = generateSigner(umi).publicKey;
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       botTax: some({ lamports: sol(0.1), lastInstruction: true }),
       solPayment: some({ lamports: sol(5), destination }),

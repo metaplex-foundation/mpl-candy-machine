@@ -629,6 +629,19 @@ export class CmInvalidProofPathError extends ProgramError {
 codeToErrorMap.set(0x1798, CmInvalidProofPathError);
 nameToErrorMap.set('InvalidProofPath', CmInvalidProofPathError);
 
+/** InvalidSettingUpdate: Invalid setting update */
+export class CmInvalidSettingUpdateError extends ProgramError {
+  readonly name: string = 'InvalidSettingUpdate';
+
+  readonly code: number = 0x1799; // 6041
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid setting update', program, cause);
+  }
+}
+codeToErrorMap.set(0x1799, CmInvalidSettingUpdateError);
+nameToErrorMap.set('InvalidSettingUpdate', CmInvalidSettingUpdateError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

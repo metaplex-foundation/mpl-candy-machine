@@ -124,4 +124,7 @@ pub enum CandyError {
 
     #[msg("Invalid proof path")]
     InvalidProofPath,
+
+    #[msg("Invalid setting update")]
+    InvalidSettingUpdate,
 }

@@ -6,6 +6,7 @@ pub mod remove_core_asset;
 pub mod remove_nft;
 pub mod set_authority;
 pub mod set_mint_authority;
+pub mod start_sale;
 pub mod update_settings;
 pub mod withdraw;
 
@@ -17,5 +18,6 @@ pub use remove_core_asset::*;
 pub use remove_nft::*;
 pub use set_authority::*;
 pub use set_mint_authority::*;
+pub use start_sale::*;
 pub use update_settings::*;
 pub use withdraw::*;

@@ -31,13 +31,12 @@ pub mod candy_machine_core {
         instructions::initialize_v2(ctx, settings)
     }
 
-    /// Initialize the candy machine account with the specified data.
+    /// Updates gumball machine settings.
     ///
     /// # Accounts
     ///
-    ///   0. `[writable]` Candy Machine account (must be pre-allocated but zero content)
-    ///   2. `[]` Candy Machine authority
-    ///   3. `[signer]` Payer
+    ///   0. `[writable]` Candy Machine account
+    ///   1. `[signer]` Candy Machine authority
     pub fn update_settings(ctx: Context<UpdateSettings>, settings: GumballSettings) -> Result<()> {
         instructions::update_settings(ctx, settings)
     }
@@ -83,6 +82,16 @@ pub mod candy_machine_core {
     ///   1. `[signer]` Candy Machine authority
     pub fn remove_core_asset(ctx: Context<RemoveCoreAsset>, index: u32) -> Result<()> {
         instructions::remove_core_asset(ctx, index)
+    }
+
+    /// Allows sales to start.
+    ///
+    /// # Accounts
+    ///
+    ///   0. `[writable]` Candy Machine account
+    ///   1. `[signer]` Candy Machine authority
+    pub fn start_sale(ctx: Context<StartSale>) -> Result<()> {
+        instructions::start_sale(ctx)
     }
 
     /// Mint an NFT.

@@ -111,6 +111,7 @@ export function getCandyMachineGpaBuilder(
       authority: PublicKey;
       mintAuthority: PublicKey;
       itemsRedeemed: number | bigint;
+      finalizedItemsCount: number | bigint;
       state: GumballStateArgs;
       settings: GumballSettingsArgs;
     }>({
@@ -119,8 +120,9 @@ export function getCandyMachineGpaBuilder(
       authority: [9, publicKeySerializer()],
       mintAuthority: [41, publicKeySerializer()],
       itemsRedeemed: [73, u64()],
-      state: [81, getGumballStateSerializer()],
-      settings: [82, getGumballSettingsSerializer()],
+      finalizedItemsCount: [81, u64()],
+      state: [89, getGumballStateSerializer()],
+      settings: [90, getGumballSettingsSerializer()],
     })
     .deserializeUsing<CandyMachine>((account) =>
       deserializeCandyMachine(account)

@@ -15,18 +15,19 @@ import {
   mintV2,
   setMintAuthority,
 } from '../src';
-import {
-  assertItemBought,
-  createUmi,
-  createV2,
-  getNewConfigLine,
-} from './_setup';
+import { assertItemBought, createUmi, createV2 } from './_setup';
 
 test('it can create a LUT for a candy machine v2', async (t) => {
   // Given a candy machine with a candy guard.
   const umi = await createUmi();
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {},
   });
 
@@ -87,7 +88,13 @@ test('it can create a LUT for a candy machine with no candy guard', async (t) =>
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
   });
 
   // And a custom mint authority.

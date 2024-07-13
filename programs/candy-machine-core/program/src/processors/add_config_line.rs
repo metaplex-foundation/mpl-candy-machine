@@ -49,8 +49,7 @@ pub fn add_config_line(
     // line is added for the first time (when updating a config line, the index is not added again)
 
     // bit-mask
-    let bit_mask_start =
-        CANDY_MACHINE_SIZE + 4 + (candy_machine.settings.item_capacity as usize) * CONFIG_LINE_SIZE;
+    let bit_mask_start = candy_machine.get_loaded_items_bit_mask_position();
     // (unordered) indices for the mint
     let indices_start = bit_mask_start
         + (candy_machine

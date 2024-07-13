@@ -10,6 +10,39 @@ use crate::{
     CandyError, CandyMachine, GumballState
 };
 
+/// Mints a new NFT.
+#[derive(Accounts)]
+pub struct MintV2<'info> {
+    /// Candy machine account.
+    #[account(
+        mut, 
+        has_one = mint_authority,
+        constraint = candy_machine.state == GumballState::SaleStarted @ CandyError::InvalidState
+    )]
+    candy_machine: Box<Account<'info, CandyMachine>>,
+
+    /// Candy machine mint authority (mint only allowed for the mint_authority).
+    mint_authority: Signer<'info>,
+
+    /// Payer for the transaction and account allocation (rent).
+    #[account(mut)]
+    payer: Signer<'info>,
+
+    /// NFT account owner.
+    ///
+    /// CHECK: account not written or read from
+    buyer: UncheckedAccount<'info>,
+
+    /// System program.
+    system_program: Program<'info, System>,
+
+    /// SlotHashes sysvar cluster data.
+    ///
+    /// CHECK: account constraints checked in account trait
+    #[account(address = sysvar::slot_hashes::id())]
+    recent_slothashes: UncheckedAccount<'info>,
+}
+
 /// Accounts to mint an NFT.
 pub(crate) struct MintAccounts<'info> {
     pub buyer: AccountInfo<'info>,
@@ -38,7 +71,7 @@ pub(crate) fn process_mint(
     accounts: MintAccounts,
 ) -> Result<()> {
     // are there items to be minted?
-    if candy_machine.items_redeemed >= candy_machine.settings.item_capacity {
+    if candy_machine.items_redeemed >= candy_machine.finalized_items_count {
         return err!(CandyError::CandyMachineEmpty);
     }
 
@@ -52,7 +85,7 @@ pub(crate) fn process_mint(
     let seed = u64::from_le_bytes(*most_recent).saturating_sub(clock.unix_timestamp as u64);
 
     let remainder: usize = seed
-        .checked_rem(candy_machine.settings.item_capacity - candy_machine.items_redeemed)
+        .checked_rem(candy_machine.finalized_items_count - candy_machine.items_redeemed)
         .ok_or(CandyError::NumericalOverflowError)? as usize;
 
     set_config_line_buyer(
@@ -86,24 +119,17 @@ pub fn set_config_line_buyer(
 
     // validates that all config lines were added to the candy machine
     let config_count = get_config_count(&account_data)? as u64;
-    if config_count != candy_machine.settings.item_capacity {
+    if config_count != candy_machine.finalized_items_count {
         return err!(CandyError::NotFullyLoaded);
     }
 
     // (1) determine the mint index (index is a random index on the available indices array)
-    let item_capacity = candy_machine.settings.item_capacity;
-    let indices_start = CANDY_MACHINE_SIZE
-        + 4 // config line count
-        + (item_capacity as usize) * CONFIG_LINE_SIZE
-        + (item_capacity
-            .checked_div(8)
-            .ok_or(CandyError::NumericalOverflowError)?
-            + 1) as usize;
+    let indices_start = candy_machine.get_mint_indices_position()?;
     // calculates the mint index and retrieves the value at that position
     let mint_index = indices_start + index * 4;
     let value_to_use = u32::from_le_bytes(*array_ref![account_data, mint_index, 4]) as usize;
     // calculates the last available index and retrieves the value at that position
-    let last_index = indices_start + ((item_capacity - mint_number - 1) * 4) as usize;
+    let last_index = indices_start + ((candy_machine.finalized_items_count - mint_number - 1) * 4) as usize;
     let last_value = u32::from_le_bytes(*array_ref![account_data, last_index, 4]);
     // swap-remove: this guarantees that we remove the used mint index from the available array
     // in a constant time O(1) no matter how big the indices array is
@@ -118,37 +144,4 @@ pub fn set_config_line_buyer(
     account_data[buyer_position..buyer_position + 32].copy_from_slice(&buyer.to_bytes());
 
     Ok(())
-}
-
-/// Mints a new NFT.
-#[derive(Accounts)]
-pub struct MintV2<'info> {
-    /// Candy machine account.
-    #[account(
-        mut, 
-        has_one = mint_authority,
-        constraint = candy_machine.state == GumballState::SaleStarted @ CandyError::InvalidState
-    )]
-    candy_machine: Box<Account<'info, CandyMachine>>,
-
-    /// Candy machine mint authority (mint only allowed for the mint_authority).
-    mint_authority: Signer<'info>,
-
-    /// Payer for the transaction and account allocation (rent).
-    #[account(mut)]
-    payer: Signer<'info>,
-
-    /// NFT account owner.
-    ///
-    /// CHECK: account not written or read from
-    buyer: UncheckedAccount<'info>,
-
-    /// System program.
-    system_program: Program<'info, System>,
-
-    /// SlotHashes sysvar cluster data.
-    ///
-    /// CHECK: account constraints checked in account trait
-    #[account(address = sysvar::slot_hashes::id())]
-    recent_slothashes: UncheckedAccount<'info>,
 }

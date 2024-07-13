@@ -7,7 +7,6 @@ import {
   assertItemBought,
   createUmi,
   createV2,
-  getNewConfigLine,
   tomorrow,
   yesterday,
 } from '../_setup';
@@ -17,7 +16,13 @@ test('it allows minting before the end date', async (t) => {
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       endDate: some({ date: tomorrow() }),
     },
@@ -43,7 +48,13 @@ test('it forbids minting after the end date', async (t) => {
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       endDate: some({ date: yesterday() }),
     },
@@ -69,7 +80,13 @@ test('it charges a bot tax when trying to mint after the end date', async (t) =>
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       botTax: some({ lamports: sol(0.01), lastInstruction: true }),
       endDate: some({ date: yesterday() }),

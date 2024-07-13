@@ -6,8 +6,14 @@ import {
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import test from 'ava';
-import { mintV2 } from '../../src';
-import { assertBotTax, assertItemBought, createUmi, createV2 } from '../_setup';
+import { mintV2, TokenStandard } from '../../src';
+import {
+  assertBotTax,
+  assertItemBought,
+  createNft,
+  createUmi,
+  createV2,
+} from '../_setup';
 
 test('it allows minting from a specific address only', async (t) => {
   // Given a loaded Candy Machine with an addressGate guard.

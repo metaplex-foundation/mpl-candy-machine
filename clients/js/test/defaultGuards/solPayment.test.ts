@@ -9,8 +9,14 @@ import {
 } from '@metaplex-foundation/umi';
 import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
 import test from 'ava';
-import { mintV2 } from '../../src';
-import { assertBotTax, assertItemBought, createUmi, createV2 } from '../_setup';
+import { mintV2, TokenStandard } from '../../src';
+import {
+  assertBotTax,
+  assertItemBought,
+  createNft,
+  createUmi,
+  createV2,
+} from '../_setup';
 
 test('it transfers SOL from the payer to the destination', async (t) => {
   // Given a loaded Candy Machine with a solPayment guard.

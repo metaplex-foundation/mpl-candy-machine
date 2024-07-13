@@ -15,8 +15,15 @@ import {
   getMerkleRoot,
   mintV2,
   route,
+  TokenStandard,
 } from '../../src';
-import { assertBotTax, assertItemBought, createUmi, createV2 } from '../_setup';
+import {
+  assertBotTax,
+  assertItemBought,
+  createNft,
+  createUmi,
+  createV2,
+} from '../_setup';
 
 test('it allows minting from wallets of a predefined list', async (t) => {
   // Given the identity is part of an allow list.

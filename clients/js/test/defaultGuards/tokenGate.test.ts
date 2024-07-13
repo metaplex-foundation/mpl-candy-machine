@@ -12,8 +12,14 @@ import {
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import test from 'ava';
-import { mintV2 } from '../../src';
-import { assertBotTax, assertItemBought, createUmi, createV2 } from '../_setup';
+import { mintV2, TokenStandard } from '../../src';
+import {
+  assertBotTax,
+  assertItemBought,
+  createNft,
+  createUmi,
+  createV2,
+} from '../_setup';
 
 test('it allows minting when the payer owns a specific token', async (t) => {
   // Given a payer with one token.

@@ -1,6 +1,6 @@
 import {
   fetchDigitalAssetWithAssociatedToken,
-  TokenStandard,
+  TokenStandard as MplTokenStandard,
 } from '@metaplex-foundation/mpl-token-metadata';
 import {
   createMint,
@@ -15,7 +15,7 @@ import {
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import test from 'ava';
-import { mintV2 } from '../../src';
+import { mintV2, TokenStandard } from '../../src';
 import {
   assertBotTax,
   assertItemBought,
@@ -66,7 +66,7 @@ test('it transfers an NFT from the payer to the destination', async (t) => {
 
         mintArgs: {
           nftPayment: some({
-            tokenStandard: TokenStandard.NonFungible,
+            tokenStandard: MplTokenStandard.NonFungible,
             requiredCollection,
             mint: nftToSend.publicKey,
             destination,
@@ -130,7 +130,7 @@ test('it allows minting even when the payer is different from the buyer', async 
 
         mintArgs: {
           nftPayment: some({
-            tokenStandard: TokenStandard.NonFungible,
+            tokenStandard: MplTokenStandard.NonFungible,
             requiredCollection,
             mint: nftToSend.publicKey,
             destination,
@@ -207,7 +207,7 @@ test('it works when the provided NFT is not on an associated token account', asy
 
         mintArgs: {
           nftPayment: some({
-            tokenStandard: TokenStandard.NonFungible,
+            tokenStandard: MplTokenStandard.NonFungible,
             requiredCollection,
             mint: nftToSend.publicKey,
             destination,
@@ -267,7 +267,7 @@ test('it fails if the payer does not own the right NFT', async (t) => {
 
         mintArgs: {
           nftPayment: some({
-            tokenStandard: TokenStandard.NonFungible,
+            tokenStandard: MplTokenStandard.NonFungible,
             requiredCollection,
             mint: wrongNft.publicKey,
             destination,
@@ -319,7 +319,7 @@ test('it fails if the payer tries to provide an NFT from an unverified collectio
 
         mintArgs: {
           nftPayment: some({
-            tokenStandard: TokenStandard.NonFungible,
+            tokenStandard: MplTokenStandard.NonFungible,
             requiredCollection,
             mint: unverifiedNftToSend.publicKey,
             destination,
@@ -371,7 +371,7 @@ test('it charges a bot tax when trying to pay with the wrong NFT', async (t) => 
 
         mintArgs: {
           nftPayment: some({
-            tokenStandard: TokenStandard.NonFungible,
+            tokenStandard: MplTokenStandard.NonFungible,
             requiredCollection,
             mint: wrongNft.publicKey,
             destination,
@@ -425,7 +425,7 @@ test('it transfers a Programmable NFT from the payer to the destination', async 
 
         mintArgs: {
           nftPayment: some({
-            tokenStandard: TokenStandard.ProgrammableNonFungible,
+            tokenStandard: MplTokenStandard.ProgrammableNonFungible,
             requiredCollection,
             mint: pnftToSend.publicKey,
             destination,
@@ -447,6 +447,6 @@ test('it transfers a Programmable NFT from the payer to the destination', async 
   );
   t.deepEqual(updatedNft.token.owner, destination);
   t.like(updatedNft.metadata, {
-    tokenStandard: some(TokenStandard.ProgrammableNonFungible),
+    tokenStandard: some(MplTokenStandard.ProgrammableNonFungible),
   });
 });

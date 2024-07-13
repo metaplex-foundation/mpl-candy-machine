@@ -1,8 +1,14 @@
 import { addMemo, setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
 import { sol, some, transactionBuilder } from '@metaplex-foundation/umi';
 import test from 'ava';
-import { mintV2 } from '../../src';
-import { assertBotTax, assertItemBought, createUmi, createV2 } from '../_setup';
+import { mintV2, TokenStandard } from '../../src';
+import {
+  assertBotTax,
+  assertItemBought,
+  createNft,
+  createUmi,
+  createV2,
+} from '../_setup';
 
 test('it does nothing if all conditions are valid', async (t) => {
   // Given a candy machine with a bot tax guard.

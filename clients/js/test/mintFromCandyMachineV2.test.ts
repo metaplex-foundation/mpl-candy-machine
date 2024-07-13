@@ -6,18 +6,23 @@ import {
   fetchCandyMachine,
   mintFromCandyMachineV2,
 } from '../src';
-import {
-  assertItemBought,
-  createUmi,
-  createV2,
-  getNewConfigLine,
-} from './_setup';
+import { assertItemBought, createUmi, createV2 } from './_setup';
 
 test('it can mint directly from a candy machine as the mint authority', async (t) => {
   // Given a loaded candy machine.
   const umi = await createUmi();
   const candyMachineSigner = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi), await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
   });
   const candyMachine = candyMachineSigner.publicKey;
 
@@ -44,7 +49,17 @@ test('it cannot mint directly from a candy machine if we are not the mint author
   // Given a loaded candy machine with a mint authority A.
   const umi = await createUmi();
   const candyMachineSigner = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi), await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
   });
   const candyMachine = candyMachineSigner.publicKey;
 

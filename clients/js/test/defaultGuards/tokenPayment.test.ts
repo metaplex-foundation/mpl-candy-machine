@@ -10,11 +10,12 @@ import {
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import test from 'ava';
-import { mintV2 } from '../../src';
+import { mintV2, TokenStandard } from '../../src';
 import {
   assertBotTax,
   assertItemBought,
   createMintWithHolders,
+  createNft,
   createUmi,
   createV2,
 } from '../_setup';

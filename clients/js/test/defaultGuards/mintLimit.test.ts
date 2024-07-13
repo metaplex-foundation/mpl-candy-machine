@@ -12,13 +12,14 @@ import {
   findCandyGuardPda,
   findMintCounterPda,
   mintV2,
+  TokenStandard,
 } from '../../src';
 import {
   assertBotTax,
   assertItemBought,
+  createNft,
   createUmi,
   createV2,
-  getNewConfigLine,
 } from '../_setup';
 
 test('it allows minting when the mint limit is not reached', async (t) => {
@@ -26,7 +27,17 @@ test('it allows minting when the mint limit is not reached', async (t) => {
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi), await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       mintLimit: some({ id: 1, limit: 5 }),
     },
@@ -64,7 +75,17 @@ test('it allows minting even when the payer is different from the buyer', async 
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi), await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       mintLimit: some({ id: 1, limit: 5 }),
     },
@@ -105,7 +126,17 @@ test('it forbids minting when the mint limit is reached', async (t) => {
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi), await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       mintLimit: some({ id: 42, limit: 1 }),
     },
@@ -144,7 +175,17 @@ test('the mint limit is local to each wallet', async (t) => {
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi), await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       mintLimit: some({ id: 42, limit: 1 }),
     },
@@ -192,7 +233,17 @@ test('it charges a bot tax when trying to mint after the limit', async (t) => {
   const umi = await createUmi();
 
   const { publicKey: candyMachine } = await createV2(umi, {
-    configLines: [await getNewConfigLine(umi), await getNewConfigLine(umi)],
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
     guards: {
       botTax: some({ lamports: sol(0.1), lastInstruction: true }),
       mintLimit: some({ id: 42, limit: 1 }),

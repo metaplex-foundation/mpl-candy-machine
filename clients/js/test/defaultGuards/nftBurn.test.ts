@@ -1,4 +1,4 @@
-import { TokenStandard } from '@metaplex-foundation/mpl-token-metadata';
+import { TokenStandard as MplTokenStandard } from '@metaplex-foundation/mpl-token-metadata';
 import { setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
 import {
   generateSigner,
@@ -8,7 +8,7 @@ import {
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import test from 'ava';
-import { mintV2 } from '../../src';
+import { mintV2, TokenStandard } from '../../src';
 import {
   assertBotTax,
   assertBurnedNft,
@@ -59,7 +59,7 @@ test('it burns a specific NFT to allow minting', async (t) => {
 
         mintArgs: {
           nftBurn: some({
-            tokenStandard: TokenStandard.NonFungible,
+            tokenStandard: MplTokenStandard.NonFungible,
             requiredCollection,
             mint: nftToBurn.publicKey,
           }),
@@ -116,7 +116,7 @@ test('it allows minting even when the payer is different from the buyer', async 
 
         mintArgs: {
           nftBurn: some({
-            tokenStandard: TokenStandard.NonFungible,
+            tokenStandard: MplTokenStandard.NonFungible,
             requiredCollection,
             mint: nftToBurn.publicKey,
           }),
@@ -161,7 +161,7 @@ test('it fails if there is not valid NFT to burn', async (t) => {
 
         mintArgs: {
           nftBurn: some({
-            tokenStandard: TokenStandard.NonFungible,
+            tokenStandard: MplTokenStandard.NonFungible,
             requiredCollection,
             mint: nftToBurn.publicKey,
           }),
@@ -205,7 +205,7 @@ test('it charges a bot tax when trying to mint using the wrong NFT', async (t) =
 
         mintArgs: {
           nftBurn: some({
-            tokenStandard: TokenStandard.NonFungible,
+            tokenStandard: MplTokenStandard.NonFungible,
             requiredCollection,
             mint: nftToBurn.publicKey,
           }),
@@ -256,7 +256,7 @@ test('it burns a specific Programmable NFT to allow minting', async (t) => {
 
         mintArgs: {
           nftBurn: some({
-            tokenStandard: TokenStandard.ProgrammableNonFungible,
+            tokenStandard: MplTokenStandard.ProgrammableNonFungible,
             requiredCollection,
             mint: pnftToBurn.publicKey,
           }),

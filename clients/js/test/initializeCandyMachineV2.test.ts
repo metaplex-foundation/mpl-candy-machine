@@ -1,6 +1,7 @@
 import { createAccountWithRent } from '@metaplex-foundation/mpl-toolbox';
 import {
   generateSigner,
+  none,
   publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
@@ -8,6 +9,8 @@ import test from 'ava';
 import {
   CandyMachine,
   fetchCandyMachine,
+  GumballSettings,
+  GumballState,
   initializeCandyMachineV2,
 } from '../src';
 import { createUmi } from './_setup';
@@ -31,12 +34,20 @@ test('it can initialize a new candy machine account', async (t) => {
     )
     .sendAndConfirm(umi);
 
+  const settings: GumballSettings = {
+    uri: 'https://arweave.net/abc123',
+    itemCapacity: 20n,
+    itemsPerSeller: 1,
+    sellersMerkleRoot: none(),
+    curatorFeeBps: 500,
+    hideSoldItems: false,
+  };
   // When we initialize a candy machine at this address.
   await transactionBuilder()
     .add(
       initializeCandyMachineV2(umi, {
         candyMachine: candyMachine.publicKey,
-        itemCapacity: 20,
+        settings,
       })
     )
     .sendAndConfirm(umi);
@@ -52,6 +63,8 @@ test('it can initialize a new candy machine account', async (t) => {
     mintAuthority: publicKey(umi.identity),
     version: 0,
     itemsRedeemed: 0n,
-    itemsAvailable: 20n,
+    finalizedItemsCount: 0n,
+    state: GumballState.None,
+    settings,
   });
 });

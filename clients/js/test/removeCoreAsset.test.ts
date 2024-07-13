@@ -5,6 +5,8 @@ import {
   addCoreAsset,
   CandyMachine,
   fetchCandyMachine,
+  getMerkleProof,
+  getMerkleRoot,
   removeCoreAsset,
   TokenStandard,
 } from '../src';
@@ -240,7 +242,10 @@ test('it can remove another seller core asset as the gumball authority', async (
   // Given a Candy Machine with one nft.
   const umi = await createUmi();
   const otherSellerUmi = await createUmi();
-  const candyMachine = await createV2(umi, { settings: { itemCapacity: 1 } });
+  const sellersMerkleRoot = getMerkleRoot([otherSellerUmi.identity.publicKey]);
+  const candyMachine = await createV2(umi, {
+    settings: { itemCapacity: 1, sellersMerkleRoot },
+  });
   const coreAsset = await createCoreAsset(otherSellerUmi);
 
   // When we add an nft to the Candy Machine.
@@ -249,6 +254,10 @@ test('it can remove another seller core asset as the gumball authority', async (
       addCoreAsset(otherSellerUmi, {
         candyMachine: candyMachine.publicKey,
         asset: coreAsset.publicKey,
+        sellerProofPath: getMerkleProof(
+          [otherSellerUmi.identity.publicKey],
+          otherSellerUmi.identity.publicKey
+        ),
       })
     )
     .sendAndConfirm(otherSellerUmi);
@@ -297,7 +306,10 @@ test('it can remove own asset as non gumball authority', async (t) => {
   // Given a Candy Machine with one nft.
   const umi = await createUmi();
   const otherSellerUmi = await createUmi();
-  const candyMachine = await createV2(umi, { settings: { itemCapacity: 1 } });
+  const sellersMerkleRoot = getMerkleRoot([otherSellerUmi.identity.publicKey]);
+  const candyMachine = await createV2(umi, {
+    settings: { itemCapacity: 1, sellersMerkleRoot },
+  });
   const coreAsset = await createCoreAsset(otherSellerUmi);
 
   // When we add an nft to the Candy Machine.
@@ -306,6 +318,10 @@ test('it can remove own asset as non gumball authority', async (t) => {
       addCoreAsset(otherSellerUmi, {
         candyMachine: candyMachine.publicKey,
         asset: coreAsset.publicKey,
+        sellerProofPath: getMerkleProof(
+          [otherSellerUmi.identity.publicKey],
+          otherSellerUmi.identity.publicKey
+        ),
       })
     )
     .sendAndConfirm(otherSellerUmi);

@@ -14,8 +14,9 @@ import {
   getMplCandyMachineCoreProgramId,
   mintV2,
   setMintAuthority,
+  TokenStandard,
 } from '../src';
-import { assertItemBought, createUmi, createV2 } from './_setup';
+import { assertItemBought, createNft, createUmi, createV2 } from './_setup';
 
 test('it can create a LUT for a candy machine v2', async (t) => {
   // Given a candy machine with a candy guard.

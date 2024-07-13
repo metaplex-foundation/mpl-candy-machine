@@ -5,8 +5,9 @@ import {
   CandyMachine,
   fetchCandyMachine,
   mintFromCandyMachineV2,
+  TokenStandard,
 } from '../src';
-import { assertItemBought, createUmi, createV2 } from './_setup';
+import { assertItemBought, createNft, createUmi, createV2 } from './_setup';
 
 test('it can mint directly from a candy machine as the mint authority', async (t) => {
   // Given a loaded candy machine.

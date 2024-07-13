@@ -121,6 +121,26 @@ pub mod candy_machine_core {
         instructions::mint_v2(ctx)
     }
 
+    /// Settles a Core asset sale
+    ///
+    /// # Accounts
+    ///
+    ///   0. `[writable]` Candy Machine account
+    ///   1. `[signer]` Candy Machine authority
+    pub fn settle_core_asset_sale(ctx: Context<SettleCoreAssetSale>) -> Result<()> {
+        instructions::settle_core_asset_sale(ctx)
+    }
+
+    /// Settles a legacy NFT sale
+    ///
+    /// # Accounts
+    ///
+    ///   0. `[writable]` Candy Machine account
+    ///   1. `[signer]` Candy Machine authority
+    pub fn settle_nft_asset_sale(ctx: Context<SettleNftSale>) -> Result<()> {
+        instructions::settle_nft_sale(ctx)
+    }
+
     /// Set a new authority of the candy machine.
     ///
     /// # Accounts

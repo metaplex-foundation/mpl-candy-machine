@@ -1,6 +1,7 @@
 {
 	"private": true,
 	"scripts": {
+		"build": "pnpm programs:build && pnpm generate",
 		"dev": "cd clients/js && pnpm dev",
 		"programs:build": "./configs/program-scripts/build.sh",
 		"programs:test": "./configs/program-scripts/test.sh",
@@ -8,6 +9,7 @@
 		"generate": "pnpm generate:idls && pnpm generate:clients",
 		"generate:idls": "node ./configs/shank.cjs",
 		"generate:clients": "node ./configs/kinobi.cjs && pnpm --recursive format:fix",
+		"test": "pnpm test:js",
 		"test:js": "cd clients/js && pnpm test",
 		"validator": "CI=1 amman start --config ./configs/validator.cjs",
 		"validator:debug": "amman start --config ./configs/validator.cjs",

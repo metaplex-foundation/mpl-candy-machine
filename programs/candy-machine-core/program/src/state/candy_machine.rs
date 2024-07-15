@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 
 use crate::{
     constants::{CANDY_MACHINE_SIZE, CONFIG_LINE_SIZE},
-    verify_proof, CandyError,
+    CandyError,
 };
 
 /// Candy machine state and config data.
@@ -19,6 +19,8 @@ pub struct CandyMachine {
     pub items_redeemed: u64,
     /// Number of assets loaded at the time the sale started.
     pub finalized_items_count: u64,
+    /// Number of assets settled after sale.
+    pub items_settled: u64,
     /// True if the authority has finalized details, which prevents adding more nfts.
     pub state: GumballState,
     /// User-defined settings
@@ -58,32 +60,6 @@ impl CandyMachine {
 
         Ok(position)
     }
-
-    pub fn assert_seller_allowlisted(
-        &self,
-        seller: Pubkey,
-        seller_proof_path: Option<Vec<[u8; 32]>>,
-    ) -> Result<()> {
-        if seller == self.authority {
-            return Ok(());
-        }
-
-        if seller_proof_path.is_none() || self.settings.sellers_merkle_root.is_none() {
-            return err!(CandyError::InvalidProofPath);
-        }
-
-        let leaf = solana_program::keccak::hashv(&[seller.to_string().as_bytes()]);
-        require!(
-            verify_proof(
-                &seller_proof_path.unwrap()[..],
-                &self.settings.sellers_merkle_root.unwrap(),
-                &leaf.0,
-            ),
-            CandyError::InvalidProofPath
-        );
-
-        Ok(())
-    }
 }
 
 /// Config line struct for storing asset (NFT) data pre-mint.
@@ -120,8 +96,7 @@ pub enum GumballState {
     None,             // Initial state
     DetailsFinalized, // Sellers invited so only some details can be updated
     SaleLive, // Sale started, can now mint items. Cannot no longer update details or add items.
-    SaleEnded, // Sale ended, can now claim items
-    AllSettled, // All items/proceeds have been settled so the machine can be closed
+    SaleEnded, // Sale ended, can now settle items
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug)]

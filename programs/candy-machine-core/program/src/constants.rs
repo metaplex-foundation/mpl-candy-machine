@@ -7,12 +7,16 @@ pub const MPL_TOKEN_AUTH_RULES_PROGRAM: Pubkey =
 // Seed used to derive the authority PDA address.
 pub const AUTHORITY_SEED: &str = "candy_machine";
 
+// Seed used to derive the seller history PDA address.
+pub const SELLER_HISTORY_SEED: &str = "seller_history";
+
 pub const GUMBALL_SETTINGS_BYTE_INDEX: usize = 8 // discriminator
     + 1                                       // version
     + 32                                      // authority
     + 32                                      // mint authority
     + 8                                       // items redeemed
     + 8                                       // finalized items count
+    + 8                                       // items settled
     + 1; // state
 
 // Determine the start of the account hidden section.

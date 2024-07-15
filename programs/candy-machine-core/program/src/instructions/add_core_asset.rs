@@ -1,6 +1,9 @@
 use crate::{
-    constants::AUTHORITY_SEED, get_core_asset_update_authority, state::CandyMachine, CandyError,
-    ConfigLineInput, GumballState, TokenStandard,
+    assert_can_add_item,
+    constants::{AUTHORITY_SEED, SELLER_HISTORY_SEED},
+    get_core_asset_update_authority,
+    state::CandyMachine,
+    CandyError, ConfigLineInput, GumballState, SellerHistory, TokenStandard,
 };
 use anchor_lang::prelude::*;
 use mpl_core::{
@@ -23,7 +26,21 @@ pub struct AddCoreAsset<'info> {
         mut,
         constraint = candy_machine.state != GumballState::SaleLive @ CandyError::InvalidState,
     )]
-    candy_machine: Account<'info, CandyMachine>,
+    candy_machine: Box<Account<'info, CandyMachine>>,
+
+    /// Seller history account.
+    #[account(
+		init_if_needed,
+		seeds = [
+			SELLER_HISTORY_SEED.as_bytes(),
+			candy_machine.key().as_ref(),
+            seller.key().as_ref(),
+		],
+		bump,
+		space = SellerHistory::SPACE,
+		payer = seller
+	)]
+    seller_history: Box<Account<'info, SellerHistory>>,
 
     /// CHECK: Safe due to seeds constraint
     #[account(
@@ -34,6 +51,7 @@ pub struct AddCoreAsset<'info> {
     authority_pda: UncheckedAccount<'info>,
 
     /// Seller of the asset.
+    #[account(mut)]
     seller: Signer<'info>,
 
     /// CHECK: Safe due to freeze
@@ -62,9 +80,15 @@ pub fn add_core_asset(
     let system_program = &ctx.accounts.system_program.to_account_info();
     let authority_pda_key = ctx.accounts.authority_pda.key();
     let candy_machine = &mut ctx.accounts.candy_machine;
+    let seller_history = &mut ctx.accounts.seller_history;
+
+    seller_history.candy_machine = candy_machine.key();
+    seller_history.seller = seller.key();
 
     // Validate the seller
-    candy_machine.assert_seller_allowlisted(seller.key(), seller_proof_path)?;
+    assert_can_add_item(candy_machine, seller_history, seller_proof_path)?;
+
+    seller_history.item_count += 1;
 
     let collection_info = if let Some(collection) = &ctx.accounts.collection {
         Some(collection.to_account_info())
@@ -111,7 +135,7 @@ pub fn add_core_asset(
         CandyError::NotPrimarySale
     );
 
-    crate::processors::add_config_line(
+    crate::processors::add_item(
         candy_machine,
         ConfigLineInput {
             mint: ctx.accounts.asset.key(),

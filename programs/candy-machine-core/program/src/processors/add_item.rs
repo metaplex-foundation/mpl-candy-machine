@@ -5,7 +5,7 @@ use crate::{
     get_config_count, CandyError, CandyMachine, ConfigLineInput, TokenStandard,
 };
 
-pub fn add_config_line(
+pub fn add_item(
     candy_machine: &mut Account<CandyMachine>,
     config_line: ConfigLineInput,
     token_standard: TokenStandard,
@@ -74,7 +74,7 @@ pub fn add_config_line(
     data[byte_position] |= mask;
 
     msg!(
-        "Config line processed: byte position={}, mask={}, current value={}, new value={}, bit position={}",
+        "Item processed: byte position={}, mask={}, current value={}, new value={}, bit position={}",
         byte_position - bit_mask_start,
         mask,
         current_value,
@@ -91,7 +91,7 @@ pub fn add_config_line(
         .ok_or(CandyError::NumericalOverflowError)?;
 
     msg!(
-        "New config line added: position={}, new count={})",
+        "New item added: position={}, new count={})",
         position,
         count,
     );

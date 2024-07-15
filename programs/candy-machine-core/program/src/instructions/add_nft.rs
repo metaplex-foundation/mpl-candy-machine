@@ -1,6 +1,8 @@
 use crate::{
-    assert_is_non_printable_edition, constants::AUTHORITY_SEED, state::CandyMachine, CandyError,
-    ConfigLineInput, GumballState, Token, TokenStandard,
+    assert_can_add_item, assert_is_non_printable_edition,
+    constants::{AUTHORITY_SEED, SELLER_HISTORY_SEED},
+    state::CandyMachine,
+    CandyError, ConfigLineInput, GumballState, SellerHistory, Token, TokenStandard,
 };
 use anchor_lang::prelude::*;
 use mpl_token_metadata::{
@@ -18,7 +20,21 @@ pub struct AddNft<'info> {
         mut,
         constraint = candy_machine.state != GumballState::SaleLive @ CandyError::InvalidState,
     )]
-    candy_machine: Account<'info, CandyMachine>,
+    candy_machine: Box<Account<'info, CandyMachine>>,
+
+    /// Seller history account.
+    #[account(
+		init_if_needed,
+		seeds = [
+			SELLER_HISTORY_SEED.as_bytes(),
+			candy_machine.key().as_ref(),
+            seller.key().as_ref(),
+		],
+		bump,
+		space = SellerHistory::SPACE,
+		payer = seller
+	)]
+    seller_history: Box<Account<'info, SellerHistory>>,
 
     /// CHECK: Safe due to seeds constraint
     #[account(
@@ -29,6 +45,7 @@ pub struct AddNft<'info> {
     authority_pda: UncheckedAccount<'info>,
 
     /// Seller of the nft
+    #[account(mut)]
     seller: Signer<'info>,
 
     /// CHECK: Safe due to freeze
@@ -49,6 +66,8 @@ pub struct AddNft<'info> {
     /// CHECK: Safe due to constraint
     #[account(address = mpl_token_metadata::ID)]
     token_metadata_program: UncheckedAccount<'info>,
+
+    system_program: Program<'info, System>,
 }
 
 pub fn add_nft(ctx: Context<AddNft>, seller_proof_path: Option<Vec<[u8; 32]>>) -> Result<()> {
@@ -60,9 +79,15 @@ pub fn add_nft(ctx: Context<AddNft>, seller_proof_path: Option<Vec<[u8; 32]>>) -
     let edition = &ctx.accounts.edition.to_account_info();
     let mint = &ctx.accounts.mint.to_account_info();
     let candy_machine = &mut ctx.accounts.candy_machine;
+    let seller_history = &mut ctx.accounts.seller_history;
+
+    seller_history.candy_machine = candy_machine.key();
+    seller_history.seller = seller.key();
 
     // Validate the seller
-    candy_machine.assert_seller_allowlisted(seller.key(), seller_proof_path)?;
+    assert_can_add_item(candy_machine, seller_history, seller_proof_path)?;
+
+    seller_history.item_count += 1;
 
     // Validate that the nft is a primary sale
     let metadata = Metadata::try_from(metadata_account)?;
@@ -72,9 +97,10 @@ pub fn add_nft(ctx: Context<AddNft>, seller_proof_path: Option<Vec<[u8; 32]>>) -
     );
     require!(!metadata.primary_sale_happened, CandyError::NotPrimarySale);
 
+    // Prevent selling printable master editions
     assert_is_non_printable_edition(&ctx.accounts.edition.to_account_info())?;
 
-    crate::processors::add_config_line(
+    crate::processors::add_item(
         candy_machine,
         ConfigLineInput {
             mint: ctx.accounts.mint.key(),

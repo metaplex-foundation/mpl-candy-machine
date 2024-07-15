@@ -55,6 +55,13 @@ kinobi.update(
         ),
       ],
     },
+    sellerHistory: {
+      seeds: [
+        k.stringConstantSeed("seller_history"),
+        candyMachineSeed,
+        k.publicKeySeed("seller", "The seller this history is tracking"),
+      ],
+    },
     mintCounter: {
       size: 2,
       discriminator: k.sizeAccountDiscriminator(),
@@ -142,6 +149,11 @@ const defaultsToAssociatedTokenPda = (mint = "mint", owner = "owner") =>
     importFrom: "mplEssentials",
     seeds: { mint: k.accountDefault(mint), owner: k.accountDefault(owner) },
   });
+const defaultsToSellerHistoryPda = (seller = "seller") =>
+  k.pdaDefault("sellerHistory", {
+    importFrom: "generated",
+    seeds: { seller: k.accountDefault(seller) },
+  });
 const defaultsToCandyMachineAuthorityPda = (candyMachine = "candyMachine") =>
   k.pdaDefault("candyMachineAuthority", {
     importFrom: "hooked",
@@ -184,6 +196,11 @@ kinobi.update(
     {
       ...k.identityDefault(),
       account: "candyMachineAuthority",
+      ignoreIfOptional: true,
+    },
+    {
+      ...defaultsToSellerHistoryPda(),
+      account: "sellerHistory",
       ignoreIfOptional: true,
     },
     {
@@ -257,6 +274,7 @@ kinobi.update(
       name: "removeNft",
       accounts: {
         authority: { defaultsTo: k.identityDefault() },
+        seller: { defaultsTo: k.identityDefault() },
         tokenAccount: {
           defaultsTo: defaultsToAssociatedTokenPda("mint", "authority"),
         },
@@ -272,6 +290,7 @@ kinobi.update(
       name: "removeCoreAsset",
       accounts: {
         authority: { defaultsTo: k.identityDefault() },
+        seller: { defaultsTo: k.identityDefault() },
       },
     },
     "mplCandyMachineCore.mintV2": {

@@ -25,6 +25,7 @@ pub fn initialize_v2(ctx: Context<InitializeV2>, settings: GumballSettings) -> R
         mint_authority: ctx.accounts.authority.key(),
         items_redeemed: 0,
         finalized_items_count: 0,
+        items_settled: 0,
         state,
         settings,
     };

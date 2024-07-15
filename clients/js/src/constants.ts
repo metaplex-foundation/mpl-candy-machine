@@ -5,6 +5,7 @@ export const CANDY_MACHINE_HIDDEN_SECTION =
   32 + // mint authority
   8 + // items redeemed
   8 + // finalized items count
+  8 + // items settled
   1 + // state
   200 + // uri
   8 + // item capacity

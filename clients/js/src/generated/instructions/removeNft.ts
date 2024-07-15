@@ -26,6 +26,7 @@ import {
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import { findCandyMachineAuthorityPda } from '../../hooked';
+import { findSellerHistoryPda } from '../accounts';
 import {
   expectPublicKey,
   getAccountMetasAndSigners,
@@ -37,9 +38,12 @@ import {
 export type RemoveNftInstructionAccounts = {
   /** Candy Machine account. */
   candyMachine: PublicKey | Pda;
+  /** Seller history account. */
+  sellerHistory?: PublicKey | Pda;
   authorityPda?: PublicKey | Pda;
   /** Authority allowed to remove the nft (must be the candy machine auth or the seller of the nft) */
   authority?: Signer;
+  seller?: PublicKey | Pda;
   mint: PublicKey | Pda;
   tokenAccount?: PublicKey | Pda;
   tmpTokenAccount?: PublicKey | Pda;
@@ -103,51 +107,66 @@ export function removeNft(
       isWritable: true,
       value: input.candyMachine ?? null,
     },
-    authorityPda: {
+    sellerHistory: {
       index: 1,
+      isWritable: true,
+      value: input.sellerHistory ?? null,
+    },
+    authorityPda: {
+      index: 2,
       isWritable: true,
       value: input.authorityPda ?? null,
     },
-    authority: { index: 2, isWritable: false, value: input.authority ?? null },
-    mint: { index: 3, isWritable: false, value: input.mint ?? null },
+    authority: { index: 3, isWritable: false, value: input.authority ?? null },
+    seller: { index: 4, isWritable: false, value: input.seller ?? null },
+    mint: { index: 5, isWritable: false, value: input.mint ?? null },
     tokenAccount: {
-      index: 4,
+      index: 6,
       isWritable: true,
       value: input.tokenAccount ?? null,
     },
     tmpTokenAccount: {
-      index: 5,
+      index: 7,
       isWritable: true,
       value: input.tmpTokenAccount ?? null,
     },
-    edition: { index: 6, isWritable: false, value: input.edition ?? null },
+    edition: { index: 8, isWritable: false, value: input.edition ?? null },
     tokenProgram: {
-      index: 7,
+      index: 9,
       isWritable: false,
       value: input.tokenProgram ?? null,
     },
     associatedTokenProgram: {
-      index: 8,
+      index: 10,
       isWritable: false,
       value: input.associatedTokenProgram ?? null,
     },
     tokenMetadataProgram: {
-      index: 9,
+      index: 11,
       isWritable: false,
       value: input.tokenMetadataProgram ?? null,
     },
     systemProgram: {
-      index: 10,
+      index: 12,
       isWritable: false,
       value: input.systemProgram ?? null,
     },
-    rent: { index: 11, isWritable: false, value: input.rent ?? null },
+    rent: { index: 13, isWritable: false, value: input.rent ?? null },
   };
 
   // Arguments.
   const resolvedArgs: RemoveNftInstructionArgs = { ...input };
 
   // Default values.
+  if (!resolvedAccounts.seller.value) {
+    resolvedAccounts.seller.value = context.identity.publicKey;
+  }
+  if (!resolvedAccounts.sellerHistory.value) {
+    resolvedAccounts.sellerHistory.value = findSellerHistoryPda(context, {
+      candyMachine: expectPublicKey(resolvedAccounts.candyMachine.value),
+      seller: expectPublicKey(resolvedAccounts.seller.value),
+    });
+  }
   if (!resolvedAccounts.authorityPda.value) {
     resolvedAccounts.authorityPda.value = findCandyMachineAuthorityPda(
       context,

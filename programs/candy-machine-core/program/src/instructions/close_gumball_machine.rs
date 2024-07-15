@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::{CandyError, CandyMachine, GumballState};
+use crate::{get_config_count, CandyError, CandyMachine};
 
 /// Withdraw the rent SOL from the candy machine account.
 #[derive(Accounts)]
@@ -10,7 +10,6 @@ pub struct CloseGumballMachine<'info> {
         mut, 
         close = authority, 
         has_one = authority, 
-        constraint = candy_machine.state == GumballState::AllSettled @ CandyError::InvalidState
     )]
     candy_machine: Account<'info, CandyMachine>,
 
@@ -19,6 +18,21 @@ pub struct CloseGumballMachine<'info> {
     authority: Signer<'info>,
 }
 
-pub fn close_gumball_machine(_ctx: Context<CloseGumballMachine>) -> Result<()> {
+pub fn close_gumball_machine(ctx: Context<CloseGumballMachine>) -> Result<()> {
+    let account_info = ctx.accounts.candy_machine.to_account_info();
+    let account_data = account_info.data.borrow();
+    let config_count = get_config_count(&account_data)? as u64;
+
+    // No items added so it's safe to close the account
+    if config_count == 0 {
+        return Ok(());
+    }
+
+    // Ensure all items have been settled/claimed
+    require!(
+        config_count == ctx.accounts.candy_machine.items_settled,
+        CandyError::InvalidState
+    );
+
     Ok(())
 }

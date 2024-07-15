@@ -32,6 +32,7 @@ import {
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import { findCandyMachineAuthorityPda } from '../../hooked';
+import { findSellerHistoryPda } from '../accounts';
 import {
   expectPublicKey,
   getAccountMetasAndSigners,
@@ -43,6 +44,8 @@ import {
 export type AddNftInstructionAccounts = {
   /** Candy Machine account. */
   candyMachine: PublicKey | Pda;
+  /** Seller history account. */
+  sellerHistory?: PublicKey | Pda;
   authorityPda?: PublicKey | Pda;
   /** Seller of the nft */
   seller?: Signer;
@@ -52,6 +55,7 @@ export type AddNftInstructionAccounts = {
   edition?: PublicKey | Pda;
   tokenProgram?: PublicKey | Pda;
   tokenMetadataProgram?: PublicKey | Pda;
+  systemProgram?: PublicKey | Pda;
 };
 
 // Data.
@@ -105,29 +109,39 @@ export function addNft(
       isWritable: true,
       value: input.candyMachine ?? null,
     },
-    authorityPda: {
+    sellerHistory: {
       index: 1,
+      isWritable: true,
+      value: input.sellerHistory ?? null,
+    },
+    authorityPda: {
+      index: 2,
       isWritable: true,
       value: input.authorityPda ?? null,
     },
-    seller: { index: 2, isWritable: false, value: input.seller ?? null },
-    mint: { index: 3, isWritable: false, value: input.mint ?? null },
+    seller: { index: 3, isWritable: true, value: input.seller ?? null },
+    mint: { index: 4, isWritable: false, value: input.mint ?? null },
     tokenAccount: {
-      index: 4,
+      index: 5,
       isWritable: true,
       value: input.tokenAccount ?? null,
     },
-    metadata: { index: 5, isWritable: false, value: input.metadata ?? null },
-    edition: { index: 6, isWritable: false, value: input.edition ?? null },
+    metadata: { index: 6, isWritable: false, value: input.metadata ?? null },
+    edition: { index: 7, isWritable: false, value: input.edition ?? null },
     tokenProgram: {
-      index: 7,
+      index: 8,
       isWritable: false,
       value: input.tokenProgram ?? null,
     },
     tokenMetadataProgram: {
-      index: 8,
+      index: 9,
       isWritable: false,
       value: input.tokenMetadataProgram ?? null,
+    },
+    systemProgram: {
+      index: 10,
+      isWritable: false,
+      value: input.systemProgram ?? null,
     },
   };
 
@@ -135,14 +149,20 @@ export function addNft(
   const resolvedArgs: AddNftInstructionArgs = { ...input };
 
   // Default values.
+  if (!resolvedAccounts.seller.value) {
+    resolvedAccounts.seller.value = context.identity;
+  }
+  if (!resolvedAccounts.sellerHistory.value) {
+    resolvedAccounts.sellerHistory.value = findSellerHistoryPda(context, {
+      candyMachine: expectPublicKey(resolvedAccounts.candyMachine.value),
+      seller: expectPublicKey(resolvedAccounts.seller.value),
+    });
+  }
   if (!resolvedAccounts.authorityPda.value) {
     resolvedAccounts.authorityPda.value = findCandyMachineAuthorityPda(
       context,
       { candyMachine: expectPublicKey(resolvedAccounts.candyMachine.value) }
     );
-  }
-  if (!resolvedAccounts.seller.value) {
-    resolvedAccounts.seller.value = context.identity;
   }
   if (!resolvedAccounts.tokenAccount.value) {
     resolvedAccounts.tokenAccount.value = findAssociatedTokenPda(context, {
@@ -173,6 +193,13 @@ export function addNft(
       'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'
     );
     resolvedAccounts.tokenMetadataProgram.isWritable = false;
+  }
+  if (!resolvedAccounts.systemProgram.value) {
+    resolvedAccounts.systemProgram.value = context.programs.getPublicKey(
+      'splSystem',
+      '11111111111111111111111111111111'
+    );
+    resolvedAccounts.systemProgram.isWritable = false;
   }
 
   // Accounts in order.

@@ -11,7 +11,8 @@ import { scalarEnum, Serializer } from '@metaplex-foundation/umi/serializers';
 export enum GumballState {
   None,
   DetailsFinalized,
-  SaleStarted,
+  SaleLive,
+  SaleEnded,
 }
 
 export type GumballStateArgs = GumballState;

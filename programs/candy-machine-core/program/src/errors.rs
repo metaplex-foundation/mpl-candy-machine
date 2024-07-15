@@ -119,6 +119,9 @@ pub enum CandyError {
     #[msg("Invalid mint")]
     InvalidMint,
 
+    #[msg("Invalid seller")]
+    InvalidSeller,
+
     #[msg("URI too long")]
     UriTooLong,
 
@@ -127,4 +130,7 @@ pub enum CandyError {
 
     #[msg("Invalid setting update")]
     InvalidSettingUpdate,
+
+    #[msg("Seller has too many items")]
+    SellerTooManyItems,
 }

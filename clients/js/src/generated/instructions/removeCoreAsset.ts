@@ -23,6 +23,7 @@ import {
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import { findCandyMachineAuthorityPda } from '../../hooked';
+import { findSellerHistoryPda } from '../accounts';
 import {
   expectPublicKey,
   getAccountMetasAndSigners,
@@ -34,9 +35,12 @@ import {
 export type RemoveCoreAssetInstructionAccounts = {
   /** Candy Machine account. */
   candyMachine: PublicKey | Pda;
+  /** Seller history account. */
+  sellerHistory?: PublicKey | Pda;
   authorityPda?: PublicKey | Pda;
   /** Seller of the asset. */
   authority?: Signer;
+  seller?: PublicKey | Pda;
   asset: PublicKey | Pda;
   /** Core asset's collection if it's part of one. */
   collection?: PublicKey | Pda;
@@ -99,21 +103,27 @@ export function removeCoreAsset(
       isWritable: true,
       value: input.candyMachine ?? null,
     },
-    authorityPda: {
+    sellerHistory: {
       index: 1,
+      isWritable: true,
+      value: input.sellerHistory ?? null,
+    },
+    authorityPda: {
+      index: 2,
       isWritable: true,
       value: input.authorityPda ?? null,
     },
-    authority: { index: 2, isWritable: false, value: input.authority ?? null },
-    asset: { index: 3, isWritable: true, value: input.asset ?? null },
-    collection: { index: 4, isWritable: true, value: input.collection ?? null },
+    authority: { index: 3, isWritable: false, value: input.authority ?? null },
+    seller: { index: 4, isWritable: false, value: input.seller ?? null },
+    asset: { index: 5, isWritable: true, value: input.asset ?? null },
+    collection: { index: 6, isWritable: true, value: input.collection ?? null },
     mplCoreProgram: {
-      index: 5,
+      index: 7,
       isWritable: false,
       value: input.mplCoreProgram ?? null,
     },
     systemProgram: {
-      index: 6,
+      index: 8,
       isWritable: false,
       value: input.systemProgram ?? null,
     },
@@ -123,6 +133,15 @@ export function removeCoreAsset(
   const resolvedArgs: RemoveCoreAssetInstructionArgs = { ...input };
 
   // Default values.
+  if (!resolvedAccounts.seller.value) {
+    resolvedAccounts.seller.value = context.identity.publicKey;
+  }
+  if (!resolvedAccounts.sellerHistory.value) {
+    resolvedAccounts.sellerHistory.value = findSellerHistoryPda(context, {
+      candyMachine: expectPublicKey(resolvedAccounts.candyMachine.value),
+      seller: expectPublicKey(resolvedAccounts.seller.value),
+    });
+  }
   if (!resolvedAccounts.authorityPda.value) {
     resolvedAccounts.authorityPda.value = findCandyMachineAuthorityPda(
       context,

@@ -338,7 +338,7 @@ test('it cannot mint from a candy machine that has been fully minted', async (t)
     .sendAndConfirm(umi);
 
   // Then we expect a program error.
-  await t.throwsAsync(promise, { message: /CandyMachineEmpty/ });
+  await t.throwsAsync(promise, { message: /InvalidState/ });
 });
 
 test('it can mint from a candy machine in a random order', async (t) => {

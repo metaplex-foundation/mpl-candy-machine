@@ -13,9 +13,12 @@ import {
   addNft,
   CandyMachine,
   fetchCandyMachine,
+  fetchSellerHistory,
+  findSellerHistoryPda,
   getMerkleProof,
   getMerkleRoot,
   removeNft,
+  SellerHistory,
   TokenStandard,
 } from '../src';
 import { createNft, createUmi, createV2 } from './_setup';
@@ -70,6 +73,21 @@ test('it can remove nfts from a candy machine', async (t) => {
     state: TokenState.Initialized,
     owner: umi.identity.publicKey,
     delegate: none(),
+  });
+
+  // Seller history state is correct
+  const sellerHistoryAccount = await fetchSellerHistory(
+    umi,
+    findSellerHistoryPda(umi, {
+      candyMachine: candyMachine.publicKey,
+      seller: umi.identity.publicKey,
+    })[0]
+  );
+
+  t.like(sellerHistoryAccount, <SellerHistory>{
+    candyMachine: candyMachine.publicKey,
+    seller: umi.identity.publicKey,
+    itemCount: 0n,
   });
 });
 
@@ -202,6 +220,23 @@ test('it cannot remove nfts when the machine is empty', async (t) => {
   const candyMachine = await createV2(umi, { settings: { itemCapacity: 1 } });
   const nft = await createNft(umi);
 
+  // Add/remove an nft first so seller history is created
+  await transactionBuilder()
+    .add(
+      addNft(umi, {
+        candyMachine: candyMachine.publicKey,
+        mint: nft.publicKey,
+      })
+    )
+    .add(
+      removeNft(umi, {
+        candyMachine: candyMachine.publicKey,
+        index: 0,
+        mint: nft.publicKey,
+      })
+    )
+    .sendAndConfirm(umi);
+
   // When we try to remove an nft from the Candy Machine.
   const promise = transactionBuilder()
     .add(
@@ -283,6 +318,7 @@ test('it can remove another seller nft as the gumball authority', async (t) => {
         candyMachine: candyMachine.publicKey,
         index: 0,
         mint: nft.publicKey,
+        seller: otherSellerUmi.identity.publicKey,
         tokenAccount: findAssociatedTokenPda(umi, {
           mint: nft.publicKey,
           owner: otherSellerUmi.identity.publicKey,

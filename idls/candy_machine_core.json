@@ -108,13 +108,21 @@
           ]
         },
         {
+          "name": "sellerHistory",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Seller history account."
+          ]
+        },
+        {
           "name": "authorityPda",
           "isMut": true,
           "isSigner": false
         },
         {
           "name": "seller",
-          "isMut": false,
+          "isMut": true,
           "isSigner": true,
           "docs": [
             "Seller of the nft"
@@ -147,6 +155,11 @@
         },
         {
           "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
           "isMut": false,
           "isSigner": false
         }
@@ -187,13 +200,21 @@
           ]
         },
         {
+          "name": "sellerHistory",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Seller history account."
+          ]
+        },
+        {
           "name": "authorityPda",
           "isMut": true,
           "isSigner": false
         },
         {
           "name": "seller",
-          "isMut": false,
+          "isMut": true,
           "isSigner": true,
           "docs": [
             "Seller of the asset."
@@ -260,6 +281,14 @@
           ]
         },
         {
+          "name": "sellerHistory",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Seller history account."
+          ]
+        },
+        {
           "name": "authorityPda",
           "isMut": true,
           "isSigner": false
@@ -271,6 +300,11 @@
           "docs": [
             "Authority allowed to remove the nft (must be the candy machine auth or the seller of the nft)"
           ]
+        },
+        {
+          "name": "seller",
+          "isMut": false,
+          "isSigner": false
         },
         {
           "name": "mint",
@@ -345,6 +379,14 @@
           ]
         },
         {
+          "name": "sellerHistory",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Seller history account."
+          ]
+        },
+        {
           "name": "authorityPda",
           "isMut": true,
           "isSigner": false
@@ -356,6 +398,11 @@
           "docs": [
             "Seller of the asset."
           ]
+        },
+        {
+          "name": "seller",
+          "isMut": false,
+          "isSigner": false
         },
         {
           "name": "asset",
@@ -392,7 +439,37 @@
     {
       "name": "startSale",
       "docs": [
-        "Allows sales to start.",
+        "Allows minting to begin.",
+        "",
+        "# Accounts",
+        "",
+        "0. `[writable]` Candy Machine account",
+        "1. `[signer]` Candy Machine authority"
+      ],
+      "accounts": [
+        {
+          "name": "candyMachine",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Candy machine account."
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Candy Machine authority. This is the address that controls the upate of the candy machine."
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "endSale",
+      "docs": [
+        "Disables minting and allows sales to be settled.",
         "",
         "# Accounts",
         "",
@@ -485,6 +562,66 @@
           "docs": [
             "SlotHashes sysvar cluster data.",
             ""
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "settleCoreAssetSale",
+      "docs": [
+        "Settles a Core asset sale",
+        "",
+        "# Accounts",
+        "",
+        "0. `[writable]` Candy Machine account",
+        "1. `[signer]` Candy Machine authority"
+      ],
+      "accounts": [
+        {
+          "name": "candyMachine",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Candy machine account."
+          ]
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Anyone can settle the sale"
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "settleNftAssetSale",
+      "docs": [
+        "Settles a legacy NFT sale",
+        "",
+        "# Accounts",
+        "",
+        "0. `[writable]` Candy Machine account",
+        "1. `[signer]` Candy Machine authority"
+      ],
+      "accounts": [
+        {
+          "name": "candyMachine",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Candy machine account."
+          ]
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Anyone can settle the sale"
           ]
         }
       ],
@@ -640,6 +777,13 @@
             "type": "u64"
           },
           {
+            "name": "itemsSettled",
+            "docs": [
+              "Number of assets settled after sale."
+            ],
+            "type": "u64"
+          },
+          {
             "name": "state",
             "docs": [
               "True if the authority has finalized details, which prevents adding more nfts."
@@ -656,6 +800,38 @@
             "type": {
               "defined": "GumballSettings"
             }
+          }
+        ]
+      }
+    },
+    {
+      "name": "SellerHistory",
+      "docs": [
+        "Seller history state to track count of items submitted to a candy machine."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "candyMachine",
+            "docs": [
+              "Candy machine we're tracking for"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "seller",
+            "docs": [
+              "Seller address"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "itemCount",
+            "docs": [
+              "Item count submitted by this seller"
+            ],
+            "type": "u64"
           }
         ]
       }
@@ -811,7 +987,10 @@
             "name": "DetailsFinalized"
           },
           {
-            "name": "SaleStarted"
+            "name": "SaleLive"
+          },
+          {
+            "name": "SaleEnded"
           }
         ]
       }
@@ -1015,18 +1194,28 @@
     },
     {
       "code": 6039,
+      "name": "InvalidSeller",
+      "msg": "Invalid seller"
+    },
+    {
+      "code": 6040,
       "name": "UriTooLong",
       "msg": "URI too long"
     },
     {
-      "code": 6040,
+      "code": 6041,
       "name": "InvalidProofPath",
       "msg": "Invalid proof path"
     },
     {
-      "code": 6041,
+      "code": 6042,
       "name": "InvalidSettingUpdate",
       "msg": "Invalid setting update"
+    },
+    {
+      "code": 6043,
+      "name": "SellerTooManyItems",
+      "msg": "Seller has too many items"
     }
   ],
   "metadata": {

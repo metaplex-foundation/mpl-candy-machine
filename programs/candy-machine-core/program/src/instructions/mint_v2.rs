@@ -99,6 +99,12 @@ pub(crate) fn process_mint(
         .items_redeemed
         .checked_add(1)
         .ok_or(CandyError::NumericalOverflowError)?;
+
+    // Sale has ended if this is the last item to be redeemed
+    if candy_machine.items_redeemed == candy_machine.finalized_items_count {
+        candy_machine.state = GumballState::SaleEnded;
+    }
+
     // release the data borrow
     drop(data);
 

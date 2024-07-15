@@ -9,7 +9,7 @@ pub struct EndSale<'info> {
     #[account(
         mut, 
         has_one = authority,
-        constraint = candy_machine.state != GumballState::AllSettled @ CandyError::InvalidState
+        constraint = candy_machine.state != GumballState::SaleEnded @ CandyError::InvalidState
     )]
     candy_machine: Box<Account<'info, CandyMachine>>,
 
@@ -20,14 +20,7 @@ pub struct EndSale<'info> {
 
 
 pub fn end_sale(ctx: Context<EndSale>) -> Result<()> {
-    let candy_machine = &mut ctx.accounts.candy_machine;
-
-    // The machine is settled if there were no sales
-    candy_machine.state = if candy_machine.items_redeemed == 0 { 
-        GumballState::AllSettled 
-    } else {
-        GumballState::SaleEnded
-    };
+    ctx.accounts.candy_machine.state = GumballState::SaleEnded;
 
     Ok(())
 }

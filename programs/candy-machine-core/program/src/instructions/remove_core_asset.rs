@@ -1,4 +1,9 @@
-use crate::{constants::AUTHORITY_SEED, state::CandyMachine, CandyError, GumballState};
+use crate::{
+    constants::{AUTHORITY_SEED, SELLER_HISTORY_SEED},
+    processors,
+    state::CandyMachine,
+    CandyError, GumballState, SellerHistory,
+};
 use anchor_lang::prelude::*;
 use mpl_core::{
     instructions::{
@@ -17,6 +22,20 @@ pub struct RemoveCoreAsset<'info> {
     )]
     candy_machine: Account<'info, CandyMachine>,
 
+    /// Seller history account.
+    #[account(
+		mut,
+		seeds = [
+			SELLER_HISTORY_SEED.as_bytes(),
+			candy_machine.key().as_ref(),
+            seller.key().as_ref(),
+		],
+		bump,
+        has_one = candy_machine,
+        has_one = seller,
+	)]
+    seller_history: Box<Account<'info, SellerHistory>>,
+
     /// CHECK: Safe due to seeds constraint
     #[account(
         mut,
@@ -27,6 +46,9 @@ pub struct RemoveCoreAsset<'info> {
 
     /// Seller of the asset.
     authority: Signer<'info>,
+
+    /// CHECK: Safe due to item seller check
+    seller: UncheckedAccount<'info>,
 
     /// CHECK: Safe due to freeze
     #[account(mut)]
@@ -50,14 +72,19 @@ pub fn remove_core_asset(ctx: Context<RemoveCoreAsset>, index: u32) -> Result<()
     let mpl_core_program = &ctx.accounts.mpl_core_program.to_account_info();
     let system_program = &ctx.accounts.system_program.to_account_info();
     let authority_pda = &ctx.accounts.authority_pda.to_account_info();
-
+    let seller = &ctx.accounts.seller.to_account_info();
     let candy_machine = &mut ctx.accounts.candy_machine;
-    let seller = crate::processors::remove_config_line(
+    let seller_history = &mut ctx.accounts.seller_history;
+
+    processors::remove_item(
         candy_machine,
         authority.key(),
         asset_info.key(),
+        seller.key(),
         index,
     )?;
+
+    seller_history.item_count -= 1;
 
     let collection_info = if let Some(collection) = &ctx.accounts.collection {
         Some(collection.to_account_info())
@@ -87,7 +114,8 @@ pub fn remove_core_asset(ctx: Context<RemoveCoreAsset>, index: u32) -> Result<()
         .system_program(system_program)
         .invoke_signed(&[&auth_seeds])?;
 
-    if seller == authority.key() {
+    // Can only remove plugins if the seller is the authority
+    if seller.key() == authority.key() {
         // Clean up freeze plugin back to seller
         RemovePluginV1CpiBuilder::new(mpl_core_program)
             .asset(asset_info)

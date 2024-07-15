@@ -1,6 +1,8 @@
 use crate::{
-    constants::AUTHORITY_SEED, state::CandyMachine, AssociatedToken, CandyError, GumballState,
-    Token,
+    constants::{AUTHORITY_SEED, SELLER_HISTORY_SEED},
+    processors,
+    state::CandyMachine,
+    AssociatedToken, CandyError, GumballState, SellerHistory, Token,
 };
 use anchor_lang::prelude::*;
 use mpl_token_metadata::instructions::{ThawDelegatedAccountCpi, ThawDelegatedAccountCpiAccounts};
@@ -18,6 +20,20 @@ pub struct RemoveNft<'info> {
     )]
     candy_machine: Account<'info, CandyMachine>,
 
+    /// Seller history account.
+    #[account(
+		mut,
+		seeds = [
+			SELLER_HISTORY_SEED.as_bytes(),
+			candy_machine.key().as_ref(),
+            seller.key().as_ref(),
+		],
+		bump,
+        has_one = candy_machine,
+        has_one = seller,
+	)]
+    seller_history: Box<Account<'info, SellerHistory>>,
+
     /// CHECK: Safe due to seeds constraint
     #[account(
         mut,
@@ -28,6 +44,9 @@ pub struct RemoveNft<'info> {
 
     /// Authority allowed to remove the nft (must be the candy machine auth or the seller of the nft)
     authority: Signer<'info>,
+
+    /// CHECK: Safe due to item seller check
+    seller: UncheckedAccount<'info>,
 
     /// CHECK: Safe due to transfer
     mint: UncheckedAccount<'info>,
@@ -67,9 +86,19 @@ pub fn remove_nft(ctx: Context<RemoveNft>, index: u32) -> Result<()> {
     let authority = &ctx.accounts.authority.to_account_info();
     let edition = &ctx.accounts.edition.to_account_info();
     let mint = &ctx.accounts.mint.to_account_info();
-
+    let seller = &ctx.accounts.seller.to_account_info();
     let candy_machine = &mut ctx.accounts.candy_machine;
-    crate::processors::remove_config_line(candy_machine, authority.key(), mint.key(), index)?;
+    let seller_history = &mut ctx.accounts.seller_history;
+
+    processors::remove_item(
+        candy_machine,
+        authority.key(),
+        mint.key(),
+        seller.key(),
+        index,
+    )?;
+
+    seller_history.item_count -= 1;
 
     let auth_seeds = [
         AUTHORITY_SEED.as_bytes(),

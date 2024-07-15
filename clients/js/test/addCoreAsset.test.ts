@@ -5,9 +5,12 @@ import {
   addCoreAsset,
   CandyMachine,
   fetchCandyMachine,
+  fetchSellerHistory,
   findCandyMachineAuthorityPda,
+  findSellerHistoryPda,
   getMerkleProof,
   getMerkleRoot,
+  SellerHistory,
   TokenStandard,
 } from '../src';
 import { createCoreAsset, createUmi, createV2 } from './_setup';
@@ -68,6 +71,21 @@ test('it can add core assets to a candy machine', async (t) => {
       },
       frozen: true,
     },
+  });
+
+  // Seller history state is correct
+  const sellerHistoryAccount = await fetchSellerHistory(
+    umi,
+    findSellerHistoryPda(umi, {
+      candyMachine: candyMachine.publicKey,
+      seller: umi.identity.publicKey,
+    })[0]
+  );
+
+  t.like(sellerHistoryAccount, <SellerHistory>{
+    candyMachine: candyMachine.publicKey,
+    seller: umi.identity.publicKey,
+    itemCount: 1n,
   });
 });
 
@@ -335,4 +353,46 @@ test('it cannot add core assets that are on the secondary market', async (t) => 
   // Then an error is thrown.
   // Then we expect a program error.
   await t.throwsAsync(promise, { message: /NotPrimarySale/ });
+});
+
+test('it cannot add more core assets than allowed per seller', async (t) => {
+  // Given a Candy Machine with 5 core assets.
+  const umi = await createUmi();
+  const otherSellerUmi = await createUmi();
+  const sellersMerkleRoot = getMerkleRoot([otherSellerUmi.identity.publicKey]);
+  const candyMachine = await createV2(umi, {
+    settings: { itemCapacity: 2, itemsPerSeller: 1, sellersMerkleRoot },
+  });
+  const coreAssets = await Promise.all([
+    createCoreAsset(otherSellerUmi),
+    createCoreAsset(otherSellerUmi),
+  ]);
+  // When we add an nft to the Candy Machine.
+  await transactionBuilder()
+    .add(
+      addCoreAsset(otherSellerUmi, {
+        candyMachine: candyMachine.publicKey,
+        asset: coreAssets[0].publicKey,
+        sellerProofPath: getMerkleProof(
+          [otherSellerUmi.identity.publicKey],
+          otherSellerUmi.identity.publicKey
+        ),
+      })
+    )
+    .sendAndConfirm(otherSellerUmi);
+
+  const promise = transactionBuilder()
+    .add(
+      addCoreAsset(otherSellerUmi, {
+        candyMachine: candyMachine.publicKey,
+        asset: coreAssets[1].publicKey,
+        sellerProofPath: getMerkleProof(
+          [otherSellerUmi.identity.publicKey],
+          otherSellerUmi.identity.publicKey
+        ),
+      })
+    )
+    .sendAndConfirm(otherSellerUmi);
+
+  await t.throwsAsync(promise, { message: /SellerTooManyItems/ });
 });

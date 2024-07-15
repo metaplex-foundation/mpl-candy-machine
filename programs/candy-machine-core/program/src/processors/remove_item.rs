@@ -5,12 +5,13 @@ use crate::{
     get_config_count, CandyError, CandyMachine,
 };
 
-pub fn remove_config_line(
+pub fn remove_item(
     candy_machine: &mut Account<CandyMachine>,
     authority: Pubkey,
     mint: Pubkey,
+    expected_seller: Pubkey,
     index: u32,
-) -> Result<Pubkey> {
+) -> Result<()> {
     let account_info = candy_machine.to_account_info();
     // mutable reference to the account data (config lines are written in the
     // 'hidden' section of the data array)
@@ -34,6 +35,7 @@ pub fn remove_config_line(
         authority == candy_machine.authority || seller == authority,
         CandyError::InvalidAuthority
     );
+    require!(expected_seller == seller, CandyError::InvalidSeller);
 
     let item_mint =
         Pubkey::try_from(&data[config_line_position..config_line_position + 32]).unwrap();
@@ -90,7 +92,7 @@ pub fn remove_config_line(
     data[byte_position] &= !mask;
 
     msg!(
-        "Config line processed: byte position={}, mask={}, current value={}, new value={}, bit position={}",
+        "Item processed: byte position={}, mask={}, current value={}, new value={}, bit position={}",
         byte_position - bit_mask_start,
         mask,
         current_value,
@@ -106,14 +108,10 @@ pub fn remove_config_line(
         .checked_sub(1)
         .ok_or(CandyError::NumericalOverflowError)?;
 
-    msg!(
-        "Config line removed: position={}, new count={})",
-        index,
-        count,
-    );
+    msg!("Item removed: position={}, new count={})", index, count,);
 
     // updates the config lines count
     data[CANDY_MACHINE_SIZE..CANDY_MACHINE_SIZE + 4].copy_from_slice(&(count as u32).to_le_bytes());
 
-    Ok(seller)
+    Ok(())
 }

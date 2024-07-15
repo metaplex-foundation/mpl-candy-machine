@@ -12,7 +12,7 @@ use solana_program::{
     pubkey::{Pubkey, PUBKEY_BYTES},
 };
 
-use crate::{constants::CANDY_MACHINE_SIZE, CandyError};
+use crate::{constants::CANDY_MACHINE_SIZE, CandyError, CandyMachine, SellerHistory};
 
 /// Anchor wrapper for Token program.
 #[derive(Debug, Clone)]
@@ -73,6 +73,38 @@ pub fn assert_keys_equal(key1: Pubkey, key2: Pubkey, error_message: &str) -> Res
         msg!("{}: actual: {} expected: {}", error_message, key1, key2);
         return err!(CandyError::PublicKeyMismatch);
     }
+
+    Ok(())
+}
+
+pub fn assert_can_add_item(
+    candy_machine: &mut Box<Account<CandyMachine>>,
+    seller_history: &mut Box<Account<SellerHistory>>,
+    seller_proof_path: Option<Vec<[u8; 32]>>,
+) -> Result<()> {
+    let seller = seller_history.seller;
+
+    if seller == candy_machine.authority {
+        return Ok(());
+    }
+
+    if seller_history.item_count >= candy_machine.settings.items_per_seller as u64 {
+        return err!(CandyError::SellerTooManyItems);
+    }
+
+    if seller_proof_path.is_none() || candy_machine.settings.sellers_merkle_root.is_none() {
+        return err!(CandyError::InvalidProofPath);
+    }
+
+    let leaf = solana_program::keccak::hashv(&[seller.to_string().as_bytes()]);
+    require!(
+        verify_proof(
+            &seller_proof_path.unwrap()[..],
+            &candy_machine.settings.sellers_merkle_root.unwrap(),
+            &leaf.0,
+        ),
+        CandyError::InvalidProofPath
+    );
 
     Ok(())
 }

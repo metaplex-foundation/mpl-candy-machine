@@ -10,3 +10,4 @@ export * from './allocationTracker';
 export * from './allowListProof';
 export * from './candyMachine';
 export * from './mintCounter';
+export * from './sellerHistory';

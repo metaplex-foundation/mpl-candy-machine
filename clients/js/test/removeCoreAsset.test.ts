@@ -5,9 +5,12 @@ import {
   addCoreAsset,
   CandyMachine,
   fetchCandyMachine,
+  fetchSellerHistory,
+  findSellerHistoryPda,
   getMerkleProof,
   getMerkleRoot,
   removeCoreAsset,
+  SellerHistory,
   TokenStandard,
 } from '../src';
 import { createCoreAsset, createUmi, createV2 } from './_setup';
@@ -56,6 +59,21 @@ test('it can remove core asset from a candy machine', async (t) => {
     freezeDelegate: undefined,
     transferDelegate: undefined,
     owner: umi.identity.publicKey,
+  });
+
+  // Seller history state is correct
+  const sellerHistoryAccount = await fetchSellerHistory(
+    umi,
+    findSellerHistoryPda(umi, {
+      candyMachine: candyMachine.publicKey,
+      seller: umi.identity.publicKey,
+    })[0]
+  );
+
+  t.like(sellerHistoryAccount, <SellerHistory>{
+    candyMachine: candyMachine.publicKey,
+    seller: umi.identity.publicKey,
+    itemCount: 0n,
   });
 });
 
@@ -186,14 +204,31 @@ test('it cannot remove core asset when the machine is empty', async (t) => {
   // Given an existing Candy Machine with a capacity of 1 item.
   const umi = await createUmi();
   const candyMachine = await createV2(umi, { settings: { itemCapacity: 1 } });
-  const nft = await createCoreAsset(umi);
+  const coreAsset = await createCoreAsset(umi);
+
+  // Add/remove an asset first so seller history is created
+  await transactionBuilder()
+    .add(
+      addCoreAsset(umi, {
+        candyMachine: candyMachine.publicKey,
+        asset: coreAsset.publicKey,
+      })
+    )
+    .add(
+      removeCoreAsset(umi, {
+        candyMachine: candyMachine.publicKey,
+        index: 0,
+        asset: coreAsset.publicKey,
+      })
+    )
+    .sendAndConfirm(umi);
 
   // When we try to remove an nft from the Candy Machine.
   const promise = transactionBuilder()
     .add(
       removeCoreAsset(umi, {
         candyMachine: candyMachine.publicKey,
-        asset: nft.publicKey,
+        asset: coreAsset.publicKey,
         index: 0,
       })
     )
@@ -269,6 +304,7 @@ test('it can remove another seller core asset as the gumball authority', async (
         candyMachine: candyMachine.publicKey,
         index: 0,
         asset: coreAsset.publicKey,
+        seller: otherSellerUmi.identity.publicKey,
       })
     )
     .sendAndConfirm(umi);

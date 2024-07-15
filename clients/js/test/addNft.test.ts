@@ -25,12 +25,12 @@ import {
   SellerHistory,
   TokenStandard,
 } from '../src';
-import { createNft, createUmi, createV2 } from './_setup';
+import { create, createNft, createUmi } from './_setup';
 
 test('it can add nft to a candy machine as the authority', async (t) => {
   // Given a Candy Machine with 5 nfts.
   const umi = await createUmi();
-  const candyMachine = await createV2(umi, { settings: { itemCapacity: 5 } });
+  const candyMachine = await create(umi, { settings: { itemCapacity: 5 } });
   const nft = await createNft(umi);
 
   // When we add an nft to the Candy Machine.
@@ -102,7 +102,7 @@ test('it can add nft to a gumball machine as allowlisted seller', async (t) => {
   const umi = await createUmi();
   const otherSellerUmi = await createUmi();
   const sellersMerkleRoot = getMerkleRoot([otherSellerUmi.identity.publicKey]);
-  const candyMachine = await createV2(umi, {
+  const candyMachine = await create(umi, {
     settings: { itemCapacity: 5, sellersMerkleRoot },
   });
   const nft = await createNft(otherSellerUmi);
@@ -170,7 +170,7 @@ test('it can add nft to a gumball machine as allowlisted seller on allowlist of 
   );
   addresses.push(otherSellerUmi.identity.publicKey);
   const sellersMerkleRoot = getMerkleRoot(addresses);
-  const candyMachine = await createV2(umi, {
+  const candyMachine = await create(umi, {
     settings: { itemCapacity: 5, sellersMerkleRoot },
   });
   const nft = await createNft(otherSellerUmi);
@@ -232,7 +232,7 @@ test('it cannot add nft as non gumball authority when there is no seller allowli
   // Given a Candy Machine with 5 nfts.
   const umi = await createUmi();
   const otherSellerUmi = await createUmi();
-  const candyMachine = await createV2(umi, { settings: { itemCapacity: 5 } });
+  const candyMachine = await create(umi, { settings: { itemCapacity: 5 } });
   const nft = await createNft(otherSellerUmi);
 
   // When we add an nft to the Candy Machine.
@@ -252,7 +252,7 @@ test('it cannot add nft as non-allowlisted seller when there is a seller allowli
   // Given a Candy Machine with 5 nfts.
   const umi = await createUmi();
   const otherSellerUmi = await createUmi();
-  const candyMachine = await createV2(umi, {
+  const candyMachine = await create(umi, {
     settings: {
       itemCapacity: 5,
       sellersMerkleRoot: getMerkleRoot([umi.identity.publicKey]),
@@ -276,7 +276,7 @@ test('it cannot add nft as non-allowlisted seller when there is a seller allowli
 test('it can append additional nfts to a candy machine', async (t) => {
   // Given a Candy Machine with 5 nfts.
   const umi = await createUmi();
-  const candyMachine = await createV2(umi, { settings: { itemCapacity: 2 } });
+  const candyMachine = await create(umi, { settings: { itemCapacity: 2 } });
   const nfts = await Promise.all([createNft(umi), createNft(umi)]);
 
   await transactionBuilder()
@@ -330,7 +330,7 @@ test('it can append additional nfts to a candy machine', async (t) => {
 test('it cannot add nfts that would make the candy machine exceed the maximum capacity', async (t) => {
   // Given an existing Candy Machine with a capacity of 1 item.
   const umi = await createUmi();
-  const candyMachine = await createV2(umi, { settings: { itemCapacity: 1 } });
+  const candyMachine = await create(umi, { settings: { itemCapacity: 1 } });
   const nfts = await Promise.all([createNft(umi), createNft(umi)]);
 
   // When we try to add 2 nfts to the Candy Machine.
@@ -358,7 +358,7 @@ test('it cannot add nfts that would make the candy machine exceed the maximum ca
 test('it cannot add nfts once the candy machine is fully loaded', async (t) => {
   // Given an existing Candy Machine with 2 nfts loaded and a capacity of 2 nfts.
   const umi = await createUmi();
-  const candyMachine = await createV2(umi, { settings: { itemCapacity: 1 } });
+  const candyMachine = await create(umi, { settings: { itemCapacity: 1 } });
   const nft = await createNft(umi);
 
   await transactionBuilder()
@@ -389,7 +389,7 @@ test('it cannot add nfts once the candy machine is fully loaded', async (t) => {
 test('it cannot add nfts that are on the secondary market', async (t) => {
   // Given a Candy Machine with 5 nfts.
   const umi = await createUmi();
-  const candyMachine = await createV2(umi, { settings: { itemCapacity: 1 } });
+  const candyMachine = await create(umi, { settings: { itemCapacity: 1 } });
   const nfts = await Promise.all([createNft(umi)]);
 
   await updatePrimarySaleHappenedViaToken(umi, {
@@ -421,7 +421,7 @@ test('it cannot add more nfts than allowed per seller', async (t) => {
   const umi = await createUmi();
   const otherSellerUmi = await createUmi();
   const sellersMerkleRoot = getMerkleRoot([otherSellerUmi.identity.publicKey]);
-  const candyMachine = await createV2(umi, {
+  const candyMachine = await create(umi, {
     settings: { itemCapacity: 2, itemsPerSeller: 1, sellersMerkleRoot },
   });
   const nfts = await Promise.all([

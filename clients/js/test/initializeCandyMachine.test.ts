@@ -11,13 +11,13 @@ import {
   fetchCandyMachine,
   GumballSettings,
   GumballState,
-  initializeCandyMachineV2,
+  initializeCandyMachine,
 } from '../src';
 import { createUmi } from './_setup';
 
 /**
- * Note that most of the tests for the "initializeCandyMachineV2" instructions are
- * part of the "createCandyMachineV2" tests as they are more convenient to test.
+ * Note that most of the tests for the "initializeCandyMachine" instructions are
+ * part of the "createCandyMachine" tests as they are more convenient to test.
  */
 
 test('it can initialize a new candy machine account', async (t) => {
@@ -45,7 +45,7 @@ test('it can initialize a new candy machine account', async (t) => {
   // When we initialize a candy machine at this address.
   await transactionBuilder()
     .add(
-      initializeCandyMachineV2(umi, {
+      initializeCandyMachine(umi, {
         candyMachine: candyMachine.publicKey,
         settings,
       })

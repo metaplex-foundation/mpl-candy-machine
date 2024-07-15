@@ -5,9 +5,9 @@ import { draw, TokenStandard } from '../../src';
 import {
   assertBotTax,
   assertItemBought,
+  create,
   createNft,
   createUmi,
-  createV2,
   tomorrow,
   yesterday,
 } from '../_setup';
@@ -16,7 +16,7 @@ test('it allows minting after the start date', async (t) => {
   // Given a candy machine with a start date in the past.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -48,7 +48,7 @@ test('it forbids minting before the start date', async (t) => {
   // Given a candy machine with a start date in the future.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -80,7 +80,7 @@ test('it charges a bot tax when trying to mint before the start date', async (t)
   // Given a candy machine with a bot tax and start date in the future.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,

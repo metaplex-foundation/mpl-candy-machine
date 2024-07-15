@@ -16,9 +16,9 @@ import { draw, TokenStandard } from '../../src';
 import {
   assertBotTax,
   assertItemBought,
+  create,
   createNft,
   createUmi,
-  createV2,
 } from '../_setup';
 
 test('it allows minting when the payer owns a specific token', async (t) => {
@@ -37,7 +37,7 @@ test('it allows minting when the payer owns a specific token', async (t) => {
 
   // And a loaded Candy Machine with the token gate guard.
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -86,7 +86,7 @@ test('it allows minting even when the payer is different from the buyer', async 
 
   // And a loaded Candy Machine with the token gate guard.
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -136,7 +136,7 @@ test('it allows minting when the payer owns multiple tokens from a specific mint
 
   // And a loaded Candy Machine with the token gate guard that requires 5 tokens.
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -194,7 +194,7 @@ test('it forbids minting when the owner does not own any required tokens', async
 
   // And a loaded Candy Machine with the token gate guard.
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -242,7 +242,7 @@ test('it forbids minting when the owner does not own enough tokens', async (t) =
 
   // And a loaded Candy Machine with the token gate guard that requires 10 tokens.
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -290,7 +290,7 @@ test('it charges a bot tax when trying to mint without the right amount of token
 
   // And a loaded Candy Machine with the token gate guard and a bot tax guard.
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,

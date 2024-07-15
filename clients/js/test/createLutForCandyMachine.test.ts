@@ -16,12 +16,12 @@ import {
   setMintAuthority,
   TokenStandard,
 } from '../src';
-import { assertItemBought, createNft, createUmi, createV2 } from './_setup';
+import { assertItemBought, create, createNft, createUmi } from './_setup';
 
 test('it can create a LUT for a candy machine v2', async (t) => {
   // Given a candy machine with a candy guard.
   const umi = await createUmi();
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -88,7 +88,7 @@ test('it can create a LUT for a candy machine with no candy guard', async (t) =>
   // Given a candy machine with no candy guard.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,

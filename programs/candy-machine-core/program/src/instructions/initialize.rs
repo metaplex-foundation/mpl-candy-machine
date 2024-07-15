@@ -5,7 +5,7 @@ use crate::{
     constants::CANDY_MACHINE_SIZE, state::CandyMachine, CandyError, GumballSettings, GumballState,
 };
 
-pub fn initialize_v2(ctx: Context<InitializeV2>, settings: GumballSettings) -> Result<()> {
+pub fn initialize(ctx: Context<Initialize>, settings: GumballSettings) -> Result<()> {
     let candy_machine_account = &mut ctx.accounts.candy_machine;
 
     if settings.uri.len() >= MAX_URI_LENGTH - 4 {
@@ -45,7 +45,7 @@ pub fn initialize_v2(ctx: Context<InitializeV2>, settings: GumballSettings) -> R
 /// Initializes a new candy machine.
 #[derive(Accounts)]
 #[instruction(settings: GumballSettings)]
-pub struct InitializeV2<'info> {
+pub struct Initialize<'info> {
     /// Candy Machine account. The account space must be allocated to allow accounts larger
     /// than 10kb.
     ///

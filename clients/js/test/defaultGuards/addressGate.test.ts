@@ -10,16 +10,16 @@ import { draw, TokenStandard } from '../../src';
 import {
   assertBotTax,
   assertItemBought,
+  create,
   createNft,
   createUmi,
-  createV2,
 } from '../_setup';
 
 test('it allows minting from a specific address only', async (t) => {
   // Given a loaded Candy Machine with an addressGate guard.
   const umi = await createUmi();
   const allowedAddress = generateSigner(umi);
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -55,7 +55,7 @@ test('it forbids minting from anyone else', async (t) => {
   // Given a candy machine with an addressGate guard.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -88,7 +88,7 @@ test('it charges a bot tax when trying to mint using the wrong address', async (
   // Given a candy machine with an addressGate guard and a bot tax.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,

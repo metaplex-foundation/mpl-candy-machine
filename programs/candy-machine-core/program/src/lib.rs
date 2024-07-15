@@ -27,8 +27,8 @@ pub mod candy_machine_core {
     ///   0. `[writable]` Candy Machine account (must be pre-allocated but zero content)
     ///   2. `[]` Candy Machine authority
     ///   3. `[signer]` Payer
-    pub fn initialize_v2(ctx: Context<InitializeV2>, settings: GumballSettings) -> Result<()> {
-        instructions::initialize_v2(ctx, settings)
+    pub fn initialize(ctx: Context<Initialize>, settings: GumballSettings) -> Result<()> {
+        instructions::initialize(ctx, settings)
     }
 
     /// Updates gumball machine settings.

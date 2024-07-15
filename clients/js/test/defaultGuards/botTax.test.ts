@@ -5,16 +5,16 @@ import { draw, TokenStandard } from '../../src';
 import {
   assertBotTax,
   assertItemBought,
+  create,
   createNft,
   createUmi,
-  createV2,
 } from '../_setup';
 
 test('it does nothing if all conditions are valid', async (t) => {
   // Given a candy machine with a bot tax guard.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -46,7 +46,7 @@ test('it optionally charges a bot tax if the mint instruction is not the last on
   // Given a candy machine with a bot tax guard with lastInstruction set to true.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,

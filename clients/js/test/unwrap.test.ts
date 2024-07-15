@@ -1,12 +1,12 @@
 import { publicKey, transactionBuilder } from '@metaplex-foundation/umi';
 import test from 'ava';
 import { CandyMachine, fetchCandyMachine, unwrap, wrap } from '../src';
-import { createCandyGuard, createUmi, createV2 } from './_setup';
+import { create, createCandyGuard, createUmi } from './_setup';
 
 test('it can unwrap a candy machine v2 from its candy guard', async (t) => {
   // Given an existing candy machine and a candy guard associated with it.
   const umi = await createUmi();
-  const candyMachine = (await createV2(umi)).publicKey;
+  const candyMachine = (await create(umi)).publicKey;
   const candyGuard = await createCandyGuard(umi);
   await transactionBuilder()
     .add(wrap(umi, { candyMachine, candyGuard }))

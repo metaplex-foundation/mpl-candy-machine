@@ -13,12 +13,12 @@ import {
   SellerHistory,
   TokenStandard,
 } from '../src';
-import { createCoreAsset, createUmi, createV2 } from './_setup';
+import { create, createCoreAsset, createUmi } from './_setup';
 
 test('it can add core assets to a candy machine', async (t) => {
   // Given a Candy Machine with 5 core assets.
   const umi = await createUmi();
-  const candyMachine = await createV2(umi, { settings: { itemCapacity: 5 } });
+  const candyMachine = await create(umi, { settings: { itemCapacity: 5 } });
   const coreAsset = await createCoreAsset(umi);
 
   // When we add an coreAsset to the Candy Machine.
@@ -94,7 +94,7 @@ test('it can add core asset to a gumball machine as allowlisted seller', async (
   const umi = await createUmi();
   const otherSellerUmi = await createUmi();
   const sellersMerkleRoot = getMerkleRoot([otherSellerUmi.identity.publicKey]);
-  const candyMachine = await createV2(umi, {
+  const candyMachine = await create(umi, {
     settings: { itemCapacity: 5, sellersMerkleRoot },
   });
   const coreAsset = await createCoreAsset(otherSellerUmi);
@@ -160,7 +160,7 @@ test('it cannot add core asset as non gumball authority when there is no seller 
   // Given a Candy Machine with 5 nfts.
   const umi = await createUmi();
   const otherSellerUmi = await createUmi();
-  const candyMachine = await createV2(umi, { settings: { itemCapacity: 5 } });
+  const candyMachine = await create(umi, { settings: { itemCapacity: 5 } });
   const coreAsset = await createCoreAsset(otherSellerUmi);
 
   // When we add an nft to the Candy Machine.
@@ -184,7 +184,7 @@ test('it cannot add core asset as non-allowlisted seller when there is a seller 
   // Given a Candy Machine with 5 nfts.
   const umi = await createUmi();
   const otherSellerUmi = await createUmi();
-  const candyMachine = await createV2(umi, {
+  const candyMachine = await create(umi, {
     settings: {
       itemCapacity: 5,
       sellersMerkleRoot: getMerkleRoot([umi.identity.publicKey]),
@@ -212,7 +212,7 @@ test('it cannot add core asset as non-allowlisted seller when there is a seller 
 test('it can append additional core assets to a candy machine', async (t) => {
   // Given a Candy Machine with 5 core assets.
   const umi = await createUmi();
-  const candyMachine = await createV2(umi, { settings: { itemCapacity: 2 } });
+  const candyMachine = await create(umi, { settings: { itemCapacity: 2 } });
   const coreAssets = await Promise.all([
     createCoreAsset(umi),
     createCoreAsset(umi),
@@ -269,7 +269,7 @@ test('it can append additional core assets to a candy machine', async (t) => {
 test('it cannot add core assets that would make the candy machine exceed the maximum capacity', async (t) => {
   // Given an existing Candy Machine with a capacity of 1 item.
   const umi = await createUmi();
-  const candyMachine = await createV2(umi, { settings: { itemCapacity: 1 } });
+  const candyMachine = await create(umi, { settings: { itemCapacity: 1 } });
   const coreAssets = await Promise.all([
     createCoreAsset(umi),
     createCoreAsset(umi),
@@ -300,7 +300,7 @@ test('it cannot add core assets that would make the candy machine exceed the max
 test('it cannot add core assets once the candy machine is fully loaded', async (t) => {
   // Given an existing Candy Machine with 2 core assets loaded and a capacity of 2 core assets.
   const umi = await createUmi();
-  const candyMachine = await createV2(umi, { settings: { itemCapacity: 1 } });
+  const candyMachine = await create(umi, { settings: { itemCapacity: 1 } });
   const coreAsset = await createCoreAsset(umi);
 
   await transactionBuilder()
@@ -331,7 +331,7 @@ test('it cannot add core assets once the candy machine is fully loaded', async (
 test('it cannot add core assets that are on the secondary market', async (t) => {
   // Given a Candy Machine with 5 core assets.
   const umi = await createUmi();
-  const candyMachine = await createV2(umi, { settings: { itemCapacity: 1 } });
+  const candyMachine = await create(umi, { settings: { itemCapacity: 1 } });
   const coreAssets = await Promise.all([createCoreAsset(umi)]);
   const asset = await fetchAssetV1(umi, coreAssets[0].publicKey);
 
@@ -360,7 +360,7 @@ test('it cannot add more core assets than allowed per seller', async (t) => {
   const umi = await createUmi();
   const otherSellerUmi = await createUmi();
   const sellersMerkleRoot = getMerkleRoot([otherSellerUmi.identity.publicKey]);
-  const candyMachine = await createV2(umi, {
+  const candyMachine = await create(umi, {
     settings: { itemCapacity: 2, itemsPerSeller: 1, sellersMerkleRoot },
   });
   const coreAssets = await Promise.all([

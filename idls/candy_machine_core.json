@@ -3,7 +3,7 @@
   "name": "candy_machine_core",
   "instructions": [
     {
-      "name": "initializeV2",
+      "name": "initialize",
       "docs": [
         "Initialize the candy machine account with the specified data.",
         "",

@@ -263,7 +263,7 @@ kinobi.update(
         },
       },
     },
-    "mplCandyMachineCore.initializeV2": { name: "initializeCandyMachineV2" },
+    "mplCandyMachineCore.initialize": { name: "initializeCandyMachine" },
     "mplCandyMachineCore.addNft": {
       name: "addNft",
       accounts: {

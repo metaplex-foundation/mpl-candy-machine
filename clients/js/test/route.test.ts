@@ -13,7 +13,7 @@ import {
   getMerkleRoot,
   route,
 } from '../src';
-import { createUmi, createV2 } from './_setup';
+import { create, createUmi } from './_setup';
 
 test('it can call the route instruction of a specific guard', async (t) => {
   // Given a candy machine with an allow list guard.
@@ -26,7 +26,7 @@ test('it can call the route instruction of a specific guard', async (t) => {
     '2vjCrmEFiN9CLLhiqy8u1JPh48av8Zpzp3kNkdTtirYG',
   ];
   const merkleRoot = getMerkleRoot(allowedWallets);
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     guards: { allowList: some({ merkleRoot }) },
   });
 
@@ -65,7 +65,7 @@ test('it can call the route instruction of a specific guard on a group', async (
   ];
   const merkleRootA = getMerkleRoot(allowedWalletsA);
   const merkleRootB = getMerkleRoot(allowedWalletsB);
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     groups: [
       {
         label: 'GROUP1',
@@ -117,7 +117,7 @@ test('it can call the route instruction of a specific guard on a group', async (
 test('it cannot call the route instruction of a guard that does not support it', async (t) => {
   // Given a candy machine with an bot tax guard which does not support the route instruction.
   const umi = await createUmi();
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     guards: { botTax: some({ lamports: sol(0.01), lastInstruction: true }) },
   });
 
@@ -135,7 +135,7 @@ test('it must provide a group label if the candy guard has groups', async (t) =>
   const umi = await createUmi();
   const allowedWallets = [umi.identity.publicKey];
   const merkleRoot = getMerkleRoot(allowedWallets);
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     groups: [{ label: 'GROUP1', guards: { allowList: some({ merkleRoot }) } }],
   });
 
@@ -161,7 +161,7 @@ test('it must not provide a group label if the candy guard does not have groups'
   const umi = await createUmi();
   const allowedWallets = [umi.identity.publicKey];
   const merkleRoot = getMerkleRoot(allowedWallets);
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     guards: { allowList: some({ merkleRoot }) },
   });
 

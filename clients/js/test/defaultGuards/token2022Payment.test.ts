@@ -11,10 +11,10 @@ import test from 'ava';
 import { draw, TokenStandard } from '../../src';
 import {
   assertItemBought,
+  create,
   createMintWithHolders,
   createNft,
   createUmi,
-  createV2,
 } from '../_setup';
 
 test('it transfers Token2022 tokens from the payer to the destination', async (t) => {
@@ -39,7 +39,7 @@ test('it transfers Token2022 tokens from the payer to the destination', async (t
 
   // And a loaded Candy Machine with a token2022Payment guard that requires 5 tokens.
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,

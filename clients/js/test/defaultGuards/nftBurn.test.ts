@@ -13,10 +13,10 @@ import {
   assertBotTax,
   assertBurnedNft,
   assertItemBought,
+  create,
   createCollectionNft,
   createNft,
   createUmi,
-  createV2,
   createVerifiedNft,
   createVerifiedProgrammableNft,
 } from '../_setup';
@@ -36,7 +36,7 @@ test('it burns a specific NFT to allow minting', async (t) => {
 
   // And a loaded Candy Machine with an nftBurn guard on that collection.
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -91,7 +91,7 @@ test('it allows minting even when the payer is different from the buyer', async 
 
   // And a loaded Candy Machine with an nftBurn guard on that collection.
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -137,7 +137,7 @@ test('it fails if there is not valid NFT to burn', async (t) => {
   const umi = await createUmi();
   const requiredCollection = (await createCollectionNft(umi)).publicKey;
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -180,7 +180,7 @@ test('it charges a bot tax when trying to mint using the wrong NFT', async (t) =
   const umi = await createUmi();
   const requiredCollection = (await createCollectionNft(umi)).publicKey;
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -233,7 +233,7 @@ test('it burns a specific Programmable NFT to allow minting', async (t) => {
 
   // And a loaded Candy Machine with an nftBurn guard on that collection.
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,

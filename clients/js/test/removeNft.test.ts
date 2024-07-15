@@ -21,12 +21,12 @@ import {
   SellerHistory,
   TokenStandard,
 } from '../src';
-import { createNft, createUmi, createV2 } from './_setup';
+import { create, createNft, createUmi } from './_setup';
 
 test('it can remove nfts from a candy machine', async (t) => {
   // Given a Candy Machine with 5 nfts.
   const umi = await createUmi();
-  const candyMachine = await createV2(umi, { settings: { itemCapacity: 5 } });
+  const candyMachine = await create(umi, { settings: { itemCapacity: 5 } });
   const nft = await createNft(umi);
 
   // When we add an nft to the Candy Machine.
@@ -94,7 +94,7 @@ test('it can remove nfts from a candy machine', async (t) => {
 test('it can remove nfts at a lower index than last from a candy machine', async (t) => {
   // Given a Candy Machine with 5 nfts.
   const umi = await createUmi();
-  const candyMachine = await createV2(umi, { settings: { itemCapacity: 5 } });
+  const candyMachine = await create(umi, { settings: { itemCapacity: 5 } });
   const nfts = await Promise.all([createNft(umi), createNft(umi)]);
 
   // When we add two nfts to the Candy Machine.
@@ -162,7 +162,7 @@ test('it can remove nfts at a lower index than last from a candy machine', async
 test('it can remove additional nfts from a candy machine', async (t) => {
   // Given a Candy Machine with 5 nfts.
   const umi = await createUmi();
-  const candyMachine = await createV2(umi, { settings: { itemCapacity: 2 } });
+  const candyMachine = await create(umi, { settings: { itemCapacity: 2 } });
   const nfts = await Promise.all([createNft(umi), createNft(umi)]);
 
   await transactionBuilder()
@@ -217,7 +217,7 @@ test('it can remove additional nfts from a candy machine', async (t) => {
 test('it cannot remove nfts when the machine is empty', async (t) => {
   // Given an existing Candy Machine with a capacity of 1 item.
   const umi = await createUmi();
-  const candyMachine = await createV2(umi, { settings: { itemCapacity: 1 } });
+  const candyMachine = await create(umi, { settings: { itemCapacity: 1 } });
   const nft = await createNft(umi);
 
   // Add/remove an nft first so seller history is created
@@ -257,7 +257,7 @@ test('it cannot remove nfts when the machine is empty', async (t) => {
 test('it cannot remove nfts as a different seller', async (t) => {
   // Given a Candy Machine with 5 nfts.
   const umi = await createUmi();
-  const candyMachine = await createV2(umi, { settings: { itemCapacity: 1 } });
+  const candyMachine = await create(umi, { settings: { itemCapacity: 1 } });
   const nft = await createNft(umi);
 
   // When we add an nft to the Candy Machine.
@@ -292,7 +292,7 @@ test('it can remove another seller nft as the gumball authority', async (t) => {
   const umi = await createUmi();
   const otherSellerUmi = await createUmi();
   const sellersMerkleRoot = getMerkleRoot([otherSellerUmi.identity.publicKey]);
-  const candyMachine = await createV2(umi, {
+  const candyMachine = await create(umi, {
     settings: { itemCapacity: 1, sellersMerkleRoot },
   });
   const nft = await createNft(otherSellerUmi);
@@ -358,7 +358,7 @@ test('it can remove own nft as non gumball authority', async (t) => {
   const umi = await createUmi();
   const otherSellerUmi = await createUmi();
   const sellersMerkleRoot = getMerkleRoot([otherSellerUmi.identity.publicKey]);
-  const candyMachine = await createV2(umi, {
+  const candyMachine = await create(umi, {
     settings: { itemCapacity: 1, sellersMerkleRoot },
   });
   const nft = await createNft(otherSellerUmi);

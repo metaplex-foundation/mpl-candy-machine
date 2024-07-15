@@ -20,9 +20,9 @@ import {
 import {
   assertBotTax,
   assertItemBought,
+  create,
   createNft,
   createUmi,
-  createV2,
 } from '../_setup';
 
 test('it allows minting from wallets of a predefined list', async (t) => {
@@ -39,7 +39,7 @@ test('it allows minting from wallets of a predefined list', async (t) => {
 
   // And given a loaded Candy Machine with the allow list guard.
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -98,7 +98,7 @@ test('it is possible to verify the proof and mint in the same transaction if the
 
   // And given a loaded Candy Machine with the allow list guard.
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -155,7 +155,7 @@ test('it allows minting even when the payer is different from the buyer', async 
 
   // And given a loaded Candy Machine with the allow list guard.
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -212,7 +212,7 @@ test('it forbids minting from wallets that are not part of a predefined list', a
 
   // And given a loaded Candy Machine with the allow list guard.
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -259,7 +259,7 @@ test('it forbids minting from wallets that are providing the wrong proof', async
 
   // And given a loaded Candy Machine with the allow list guard.
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -309,7 +309,7 @@ test('it forbids minting if the wallet has not been verified via the route instr
 
   // And given a loaded Candy Machine with an allow list guard.
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -354,7 +354,7 @@ test('it charges a bot tax when trying to mint whilst not verified', async (t) =
 
   // And given a loaded Candy Machine with an allow list and a bot tax guard.
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -401,7 +401,7 @@ test('it creates a proof for a buyer even when the buyer is not a signer', async
 
   // And given a loaded Candy Machine with the allow list guard.
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -471,7 +471,7 @@ test('it creates a proof for the payer when the buyer is not present', async (t)
 
   // And given a loaded Candy Machine with the allow list guard.
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,

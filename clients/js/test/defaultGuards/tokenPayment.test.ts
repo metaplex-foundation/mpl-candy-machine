@@ -14,10 +14,10 @@ import { draw, TokenStandard } from '../../src';
 import {
   assertBotTax,
   assertItemBought,
+  create,
   createMintWithHolders,
   createNft,
   createUmi,
-  createV2,
 } from '../_setup';
 
 test('it transfers tokens from the payer to the destination', async (t) => {
@@ -38,7 +38,7 @@ test('it transfers tokens from the payer to the destination', async (t) => {
 
   // And a loaded Candy Machine with a tokenPayment guard that requires 5 tokens.
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -101,7 +101,7 @@ test('it allows minting even when the payer is different from the buyer', async 
 
   // And a loaded Candy Machine with a tokenPayment guard that requires 5 tokens.
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -163,7 +163,7 @@ test('it fails if the payer does not have enough tokens', async (t) => {
 
   // And a loaded Candy Machine with a tokenPayment guard that requires 5 tokens.
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -219,7 +219,7 @@ test('it charges a bot tax if the payer does not have enough tokens', async (t) 
 
   // And a loaded Candy Machine with a bot tax guard and a tokenPayment guard that requires 5 tokens.
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,

@@ -13,12 +13,12 @@ import {
   SellerHistory,
   TokenStandard,
 } from '../src';
-import { createCoreAsset, createUmi, createV2 } from './_setup';
+import { create, createCoreAsset, createUmi } from './_setup';
 
 test('it can remove core asset from a candy machine', async (t) => {
   // Given a Candy Machine with 5 coreAssets.
   const umi = await createUmi();
-  const candyMachine = await createV2(umi, { settings: { itemCapacity: 5 } });
+  const candyMachine = await create(umi, { settings: { itemCapacity: 5 } });
   const coreAsset = await createCoreAsset(umi);
 
   // When we add an nft to the Candy Machine.
@@ -80,7 +80,7 @@ test('it can remove core asset from a candy machine', async (t) => {
 test('it can remove core asset at a lower index than last from a candy machine', async (t) => {
   // Given a Candy Machine with 5 coreAssets.
   const umi = await createUmi();
-  const candyMachine = await createV2(umi, { settings: { itemCapacity: 5 } });
+  const candyMachine = await create(umi, { settings: { itemCapacity: 5 } });
   const coreAssets = await Promise.all([
     createCoreAsset(umi),
     createCoreAsset(umi),
@@ -145,7 +145,7 @@ test('it can remove core asset at a lower index than last from a candy machine',
 test('it can remove additional core asset from a candy machine', async (t) => {
   // Given a Candy Machine with 5 coreAssets.
   const umi = await createUmi();
-  const candyMachine = await createV2(umi, { settings: { itemCapacity: 2 } });
+  const candyMachine = await create(umi, { settings: { itemCapacity: 2 } });
   const coreAssets = await Promise.all([
     createCoreAsset(umi),
     createCoreAsset(umi),
@@ -203,7 +203,7 @@ test('it can remove additional core asset from a candy machine', async (t) => {
 test('it cannot remove core asset when the machine is empty', async (t) => {
   // Given an existing Candy Machine with a capacity of 1 item.
   const umi = await createUmi();
-  const candyMachine = await createV2(umi, { settings: { itemCapacity: 1 } });
+  const candyMachine = await create(umi, { settings: { itemCapacity: 1 } });
   const coreAsset = await createCoreAsset(umi);
 
   // Add/remove an asset first so seller history is created
@@ -243,7 +243,7 @@ test('it cannot remove core asset when the machine is empty', async (t) => {
 test('it cannot remove core asset as a different seller', async (t) => {
   // Given a Candy Machine with 5 coreAssets.
   const umi = await createUmi();
-  const candyMachine = await createV2(umi, { settings: { itemCapacity: 1 } });
+  const candyMachine = await create(umi, { settings: { itemCapacity: 1 } });
   const nft = await createCoreAsset(umi);
 
   // When we add an nft to the Candy Machine.
@@ -278,7 +278,7 @@ test('it can remove another seller core asset as the gumball authority', async (
   const umi = await createUmi();
   const otherSellerUmi = await createUmi();
   const sellersMerkleRoot = getMerkleRoot([otherSellerUmi.identity.publicKey]);
-  const candyMachine = await createV2(umi, {
+  const candyMachine = await create(umi, {
     settings: { itemCapacity: 1, sellersMerkleRoot },
   });
   const coreAsset = await createCoreAsset(otherSellerUmi);
@@ -343,7 +343,7 @@ test('it can remove own asset as non gumball authority', async (t) => {
   const umi = await createUmi();
   const otherSellerUmi = await createUmi();
   const sellersMerkleRoot = getMerkleRoot([otherSellerUmi.identity.publicKey]);
-  const candyMachine = await createV2(umi, {
+  const candyMachine = await create(umi, {
     settings: { itemCapacity: 1, sellersMerkleRoot },
   });
   const coreAsset = await createCoreAsset(otherSellerUmi);

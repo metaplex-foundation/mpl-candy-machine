@@ -16,9 +16,9 @@ import { draw, TokenStandard } from '../../src';
 import {
   assertBotTax,
   assertItemBought,
+  create,
   createNft,
   createUmi,
-  createV2,
 } from '../_setup';
 
 test('it burns a specific token to allow minting', async (t) => {
@@ -37,7 +37,7 @@ test('it burns a specific token to allow minting', async (t) => {
 
   // And a loaded Candy Machine with the tokenBurn guard.
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -96,7 +96,7 @@ test('it allows minting even when the payer is different from the buyer', async 
 
   // And a loaded Candy Machine with the tokenBurn guard.
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -156,7 +156,7 @@ test('it may burn multiple tokens from a specific mint', async (t) => {
 
   // And a loaded Candy Machine with the tokenBurn guard that requires 5 tokens.
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -214,7 +214,7 @@ test('it fails to mint if there are not enough tokens to burn', async (t) => {
 
   // And a loaded Candy Machine with the tokenBurn guard that requires 2 tokens.
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -272,7 +272,7 @@ test('it charges a bot tax when trying to mint without the required amount of to
 
   // And a loaded Candy Machine with a botTax guard and a tokenBurn guard that requires 2 tokens.
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,

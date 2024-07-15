@@ -1,12 +1,12 @@
 import { transactionBuilder } from '@metaplex-foundation/umi';
 import test from 'ava';
 import { deleteCandyMachine, TokenStandard } from '../src';
-import { createNft, createUmi, createV2 } from './_setup';
+import { create, createNft, createUmi } from './_setup';
 
 test('it can delete an empty candy machine', async (t) => {
   // Given an existing candy machine.
   const umi = await createUmi();
-  const candyMachine = await createV2(umi);
+  const candyMachine = await create(umi);
 
   // When we delete it.
   await transactionBuilder()
@@ -20,7 +20,7 @@ test('it can delete an empty candy machine', async (t) => {
 test('it cannot delete a candy machine that has not been fully settled', async (t) => {
   // Given an existing candy machine.
   const umi = await createUmi();
-  const candyMachine = await createV2(umi, {
+  const candyMachine = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,

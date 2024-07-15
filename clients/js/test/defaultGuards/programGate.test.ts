@@ -15,9 +15,9 @@ import { draw, TokenStandard } from '../../src';
 import {
   assertBotTax,
   assertItemBought,
+  create,
   createNft,
   createUmi,
-  createV2,
 } from '../_setup';
 
 test('it allows minting with specified program in transaction', async (t) => {
@@ -25,7 +25,7 @@ test('it allows minting with specified program in transaction', async (t) => {
   const umi = await createUmi();
   const memoProgram = getSplMemoProgramId(umi);
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -59,7 +59,7 @@ test('it allows minting even when the payer is different from the buyer', async 
   const umi = await createUmi();
   const memoProgram = getSplMemoProgramId(umi);
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -96,7 +96,7 @@ test('it forbids minting with unspecified program in transaction', async (t) => 
   // Given a loaded Candy Machine with a programGate guard allowing no additional programs.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -131,7 +131,7 @@ test('it forbids candy machine creation with more than 5 specified programs', as
   const umi = await createUmi();
   const memoProgram = getSplMemoProgramId(umi);
 
-  const promise = createV2(umi, {
+  const promise = create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -155,7 +155,7 @@ test('it charges a bot tax when minting with unspecified program in transaction'
   // and a programGate guard allowing no additional programs.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,

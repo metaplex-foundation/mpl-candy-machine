@@ -43,7 +43,7 @@ import {
   createCandyGuard as baseCreateCandyGuard,
   CreateCandyGuardInstructionAccounts,
   CreateCandyGuardInstructionDataArgs,
-  createCandyMachineV2 as baseCreateCandyMachineV2,
+  createCandyMachine as baseCreateCandyMachineV2,
   DefaultGuardSetArgs,
   fetchCandyMachine,
   findCandyGuardPda,
@@ -207,7 +207,7 @@ export const createMintWithHolders = async (
   return [mint, ...atas];
 };
 
-export const createV2 = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
+export const create = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
   umi: Umi,
   input: Omit<
     Partial<Parameters<typeof baseCreateCandyMachineV2>[1]>,

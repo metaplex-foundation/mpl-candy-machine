@@ -19,10 +19,10 @@ import { draw, TokenStandard } from '../../src';
 import {
   assertBotTax,
   assertItemBought,
+  create,
   createCollectionNft,
   createNft,
   createUmi,
-  createV2,
   createVerifiedNft,
   createVerifiedProgrammableNft,
 } from '../_setup';
@@ -36,7 +36,7 @@ test('it transfers an NFT from the payer to the destination', async (t) => {
     authority: requiredCollectionAuthority,
   });
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -97,7 +97,7 @@ test('it allows minting even when the payer is different from the buyer', async 
     authority: requiredCollectionAuthority,
   });
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -161,7 +161,7 @@ test('it works when the provided NFT is not on an associated token account', asy
     authority: requiredCollectionAuthority,
   });
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -239,7 +239,7 @@ test('it fails if the payer does not own the right NFT', async (t) => {
     authority: requiredCollectionAuthority,
   });
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -290,7 +290,7 @@ test('it fails if the payer tries to provide an NFT from an unverified collectio
     authority: requiredCollectionAuthority,
   });
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -342,7 +342,7 @@ test('it charges a bot tax when trying to pay with the wrong NFT', async (t) => 
     authority: requiredCollectionAuthority,
   });
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -394,7 +394,7 @@ test('it transfers a Programmable NFT from the payer to the destination', async 
     authority: requiredCollectionAuthority,
   });
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,

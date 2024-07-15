@@ -13,9 +13,9 @@ import { draw, TokenStandard } from '../../src';
 import {
   assertBotTax,
   assertItemBought,
+  create,
   createNft,
   createUmi,
-  createV2,
 } from '../_setup';
 
 test('it transfers SOL from the payer to the destination', async (t) => {
@@ -23,7 +23,7 @@ test('it transfers SOL from the payer to the destination', async (t) => {
   const umi = await createUmi();
   const destination = generateSigner(umi).publicKey;
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -71,7 +71,7 @@ test('it fails if the payer does not have enough funds', async (t) => {
   const umi = await createUmi();
   const destination = generateSigner(umi).publicKey;
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -113,7 +113,7 @@ test('it charges a bot tax if the payer does not have enough funds', async (t) =
   const umi = await createUmi();
   const destination = generateSigner(umi).publicKey;
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,

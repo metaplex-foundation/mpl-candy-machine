@@ -8,7 +8,7 @@ import test from 'ava';
 import {
   CandyMachine,
   CandyMachineItem,
-  createCandyMachineV2,
+  createCandyMachine,
   fetchCandyMachine,
   GumballSettings,
   GumballState,
@@ -31,7 +31,7 @@ test('it can create a candy machine using config line settings', async (t) => {
   };
   await transactionBuilder()
     .add(
-      await createCandyMachineV2(umi, {
+      await createCandyMachine(umi, {
         candyMachine,
         settings,
       })
@@ -73,7 +73,7 @@ test("it can create a candy machine that's bigger than 10Kb", async (t) => {
   };
   await transactionBuilder()
     .add(
-      await createCandyMachineV2(umi, {
+      await createCandyMachine(umi, {
         ...defaultGumballSettings(),
         candyMachine,
         settings,

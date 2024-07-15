@@ -10,9 +10,9 @@ import { draw, TokenStandard } from '../../src';
 import {
   assertBotTax,
   assertItemBought,
+  create,
   createNft,
   createUmi,
-  createV2,
 } from '../_setup';
 
 test('it allows minting when the third party signer is provided', async (t) => {
@@ -20,7 +20,7 @@ test('it allows minting when the third party signer is provided', async (t) => {
   const umi = await createUmi();
   const thirdPartySigner = generateSigner(umi);
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -57,7 +57,7 @@ test('it forbids minting when the third party signer is wrong', async (t) => {
   const umi = await createUmi();
   const thirdPartySigner = generateSigner(umi);
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -95,7 +95,7 @@ test('it charges a bot tax when trying to mint using the wrong third party signe
   const umi = await createUmi();
   const thirdPartySigner = generateSigner(umi);
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,

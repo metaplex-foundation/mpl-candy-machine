@@ -7,18 +7,18 @@ import {
   createCandyGuard,
   CreateCandyGuardInstructionDataArgs,
 } from './createCandyGuard';
-import { createCandyMachineV2 } from './createCandyMachineV2';
+import { createCandyMachine } from './createCandyMachine';
 import { DefaultGuardSetArgs } from './defaultGuards';
 import { wrap } from './generated';
 import { GuardRepository, GuardSetArgs } from './guards';
 import { findCandyGuardPda } from './hooked';
 
 export type CreateInput<DA extends GuardSetArgs = DefaultGuardSetArgs> =
-  Parameters<typeof createCandyMachineV2>[1] &
+  Parameters<typeof createCandyMachine>[1] &
     CreateCandyGuardInstructionDataArgs<DA>;
 
 export const create = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
-  context: Parameters<typeof createCandyMachineV2>[0] &
+  context: Parameters<typeof createCandyMachine>[0] &
     Pick<Context, 'eddsa'> & {
       guards: GuardRepository;
     },
@@ -29,7 +29,7 @@ export const create = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
     base: input.candyMachine.publicKey,
   });
   return transactionBuilder()
-    .add(await createCandyMachineV2(context, rest))
+    .add(await createCandyMachine(context, rest))
     .add(
       createCandyGuard(context, {
         base: input.candyMachine,

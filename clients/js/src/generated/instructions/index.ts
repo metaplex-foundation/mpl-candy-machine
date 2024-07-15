@@ -12,7 +12,7 @@ export * from './deleteCandyGuard';
 export * from './deleteCandyMachine';
 export * from './drawFromCandyMachine';
 export * from './endSale';
-export * from './initializeCandyMachineV2';
+export * from './initializeCandyMachine';
 export * from './removeCoreAsset';
 export * from './removeNft';
 export * from './setCandyGuardAuthority';

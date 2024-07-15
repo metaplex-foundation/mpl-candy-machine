@@ -21,9 +21,9 @@ import {
 } from '../src';
 import {
   assertItemBought,
+  create,
   createNft,
   createUmi,
-  createV2,
   tomorrow,
   yesterday,
 } from './_setup';
@@ -32,7 +32,7 @@ test('it can mint from a candy guard with no guards', async (t) => {
   // Given a candy machine with a candy guard that has no guards.
   const umi = await createUmi();
 
-  const candyMachineSigner = await createV2(umi, {
+  const candyMachineSigner = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -70,7 +70,7 @@ test('it can mint from a candy guard with guards', async (t) => {
   const umi = await createUmi();
 
   const destination = generateSigner(umi).publicKey;
-  const candyMachineSigner = await createV2(umi, {
+  const candyMachineSigner = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -119,7 +119,7 @@ test('it can mint from a candy guard with groups', async (t) => {
   const umi = await createUmi();
 
   const destination = generateSigner(umi).publicKey;
-  const candyMachineSigner = await createV2(umi, {
+  const candyMachineSigner = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -161,7 +161,7 @@ test('it cannot mint using the default guards if the candy guard has groups', as
   const umi = await createUmi();
 
   const destination = generateSigner(umi).publicKey;
-  const candyMachineSigner = await createV2(umi, {
+  const candyMachineSigner = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -200,7 +200,7 @@ test('it cannot mint from a group if the provided group label does not exist', a
   const umi = await createUmi();
 
   const destination = generateSigner(umi).publicKey;
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -235,7 +235,7 @@ test('it can mint using an explicit payer', async (t) => {
   const umi = await createUmi();
 
   const destination = generateSigner(umi).publicKey;
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -275,7 +275,7 @@ test('it cannot mint from a candy machine not in sale started state', async (t) 
   // Given an empty candy machine.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -305,7 +305,7 @@ test('it cannot mint from a candy machine that has been fully minted', async (t)
   // Given a candy machine that has been fully minted.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -350,7 +350,7 @@ test('it can mint from a candy machine in a random order', async (t) => {
     (item) => ({ id: item.publicKey, tokenStandard: TokenStandard.NonFungible })
   );
 
-  const { publicKey: candyMachine } = await createV2(umi, {
+  const { publicKey: candyMachine } = await create(umi, {
     guards: {},
   });
 

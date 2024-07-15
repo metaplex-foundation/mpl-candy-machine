@@ -9,13 +9,13 @@ import {
   fetchCandyMachine,
   setCandyMachineAuthority,
 } from '../src';
-import { createUmi, createV2 } from './_setup';
+import { create, createUmi } from './_setup';
 
 test('it can update the authority of a candy machine v2', async (t) => {
   // Given a Candy Machine using authority A.
   const umi = await createUmi();
   const authorityA = generateSigner(umi);
-  const candyMachine = await createV2(umi, {
+  const candyMachine = await create(umi, {
     authority: authorityA.publicKey,
   });
 

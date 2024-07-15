@@ -9,9 +9,9 @@ import {
 } from '@metaplex-foundation/umi';
 import { DefaultGuardSetMintArgs } from './defaultGuards';
 import {
-  mintV2 as baseMintV2,
-  MintV2InstructionAccounts,
-} from './generated/instructions/mintV2';
+  draw as baseDraw,
+  DrawInstructionAccounts,
+} from './generated/instructions/draw';
 import {
   CandyGuardProgram,
   GuardRepository,
@@ -22,29 +22,27 @@ import {
 } from './guards';
 import { findCandyGuardPda } from './hooked';
 
-export { MintV2InstructionAccounts };
+export { DrawInstructionAccounts };
 
-export type MintV2InstructionData<MA extends GuardSetMintArgs> = {
+export type DrawInstructionData<MA extends GuardSetMintArgs> = {
   discriminator: Array<number>;
   mintArgs: MA;
   group: Option<string>;
 };
 
-export type MintV2InstructionDataArgs<MA extends GuardSetMintArgs> = {
+export type DrawInstructionDataArgs<MA extends GuardSetMintArgs> = {
   mintArgs?: Partial<MA>;
   group?: OptionOrNullable<string>;
   /** @defaultValue `TokenStandard.NonFungible`. */
   tokenStandard?: TokenStandard;
 };
 
-export function mintV2<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
-  context: Parameters<typeof baseMintV2>[0] & {
+export function draw<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
+  context: Parameters<typeof baseDraw>[0] & {
     guards: GuardRepository;
   },
-  input: MintV2InstructionAccounts &
-    MintV2InstructionDataArgs<
-      MA extends undefined ? DefaultGuardSetMintArgs : MA
-    >
+  input: DrawInstructionAccounts &
+    DrawInstructionDataArgs<MA extends undefined ? DefaultGuardSetMintArgs : MA>
 ): TransactionBuilder {
   const { mintArgs = {}, group = none(), ...rest } = input;
 
@@ -64,7 +62,7 @@ export function mintV2<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
     MA extends undefined ? DefaultGuardSetMintArgs : MA
   >(context, program, mintContext, mintArgs);
 
-  const ix = baseMintV2(context, {
+  const ix = baseDraw(context, {
     ...rest,
     mintArgs: data,
     group,

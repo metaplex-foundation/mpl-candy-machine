@@ -117,8 +117,8 @@ pub mod candy_machine_core {
     ///   4. `[writable]` Mint account of the NFT
     ///   18. `[]` System program
     ///   20. `[]` SlotHashes sysvar cluster data.
-    pub fn mint_v2<'info>(ctx: Context<'_, '_, '_, 'info, MintV2<'info>>) -> Result<()> {
-        instructions::mint_v2(ctx)
+    pub fn draw<'info>(ctx: Context<'_, '_, '_, 'info, Draw<'info>>) -> Result<()> {
+        instructions::draw(ctx)
     }
 
     /// Settles a Core asset sale

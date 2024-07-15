@@ -14,7 +14,7 @@ import {
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import test from 'ava';
-import { mintV2, TokenStandard } from '../../src';
+import { draw, TokenStandard } from '../../src';
 import {
   assertBotTax,
   assertItemBought,
@@ -58,7 +58,7 @@ test('it allows minting when the payer owns an NFT from a certain collection', a
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: {
@@ -106,7 +106,7 @@ test('it allows minting even when the payer is different from the buyer', async 
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         buyer,
@@ -169,7 +169,7 @@ test('it allows minting when the NFT is not on an associated token account', asy
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: {
@@ -239,7 +239,7 @@ test('it forbids minting when the payer does not own an NFT from a certain colle
   const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: {
@@ -290,7 +290,7 @@ test('it forbids minting when the payer tries to provide an NFT from the wrong c
   const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: {
@@ -335,7 +335,7 @@ test('it forbids minting when the payer tries to provide an NFT from an unverifi
   const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: {
@@ -374,7 +374,7 @@ test('it charges a bot tax when trying to mint without owning the right NFT', as
   const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: {

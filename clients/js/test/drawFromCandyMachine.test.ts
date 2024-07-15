@@ -3,8 +3,8 @@ import { generateSigner, transactionBuilder } from '@metaplex-foundation/umi';
 import test from 'ava';
 import {
   CandyMachine,
+  drawFromCandyMachine,
   fetchCandyMachine,
-  mintFromCandyMachineV2,
   TokenStandard,
 } from '../src';
 import { assertItemBought, createNft, createUmi, createV2 } from './_setup';
@@ -31,7 +31,7 @@ test('it can mint directly from a candy machine as the mint authority', async (t
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 400000 }))
     .add(
-      mintFromCandyMachineV2(umi, {
+      drawFromCandyMachine(umi, {
         candyMachine,
         mintAuthority: umi.identity,
       })
@@ -68,7 +68,7 @@ test('it cannot mint directly from a candy machine if we are not the mint author
   const mintAuthorityB = generateSigner(umi);
   const promise = transactionBuilder()
     .add(
-      mintFromCandyMachineV2(umi, {
+      drawFromCandyMachine(umi, {
         candyMachine,
         mintAuthority: mintAuthorityB,
       })

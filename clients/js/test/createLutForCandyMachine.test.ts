@@ -10,9 +10,9 @@ import { generateSigner, transactionBuilder } from '@metaplex-foundation/umi';
 import test from 'ava';
 import {
   createLutForCandyMachine,
+  draw,
   findCandyGuardPda,
   getMplCandyMachineCoreProgramId,
-  mintV2,
   setMintAuthority,
   TokenStandard,
 } from '../src';
@@ -36,7 +36,7 @@ test('it can create a LUT for a candy machine v2', async (t) => {
   const builderWithoutLut = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
       })
     );

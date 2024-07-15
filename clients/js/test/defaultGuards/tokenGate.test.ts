@@ -12,7 +12,7 @@ import {
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import test from 'ava';
-import { mintV2, TokenStandard } from '../../src';
+import { draw, TokenStandard } from '../../src';
 import {
   assertBotTax,
   assertItemBought,
@@ -55,7 +55,7 @@ test('it allows minting when the payer owns a specific token', async (t) => {
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: {
@@ -104,7 +104,7 @@ test('it allows minting even when the payer is different from the buyer', async 
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         buyer,
@@ -154,7 +154,7 @@ test('it allows minting when the payer owns multiple tokens from a specific mint
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: {
@@ -212,7 +212,7 @@ test('it forbids minting when the owner does not own any required tokens', async
   const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: {
@@ -260,7 +260,7 @@ test('it forbids minting when the owner does not own enough tokens', async (t) =
   const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: {
@@ -309,7 +309,7 @@ test('it charges a bot tax when trying to mint without the right amount of token
   const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: {

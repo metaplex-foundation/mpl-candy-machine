@@ -497,7 +497,7 @@
       "args": []
     },
     {
-      "name": "mintV2",
+      "name": "draw",
       "docs": [
         "Mint an NFT.",
         "",

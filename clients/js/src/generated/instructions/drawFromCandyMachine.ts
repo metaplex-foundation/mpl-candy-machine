@@ -29,7 +29,7 @@ import {
 } from '../shared';
 
 // Accounts.
-export type MintFromCandyMachineV2InstructionAccounts = {
+export type DrawFromCandyMachineInstructionAccounts = {
   /** Candy machine account. */
   candyMachine: PublicKey | Pda;
   /** Candy machine mint authority (mint only allowed for the mint_authority). */
@@ -53,39 +53,39 @@ export type MintFromCandyMachineV2InstructionAccounts = {
 };
 
 // Data.
-export type MintFromCandyMachineV2InstructionData = {
+export type DrawFromCandyMachineInstructionData = {
   discriminator: Array<number>;
 };
 
-export type MintFromCandyMachineV2InstructionDataArgs = {};
+export type DrawFromCandyMachineInstructionDataArgs = {};
 
-export function getMintFromCandyMachineV2InstructionDataSerializer(): Serializer<
-  MintFromCandyMachineV2InstructionDataArgs,
-  MintFromCandyMachineV2InstructionData
+export function getDrawFromCandyMachineInstructionDataSerializer(): Serializer<
+  DrawFromCandyMachineInstructionDataArgs,
+  DrawFromCandyMachineInstructionData
 > {
   return mapSerializer<
-    MintFromCandyMachineV2InstructionDataArgs,
+    DrawFromCandyMachineInstructionDataArgs,
     any,
-    MintFromCandyMachineV2InstructionData
+    DrawFromCandyMachineInstructionData
   >(
-    struct<MintFromCandyMachineV2InstructionData>(
+    struct<DrawFromCandyMachineInstructionData>(
       [['discriminator', array(u8(), { size: 8 })]],
-      { description: 'MintFromCandyMachineV2InstructionData' }
+      { description: 'DrawFromCandyMachineInstructionData' }
     ),
     (value) => ({
       ...value,
-      discriminator: [120, 121, 23, 146, 173, 110, 199, 205],
+      discriminator: [61, 40, 62, 184, 31, 176, 24, 130],
     })
   ) as Serializer<
-    MintFromCandyMachineV2InstructionDataArgs,
-    MintFromCandyMachineV2InstructionData
+    DrawFromCandyMachineInstructionDataArgs,
+    DrawFromCandyMachineInstructionData
   >;
 }
 
 // Instruction.
-export function mintFromCandyMachineV2(
+export function drawFromCandyMachine(
   context: Pick<Context, 'identity' | 'payer' | 'programs'>,
-  input: MintFromCandyMachineV2InstructionAccounts
+  input: DrawFromCandyMachineInstructionAccounts
 ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey(
@@ -155,9 +155,7 @@ export function mintFromCandyMachineV2(
   );
 
   // Data.
-  const data = getMintFromCandyMachineV2InstructionDataSerializer().serialize(
-    {}
-  );
+  const data = getDrawFromCandyMachineInstructionDataSerializer().serialize({});
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

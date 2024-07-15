@@ -7,10 +7,10 @@ import {
 } from '@metaplex-foundation/umi';
 import test from 'ava';
 import {
+  draw,
   fetchAllocationTracker,
   findAllocationTrackerPda,
   findCandyGuardPda,
-  mintV2,
   route,
   TokenStandard,
 } from '../../src';
@@ -62,7 +62,7 @@ test('it allows minting when the allocation limit is not reached', async (t) => 
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: { allocation: some({ id: 1 }) },
@@ -123,7 +123,7 @@ test('it forbids minting when the allocation limit is reached', async (t) => {
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: { allocation: some({ id: 1 }) },
@@ -135,7 +135,7 @@ test('it forbids minting when the allocation limit is reached', async (t) => {
   const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: { allocation: some({ id: 1 }) },
@@ -211,7 +211,7 @@ test('the allocation limit is local to each id', async (t) => {
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
         buyer: buyerA,
         mintArgs: { allocation: some({ id: 1 }) },
@@ -226,7 +226,7 @@ test('the allocation limit is local to each id', async (t) => {
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
         buyer: buyerB,
         mintArgs: { allocation: some({ id: 2 }) },
@@ -279,7 +279,7 @@ test('it charges a bot tax when trying to mint after the limit', async (t) => {
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: { allocation: some({ id: 1 }) },
@@ -291,7 +291,7 @@ test('it charges a bot tax when trying to mint after the limit', async (t) => {
   const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: { allocation: some({ id: 1 }) },

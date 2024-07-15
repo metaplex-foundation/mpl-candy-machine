@@ -1,7 +1,7 @@
 import { addMemo, setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
 import { sol, some, transactionBuilder } from '@metaplex-foundation/umi';
 import test from 'ava';
-import { mintV2, TokenStandard } from '../../src';
+import { draw, TokenStandard } from '../../src';
 import {
   assertBotTax,
   assertItemBought,
@@ -32,7 +32,7 @@ test('it does nothing if all conditions are valid', async (t) => {
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
       })
     )
@@ -64,7 +64,7 @@ test('it optionally charges a bot tax if the mint instruction is not the last on
   const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
       })
     )

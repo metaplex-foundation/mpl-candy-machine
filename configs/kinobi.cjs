@@ -293,13 +293,13 @@ kinobi.update(
         seller: { defaultsTo: k.identityDefault() },
       },
     },
-    "mplCandyMachineCore.mintV2": {
-      name: "mintFromCandyMachineV2",
+    "mplCandyMachineCore.draw": {
+      name: "drawFromCandyMachine",
       accounts: {
         buyer: { defaultsTo: k.identityDefault() },
       },
     },
-    "mplCandyGuard.mintV2": {
+    "mplCandyGuard.draw": {
       internal: true,
       args: {
         label: { name: "group" },

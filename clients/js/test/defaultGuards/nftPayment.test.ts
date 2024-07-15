@@ -15,7 +15,7 @@ import {
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import test from 'ava';
-import { mintV2, TokenStandard } from '../../src';
+import { draw, TokenStandard } from '../../src';
 import {
   assertBotTax,
   assertItemBought,
@@ -61,7 +61,7 @@ test('it transfers an NFT from the payer to the destination', async (t) => {
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: {
@@ -123,7 +123,7 @@ test('it allows minting even when the payer is different from the buyer', async 
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         buyer,
@@ -202,7 +202,7 @@ test('it works when the provided NFT is not on an associated token account', asy
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: {
@@ -262,7 +262,7 @@ test('it fails if the payer does not own the right NFT', async (t) => {
   const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: {
@@ -314,7 +314,7 @@ test('it fails if the payer tries to provide an NFT from an unverified collectio
   const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: {
@@ -366,7 +366,7 @@ test('it charges a bot tax when trying to pay with the wrong NFT', async (t) => 
   const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: {
@@ -420,7 +420,7 @@ test('it transfers a Programmable NFT from the payer to the destination', async 
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 800_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: {

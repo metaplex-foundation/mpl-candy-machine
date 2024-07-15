@@ -1,7 +1,7 @@
 import { setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
 import { sol, some, transactionBuilder } from '@metaplex-foundation/umi';
 import test from 'ava';
-import { mintV2, TokenStandard } from '../../src';
+import { draw, TokenStandard } from '../../src';
 import {
   assertBotTax,
   assertItemBought,
@@ -34,7 +34,7 @@ test('it allows minting after the start date', async (t) => {
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
       })
     )
@@ -66,7 +66,7 @@ test('it forbids minting before the start date', async (t) => {
   const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
       })
     )
@@ -99,7 +99,7 @@ test('it charges a bot tax when trying to mint before the start date', async (t)
   const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
       })
     )

@@ -8,7 +8,7 @@ import {
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import test from 'ava';
-import { mintV2, TokenStandard } from '../../src';
+import { draw, TokenStandard } from '../../src';
 import {
   assertBotTax,
   assertBurnedNft,
@@ -54,7 +54,7 @@ test('it burns a specific NFT to allow minting', async (t) => {
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: {
@@ -109,7 +109,7 @@ test('it allows minting even when the payer is different from the buyer', async 
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         buyer,
@@ -156,7 +156,7 @@ test('it fails if there is not valid NFT to burn', async (t) => {
   const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: {
@@ -200,7 +200,7 @@ test('it charges a bot tax when trying to mint using the wrong NFT', async (t) =
   const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: {
@@ -251,7 +251,7 @@ test('it burns a specific Programmable NFT to allow minting', async (t) => {
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: {

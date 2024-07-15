@@ -37,7 +37,7 @@ import {
 } from '../shared';
 
 // Accounts.
-export type MintV2InstructionAccounts = {
+export type DrawInstructionAccounts = {
   /** Candy Guard account. */
   candyGuard?: PublicKey | Pda;
   /**
@@ -77,44 +77,44 @@ export type MintV2InstructionAccounts = {
 };
 
 // Data.
-export type MintV2InstructionData = {
+export type DrawInstructionData = {
   discriminator: Array<number>;
   mintArgs: Uint8Array;
   group: Option<string>;
 };
 
-export type MintV2InstructionDataArgs = {
+export type DrawInstructionDataArgs = {
   mintArgs: Uint8Array;
   group: OptionOrNullable<string>;
 };
 
-export function getMintV2InstructionDataSerializer(): Serializer<
-  MintV2InstructionDataArgs,
-  MintV2InstructionData
+export function getDrawInstructionDataSerializer(): Serializer<
+  DrawInstructionDataArgs,
+  DrawInstructionData
 > {
-  return mapSerializer<MintV2InstructionDataArgs, any, MintV2InstructionData>(
-    struct<MintV2InstructionData>(
+  return mapSerializer<DrawInstructionDataArgs, any, DrawInstructionData>(
+    struct<DrawInstructionData>(
       [
         ['discriminator', array(u8(), { size: 8 })],
         ['mintArgs', bytes({ size: u32() })],
         ['group', option(string())],
       ],
-      { description: 'MintV2InstructionData' }
+      { description: 'DrawInstructionData' }
     ),
     (value) => ({
       ...value,
-      discriminator: [120, 121, 23, 146, 173, 110, 199, 205],
+      discriminator: [61, 40, 62, 184, 31, 176, 24, 130],
     })
-  ) as Serializer<MintV2InstructionDataArgs, MintV2InstructionData>;
+  ) as Serializer<DrawInstructionDataArgs, DrawInstructionData>;
 }
 
 // Args.
-export type MintV2InstructionArgs = MintV2InstructionDataArgs;
+export type DrawInstructionArgs = DrawInstructionDataArgs;
 
 // Instruction.
-export function mintV2(
+export function draw(
   context: Pick<Context, 'eddsa' | 'identity' | 'payer' | 'programs'>,
-  input: MintV2InstructionAccounts & MintV2InstructionArgs
+  input: DrawInstructionAccounts & DrawInstructionArgs
 ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey(
@@ -169,7 +169,7 @@ export function mintV2(
   };
 
   // Arguments.
-  const resolvedArgs: MintV2InstructionArgs = { ...input };
+  const resolvedArgs: DrawInstructionArgs = { ...input };
 
   // Default values.
   if (!resolvedAccounts.candyGuard.value) {
@@ -235,8 +235,8 @@ export function mintV2(
   );
 
   // Data.
-  const data = getMintV2InstructionDataSerializer().serialize(
-    resolvedArgs as MintV2InstructionDataArgs
+  const data = getDrawInstructionDataSerializer().serialize(
+    resolvedArgs as DrawInstructionDataArgs
   );
 
   // Bytes Created On Chain.

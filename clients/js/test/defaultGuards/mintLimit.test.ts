@@ -8,10 +8,10 @@ import {
 } from '@metaplex-foundation/umi';
 import test from 'ava';
 import {
+  draw,
   fetchMintCounter,
   findCandyGuardPda,
   findMintCounterPda,
-  mintV2,
   TokenStandard,
 } from '../../src';
 import {
@@ -48,7 +48,7 @@ test('it allows minting when the mint limit is not reached', async (t) => {
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: { mintLimit: some({ id: 1 }) },
@@ -97,7 +97,7 @@ test('it allows minting even when the payer is different from the buyer', async 
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         buyer,
@@ -147,7 +147,7 @@ test('it forbids minting when the mint limit is reached', async (t) => {
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: { mintLimit: some({ id: 42 }) },
@@ -159,7 +159,7 @@ test('it forbids minting when the mint limit is reached', async (t) => {
   const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
         mintArgs: { mintLimit: some({ id: 42 }) },
       })
@@ -197,7 +197,7 @@ test('the mint limit is local to each wallet', async (t) => {
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         buyer: buyerA,
@@ -214,7 +214,7 @@ test('the mint limit is local to each wallet', async (t) => {
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         buyer: buyerB,
@@ -255,7 +255,7 @@ test('it charges a bot tax when trying to mint after the limit', async (t) => {
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: { mintLimit: some({ id: 42 }) },
@@ -268,7 +268,7 @@ test('it charges a bot tax when trying to mint after the limit', async (t) => {
   const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: { mintLimit: some({ id: 42 }) },

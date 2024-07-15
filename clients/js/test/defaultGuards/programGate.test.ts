@@ -11,7 +11,7 @@ import {
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import test from 'ava';
-import { mintV2, TokenStandard } from '../../src';
+import { draw, TokenStandard } from '../../src';
 import {
   assertBotTax,
   assertItemBought,
@@ -44,7 +44,7 @@ test('it allows minting with specified program in transaction', async (t) => {
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(addMemo(umi, { memo: 'Instruction from the Memo program' }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
       })
     )
@@ -80,7 +80,7 @@ test('it allows minting even when the payer is different from the buyer', async 
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(addMemo(umi, { memo: 'Instruction from the Memo program' }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         buyer,
@@ -115,7 +115,7 @@ test('it forbids minting with unspecified program in transaction', async (t) => 
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(addMemo(umi, { memo: 'Instruction from the Memo program' }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
       })
     )
@@ -175,7 +175,7 @@ test('it charges a bot tax when minting with unspecified program in transaction'
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(addMemo(umi, { memo: 'Instruction from the Memo program' }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
       })
     )

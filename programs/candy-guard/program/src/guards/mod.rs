@@ -2,9 +2,9 @@ use std::collections::BTreeMap;
 
 pub use anchor_lang::prelude::*;
 
-pub use crate::{errors::CandyGuardError, instructions::mint_v2::*, state::GuardSet};
+pub use crate::{errors::CandyGuardError, instructions::draw::*, state::GuardSet};
 use crate::{
-    instructions::{MintAccounts, Route, RouteContext},
+    instructions::{DrawAccounts, Route, RouteContext},
     state::CandyGuardData,
 };
 
@@ -154,7 +154,7 @@ pub trait Guard: Condition + AnchorSerialize + AnchorDeserialize {
 }
 pub struct EvaluationContext<'b, 'c: 'info, 'info> {
     /// Accounts required to mint an NFT.
-    pub(crate) accounts: MintAccounts<'b, 'c, 'info>,
+    pub(crate) accounts: DrawAccounts<'b, 'c, 'info>,
 
     /// The cursor for the remaining account list. When a guard "consumes" one of the
     /// remaining accounts, it should increment the cursor.

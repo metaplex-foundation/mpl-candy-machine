@@ -9,11 +9,11 @@ import {
 } from '@metaplex-foundation/umi';
 import test from 'ava';
 import {
+  draw,
   findAllowListProofPda,
   findCandyGuardPda,
   getMerkleProof,
   getMerkleRoot,
-  mintV2,
   route,
   TokenStandard,
 } from '../../src';
@@ -72,7 +72,7 @@ test('it allows minting from wallets of a predefined list', async (t) => {
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: { allowList: some({ merkleRoot }) },
@@ -128,7 +128,7 @@ test('it is possible to verify the proof and mint in the same transaction if the
       })
     )
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: { allowList: some({ merkleRoot }) },
@@ -185,7 +185,7 @@ test('it allows minting even when the payer is different from the buyer', async 
       })
     )
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         buyer,
@@ -328,7 +328,7 @@ test('it forbids minting if the wallet has not been verified via the route instr
   const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: { allowList: some({ merkleRoot }) },
@@ -374,7 +374,7 @@ test('it charges a bot tax when trying to mint whilst not verified', async (t) =
   const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
 
         mintArgs: { allowList: some({ merkleRoot }) },

@@ -9,14 +9,14 @@ use crate::{
     state::{CandyGuard, CandyGuardData, GuardSet, DATA_OFFSET, SEED},
 };
 
-use super::{MintAccounts, Token};
+use super::{DrawAccounts, Token};
 
-pub fn mint_v2<'c: 'info, 'info>(
-    ctx: Context<'_, '_, 'c, 'info, MintV2<'info>>,
+pub fn draw<'c: 'info, 'info>(
+    ctx: Context<'_, '_, 'c, 'info, Draw<'info>>,
     mint_args: Vec<u8>,
     label: Option<String>,
 ) -> Result<()> {
-    let accounts = MintAccounts {
+    let accounts = DrawAccounts {
         candy_guard: &ctx.accounts.candy_guard,
         candy_machine: &ctx.accounts.candy_machine,
         _candy_machine_program: ctx.accounts.candy_machine_program.to_account_info(),
@@ -38,10 +38,10 @@ pub fn mint_v2<'c: 'info, 'info>(
         indices: BTreeMap::new(),
     };
 
-    process_mint(&mut ctx, mint_args, label)
+    process_draw(&mut ctx, mint_args, label)
 }
 
-pub fn process_mint(
+pub fn process_draw(
     ctx: &mut EvaluationContext<'_, '_, '_>,
     mint_args: Vec<u8>,
     label: Option<String>,
@@ -76,7 +76,7 @@ pub fn process_mint(
         condition.pre_actions(ctx, &guard_set, &mint_args)?;
     }
 
-    cpi_mint(ctx)?;
+    cpi_draw(ctx)?;
 
     for condition in &conditions {
         condition.post_actions(ctx, &guard_set, &mint_args)?;
@@ -96,11 +96,11 @@ fn process_error(ctx: &EvaluationContext, guard_set: &GuardSet, error: Error) ->
 }
 
 /// Send a mint transaction to the candy machine.
-fn cpi_mint(ctx: &EvaluationContext) -> Result<()> {
+fn cpi_draw(ctx: &EvaluationContext) -> Result<()> {
     let candy_guard = &ctx.accounts.candy_guard;
 
     // candy machine mint instruction accounts
-    let mint_accounts = Box::new(mpl_candy_machine_core::cpi::accounts::MintV2 {
+    let mint_accounts = Box::new(mpl_candy_machine_core::cpi::accounts::Draw {
         candy_machine: ctx.accounts.candy_machine.to_account_info(),
         mint_authority: candy_guard.to_account_info(),
         payer: ctx.accounts.payer.clone(),
@@ -115,7 +115,7 @@ fn cpi_mint(ctx: &EvaluationContext) -> Result<()> {
     let mint_ix = Instruction {
         program_id: mpl_candy_machine_core::ID,
         accounts: mint_metas,
-        data: mpl_candy_machine_core::instruction::MintV2::DISCRIMINATOR.to_vec(),
+        data: mpl_candy_machine_core::instruction::Draw::DISCRIMINATOR.to_vec(),
     };
 
     // PDA signer for the transaction
@@ -129,7 +129,7 @@ fn cpi_mint(ctx: &EvaluationContext) -> Result<()> {
 
 /// Mint an NFT.
 #[derive(Accounts)]
-pub struct MintV2<'info> {
+pub struct Draw<'info> {
     /// Candy Guard account.
     #[account(seeds = [SEED, candy_guard.base.key().as_ref()], bump = candy_guard.bump)]
     candy_guard: Account<'info, CandyGuard>,

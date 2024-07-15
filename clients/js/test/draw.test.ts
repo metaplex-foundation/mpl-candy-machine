@@ -14,8 +14,8 @@ import test from 'ava';
 import {
   addNft,
   CandyMachine,
+  draw,
   fetchCandyMachine,
-  mintV2,
   startSale,
   TokenStandard,
 } from '../src';
@@ -50,7 +50,7 @@ test('it can mint from a candy guard with no guards', async (t) => {
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
         buyer,
       })
@@ -91,7 +91,7 @@ test('it can mint from a candy guard with guards', async (t) => {
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
         payer,
         buyer,
@@ -143,7 +143,7 @@ test('it can mint from a candy guard with groups', async (t) => {
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
         buyer,
         mintArgs: { solPayment: { destination } },
@@ -182,7 +182,7 @@ test('it cannot mint using the default guards if the candy guard has groups', as
   const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
         buyer,
         mintArgs: { solPayment: { destination } },
@@ -217,7 +217,7 @@ test('it cannot mint from a group if the provided group label does not exist', a
   const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
         buyer,
         mintArgs: { solPayment: { destination } },
@@ -254,7 +254,7 @@ test('it can mint using an explicit payer', async (t) => {
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
         buyer,
         payer,
@@ -290,7 +290,7 @@ test('it cannot mint from a candy machine not in sale started state', async (t) 
   const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
         buyer,
       })
@@ -319,7 +319,7 @@ test('it cannot mint from a candy machine that has been fully minted', async (t)
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         buyer: umi.identity,
         candyMachine,
       })
@@ -331,7 +331,7 @@ test('it cannot mint from a candy machine that has been fully minted', async (t)
   const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
-      mintV2(umi, {
+      draw(umi, {
         candyMachine,
       })
     )
@@ -394,7 +394,7 @@ const drain = async (umi: Umi, candyMachine: PublicKey, available: number) => {
     await transactionBuilder()
       .add(setComputeUnitLimit(umi, { units: 600_000 }))
       .add(
-        mintV2(umi, {
+        draw(umi, {
           candyMachine,
           buyer,
         })

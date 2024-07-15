@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
+pub use draw::*;
 pub use initialize::*;
-pub use mint_v2::*;
 use mpl_candy_machine_core::CandyMachine;
 pub use route::*;
 pub use set_authority::*;
@@ -11,8 +11,8 @@ pub use wrap::*;
 
 use crate::state::CandyGuard;
 
+pub mod draw;
 pub mod initialize;
-pub mod mint_v2;
 pub mod route;
 pub mod set_authority;
 pub mod unwrap;
@@ -21,7 +21,7 @@ pub mod withdraw;
 pub mod wrap;
 
 /// Accounts to mint an NFT.
-pub(crate) struct MintAccounts<'b, 'c, 'info> {
+pub(crate) struct DrawAccounts<'b, 'c, 'info> {
     pub(crate) candy_guard: &'b Account<'info, CandyGuard>,
     pub(crate) candy_machine: &'b Account<'info, CandyMachine>,
     pub(crate) payer: AccountInfo<'info>,

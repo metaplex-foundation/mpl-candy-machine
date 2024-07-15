@@ -12,7 +12,7 @@ use crate::{
 
 /// Mints a new NFT.
 #[derive(Accounts)]
-pub struct MintV2<'info> {
+pub struct Draw<'info> {
     /// Candy machine account.
     #[account(
         mut, 
@@ -44,18 +44,18 @@ pub struct MintV2<'info> {
 }
 
 /// Accounts to mint an NFT.
-pub(crate) struct MintAccounts<'info> {
+pub(crate) struct DrawAccounts<'info> {
     pub buyer: AccountInfo<'info>,
     pub recent_slothashes: AccountInfo<'info>,
 }
 
-pub fn mint_v2<'info>(ctx: Context<'_, '_, '_, 'info, MintV2<'info>>) -> Result<()> {
-    let accounts = MintAccounts {
+pub fn draw<'info>(ctx: Context<'_, '_, '_, 'info, Draw<'info>>) -> Result<()> {
+    let accounts = DrawAccounts {
         buyer: ctx.accounts.buyer.to_account_info(),
         recent_slothashes: ctx.accounts.recent_slothashes.to_account_info(),
     };
 
-    process_mint(
+    process_draw(
         &mut ctx.accounts.candy_machine,
         accounts
     )
@@ -66,9 +66,9 @@ pub fn mint_v2<'info>(ctx: Context<'_, '_, '_, 'info, MintV2<'info>>) -> Result<
 /// The index minted depends on the configuration of the candy machine: it could be
 /// a psuedo-randomly selected one or sequential. In both cases, after minted a
 /// specific index, the candy machine does not allow to mint the same index again.
-pub(crate) fn process_mint(
+pub(crate) fn process_draw(
     candy_machine: &mut Box<Account<'_, CandyMachine>>,
-    accounts: MintAccounts,
+    accounts: DrawAccounts,
 ) -> Result<()> {
     // are there items to be minted?
     if candy_machine.items_redeemed >= candy_machine.finalized_items_count {

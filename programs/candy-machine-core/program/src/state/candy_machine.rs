@@ -15,6 +15,8 @@ pub struct CandyMachine {
     pub authority: Pubkey,
     /// Authority address allowed to mint from the candy machine.
     pub mint_authority: Pubkey,
+    /// Fee config for the marketplace this gumball is listed on
+    pub marketplace_fee_config: Option<FeeConfig>,
     /// Number of assets redeemed.
     pub items_redeemed: u64,
     /// Number of assets loaded at the time the sale started.
@@ -62,6 +64,14 @@ impl CandyMachine {
     }
 }
 
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug)]
+pub struct FeeConfig {
+    /// Where fees will go
+    fee_account: Pubkey,
+    /// Sale basis points for fees
+    fee_bps: u16,
+}
+
 /// Config line struct for storing asset (NFT) data pre-mint.
 #[derive(AnchorSerialize, AnchorDeserialize, Debug)]
 pub struct ConfigLineInput {
@@ -84,7 +94,6 @@ pub struct ConfigLine {
     pub token_standard: TokenStandard,
 }
 
-// Need to include this as it doesn't get picked up from mallow-utils by anchor idl generation
 #[derive(Copy, AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, Debug)]
 pub enum TokenStandard {
     NonFungible,

@@ -14,10 +14,14 @@ pub const GUMBALL_SETTINGS_BYTE_INDEX: usize = 8 // discriminator
     + 1                                       // version
     + 32                                      // authority
     + 32                                      // mint authority
+    + FEE_CONFIG_SIZE + 1                     // marketplace fee config (+1 for optional)
     + 8                                       // items redeemed
     + 8                                       // finalized items count
     + 8                                       // items settled
     + 1; // state
+
+pub const FEE_CONFIG_SIZE: usize = 32 // fee account
+    + 2; // bps
 
 // Determine the start of the account hidden section.
 pub const CANDY_MACHINE_SIZE: usize = GUMBALL_SETTINGS_BYTE_INDEX

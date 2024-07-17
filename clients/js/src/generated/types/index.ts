@@ -13,6 +13,7 @@ export * from './botTax';
 export * from './configLine';
 export * from './configLineInput';
 export * from './endDate';
+export * from './feeConfig';
 export * from './gatekeeper';
 export * from './guardType';
 export * from './gumballSettings';

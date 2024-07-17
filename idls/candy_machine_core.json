@@ -48,6 +48,14 @@
           "type": {
             "defined": "GumballSettings"
           }
+        },
+        {
+          "name": "feeConfig",
+          "type": {
+            "option": {
+              "defined": "FeeConfig"
+            }
+          }
         }
       ]
     },
@@ -763,6 +771,17 @@
             "type": "publicKey"
           },
           {
+            "name": "marketplaceFeeConfig",
+            "docs": [
+              "Fee config for the marketplace this gumball is listed on"
+            ],
+            "type": {
+              "option": {
+                "defined": "FeeConfig"
+              }
+            }
+          },
+          {
             "name": "itemsRedeemed",
             "docs": [
               "Number of assets redeemed."
@@ -838,6 +857,28 @@
     }
   ],
   "types": [
+    {
+      "name": "FeeConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "feeAccount",
+            "docs": [
+              "Where fees will go"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "feeBps",
+            "docs": [
+              "Sale basis points for fees"
+            ],
+            "type": "u16"
+          }
+        ]
+      }
+    },
     {
       "name": "ConfigLineInput",
       "docs": [

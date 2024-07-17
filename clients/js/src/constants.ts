@@ -1,8 +1,14 @@
+export const FEE_CONFIG_SIZE =
+  32 + // fee account
+  2; // fee bps
+
 export const CANDY_MACHINE_HIDDEN_SECTION =
   8 + // discriminator
   1 + // version
   32 + // authority
   32 + // mint authority
+  FEE_CONFIG_SIZE +
+  1 + // marketplace fee config (optional)
   8 + // items redeemed
   8 + // finalized items count
   8 + // items settled

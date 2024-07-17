@@ -6,10 +6,11 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { PublicKey } from '@metaplex-foundation/umi';
+import { Option, OptionOrNullable, PublicKey } from '@metaplex-foundation/umi';
 import {
   array,
   mapSerializer,
+  option,
   publicKey as publicKeySerializer,
   Serializer,
   struct,
@@ -17,6 +18,9 @@ import {
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import {
+  FeeConfig,
+  FeeConfigArgs,
+  getFeeConfigSerializer,
   getGumballSettingsSerializer,
   getGumballStateSerializer,
   GumballSettings,
@@ -34,6 +38,8 @@ export type CandyMachineAccountData = {
   authority: PublicKey;
   /** Authority address allowed to mint from the candy machine. */
   mintAuthority: PublicKey;
+  /** Fee config for the marketplace this gumball is listed on */
+  marketplaceFeeConfig: Option<FeeConfig>;
   /** Number of assets redeemed. */
   itemsRedeemed: bigint;
   /** Number of assets loaded at the time the sale started. */
@@ -53,6 +59,8 @@ export type CandyMachineAccountDataArgs = {
   authority: PublicKey;
   /** Authority address allowed to mint from the candy machine. */
   mintAuthority: PublicKey;
+  /** Fee config for the marketplace this gumball is listed on */
+  marketplaceFeeConfig: OptionOrNullable<FeeConfigArgs>;
   /** Number of assets redeemed. */
   itemsRedeemed: number | bigint;
   /** Number of assets loaded at the time the sale started. */
@@ -80,6 +88,7 @@ export function getCandyMachineAccountDataSerializer(): Serializer<
         ['version', u8()],
         ['authority', publicKeySerializer()],
         ['mintAuthority', publicKeySerializer()],
+        ['marketplaceFeeConfig', option(getFeeConfigSerializer())],
         ['itemsRedeemed', u64()],
         ['finalizedItemsCount', u64()],
         ['itemsSettled', u64()],

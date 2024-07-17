@@ -8,6 +8,9 @@
 
 import {
   Context,
+  none,
+  Option,
+  OptionOrNullable,
   Pda,
   PublicKey,
   Signer,
@@ -17,6 +20,7 @@ import {
 import {
   array,
   mapSerializer,
+  option,
   Serializer,
   struct,
   u8,
@@ -27,6 +31,9 @@ import {
   ResolvedAccountsWithIndices,
 } from '../shared';
 import {
+  FeeConfig,
+  FeeConfigArgs,
+  getFeeConfigSerializer,
   getGumballSettingsSerializer,
   GumballSettings,
   GumballSettingsArgs,
@@ -55,10 +62,12 @@ export type InitializeCandyMachineInstructionAccounts = {
 export type InitializeCandyMachineInstructionData = {
   discriminator: Array<number>;
   settings: GumballSettings;
+  feeConfig: Option<FeeConfig>;
 };
 
 export type InitializeCandyMachineInstructionDataArgs = {
   settings: GumballSettingsArgs;
+  feeConfig?: OptionOrNullable<FeeConfigArgs>;
 };
 
 export function getInitializeCandyMachineInstructionDataSerializer(): Serializer<
@@ -74,12 +83,14 @@ export function getInitializeCandyMachineInstructionDataSerializer(): Serializer
       [
         ['discriminator', array(u8(), { size: 8 })],
         ['settings', getGumballSettingsSerializer()],
+        ['feeConfig', option(getFeeConfigSerializer())],
       ],
       { description: 'InitializeCandyMachineInstructionData' }
     ),
     (value) => ({
       ...value,
       discriminator: [175, 175, 109, 31, 13, 152, 155, 237],
+      feeConfig: value.feeConfig ?? none(),
     })
   ) as Serializer<
     InitializeCandyMachineInstructionDataArgs,

@@ -12,6 +12,7 @@ import {
   Context,
   deserializeAccount,
   gpaBuilder,
+  OptionOrNullable,
   Pda,
   PublicKey,
   publicKey as toPublicKey,
@@ -21,6 +22,7 @@ import {
 } from '@metaplex-foundation/umi';
 import {
   array,
+  option,
   publicKey as publicKeySerializer,
   u64,
   u8,
@@ -30,6 +32,8 @@ import {
   getCandyMachineAccountDataSerializer,
 } from '../../hooked';
 import {
+  FeeConfigArgs,
+  getFeeConfigSerializer,
   getGumballSettingsSerializer,
   getGumballStateSerializer,
   GumballSettingsArgs,
@@ -110,6 +114,7 @@ export function getCandyMachineGpaBuilder(
       version: number;
       authority: PublicKey;
       mintAuthority: PublicKey;
+      marketplaceFeeConfig: OptionOrNullable<FeeConfigArgs>;
       itemsRedeemed: number | bigint;
       finalizedItemsCount: number | bigint;
       itemsSettled: number | bigint;
@@ -120,11 +125,12 @@ export function getCandyMachineGpaBuilder(
       version: [8, u8()],
       authority: [9, publicKeySerializer()],
       mintAuthority: [41, publicKeySerializer()],
-      itemsRedeemed: [73, u64()],
-      finalizedItemsCount: [81, u64()],
-      itemsSettled: [89, u64()],
-      state: [97, getGumballStateSerializer()],
-      settings: [98, getGumballSettingsSerializer()],
+      marketplaceFeeConfig: [73, option(getFeeConfigSerializer())],
+      itemsRedeemed: [null, u64()],
+      finalizedItemsCount: [null, u64()],
+      itemsSettled: [null, u64()],
+      state: [null, getGumballStateSerializer()],
+      settings: [null, getGumballSettingsSerializer()],
     })
     .deserializeUsing<CandyMachine>((account) =>
       deserializeCandyMachine(account)

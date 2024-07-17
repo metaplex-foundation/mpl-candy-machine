@@ -2,10 +2,15 @@ use anchor_lang::{prelude::*, Discriminator};
 use mpl_token_metadata::MAX_URI_LENGTH;
 
 use crate::{
-    constants::CANDY_MACHINE_SIZE, state::CandyMachine, CandyError, GumballSettings, GumballState,
+    constants::CANDY_MACHINE_SIZE, state::CandyMachine, CandyError, FeeConfig, GumballSettings,
+    GumballState,
 };
 
-pub fn initialize(ctx: Context<Initialize>, settings: GumballSettings) -> Result<()> {
+pub fn initialize(
+    ctx: Context<Initialize>,
+    settings: GumballSettings,
+    fee_config: Option<FeeConfig>,
+) -> Result<()> {
     let candy_machine_account = &mut ctx.accounts.candy_machine;
 
     if settings.uri.len() >= MAX_URI_LENGTH - 4 {
@@ -23,6 +28,7 @@ pub fn initialize(ctx: Context<Initialize>, settings: GumballSettings) -> Result
         version: 0,
         authority: ctx.accounts.authority.key(),
         mint_authority: ctx.accounts.authority.key(),
+        marketplace_fee_config: fee_config,
         items_redeemed: 0,
         finalized_items_count: 0,
         items_settled: 0,

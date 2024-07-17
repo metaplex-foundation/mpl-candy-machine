@@ -9,6 +9,7 @@ pub use utils::*;
 
 pub mod constants;
 pub mod errors;
+mod events;
 mod instructions;
 mod processors;
 mod state;
@@ -131,8 +132,8 @@ pub mod candy_machine_core {
     ///
     ///   0. `[writable]` Candy Machine account
     ///   1. `[signer]` Candy Machine authority
-    pub fn settle_core_asset_sale(ctx: Context<SettleCoreAssetSale>) -> Result<()> {
-        instructions::settle_core_asset_sale(ctx)
+    pub fn settle_core_asset_sale(ctx: Context<SettleCoreAssetSale>, index: u32) -> Result<()> {
+        instructions::settle_core_asset_sale(ctx, index)
     }
 
     /// Settles a legacy NFT sale
@@ -141,8 +142,11 @@ pub mod candy_machine_core {
     ///
     ///   0. `[writable]` Candy Machine account
     ///   1. `[signer]` Candy Machine authority
-    pub fn settle_nft_asset_sale(ctx: Context<SettleNftSale>) -> Result<()> {
-        instructions::settle_nft_sale(ctx)
+    pub fn settle_nft_asset_sale<'info>(
+        ctx: Context<'_, '_, '_, 'info, SettleNftSale<'info>>,
+        index: u32,
+    ) -> Result<()> {
+        instructions::settle_nft_sale(ctx, index)
     }
 
     /// Set a new authority of the candy machine.

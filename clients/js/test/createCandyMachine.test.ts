@@ -1,6 +1,5 @@
 import {
   generateSigner,
-  none,
   publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
@@ -22,12 +21,7 @@ test('it can create a candy machine using config line settings', async (t) => {
   // When we create a new candy machine with config line settings.
   const candyMachine = generateSigner(umi);
   const settings: GumballSettings = {
-    uri: 'https://arweave.net/abc123',
-    itemCapacity: 20n,
-    itemsPerSeller: 1,
-    sellersMerkleRoot: none(),
-    curatorFeeBps: 500,
-    hideSoldItems: false,
+    ...defaultGumballSettings(),
   };
   await transactionBuilder()
     .add(
@@ -64,12 +58,8 @@ test("it can create a candy machine that's bigger than 10Kb", async (t) => {
   // When we create a new candy machine with a large amount of items.
   const candyMachine = generateSigner(umi);
   const settings: GumballSettings = {
-    uri: 'https://arweave.net/abc123',
+    ...defaultGumballSettings(),
     itemCapacity: 20000n,
-    itemsPerSeller: 1,
-    sellersMerkleRoot: none(),
-    curatorFeeBps: 500,
-    hideSoldItems: false,
   };
   await transactionBuilder()
     .add(

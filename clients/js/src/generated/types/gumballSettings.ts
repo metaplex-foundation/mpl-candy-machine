@@ -6,11 +6,12 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { Option, OptionOrNullable } from '@metaplex-foundation/umi';
+import { Option, OptionOrNullable, PublicKey } from '@metaplex-foundation/umi';
 import {
   bool,
   bytes,
   option,
+  publicKey as publicKeySerializer,
   Serializer,
   string,
   struct,
@@ -31,6 +32,10 @@ export type GumballSettings = {
   curatorFeeBps: number;
   /** True if the front end should hide items that have been sold. */
   hideSoldItems: boolean;
+  /** Payment token for the mint */
+  paymentMint: PublicKey;
+  /** Price per draw */
+  itemPrice: bigint;
 };
 
 export type GumballSettingsArgs = {
@@ -46,6 +51,10 @@ export type GumballSettingsArgs = {
   curatorFeeBps: number;
   /** True if the front end should hide items that have been sold. */
   hideSoldItems: boolean;
+  /** Payment token for the mint */
+  paymentMint: PublicKey;
+  /** Price per draw */
+  itemPrice: number | bigint;
 };
 
 export function getGumballSettingsSerializer(): Serializer<
@@ -60,6 +69,8 @@ export function getGumballSettingsSerializer(): Serializer<
       ['sellersMerkleRoot', option(bytes({ size: 32 }))],
       ['curatorFeeBps', u16()],
       ['hideSoldItems', bool()],
+      ['paymentMint', publicKeySerializer()],
+      ['itemPrice', u64()],
     ],
     { description: 'GumballSettings' }
   ) as Serializer<GumballSettingsArgs, GumballSettings>;

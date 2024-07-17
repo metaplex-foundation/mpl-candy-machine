@@ -1,8 +1,4 @@
 import {
-  findMetadataPda,
-  updatePrimarySaleHappenedViaToken,
-} from '@metaplex-foundation/mpl-token-metadata';
-import {
   fetchToken,
   findAssociatedTokenPda,
   TokenState,
@@ -384,36 +380,6 @@ test('it cannot add nfts once the candy machine is fully loaded', async (t) => {
   await t.throwsAsync(promise, {
     message: /IndexGreaterThanLength/,
   });
-});
-
-test('it cannot add nfts that are on the secondary market', async (t) => {
-  // Given a Candy Machine with 5 nfts.
-  const umi = await createUmi();
-  const candyMachine = await create(umi, { settings: { itemCapacity: 1 } });
-  const nfts = await Promise.all([createNft(umi)]);
-
-  await updatePrimarySaleHappenedViaToken(umi, {
-    metadata: findMetadataPda(umi, { mint: nfts[0].publicKey })[0],
-    owner: umi.identity,
-    token: findAssociatedTokenPda(umi, {
-      owner: umi.identity.publicKey,
-      mint: nfts[0].publicKey,
-    })[0],
-  }).sendAndConfirm(umi);
-
-  // When we add two nfts to the Candy Machine.
-  const promise = transactionBuilder()
-    .add(
-      addNft(umi, {
-        candyMachine: candyMachine.publicKey,
-        mint: nfts[0].publicKey,
-      })
-    )
-    .sendAndConfirm(umi);
-
-  // Then an error is thrown.
-  // Then we expect a program error.
-  await t.throwsAsync(promise, { message: /NotPrimarySale/ });
 });
 
 test('it cannot add more nfts than allowed per seller', async (t) => {

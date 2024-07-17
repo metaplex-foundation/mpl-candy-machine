@@ -8,8 +8,7 @@ pub mod remove_core_asset;
 pub mod remove_nft;
 pub mod set_authority;
 pub mod set_mint_authority;
-pub mod settle_core_asset_sale;
-pub mod settle_nft_sale;
+pub mod settle_item_sale;
 pub mod start_sale;
 pub mod update_settings;
 
@@ -23,7 +22,6 @@ pub use remove_core_asset::*;
 pub use remove_nft::*;
 pub use set_authority::*;
 pub use set_mint_authority::*;
-pub use settle_core_asset_sale::*;
-pub use settle_nft_sale::*;
+pub use settle_item_sale::*;
 pub use start_sale::*;
 pub use update_settings::*;

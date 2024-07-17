@@ -1,5 +1,5 @@
 use crate::{
-    assert_can_add_item, assert_is_non_printable_edition,
+    assert_can_add_item,
     constants::{AUTHORITY_SEED, SELLER_HISTORY_SEED},
     state::CandyMachine,
     CandyError, ConfigLineInput, GumballState, SellerHistory, Token, TokenStandard,
@@ -11,6 +11,7 @@ use mpl_token_metadata::{
 };
 use solana_program::program::invoke;
 use spl_token::instruction::approve;
+use utils::assert_is_non_printable_edition;
 
 /// Add nft to a gumball machine.
 #[derive(Accounts)]
@@ -95,7 +96,6 @@ pub fn add_nft(ctx: Context<AddNft>, seller_proof_path: Option<Vec<[u8; 32]>>) -
         metadata.mint == ctx.accounts.mint.key(),
         CandyError::MintMismatch
     );
-    require!(!metadata.primary_sale_happened, CandyError::NotPrimarySale);
 
     // Prevent selling printable master editions
     assert_is_non_printable_edition(&ctx.accounts.edition.to_account_info())?;

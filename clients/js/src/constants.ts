@@ -18,7 +18,9 @@ export const CANDY_MACHINE_HIDDEN_SECTION =
   2 + // items per seller
   33 + // add items merkle root
   2 + // curator fee bps
-  1; // hide sold items
+  1 + // hide sold items
+  32 + // payment token
+  8; // price per draw
 
 export const CANDY_MACHINE_SIZE = CANDY_MACHINE_HIDDEN_SECTION;
 

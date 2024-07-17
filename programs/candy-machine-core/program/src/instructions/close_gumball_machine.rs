@@ -34,5 +34,18 @@ pub fn close_gumball_machine(ctx: Context<CloseGumballMachine>) -> Result<()> {
         CandyError::InvalidState
     );
 
+    // TODO: close payment account if using payment token
+    // token::close_account(
+    //     CpiContext::new(
+    //         token_program.to_account_info(),
+    //         CloseAccount {
+    //             account: escrow_currency_account.to_account_info(),
+    //             destination: seller.to_account_info(),
+    //             authority: auction_config.to_account_info(),
+    //         },
+    //     )
+    //     .with_signer(&[&auth_seeds[..]]),
+    // )?;
+
     Ok(())
 }

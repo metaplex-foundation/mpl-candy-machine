@@ -617,23 +617,172 @@
       ],
       "accounts": [
         {
-          "name": "candyMachine",
-          "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "Candy machine account."
+          "name": "settleAccounts",
+          "accounts": [
+            {
+              "name": "payer",
+              "isMut": true,
+              "isSigner": true,
+              "docs": [
+                "Anyone can settle the sale"
+              ]
+            },
+            {
+              "name": "candyMachine",
+              "isMut": true,
+              "isSigner": false,
+              "docs": [
+                "Candy machine account."
+              ]
+            },
+            {
+              "name": "authorityPda",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "authorityPdaPaymentAccount",
+              "isMut": true,
+              "isSigner": false,
+              "isOptional": true,
+              "docs": [
+                "Payment account for authority pda if using token payment"
+              ]
+            },
+            {
+              "name": "authority",
+              "isMut": true,
+              "isSigner": false,
+              "docs": [
+                "Seller of the nft"
+              ]
+            },
+            {
+              "name": "authorityPaymentAccount",
+              "isMut": true,
+              "isSigner": false,
+              "isOptional": true,
+              "docs": [
+                "Payment account for authority if using token payment"
+              ]
+            },
+            {
+              "name": "seller",
+              "isMut": true,
+              "isSigner": false,
+              "docs": [
+                "Seller of the nft"
+              ]
+            },
+            {
+              "name": "sellerPaymentAccount",
+              "isMut": true,
+              "isSigner": false,
+              "isOptional": true,
+              "docs": [
+                "Payment account for seller if using token payment"
+              ]
+            },
+            {
+              "name": "sellerHistory",
+              "isMut": true,
+              "isSigner": false,
+              "docs": [
+                "Seller history account."
+              ]
+            },
+            {
+              "name": "buyer",
+              "isMut": false,
+              "isSigner": false,
+              "docs": [
+                "buyer of the nft"
+              ]
+            },
+            {
+              "name": "feeAccount",
+              "isMut": true,
+              "isSigner": false,
+              "isOptional": true,
+              "docs": [
+                "Fee account for marketplace fee if using fee config"
+              ]
+            },
+            {
+              "name": "feePaymentAccount",
+              "isMut": true,
+              "isSigner": false,
+              "isOptional": true,
+              "docs": [
+                "Payment account for marketplace fee if using token payment"
+              ]
+            },
+            {
+              "name": "paymentMint",
+              "isMut": false,
+              "isSigner": false,
+              "isOptional": true,
+              "docs": [
+                "Payment mint if using non-native payment token"
+              ]
+            },
+            {
+              "name": "tokenProgram",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "associatedTokenProgram",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "systemProgram",
+              "isMut": false,
+              "isSigner": false
+            },
+            {
+              "name": "rent",
+              "isMut": false,
+              "isSigner": false
+            }
           ]
         },
         {
-          "name": "payer",
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
           "isMut": true,
-          "isSigner": true,
+          "isSigner": false
+        },
+        {
+          "name": "buyerTokenAccount",
+          "isMut": true,
+          "isSigner": false,
           "docs": [
-            "Anyone can settle the sale"
+            "Nft token account for buyer"
           ]
+        },
+        {
+          "name": "metadata",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "index",
+          "type": "u32"
+        }
+      ]
     },
     {
       "name": "setAuthority",
@@ -998,6 +1147,20 @@
               "True if the front end should hide items that have been sold."
             ],
             "type": "bool"
+          },
+          {
+            "name": "paymentMint",
+            "docs": [
+              "Payment token for the mint"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "itemPrice",
+            "docs": [
+              "Price per draw"
+            ],
+            "type": "u64"
           }
         ]
       }
@@ -1035,6 +1198,57 @@
           }
         ]
       }
+    }
+  ],
+  "events": [
+    {
+      "name": "SettleSaleEvent",
+      "fields": [
+        {
+          "name": "mint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "authority",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "seller",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "buyer",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "amount",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "paymentMint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "feeConfig",
+          "type": {
+            "option": {
+              "defined": "FeeConfig"
+            }
+          },
+          "index": false
+        },
+        {
+          "name": "curatorFeeBps",
+          "type": "u16",
+          "index": false
+        }
+      ]
     }
   ],
   "errors": [

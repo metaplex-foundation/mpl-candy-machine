@@ -13,7 +13,7 @@ import {
   GumballState,
   initializeCandyMachine,
 } from '../src';
-import { createUmi } from './_setup';
+import { createUmi, defaultGumballSettings } from './_setup';
 
 /**
  * Note that most of the tests for the "initializeCandyMachine" instructions are
@@ -35,6 +35,7 @@ test('it can initialize a new candy machine account', async (t) => {
     .sendAndConfirm(umi);
 
   const settings: GumballSettings = {
+    ...defaultGumballSettings(),
     uri: 'https://arweave.net/abc123',
     itemCapacity: 20n,
     itemsPerSeller: 1,
@@ -48,6 +49,10 @@ test('it can initialize a new candy machine account', async (t) => {
       initializeCandyMachine(umi, {
         candyMachine: candyMachine.publicKey,
         settings,
+        feeConfig: {
+          feeAccount: publicKey(umi.identity),
+          feeBps: 500,
+        },
       })
     )
     .sendAndConfirm(umi);

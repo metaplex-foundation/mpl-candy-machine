@@ -1,7 +1,6 @@
 use crate::{
     assert_can_add_item,
     constants::{AUTHORITY_SEED, SELLER_HISTORY_SEED},
-    get_core_asset_update_authority,
     state::CandyMachine,
     CandyError, ConfigLineInput, GumballState, SellerHistory, TokenStandard,
 };
@@ -128,12 +127,6 @@ pub fn add_core_asset(
             return err!(CandyError::InvalidCollection);
         }
     }
-
-    let (update_authority, asset) = get_core_asset_update_authority(asset_info, collection)?;
-    require!(
-        update_authority.is_some() && asset.base.owner == update_authority.unwrap(),
-        CandyError::NotPrimarySale
-    );
 
     crate::processors::add_item(
         candy_machine,

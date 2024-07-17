@@ -25,12 +25,14 @@ pub const FEE_CONFIG_SIZE: usize = 32 // fee account
 
 // Determine the start of the account hidden section.
 pub const CANDY_MACHINE_SIZE: usize = GUMBALL_SETTINGS_BYTE_INDEX
-    + MAX_URI_LENGTH                          // uri
-    + 8                                       // item capacity
-    + 2                                       // items per seller
-    + 33                                       // add items merkle root
-    + 2                                       // curator fee bps
-    + 1; // hide sold items
+    + MAX_URI_LENGTH                        // uri
+    + 8                                     // item capacity
+    + 2                                     // items per seller
+    + 33                                    // add items merkle root
+    + 2                                     // curator fee bps
+    + 1                                     // hide sold items
+    + 32                                    // payment token
+    + 8; // price per draw
 
 pub const CONFIG_LINE_SIZE: usize = 32// mint
     + 32 // seller

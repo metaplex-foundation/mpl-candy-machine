@@ -64,12 +64,12 @@ impl CandyMachine {
     }
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, Debug)]
 pub struct FeeConfig {
     /// Where fees will go
-    fee_account: Pubkey,
+    pub fee_account: Pubkey,
     /// Sale basis points for fees
-    fee_bps: u16,
+    pub fee_bps: u16,
 }
 
 /// Config line struct for storing asset (NFT) data pre-mint.
@@ -122,4 +122,8 @@ pub struct GumballSettings {
     pub curator_fee_bps: u16,
     /// True if the front end should hide items that have been sold.
     pub hide_sold_items: bool,
+    /// Payment token for the mint
+    pub payment_mint: Pubkey,
+    /// Price per draw
+    pub item_price: u64,
 }

@@ -13,6 +13,8 @@ pub fn start_sale(ctx: Context<StartSale>) -> Result<()> {
     candy_machine.state = GumballState::SaleLive;
     candy_machine.finalized_items_count = count as u64;
 
+    // TODO: initialize payment token account if using payment token
+
     Ok(())
 }
 

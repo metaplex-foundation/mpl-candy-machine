@@ -1,5 +1,5 @@
-import { AssetV1, fetchAssetV1, transfer } from '@metaplex-foundation/mpl-core';
-import { generateSigner, transactionBuilder } from '@metaplex-foundation/umi';
+import { AssetV1, fetchAssetV1 } from '@metaplex-foundation/mpl-core';
+import { transactionBuilder } from '@metaplex-foundation/umi';
 import test from 'ava';
 import {
   addCoreAsset,
@@ -326,33 +326,6 @@ test('it cannot add core assets once the candy machine is fully loaded', async (
   await t.throwsAsync(promise, {
     message: /IndexGreaterThanLength/,
   });
-});
-
-test('it cannot add core assets that are on the secondary market', async (t) => {
-  // Given a Candy Machine with 5 core assets.
-  const umi = await createUmi();
-  const candyMachine = await create(umi, { settings: { itemCapacity: 1 } });
-  const coreAssets = await Promise.all([createCoreAsset(umi)]);
-  const asset = await fetchAssetV1(umi, coreAssets[0].publicKey);
-
-  await transfer(umi, {
-    asset,
-    newOwner: generateSigner(umi).publicKey,
-  }).sendAndConfirm(umi);
-
-  // When we add two core assets to the Candy Machine.
-  const promise = transactionBuilder()
-    .add(
-      addCoreAsset(umi, {
-        candyMachine: candyMachine.publicKey,
-        asset: coreAssets[0].publicKey,
-      })
-    )
-    .sendAndConfirm(umi);
-
-  // Then an error is thrown.
-  // Then we expect a program error.
-  await t.throwsAsync(promise, { message: /NotPrimarySale/ });
 });
 
 test('it cannot add more core assets than allowed per seller', async (t) => {

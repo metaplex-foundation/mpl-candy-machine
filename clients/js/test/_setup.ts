@@ -285,6 +285,8 @@ export const defaultGumballSettings = (): GumballSettings => ({
   sellersMerkleRoot: none(),
   curatorFeeBps: 500,
   hideSoldItems: false,
+  paymentMint: publicKey('So11111111111111111111111111111111111111112'),
+  itemPrice: BigInt(10 ** 9),
 });
 
 export const createCandyGuard = async <

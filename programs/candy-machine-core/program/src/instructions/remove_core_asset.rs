@@ -39,7 +39,10 @@ pub struct RemoveCoreAsset<'info> {
     /// CHECK: Safe due to seeds constraint
     #[account(
         mut,
-        seeds = [AUTHORITY_SEED.as_bytes(), candy_machine.to_account_info().key.as_ref()],
+        seeds = [
+            AUTHORITY_SEED.as_bytes(), 
+            candy_machine.key().as_ref()
+        ],
         bump
     )]
     authority_pda: UncheckedAccount<'info>,

@@ -616,56 +616,69 @@ export class CmInvalidSellerError extends ProgramError {
 codeToErrorMap.set(0x1797, CmInvalidSellerError);
 nameToErrorMap.set('InvalidSeller', CmInvalidSellerError);
 
+/** InvalidBuyer: Invalid buyer */
+export class CmInvalidBuyerError extends ProgramError {
+  readonly name: string = 'InvalidBuyer';
+
+  readonly code: number = 0x1798; // 6040
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid buyer', program, cause);
+  }
+}
+codeToErrorMap.set(0x1798, CmInvalidBuyerError);
+nameToErrorMap.set('InvalidBuyer', CmInvalidBuyerError);
+
 /** UriTooLong: URI too long */
 export class CmUriTooLongError extends ProgramError {
   readonly name: string = 'UriTooLong';
 
-  readonly code: number = 0x1798; // 6040
+  readonly code: number = 0x1799; // 6041
 
   constructor(program: Program, cause?: Error) {
     super('URI too long', program, cause);
   }
 }
-codeToErrorMap.set(0x1798, CmUriTooLongError);
+codeToErrorMap.set(0x1799, CmUriTooLongError);
 nameToErrorMap.set('UriTooLong', CmUriTooLongError);
 
 /** InvalidProofPath: Invalid proof path */
 export class CmInvalidProofPathError extends ProgramError {
   readonly name: string = 'InvalidProofPath';
 
-  readonly code: number = 0x1799; // 6041
+  readonly code: number = 0x179a; // 6042
 
   constructor(program: Program, cause?: Error) {
     super('Invalid proof path', program, cause);
   }
 }
-codeToErrorMap.set(0x1799, CmInvalidProofPathError);
+codeToErrorMap.set(0x179a, CmInvalidProofPathError);
 nameToErrorMap.set('InvalidProofPath', CmInvalidProofPathError);
 
 /** InvalidSettingUpdate: Invalid setting update */
 export class CmInvalidSettingUpdateError extends ProgramError {
   readonly name: string = 'InvalidSettingUpdate';
 
-  readonly code: number = 0x179a; // 6042
+  readonly code: number = 0x179b; // 6043
 
   constructor(program: Program, cause?: Error) {
     super('Invalid setting update', program, cause);
   }
 }
-codeToErrorMap.set(0x179a, CmInvalidSettingUpdateError);
+codeToErrorMap.set(0x179b, CmInvalidSettingUpdateError);
 nameToErrorMap.set('InvalidSettingUpdate', CmInvalidSettingUpdateError);
 
 /** SellerTooManyItems: Seller has too many items */
 export class CmSellerTooManyItemsError extends ProgramError {
   readonly name: string = 'SellerTooManyItems';
 
-  readonly code: number = 0x179b; // 6043
+  readonly code: number = 0x179c; // 6044
 
   constructor(program: Program, cause?: Error) {
     super('Seller has too many items', program, cause);
   }
 }
-codeToErrorMap.set(0x179b, CmSellerTooManyItemsError);
+codeToErrorMap.set(0x179c, CmSellerTooManyItemsError);
 nameToErrorMap.set('SellerTooManyItems', CmSellerTooManyItemsError);
 
 /**

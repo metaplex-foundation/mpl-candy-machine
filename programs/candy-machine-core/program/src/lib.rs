@@ -132,7 +132,36 @@ pub mod candy_machine_core {
     ///
     ///   0. `[writable]` Candy Machine account
     ///   1. `[signer]` Candy Machine authority
-    pub fn settle_core_asset_sale(ctx: Context<SettleCoreAssetSale>, index: u32) -> Result<()> {
+    pub fn claim_core_asset<'info>(
+        ctx: Context<'_, '_, '_, 'info, ClaimCoreAsset<'info>>,
+        index: u32,
+    ) -> Result<()> {
+        instructions::claim_core_asset(ctx, index)
+    }
+
+    /// Settles a legacy NFT sale
+    ///
+    /// # Accounts
+    ///
+    ///   0. `[writable]` Candy Machine account
+    ///   1. `[signer]` Candy Machine authority
+    pub fn claim_nft<'info>(
+        ctx: Context<'_, '_, '_, 'info, ClaimNft<'info>>,
+        index: u32,
+    ) -> Result<()> {
+        instructions::claim_nft(ctx, index)
+    }
+
+    /// Settles a Core asset sale
+    ///
+    /// # Accounts
+    ///
+    ///   0. `[writable]` Candy Machine account
+    ///   1. `[signer]` Candy Machine authority
+    pub fn settle_core_asset_sale<'info>(
+        ctx: Context<'_, '_, '_, 'info, SettleCoreAssetSale<'info>>,
+        index: u32,
+    ) -> Result<()> {
         instructions::settle_core_asset_sale(ctx, index)
     }
 
@@ -142,7 +171,7 @@ pub mod candy_machine_core {
     ///
     ///   0. `[writable]` Candy Machine account
     ///   1. `[signer]` Candy Machine authority
-    pub fn settle_nft_asset_sale<'info>(
+    pub fn settle_nft_sale<'info>(
         ctx: Context<'_, '_, '_, 'info, SettleNftSale<'info>>,
         index: u32,
     ) -> Result<()> {

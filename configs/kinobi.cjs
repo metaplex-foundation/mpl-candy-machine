@@ -138,6 +138,10 @@ const defaultsToSellerHistoryPda = (seller = "seller") =>
 		importFrom: "generated",
 		seeds: { seller: k.accountDefault(seller) },
 	});
+const defaultsToEventAuthorityPda = () =>
+	k.pdaDefault("eventAuthority", {
+		importFrom: "hooked",
+	});
 const defaultsToCandyMachineAuthorityPda = (candyMachine = "candyMachine") =>
 	k.pdaDefault("candyMachineAuthority", {
 		importFrom: "hooked",
@@ -162,6 +166,8 @@ const defaultsToSplAssociatedTokenProgram = () =>
 	k.programDefault("splAssociatedToken", "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
 const defaultsToMplCoreProgram = () =>
 	k.programDefault("mplCoreProgram", "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d");
+const defaultsToProgram = () =>
+	k.programDefault("mplCandyMachineCore", "CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR");
 
 // Automatically recognize account default values.
 kinobi.update(
@@ -174,6 +180,21 @@ kinobi.update(
 		{
 			...k.identityDefault(),
 			account: "candyMachineAuthority",
+			ignoreIfOptional: true,
+		},
+		{
+			...defaultsToEventAuthorityPda(),
+			account: "eventAuthority",
+			ignoreIfOptional: true,
+		},
+		{
+			...defaultsToProgram(),
+			account: "program",
+			ignoreIfOptional: true,
+		},
+		{
+			...k.payerDefault(),
+			account: "payer",
 			ignoreIfOptional: true,
 		},
 		{
@@ -294,6 +315,13 @@ kinobi.update(
 			},
 			accounts: {
 				candyGuard: { defaultsTo: defaultsToCandyGuardPda("candyMachine") },
+			},
+		},
+		"mplCandyMachineCore.settleNftSale": {
+			name: "settleNftSale",
+			accounts: {
+				buyer: { defaultsTo: k.identityDefault() },
+				buyerTokenAccount: { defaultsTo: defaultsToAssociatedTokenPda("mint", "buyer") },
 			},
 		},
 		"mplCandyMachineCore.SetAuthority": { name: "SetCandyMachineAuthority" },

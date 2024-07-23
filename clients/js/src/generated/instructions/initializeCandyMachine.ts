@@ -25,7 +25,9 @@ import {
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
+import { findCandyMachineAuthorityPda } from '../../hooked';
 import {
+  expectPublicKey,
   getAccountMetasAndSigners,
   ResolvedAccount,
   ResolvedAccountsWithIndices,
@@ -54,8 +56,10 @@ export type InitializeCandyMachineInstructionAccounts = {
    */
 
   authority?: PublicKey | Pda;
+  authorityPda?: PublicKey | Pda;
   /** Payer of the transaction. */
   payer?: Signer;
+  systemProgram?: PublicKey | Pda;
 };
 
 // Data.
@@ -104,7 +108,7 @@ export type InitializeCandyMachineInstructionArgs =
 
 // Instruction.
 export function initializeCandyMachine(
-  context: Pick<Context, 'identity' | 'payer' | 'programs'>,
+  context: Pick<Context, 'eddsa' | 'identity' | 'payer' | 'programs'>,
   input: InitializeCandyMachineInstructionAccounts &
     InitializeCandyMachineInstructionArgs
 ): TransactionBuilder {
@@ -122,7 +126,17 @@ export function initializeCandyMachine(
       value: input.candyMachine ?? null,
     },
     authority: { index: 1, isWritable: false, value: input.authority ?? null },
-    payer: { index: 2, isWritable: true, value: input.payer ?? null },
+    authorityPda: {
+      index: 2,
+      isWritable: true,
+      value: input.authorityPda ?? null,
+    },
+    payer: { index: 3, isWritable: true, value: input.payer ?? null },
+    systemProgram: {
+      index: 4,
+      isWritable: false,
+      value: input.systemProgram ?? null,
+    },
   };
 
   // Arguments.
@@ -132,8 +146,21 @@ export function initializeCandyMachine(
   if (!resolvedAccounts.authority.value) {
     resolvedAccounts.authority.value = context.identity.publicKey;
   }
+  if (!resolvedAccounts.authorityPda.value) {
+    resolvedAccounts.authorityPda.value = findCandyMachineAuthorityPda(
+      context,
+      { candyMachine: expectPublicKey(resolvedAccounts.candyMachine.value) }
+    );
+  }
   if (!resolvedAccounts.payer.value) {
     resolvedAccounts.payer.value = context.payer;
+  }
+  if (!resolvedAccounts.systemProgram.value) {
+    resolvedAccounts.systemProgram.value = context.programs.getPublicKey(
+      'splSystem',
+      '11111111111111111111111111111111'
+    );
+    resolvedAccounts.systemProgram.isWritable = false;
   }
 
   // Accounts in order.

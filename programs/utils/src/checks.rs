@@ -5,11 +5,8 @@ use mpl_token_metadata::{
     accounts::{Edition, MasterEdition, Metadata},
     types::Key,
 };
+use solana_program::program_pack::{IsInitialized, Pack};
 use solana_program::{account_info::AccountInfo, pubkey::Pubkey};
-use solana_program::{
-    program_pack::{IsInitialized, Pack},
-    pubkey,
-};
 use spl_token::state::Account as SplAccount;
 
 pub fn is_native_mint(key: Pubkey) -> bool {

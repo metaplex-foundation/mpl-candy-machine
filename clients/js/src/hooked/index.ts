@@ -3,3 +3,4 @@ export * from './candyGuardData';
 export * from './candyMachine';
 export * from './candyMachineAccountData';
 export * from './candyMachineAuthority';
+export * from './eventAuthority';

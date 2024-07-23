@@ -1,9 +1,8 @@
-use anchor_lang::prelude::*;
-
 use crate::{
     constants::{CANDY_MACHINE_SIZE, CONFIG_LINE_SIZE},
     get_config_count, CandyError, CandyMachine,
 };
+use anchor_lang::prelude::*;
 
 pub fn remove_item(
     candy_machine: &mut Account<CandyMachine>,
@@ -65,7 +64,8 @@ pub fn remove_item(
     // present on the data; (2) an array with mint indices, where indices are added when the config
     // line is added
 
-    // bit-mask
+    remove_from_loaded_bitmask(candy_machine.settings.item_capacity, last_index, *data)?;
+
     let bit_mask_start =
         CANDY_MACHINE_SIZE + 4 + (candy_machine.settings.item_capacity as usize) * CONFIG_LINE_SIZE;
     // (unordered) indices for the mint
@@ -76,6 +76,30 @@ pub fn remove_item(
             .checked_div(8)
             .ok_or(CandyError::NumericalOverflowError)?
             + 1) as usize;
+
+    // remove the last index from the mint indices vec
+    let index_position = indices_start + last_index * 4;
+    data[index_position..index_position + 4].copy_from_slice(&u32::MIN.to_le_bytes());
+
+    count = count
+        .checked_sub(1)
+        .ok_or(CandyError::NumericalOverflowError)?;
+
+    msg!("Item removed: position={}, new count={})", index, count,);
+
+    // updates the config lines count
+    data[CANDY_MACHINE_SIZE..CANDY_MACHINE_SIZE + 4].copy_from_slice(&(count as u32).to_le_bytes());
+
+    Ok(())
+}
+
+pub fn remove_from_loaded_bitmask(
+    item_capacity: u64,
+    last_index: usize,
+    data: &mut [u8],
+) -> Result<bool> {
+    // bit-mask
+    let bit_mask_start = CANDY_MACHINE_SIZE + 4 + (item_capacity as usize) * CONFIG_LINE_SIZE;
 
     let position = last_index as usize;
     let byte_position = bit_mask_start
@@ -100,18 +124,5 @@ pub fn remove_item(
         bit
     );
 
-    // remove the last index from the mint indices vec
-    let index_position = indices_start + last_index * 4;
-    data[index_position..index_position + 4].copy_from_slice(&u32::MIN.to_le_bytes());
-
-    count = count
-        .checked_sub(1)
-        .ok_or(CandyError::NumericalOverflowError)?;
-
-    msg!("Item removed: position={}, new count={})", index, count,);
-
-    // updates the config lines count
-    data[CANDY_MACHINE_SIZE..CANDY_MACHINE_SIZE + 4].copy_from_slice(&(count as u32).to_le_bytes());
-
-    Ok(())
+    Ok(current_value != data[byte_position])
 }

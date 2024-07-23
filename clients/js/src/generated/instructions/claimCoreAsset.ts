@@ -27,7 +27,6 @@ import {
   findCandyMachineAuthorityPda,
   findEventAuthorityPda,
 } from '../../hooked';
-import { findSellerHistoryPda } from '../accounts';
 import {
   expectPublicKey,
   getAccountMetasAndSigners,
@@ -36,7 +35,7 @@ import {
 } from '../shared';
 
 // Accounts.
-export type SettleCoreAssetSaleInstructionAccounts = {
+export type ClaimCoreAssetInstructionAccounts = {
   /** Anyone can settle the sale */
   payer?: Signer;
   /** Candy machine account. */
@@ -44,16 +43,12 @@ export type SettleCoreAssetSaleInstructionAccounts = {
   authorityPda?: PublicKey | Pda;
   /** Payment account for authority pda if using token payment */
   authorityPdaPaymentAccount?: PublicKey | Pda;
-  /** Seller of the nft */
-  authority?: PublicKey | Pda;
   /** Payment account for authority if using token payment */
   authorityPaymentAccount?: PublicKey | Pda;
   /** Seller of the nft */
   seller: PublicKey | Pda;
   /** Payment account for seller if using token payment */
   sellerPaymentAccount?: PublicKey | Pda;
-  /** Seller history account. */
-  sellerHistory?: PublicKey | Pda;
   /** buyer of the nft */
   buyer: PublicKey | Pda;
   /** Fee account for marketplace fee if using fee config */
@@ -62,8 +57,6 @@ export type SettleCoreAssetSaleInstructionAccounts = {
   feePaymentAccount?: PublicKey | Pda;
   /** Payment mint if using non-native payment token */
   paymentMint?: PublicKey | Pda;
-  tokenProgram?: PublicKey | Pda;
-  associatedTokenProgram?: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
   rent?: PublicKey | Pda;
   asset: PublicKey | Pda;
@@ -74,45 +67,46 @@ export type SettleCoreAssetSaleInstructionAccounts = {
 };
 
 // Data.
-export type SettleCoreAssetSaleInstructionData = {
+export type ClaimCoreAssetInstructionData = {
   discriminator: Array<number>;
   index: number;
 };
 
-export type SettleCoreAssetSaleInstructionDataArgs = { index: number };
+export type ClaimCoreAssetInstructionDataArgs = { index: number };
 
-export function getSettleCoreAssetSaleInstructionDataSerializer(): Serializer<
-  SettleCoreAssetSaleInstructionDataArgs,
-  SettleCoreAssetSaleInstructionData
+export function getClaimCoreAssetInstructionDataSerializer(): Serializer<
+  ClaimCoreAssetInstructionDataArgs,
+  ClaimCoreAssetInstructionData
 > {
   return mapSerializer<
-    SettleCoreAssetSaleInstructionDataArgs,
+    ClaimCoreAssetInstructionDataArgs,
     any,
-    SettleCoreAssetSaleInstructionData
+    ClaimCoreAssetInstructionData
   >(
-    struct<SettleCoreAssetSaleInstructionData>(
+    struct<ClaimCoreAssetInstructionData>(
       [
         ['discriminator', array(u8(), { size: 8 })],
         ['index', u32()],
       ],
-      { description: 'SettleCoreAssetSaleInstructionData' }
+      { description: 'ClaimCoreAssetInstructionData' }
     ),
-    (value) => ({ ...value, discriminator: [78, 55, 252, 82, 233, 15, 98, 51] })
+    (value) => ({
+      ...value,
+      discriminator: [63, 249, 255, 80, 180, 15, 173, 59],
+    })
   ) as Serializer<
-    SettleCoreAssetSaleInstructionDataArgs,
-    SettleCoreAssetSaleInstructionData
+    ClaimCoreAssetInstructionDataArgs,
+    ClaimCoreAssetInstructionData
   >;
 }
 
 // Args.
-export type SettleCoreAssetSaleInstructionArgs =
-  SettleCoreAssetSaleInstructionDataArgs;
+export type ClaimCoreAssetInstructionArgs = ClaimCoreAssetInstructionDataArgs;
 
 // Instruction.
-export function settleCoreAssetSale(
-  context: Pick<Context, 'eddsa' | 'identity' | 'payer' | 'programs'>,
-  input: SettleCoreAssetSaleInstructionAccounts &
-    SettleCoreAssetSaleInstructionArgs
+export function claimCoreAsset(
+  context: Pick<Context, 'eddsa' | 'payer' | 'programs'>,
+  input: ClaimCoreAssetInstructionAccounts & ClaimCoreAssetInstructionArgs
 ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey(
@@ -138,76 +132,56 @@ export function settleCoreAssetSale(
       isWritable: true,
       value: input.authorityPdaPaymentAccount ?? null,
     },
-    authority: { index: 4, isWritable: true, value: input.authority ?? null },
     authorityPaymentAccount: {
-      index: 5,
+      index: 4,
       isWritable: true,
       value: input.authorityPaymentAccount ?? null,
     },
-    seller: { index: 6, isWritable: true, value: input.seller ?? null },
+    seller: { index: 5, isWritable: true, value: input.seller ?? null },
     sellerPaymentAccount: {
-      index: 7,
+      index: 6,
       isWritable: true,
       value: input.sellerPaymentAccount ?? null,
     },
-    sellerHistory: {
-      index: 8,
-      isWritable: true,
-      value: input.sellerHistory ?? null,
-    },
-    buyer: { index: 9, isWritable: false, value: input.buyer ?? null },
-    feeAccount: {
-      index: 10,
-      isWritable: true,
-      value: input.feeAccount ?? null,
-    },
+    buyer: { index: 7, isWritable: false, value: input.buyer ?? null },
+    feeAccount: { index: 8, isWritable: true, value: input.feeAccount ?? null },
     feePaymentAccount: {
-      index: 11,
+      index: 9,
       isWritable: true,
       value: input.feePaymentAccount ?? null,
     },
     paymentMint: {
-      index: 12,
+      index: 10,
       isWritable: false,
       value: input.paymentMint ?? null,
     },
-    tokenProgram: {
-      index: 13,
-      isWritable: false,
-      value: input.tokenProgram ?? null,
-    },
-    associatedTokenProgram: {
-      index: 14,
-      isWritable: false,
-      value: input.associatedTokenProgram ?? null,
-    },
     systemProgram: {
-      index: 15,
+      index: 11,
       isWritable: false,
       value: input.systemProgram ?? null,
     },
-    rent: { index: 16, isWritable: false, value: input.rent ?? null },
-    asset: { index: 17, isWritable: false, value: input.asset ?? null },
+    rent: { index: 12, isWritable: false, value: input.rent ?? null },
+    asset: { index: 13, isWritable: false, value: input.asset ?? null },
     collection: {
-      index: 18,
+      index: 14,
       isWritable: false,
       value: input.collection ?? null,
     },
     mplCoreProgram: {
-      index: 19,
+      index: 15,
       isWritable: false,
       value: input.mplCoreProgram ?? null,
     },
     eventAuthority: {
-      index: 20,
+      index: 16,
       isWritable: false,
       value: input.eventAuthority ?? null,
     },
-    program: { index: 21, isWritable: false, value: input.program ?? null },
+    program: { index: 17, isWritable: false, value: input.program ?? null },
   };
 
   // Arguments.
-  const resolvedArgs: SettleCoreAssetSaleInstructionArgs = { ...input };
+  const resolvedArgs: ClaimCoreAssetInstructionArgs = { ...input };
 
   // Default values.
   if (!resolvedAccounts.payer.value) {
@@ -218,30 +192,6 @@ export function settleCoreAssetSale(
       context,
       { candyMachine: expectPublicKey(resolvedAccounts.candyMachine.value) }
     );
-  }
-  if (!resolvedAccounts.authority.value) {
-    resolvedAccounts.authority.value = context.identity.publicKey;
-  }
-  if (!resolvedAccounts.sellerHistory.value) {
-    resolvedAccounts.sellerHistory.value = findSellerHistoryPda(context, {
-      candyMachine: expectPublicKey(resolvedAccounts.candyMachine.value),
-      seller: expectPublicKey(resolvedAccounts.seller.value),
-    });
-  }
-  if (!resolvedAccounts.tokenProgram.value) {
-    resolvedAccounts.tokenProgram.value = context.programs.getPublicKey(
-      'splToken',
-      'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
-    );
-    resolvedAccounts.tokenProgram.isWritable = false;
-  }
-  if (!resolvedAccounts.associatedTokenProgram.value) {
-    resolvedAccounts.associatedTokenProgram.value =
-      context.programs.getPublicKey(
-        'splAssociatedToken',
-        'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'
-      );
-    resolvedAccounts.associatedTokenProgram.isWritable = false;
   }
   if (!resolvedAccounts.systemProgram.value) {
     resolvedAccounts.systemProgram.value = context.programs.getPublicKey(
@@ -286,8 +236,8 @@ export function settleCoreAssetSale(
   );
 
   // Data.
-  const data = getSettleCoreAssetSaleInstructionDataSerializer().serialize(
-    resolvedArgs as SettleCoreAssetSaleInstructionDataArgs
+  const data = getClaimCoreAssetInstructionDataSerializer().serialize(
+    resolvedArgs as ClaimCoreAssetInstructionDataArgs
   );
 
   // Bytes Created On Chain.

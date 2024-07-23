@@ -8,7 +8,10 @@ use solana_program::{
 };
 use utils::{assert_keys_equal, verify_proof};
 
-use crate::{constants::CANDY_MACHINE_SIZE, CandyError, CandyMachine, SellerHistory};
+use crate::{
+    constants::{CANDY_MACHINE_SIZE, CONFIG_LINE_SIZE},
+    CandyError, CandyMachine, ConfigLine, SellerHistory,
+};
 
 /// Anchor wrapper for Token program.
 #[derive(Debug, Clone)]
@@ -58,6 +61,44 @@ pub fn assert_can_add_item(
         ),
         CandyError::InvalidProofPath
     );
+
+    Ok(())
+}
+
+pub fn assert_config_line(
+    candy_machine: &Box<Account<CandyMachine>>,
+    index: u32,
+    config_line: ConfigLine,
+) -> Result<()> {
+    let account_info = candy_machine.to_account_info();
+    let data = account_info.data.borrow();
+    let count = get_config_count(&data)?;
+
+    if index >= count as u32 {
+        return err!(CandyError::IndexGreaterThanLength);
+    }
+
+    let config_line_position = CANDY_MACHINE_SIZE + 4 + (index as usize) * CONFIG_LINE_SIZE;
+
+    let mint = Pubkey::try_from(&data[config_line_position..config_line_position + 32]).unwrap();
+    require!(config_line.mint == mint, CandyError::InvalidMint);
+
+    let seller =
+        Pubkey::try_from(&data[config_line_position + 32..config_line_position + 64]).unwrap();
+    // Only the candy machine authority or the seller can remove a config line
+    require!(config_line.seller == seller, CandyError::InvalidSeller);
+
+    let buyer =
+        Pubkey::try_from(&data[config_line_position + 64..config_line_position + 96]).unwrap();
+    require!(config_line.buyer == buyer, CandyError::InvalidBuyer);
+
+    let token_standard = u8::from_le_bytes(*array_ref![data, config_line_position + 96, 1]);
+    require!(
+        config_line.token_standard as u8 == token_standard,
+        CandyError::InvalidTokenStandard
+    );
+
+    drop(data);
 
     Ok(())
 }

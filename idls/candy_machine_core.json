@@ -34,12 +34,22 @@
           ]
         },
         {
+          "name": "authorityPda",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "payer",
           "isMut": true,
           "isSigner": true,
           "docs": [
             "Payer of the transaction."
           ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
         }
       ],
       "args": [
@@ -576,7 +586,7 @@
       "args": []
     },
     {
-      "name": "settleCoreAssetSale",
+      "name": "claimCoreAsset",
       "docs": [
         "Settles a Core asset sale",
         "",
@@ -587,6 +597,14 @@
       ],
       "accounts": [
         {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Anyone can settle the sale"
+          ]
+        },
+        {
           "name": "candyMachine",
           "isMut": true,
           "isSigner": false,
@@ -595,18 +613,126 @@
           ]
         },
         {
-          "name": "payer",
+          "name": "authorityPda",
           "isMut": true,
-          "isSigner": true,
+          "isSigner": false
+        },
+        {
+          "name": "authorityPdaPaymentAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
           "docs": [
-            "Anyone can settle the sale"
+            "Payment account for authority pda if using token payment"
           ]
+        },
+        {
+          "name": "authorityPaymentAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Payment account for authority if using token payment"
+          ]
+        },
+        {
+          "name": "seller",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Seller of the nft"
+          ]
+        },
+        {
+          "name": "sellerPaymentAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Payment account for seller if using token payment"
+          ]
+        },
+        {
+          "name": "buyer",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "buyer of the nft"
+          ]
+        },
+        {
+          "name": "feeAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Fee account for marketplace fee if using fee config"
+          ]
+        },
+        {
+          "name": "feePaymentAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Payment account for marketplace fee if using token payment"
+          ]
+        },
+        {
+          "name": "paymentMint",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Payment mint if using non-native payment token"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "asset",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "collection",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "mplCoreProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "index",
+          "type": "u32"
+        }
+      ]
     },
     {
-      "name": "settleNftAssetSale",
+      "name": "claimNft",
       "docs": [
         "Settles a legacy NFT sale",
         "",
@@ -617,136 +743,115 @@
       ],
       "accounts": [
         {
-          "name": "settleAccounts",
-          "accounts": [
-            {
-              "name": "payer",
-              "isMut": true,
-              "isSigner": true,
-              "docs": [
-                "Anyone can settle the sale"
-              ]
-            },
-            {
-              "name": "candyMachine",
-              "isMut": true,
-              "isSigner": false,
-              "docs": [
-                "Candy machine account."
-              ]
-            },
-            {
-              "name": "authorityPda",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
-              "name": "authorityPdaPaymentAccount",
-              "isMut": true,
-              "isSigner": false,
-              "isOptional": true,
-              "docs": [
-                "Payment account for authority pda if using token payment"
-              ]
-            },
-            {
-              "name": "authority",
-              "isMut": true,
-              "isSigner": false,
-              "docs": [
-                "Seller of the nft"
-              ]
-            },
-            {
-              "name": "authorityPaymentAccount",
-              "isMut": true,
-              "isSigner": false,
-              "isOptional": true,
-              "docs": [
-                "Payment account for authority if using token payment"
-              ]
-            },
-            {
-              "name": "seller",
-              "isMut": true,
-              "isSigner": false,
-              "docs": [
-                "Seller of the nft"
-              ]
-            },
-            {
-              "name": "sellerPaymentAccount",
-              "isMut": true,
-              "isSigner": false,
-              "isOptional": true,
-              "docs": [
-                "Payment account for seller if using token payment"
-              ]
-            },
-            {
-              "name": "sellerHistory",
-              "isMut": true,
-              "isSigner": false,
-              "docs": [
-                "Seller history account."
-              ]
-            },
-            {
-              "name": "buyer",
-              "isMut": false,
-              "isSigner": false,
-              "docs": [
-                "buyer of the nft"
-              ]
-            },
-            {
-              "name": "feeAccount",
-              "isMut": true,
-              "isSigner": false,
-              "isOptional": true,
-              "docs": [
-                "Fee account for marketplace fee if using fee config"
-              ]
-            },
-            {
-              "name": "feePaymentAccount",
-              "isMut": true,
-              "isSigner": false,
-              "isOptional": true,
-              "docs": [
-                "Payment account for marketplace fee if using token payment"
-              ]
-            },
-            {
-              "name": "paymentMint",
-              "isMut": false,
-              "isSigner": false,
-              "isOptional": true,
-              "docs": [
-                "Payment mint if using non-native payment token"
-              ]
-            },
-            {
-              "name": "tokenProgram",
-              "isMut": false,
-              "isSigner": false
-            },
-            {
-              "name": "associatedTokenProgram",
-              "isMut": false,
-              "isSigner": false
-            },
-            {
-              "name": "systemProgram",
-              "isMut": false,
-              "isSigner": false
-            },
-            {
-              "name": "rent",
-              "isMut": false,
-              "isSigner": false
-            }
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Anyone can settle the sale"
           ]
+        },
+        {
+          "name": "candyMachine",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Candy machine account."
+          ]
+        },
+        {
+          "name": "authorityPda",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authorityPdaPaymentAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Payment account for authority pda if using token payment"
+          ]
+        },
+        {
+          "name": "authorityPaymentAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Payment account for authority if using token payment"
+          ]
+        },
+        {
+          "name": "seller",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Seller of the nft"
+          ]
+        },
+        {
+          "name": "sellerPaymentAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Payment account for seller if using token payment"
+          ]
+        },
+        {
+          "name": "buyer",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "buyer of the nft"
+          ]
+        },
+        {
+          "name": "feeAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Fee account for marketplace fee if using fee config"
+          ]
+        },
+        {
+          "name": "feePaymentAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Payment account for marketplace fee if using token payment"
+          ]
+        },
+        {
+          "name": "paymentMint",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Payment mint if using non-native payment token"
+          ]
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
         },
         {
           "name": "mint",
@@ -767,12 +872,398 @@
           ]
         },
         {
+          "name": "tmpTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "metadata",
-          "isMut": false,
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "edition",
+          "isMut": true,
           "isSigner": false
         },
         {
           "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "index",
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "settleCoreAssetSale",
+      "docs": [
+        "Settles a Core asset sale",
+        "",
+        "# Accounts",
+        "",
+        "0. `[writable]` Candy Machine account",
+        "1. `[signer]` Candy Machine authority"
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Anyone can settle the sale"
+          ]
+        },
+        {
+          "name": "candyMachine",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Candy machine account."
+          ]
+        },
+        {
+          "name": "authorityPda",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authorityPdaPaymentAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Payment account for authority pda if using token payment"
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Seller of the nft"
+          ]
+        },
+        {
+          "name": "authorityPaymentAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Payment account for authority if using token payment"
+          ]
+        },
+        {
+          "name": "seller",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Seller of the nft"
+          ]
+        },
+        {
+          "name": "sellerPaymentAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Payment account for seller if using token payment"
+          ]
+        },
+        {
+          "name": "sellerHistory",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Seller history account."
+          ]
+        },
+        {
+          "name": "buyer",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "buyer of the nft"
+          ]
+        },
+        {
+          "name": "feeAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Fee account for marketplace fee if using fee config"
+          ]
+        },
+        {
+          "name": "feePaymentAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Payment account for marketplace fee if using token payment"
+          ]
+        },
+        {
+          "name": "paymentMint",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Payment mint if using non-native payment token"
+          ]
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "asset",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "collection",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "mplCoreProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "index",
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "settleNftSale",
+      "docs": [
+        "Settles a legacy NFT sale",
+        "",
+        "# Accounts",
+        "",
+        "0. `[writable]` Candy Machine account",
+        "1. `[signer]` Candy Machine authority"
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Anyone can settle the sale"
+          ]
+        },
+        {
+          "name": "candyMachine",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Candy machine account."
+          ]
+        },
+        {
+          "name": "authorityPda",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authorityPdaPaymentAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Payment account for authority pda if using token payment"
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Seller of the nft"
+          ]
+        },
+        {
+          "name": "authorityPaymentAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Payment account for authority if using token payment"
+          ]
+        },
+        {
+          "name": "seller",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Seller of the nft"
+          ]
+        },
+        {
+          "name": "sellerPaymentAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Payment account for seller if using token payment"
+          ]
+        },
+        {
+          "name": "sellerHistory",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Seller history account."
+          ]
+        },
+        {
+          "name": "buyer",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "buyer of the nft"
+          ]
+        },
+        {
+          "name": "feeAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Fee account for marketplace fee if using fee config"
+          ]
+        },
+        {
+          "name": "feePaymentAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Payment account for marketplace fee if using token payment"
+          ]
+        },
+        {
+          "name": "paymentMint",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Payment mint if using non-native payment token"
+          ]
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "buyerTokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Nft token account for buyer"
+          ]
+        },
+        {
+          "name": "tmpTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "metadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "edition",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "program",
           "isMut": false,
           "isSigner": false
         }
@@ -1202,7 +1693,32 @@
   ],
   "events": [
     {
-      "name": "SettleSaleEvent",
+      "name": "ClaimItemEvent",
+      "fields": [
+        {
+          "name": "mint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "authority",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "seller",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "buyer",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "SettleItemSaleEvent",
       "fields": [
         {
           "name": "mint",
@@ -1225,7 +1741,12 @@
           "index": false
         },
         {
-          "name": "amount",
+          "name": "price",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "proceeds",
           "type": "u64",
           "index": false
         },
@@ -1454,21 +1975,26 @@
     },
     {
       "code": 6040,
+      "name": "InvalidBuyer",
+      "msg": "Invalid buyer"
+    },
+    {
+      "code": 6041,
       "name": "UriTooLong",
       "msg": "URI too long"
     },
     {
-      "code": 6041,
+      "code": 6042,
       "name": "InvalidProofPath",
       "msg": "Invalid proof path"
     },
     {
-      "code": 6042,
+      "code": 6043,
       "name": "InvalidSettingUpdate",
       "msg": "Invalid setting update"
     },
     {
-      "code": 6043,
+      "code": 6044,
       "name": "SellerTooManyItems",
       "msg": "Seller has too many items"
     }

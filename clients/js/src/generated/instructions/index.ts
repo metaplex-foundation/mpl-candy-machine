@@ -8,6 +8,8 @@
 
 export * from './addCoreAsset';
 export * from './addNft';
+export * from './claimCoreAsset';
+export * from './claimNft';
 export * from './deleteCandyGuard';
 export * from './deleteCandyMachine';
 export * from './drawFromCandyMachine';
@@ -19,7 +21,7 @@ export * from './setCandyGuardAuthority';
 export * from './setCandyMachineAuthority';
 export * from './setMintAuthority';
 export * from './settleCoreAssetSale';
-export * from './settleNftAssetSale';
+export * from './settleNftSale';
 export * from './startSale';
 export * from './unwrap';
 export * from './updateSettings';

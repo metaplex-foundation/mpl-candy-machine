@@ -7,6 +7,11 @@
  */
 
 import {
+  findMasterEditionPda,
+  findMetadataPda,
+} from '@metaplex-foundation/mpl-token-metadata';
+import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-toolbox';
+import {
   Context,
   Pda,
   PublicKey,
@@ -27,7 +32,6 @@ import {
   findCandyMachineAuthorityPda,
   findEventAuthorityPda,
 } from '../../hooked';
-import { findSellerHistoryPda } from '../accounts';
 import {
   expectPublicKey,
   getAccountMetasAndSigners,
@@ -36,7 +40,7 @@ import {
 } from '../shared';
 
 // Accounts.
-export type SettleCoreAssetSaleInstructionAccounts = {
+export type ClaimNftInstructionAccounts = {
   /** Anyone can settle the sale */
   payer?: Signer;
   /** Candy machine account. */
@@ -44,16 +48,12 @@ export type SettleCoreAssetSaleInstructionAccounts = {
   authorityPda?: PublicKey | Pda;
   /** Payment account for authority pda if using token payment */
   authorityPdaPaymentAccount?: PublicKey | Pda;
-  /** Seller of the nft */
-  authority?: PublicKey | Pda;
   /** Payment account for authority if using token payment */
   authorityPaymentAccount?: PublicKey | Pda;
   /** Seller of the nft */
   seller: PublicKey | Pda;
   /** Payment account for seller if using token payment */
   sellerPaymentAccount?: PublicKey | Pda;
-  /** Seller history account. */
-  sellerHistory?: PublicKey | Pda;
   /** buyer of the nft */
   buyer: PublicKey | Pda;
   /** Fee account for marketplace fee if using fee config */
@@ -66,53 +66,56 @@ export type SettleCoreAssetSaleInstructionAccounts = {
   associatedTokenProgram?: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
   rent?: PublicKey | Pda;
-  asset: PublicKey | Pda;
-  collection?: PublicKey | Pda;
-  mplCoreProgram?: PublicKey | Pda;
+  mint: PublicKey | Pda;
+  tokenAccount?: PublicKey | Pda;
+  /** Nft token account for buyer */
+  buyerTokenAccount: PublicKey | Pda;
+  tmpTokenAccount?: PublicKey | Pda;
+  metadata?: PublicKey | Pda;
+  edition?: PublicKey | Pda;
+  tokenMetadataProgram?: PublicKey | Pda;
   eventAuthority?: PublicKey | Pda;
   program?: PublicKey | Pda;
 };
 
 // Data.
-export type SettleCoreAssetSaleInstructionData = {
+export type ClaimNftInstructionData = {
   discriminator: Array<number>;
   index: number;
 };
 
-export type SettleCoreAssetSaleInstructionDataArgs = { index: number };
+export type ClaimNftInstructionDataArgs = { index: number };
 
-export function getSettleCoreAssetSaleInstructionDataSerializer(): Serializer<
-  SettleCoreAssetSaleInstructionDataArgs,
-  SettleCoreAssetSaleInstructionData
+export function getClaimNftInstructionDataSerializer(): Serializer<
+  ClaimNftInstructionDataArgs,
+  ClaimNftInstructionData
 > {
   return mapSerializer<
-    SettleCoreAssetSaleInstructionDataArgs,
+    ClaimNftInstructionDataArgs,
     any,
-    SettleCoreAssetSaleInstructionData
+    ClaimNftInstructionData
   >(
-    struct<SettleCoreAssetSaleInstructionData>(
+    struct<ClaimNftInstructionData>(
       [
         ['discriminator', array(u8(), { size: 8 })],
         ['index', u32()],
       ],
-      { description: 'SettleCoreAssetSaleInstructionData' }
+      { description: 'ClaimNftInstructionData' }
     ),
-    (value) => ({ ...value, discriminator: [78, 55, 252, 82, 233, 15, 98, 51] })
-  ) as Serializer<
-    SettleCoreAssetSaleInstructionDataArgs,
-    SettleCoreAssetSaleInstructionData
-  >;
+    (value) => ({
+      ...value,
+      discriminator: [6, 193, 146, 120, 48, 218, 69, 33],
+    })
+  ) as Serializer<ClaimNftInstructionDataArgs, ClaimNftInstructionData>;
 }
 
 // Args.
-export type SettleCoreAssetSaleInstructionArgs =
-  SettleCoreAssetSaleInstructionDataArgs;
+export type ClaimNftInstructionArgs = ClaimNftInstructionDataArgs;
 
 // Instruction.
-export function settleCoreAssetSale(
-  context: Pick<Context, 'eddsa' | 'identity' | 'payer' | 'programs'>,
-  input: SettleCoreAssetSaleInstructionAccounts &
-    SettleCoreAssetSaleInstructionArgs
+export function claimNft(
+  context: Pick<Context, 'eddsa' | 'payer' | 'programs'>,
+  input: ClaimNftInstructionAccounts & ClaimNftInstructionArgs
 ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey(
@@ -138,76 +141,78 @@ export function settleCoreAssetSale(
       isWritable: true,
       value: input.authorityPdaPaymentAccount ?? null,
     },
-    authority: { index: 4, isWritable: true, value: input.authority ?? null },
     authorityPaymentAccount: {
-      index: 5,
+      index: 4,
       isWritable: true,
       value: input.authorityPaymentAccount ?? null,
     },
-    seller: { index: 6, isWritable: true, value: input.seller ?? null },
+    seller: { index: 5, isWritable: true, value: input.seller ?? null },
     sellerPaymentAccount: {
-      index: 7,
+      index: 6,
       isWritable: true,
       value: input.sellerPaymentAccount ?? null,
     },
-    sellerHistory: {
-      index: 8,
-      isWritable: true,
-      value: input.sellerHistory ?? null,
-    },
-    buyer: { index: 9, isWritable: false, value: input.buyer ?? null },
-    feeAccount: {
-      index: 10,
-      isWritable: true,
-      value: input.feeAccount ?? null,
-    },
+    buyer: { index: 7, isWritable: false, value: input.buyer ?? null },
+    feeAccount: { index: 8, isWritable: true, value: input.feeAccount ?? null },
     feePaymentAccount: {
-      index: 11,
+      index: 9,
       isWritable: true,
       value: input.feePaymentAccount ?? null,
     },
     paymentMint: {
-      index: 12,
+      index: 10,
       isWritable: false,
       value: input.paymentMint ?? null,
     },
     tokenProgram: {
-      index: 13,
+      index: 11,
       isWritable: false,
       value: input.tokenProgram ?? null,
     },
     associatedTokenProgram: {
-      index: 14,
+      index: 12,
       isWritable: false,
       value: input.associatedTokenProgram ?? null,
     },
     systemProgram: {
-      index: 15,
+      index: 13,
       isWritable: false,
       value: input.systemProgram ?? null,
     },
-    rent: { index: 16, isWritable: false, value: input.rent ?? null },
-    asset: { index: 17, isWritable: false, value: input.asset ?? null },
-    collection: {
-      index: 18,
-      isWritable: false,
-      value: input.collection ?? null,
+    rent: { index: 14, isWritable: false, value: input.rent ?? null },
+    mint: { index: 15, isWritable: false, value: input.mint ?? null },
+    tokenAccount: {
+      index: 16,
+      isWritable: true,
+      value: input.tokenAccount ?? null,
     },
-    mplCoreProgram: {
-      index: 19,
+    buyerTokenAccount: {
+      index: 17,
+      isWritable: true,
+      value: input.buyerTokenAccount ?? null,
+    },
+    tmpTokenAccount: {
+      index: 18,
+      isWritable: true,
+      value: input.tmpTokenAccount ?? null,
+    },
+    metadata: { index: 19, isWritable: true, value: input.metadata ?? null },
+    edition: { index: 20, isWritable: true, value: input.edition ?? null },
+    tokenMetadataProgram: {
+      index: 21,
       isWritable: false,
-      value: input.mplCoreProgram ?? null,
+      value: input.tokenMetadataProgram ?? null,
     },
     eventAuthority: {
-      index: 20,
+      index: 22,
       isWritable: false,
       value: input.eventAuthority ?? null,
     },
-    program: { index: 21, isWritable: false, value: input.program ?? null },
+    program: { index: 23, isWritable: false, value: input.program ?? null },
   };
 
   // Arguments.
-  const resolvedArgs: SettleCoreAssetSaleInstructionArgs = { ...input };
+  const resolvedArgs: ClaimNftInstructionArgs = { ...input };
 
   // Default values.
   if (!resolvedAccounts.payer.value) {
@@ -218,15 +223,6 @@ export function settleCoreAssetSale(
       context,
       { candyMachine: expectPublicKey(resolvedAccounts.candyMachine.value) }
     );
-  }
-  if (!resolvedAccounts.authority.value) {
-    resolvedAccounts.authority.value = context.identity.publicKey;
-  }
-  if (!resolvedAccounts.sellerHistory.value) {
-    resolvedAccounts.sellerHistory.value = findSellerHistoryPda(context, {
-      candyMachine: expectPublicKey(resolvedAccounts.candyMachine.value),
-      seller: expectPublicKey(resolvedAccounts.seller.value),
-    });
   }
   if (!resolvedAccounts.tokenProgram.value) {
     resolvedAccounts.tokenProgram.value = context.programs.getPublicKey(
@@ -255,12 +251,34 @@ export function settleCoreAssetSale(
       'SysvarRent111111111111111111111111111111111'
     );
   }
-  if (!resolvedAccounts.mplCoreProgram.value) {
-    resolvedAccounts.mplCoreProgram.value = context.programs.getPublicKey(
-      'mplCoreProgram',
-      'CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d'
+  if (!resolvedAccounts.tokenAccount.value) {
+    resolvedAccounts.tokenAccount.value = findAssociatedTokenPda(context, {
+      mint: expectPublicKey(resolvedAccounts.mint.value),
+      owner: expectPublicKey(resolvedAccounts.seller.value),
+    });
+  }
+  if (!resolvedAccounts.tmpTokenAccount.value) {
+    resolvedAccounts.tmpTokenAccount.value = findAssociatedTokenPda(context, {
+      mint: expectPublicKey(resolvedAccounts.mint.value),
+      owner: expectPublicKey(resolvedAccounts.authorityPda.value),
+    });
+  }
+  if (!resolvedAccounts.metadata.value) {
+    resolvedAccounts.metadata.value = findMetadataPda(context, {
+      mint: expectPublicKey(resolvedAccounts.mint.value),
+    });
+  }
+  if (!resolvedAccounts.edition.value) {
+    resolvedAccounts.edition.value = findMasterEditionPda(context, {
+      mint: expectPublicKey(resolvedAccounts.mint.value),
+    });
+  }
+  if (!resolvedAccounts.tokenMetadataProgram.value) {
+    resolvedAccounts.tokenMetadataProgram.value = context.programs.getPublicKey(
+      'mplTokenMetadata',
+      'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'
     );
-    resolvedAccounts.mplCoreProgram.isWritable = false;
+    resolvedAccounts.tokenMetadataProgram.isWritable = false;
   }
   if (!resolvedAccounts.eventAuthority.value) {
     resolvedAccounts.eventAuthority.value = findEventAuthorityPda(context);
@@ -286,8 +304,8 @@ export function settleCoreAssetSale(
   );
 
   // Data.
-  const data = getSettleCoreAssetSaleInstructionDataSerializer().serialize(
-    resolvedArgs as SettleCoreAssetSaleInstructionDataArgs
+  const data = getClaimNftInstructionDataSerializer().serialize(
+    resolvedArgs as ClaimNftInstructionDataArgs
   );
 
   // Bytes Created On Chain.

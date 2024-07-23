@@ -2,7 +2,7 @@ use crate::error::Error;
 use anchor_lang::prelude::*;
 
 pub fn get_bps_of(amount: u64, bps: u16) -> Result<u64> {
-    if amount == 0 {
+    if bps == 0 || amount == 0 {
         return Ok(0);
     }
 

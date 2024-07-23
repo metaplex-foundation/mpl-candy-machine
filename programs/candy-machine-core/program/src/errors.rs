@@ -122,6 +122,9 @@ pub enum CandyError {
     #[msg("Invalid seller")]
     InvalidSeller,
 
+    #[msg("Invalid buyer")]
+    InvalidBuyer,
+
     #[msg("URI too long")]
     UriTooLong,
 

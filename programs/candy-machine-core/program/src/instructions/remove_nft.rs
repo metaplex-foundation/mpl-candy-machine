@@ -105,6 +105,7 @@ pub fn remove_nft(ctx: Context<RemoveNft>, index: u32) -> Result<()> {
         ctx.accounts.candy_machine.to_account_info().key.as_ref(),
         &[ctx.bumps.authority_pda],
     ];
+
     ThawDelegatedAccountCpi::new(
         token_metadata_program,
         ThawDelegatedAccountCpiAccounts {

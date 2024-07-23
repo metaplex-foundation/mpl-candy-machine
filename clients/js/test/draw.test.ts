@@ -16,6 +16,7 @@ import {
   CandyMachine,
   draw,
   fetchCandyMachine,
+  GumballState,
   startSale,
   TokenStandard,
 } from '../src';
@@ -63,6 +64,48 @@ test('it can mint from a candy guard with no guards', async (t) => {
   // And the candy machine was updated.
   const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
   t.like(candyMachineAccount, <CandyMachine>{ itemsRedeemed: 1n });
+});
+
+test('it sets state to SaleEnded on final draw', async (t) => {
+  // Given a candy machine with a candy guard that has no guards.
+  const umi = await createUmi();
+
+  const candyMachineSigner = await create(umi, {
+    settings: { itemCapacity: 1 },
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
+    guards: {},
+    groups: [],
+  });
+  const candyMachine = candyMachineSigner.publicKey;
+
+  // When we mint from the candy guard.
+  const buyer = generateSigner(umi);
+  await transactionBuilder()
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      draw(umi, {
+        candyMachine,
+        buyer,
+      })
+    )
+    .sendAndConfirm(umi);
+
+  // Then the mint was successful.
+  await assertItemBought(t, umi, { candyMachine, buyer: buyer.publicKey });
+
+  // And the candy machine was updated.
+  const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
+  t.like(candyMachineAccount, <CandyMachine>{
+    itemsRedeemed: 1n,
+    finalizedItemsCount: 1n,
+    state: GumballState.SaleEnded,
+  });
 });
 
 test('it can mint from a candy guard with guards', async (t) => {

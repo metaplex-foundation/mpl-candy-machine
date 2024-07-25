@@ -9,7 +9,7 @@ import {
 } from '@metaplex-foundation/umi';
 import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
 import test from 'ava';
-import { draw, TokenStandard } from '../../src';
+import { draw, findCandyMachineAuthorityPda, TokenStandard } from '../../src';
 import {
   assertBotTax,
   assertItemBought,
@@ -18,10 +18,9 @@ import {
   createUmi,
 } from '../_setup';
 
-test('it transfers SOL from the payer to the destination', async (t) => {
+test('it transfers SOL from the payer to the authority pda', async (t) => {
   // Given a loaded Candy Machine with a solPayment guard.
   const umi = await createUmi();
-  const destination = generateSigner(umi).publicKey;
 
   const { publicKey: candyMachine } = await create(umi, {
     items: [
@@ -32,7 +31,7 @@ test('it transfers SOL from the payer to the destination', async (t) => {
     ],
     startSale: true,
     guards: {
-      solPayment: some({ lamports: sol(1), destination }),
+      solPayment: some({ lamports: sol(1) }),
     },
   });
 
@@ -45,11 +44,9 @@ test('it transfers SOL from the payer to the destination', async (t) => {
     .add(
       draw(umi, {
         candyMachine,
-
         buyer,
         payer,
-
-        mintArgs: { solPayment: some({ destination }) },
+        mintArgs: { solPayment: some(true) },
       })
     )
     .sendAndConfirm(umi);
@@ -58,8 +55,12 @@ test('it transfers SOL from the payer to the destination', async (t) => {
   await assertItemBought(t, umi, { candyMachine, buyer: publicKey(buyer) });
 
   // And the treasury received SOLs.
-  const treasuryBalance = await umi.rpc.getBalance(destination);
-  t.true(isEqualToAmount(treasuryBalance, sol(1)), 'treasury received SOLs');
+  const authorityPda = findCandyMachineAuthorityPda(umi, { candyMachine })[0];
+  const treasuryBalance = await umi.rpc.getBalance(authorityPda);
+  t.true(
+    isEqualToAmount(treasuryBalance, sol(1), sol(0.001)),
+    'treasury received SOLs'
+  );
 
   // And the payer lost SOLs.
   const payerBalance = await umi.rpc.getBalance(payer.publicKey);
@@ -80,7 +81,7 @@ test('it fails if the payer does not have enough funds', async (t) => {
     ],
     startSale: true,
     guards: {
-      solPayment: some({ lamports: sol(5), destination }),
+      solPayment: some({ lamports: sol(5) }),
     },
   });
 
@@ -92,10 +93,8 @@ test('it fails if the payer does not have enough funds', async (t) => {
     .add(
       draw(umi, {
         candyMachine,
-
         payer,
-
-        mintArgs: { solPayment: some({ destination }) },
+        mintArgs: { solPayment: some(true) },
       })
     )
     .sendAndConfirm(umi);
@@ -123,7 +122,7 @@ test('it charges a bot tax if the payer does not have enough funds', async (t) =
     startSale: true,
     guards: {
       botTax: some({ lamports: sol(0.1), lastInstruction: true }),
-      solPayment: some({ lamports: sol(5), destination }),
+      solPayment: some({ lamports: sol(5) }),
     },
   });
 
@@ -135,10 +134,8 @@ test('it charges a bot tax if the payer does not have enough funds', async (t) =
     .add(
       draw(umi, {
         candyMachine,
-
         payer,
-
-        mintArgs: { solPayment: some({ destination }) },
+        mintArgs: { solPayment: some(true) },
       })
     )
     .sendAndConfirm(umi);

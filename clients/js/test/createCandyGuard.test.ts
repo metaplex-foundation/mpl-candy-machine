@@ -48,7 +48,6 @@ test('it can create a candy guard with guards', async (t) => {
   const base = generateSigner(umi);
 
   // When we create a new candy guard with guards.
-  const solDestination = generateSigner(umi).publicKey;
   const gatekeeperNetwork = generateSigner(umi).publicKey;
   const tokenMint = generateSigner(umi).publicKey;
   const tokenDestination = generateSigner(umi).publicKey;
@@ -58,7 +57,7 @@ test('it can create a candy guard with guards', async (t) => {
         base,
         guards: {
           botTax: some({ lamports: sol(0.001), lastInstruction: true }),
-          solPayment: some({ lamports: sol(1.5), destination: solDestination }),
+          solPayment: some({ lamports: sol(1.5) }),
           startDate: some({ date: '2023-03-07T16:13:00.000Z' }),
           endDate: some({ date: '2023-03-08T16:13:00.000Z' }),
           gatekeeper: some({ gatekeeperNetwork, expireOnUse: true }),
@@ -82,7 +81,7 @@ test('it can create a candy guard with guards', async (t) => {
     guards: {
       ...emptyDefaultGuardSetArgs,
       botTax: some({ lamports: sol(0.001), lastInstruction: true }),
-      solPayment: some({ lamports: sol(1.5), destination: solDestination }),
+      solPayment: some({ lamports: sol(1.5) }),
       startDate: some({ date: dateTime('2023-03-07T16:13:00.000Z') }),
       endDate: some({ date: dateTime('2023-03-08T16:13:00.000Z') }),
       gatekeeper: some({ gatekeeperNetwork, expireOnUse: true }),
@@ -125,7 +124,6 @@ test('it can create a candy guard with guard groups', async (t) => {
               allowList: some({ merkleRoot }),
               solPayment: some({
                 lamports: sol(1),
-                destination: solDestination,
               }),
             },
           },
@@ -137,7 +135,6 @@ test('it can create a candy guard with guard groups', async (t) => {
               tokenGate: some({ mint: tokenGateMint, amount: 1 }),
               solPayment: some({
                 lamports: sol(2),
-                destination: solDestination,
               }),
             },
           },
@@ -149,7 +146,6 @@ test('it can create a candy guard with guard groups', async (t) => {
               gatekeeper: some({ gatekeeperNetwork, expireOnUse: false }),
               solPayment: some({
                 lamports: sol(3),
-                destination: solDestination,
               }),
             },
           },
@@ -177,7 +173,6 @@ test('it can create a candy guard with guard groups', async (t) => {
           allowList: some({ merkleRoot }),
           solPayment: some({
             lamports: sol(1),
-            destination: publicKey(solDestination),
           }),
         },
       },
@@ -189,7 +184,6 @@ test('it can create a candy guard with guard groups', async (t) => {
           tokenGate: some({ mint: tokenGateMint, amount: 1n }),
           solPayment: some({
             lamports: sol(2),
-            destination: publicKey(solDestination),
           }),
         },
       },
@@ -201,7 +195,6 @@ test('it can create a candy guard with guard groups', async (t) => {
           gatekeeper: some({ gatekeeperNetwork, expireOnUse: false }),
           solPayment: some({
             lamports: sol(3),
-            destination: publicKey(solDestination),
           }),
         },
       },

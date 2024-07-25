@@ -25,12 +25,11 @@ test('it can create a candy machine with an associated candy guard', async (t) =
 
   // When we create a new candy machine with an associated candy guard.
   const candyMachine = generateSigner(umi);
-  const destination = generateSigner(umi).publicKey;
   const createInstructions = await create(umi, {
     candyMachine,
     guards: {
       botTax: some({ lamports: sol(0.01), lastInstruction: true }),
-      solPayment: some({ lamports: sol(2), destination }),
+      solPayment: some({ lamports: sol(2) }),
     },
     settings: defaultGumballSettings(),
   });
@@ -46,7 +45,7 @@ test('it can create a candy machine with an associated candy guard', async (t) =
     guards: {
       ...emptyDefaultGuardSetArgs,
       botTax: some({ lamports: sol(0.01), lastInstruction: true }),
-      solPayment: some({ lamports: sol(2), destination }),
+      solPayment: some({ lamports: sol(2) }),
     },
     groups: [] as GuardGroup<GuardSet>[],
   });

@@ -21,7 +21,6 @@ import { createCandyGuard, createUmi } from './_setup';
 test('it can update the guards of a candy guard', async (t) => {
   // Given an existing candy guard.
   const umi = await createUmi();
-  const treasuryA = generateSigner(umi).publicKey;
   const candyGuard = await createCandyGuard(umi, {
     guards: {
       botTax: some({ lamports: sol(0.01), lastInstruction: true }),
@@ -31,21 +30,20 @@ test('it can update the guards of a candy guard', async (t) => {
         label: 'OLD1',
         guards: {
           startDate: some({ date: '2022-09-13T10:00:00.000Z' }),
-          solPayment: some({ lamports: sol(2), destination: treasuryA }),
+          solPayment: some({ lamports: sol(2) }),
         },
       },
       {
         label: 'OLD2',
         guards: {
           startDate: some({ date: '2022-09-13T12:00:00.000Z' }),
-          solPayment: some({ lamports: sol(4), destination: treasuryA }),
+          solPayment: some({ lamports: sol(4) }),
         },
       },
     ],
   });
 
   // When we update all its guards — defaults and groups.
-  const treasuryB = generateSigner(umi).publicKey;
   await transactionBuilder()
     .add(
       updateCandyGuard(umi, {
@@ -58,7 +56,7 @@ test('it can update the guards of a candy guard', async (t) => {
             label: 'NEW1',
             guards: {
               startDate: some({ date: '2022-09-15T10:00:00.000Z' }),
-              solPayment: some({ lamports: sol(1), destination: treasuryB }),
+              solPayment: some({ lamports: sol(1) }),
               endDate: some({ date: '2022-09-15T12:00:00.000Z' }),
             },
           },
@@ -66,7 +64,7 @@ test('it can update the guards of a candy guard', async (t) => {
             label: 'NEW2',
             guards: {
               startDate: some({ date: '2022-09-15T12:00:00.000Z' }),
-              solPayment: some({ lamports: sol(3), destination: treasuryB }),
+              solPayment: some({ lamports: sol(3) }),
             },
           },
         ],
@@ -87,7 +85,7 @@ test('it can update the guards of a candy guard', async (t) => {
         guards: {
           ...emptyDefaultGuardSetArgs,
           startDate: some({ date: dateTime('2022-09-15T10:00:00.000Z') }),
-          solPayment: some({ lamports: sol(1), destination: treasuryB }),
+          solPayment: some({ lamports: sol(1) }),
           endDate: some({ date: dateTime('2022-09-15T12:00:00.000Z') }),
         },
       },
@@ -96,7 +94,7 @@ test('it can update the guards of a candy guard', async (t) => {
         guards: {
           ...emptyDefaultGuardSetArgs,
           startDate: some({ date: dateTime('2022-09-15T12:00:00.000Z') }),
-          solPayment: some({ lamports: sol(3), destination: treasuryB }),
+          solPayment: some({ lamports: sol(3) }),
         },
       },
     ],
@@ -106,7 +104,6 @@ test('it can update the guards of a candy guard', async (t) => {
 test('it can remove all guards from a candy guard', async (t) => {
   // Given an existing candy guard with defaults guards and groups.
   const umi = await createUmi();
-  const destination = generateSigner(umi).publicKey;
   const candyGuard = await createCandyGuard(umi, {
     guards: {
       botTax: some({ lamports: sol(0.01), lastInstruction: true }),
@@ -116,14 +113,14 @@ test('it can remove all guards from a candy guard', async (t) => {
         label: 'OLD1',
         guards: {
           startDate: some({ date: '2022-09-13T10:00:00.000Z' }),
-          solPayment: some({ lamports: sol(2), destination }),
+          solPayment: some({ lamports: sol(2) }),
         },
       },
       {
         label: 'OLD2',
         guards: {
           startDate: some({ date: '2022-09-13T12:00:00.000Z' }),
-          solPayment: some({ lamports: sol(4), destination }),
+          solPayment: some({ lamports: sol(4) }),
         },
       },
     ],
@@ -155,14 +152,14 @@ test('it can update a single guard by passing the current data', async (t) => {
         label: 'GROUP1',
         guards: {
           startDate: some({ date: '2022-09-13T10:00:00.000Z' }),
-          solPayment: some({ lamports: sol(2), destination }),
+          solPayment: some({ lamports: sol(2) }),
         },
       },
       {
         label: 'GROUP2',
         guards: {
           startDate: some({ date: '2022-09-13T12:00:00.000Z' }),
-          solPayment: some({ lamports: sol(4), destination }),
+          solPayment: some({ lamports: sol(4) }),
         },
       },
     ],
@@ -193,7 +190,7 @@ test('it can update a single guard by passing the current data', async (t) => {
         guards: {
           ...emptyDefaultGuardSetArgs,
           startDate: some({ date: dateTime('2022-09-13T10:00:00.000Z') }),
-          solPayment: some({ lamports: sol(2), destination }),
+          solPayment: some({ lamports: sol(2) }),
         },
       },
       {
@@ -201,7 +198,7 @@ test('it can update a single guard by passing the current data', async (t) => {
         guards: {
           ...emptyDefaultGuardSetArgs,
           startDate: some({ date: dateTime('2022-09-13T14:00:00.000Z') }), // <-- This was updated.
-          solPayment: some({ lamports: sol(4), destination }),
+          solPayment: some({ lamports: sol(4) }),
         },
       },
     ],

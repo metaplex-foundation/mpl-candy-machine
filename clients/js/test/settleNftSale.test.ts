@@ -4,17 +4,12 @@ import {
   generateSigner,
   isEqualToAmount,
   sol,
+  some,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
 import test from 'ava';
-import {
-  CandyMachine,
-  draw,
-  fetchCandyMachine,
-  findCandyMachineAuthorityPda,
-  TokenStandard,
-} from '../src';
+import { CandyMachine, draw, fetchCandyMachine, TokenStandard } from '../src';
 import { settleNftSale } from '../src/generated/instructions/settleNftSale';
 import { create, createNft, createUmi } from './_setup';
 
@@ -25,9 +20,6 @@ test('it can settle an nft sale', async (t) => {
 
   const candyMachineSigner = generateSigner(umi);
   const candyMachine = candyMachineSigner.publicKey;
-  const destination = findCandyMachineAuthorityPda(umi, {
-    candyMachine,
-  })[0];
 
   await create(umi, {
     candyMachine: candyMachineSigner,
@@ -40,7 +32,7 @@ test('it can settle an nft sale', async (t) => {
     startSale: true,
     guards: {
       botTax: { lamports: sol(0.01), lastInstruction: true },
-      solPayment: { lamports: sol(1), destination },
+      solPayment: { lamports: sol(1) },
     },
   });
 
@@ -56,7 +48,7 @@ test('it can settle an nft sale', async (t) => {
         payer,
         buyer,
         mintArgs: {
-          solPayment: { destination },
+          solPayment: some(true),
         },
       })
     )

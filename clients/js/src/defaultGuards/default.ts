@@ -52,7 +52,6 @@ import { MintLimitMintArgs } from './mintLimit';
 import { NftBurnMintArgs } from './nftBurn';
 import { NftGateMintArgs } from './nftGate';
 import { NftPaymentMintArgs } from './nftPayment';
-import { SolPaymentMintArgs } from './solPayment';
 import { ThirdPartySignerMintArgs } from './thirdPartySigner';
 import { Token2022PaymentMintArgs } from './token2022Payment';
 import { TokenBurnMintArgs } from './tokenBurn';
@@ -114,7 +113,7 @@ export type DefaultGuardSet = GuardSet & {
  */
 export type DefaultGuardSetMintArgs = GuardSetMintArgs & {
   // botTax: no mint settings
-  solPayment: OptionOrNullable<SolPaymentMintArgs>;
+  solPayment: OptionOrNullable<boolean>;
   tokenPayment: OptionOrNullable<TokenPaymentMintArgs>;
   // startDate: no mint settings
   thirdPartySigner: OptionOrNullable<ThirdPartySignerMintArgs>;

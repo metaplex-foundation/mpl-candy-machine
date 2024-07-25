@@ -731,6 +731,19 @@ export class CgInvalidAccountVersionError extends ProgramError {
 codeToErrorMap.set(0x17a3, CgInvalidAccountVersionError);
 nameToErrorMap.set('InvalidAccountVersion', CgInvalidAccountVersionError);
 
+/** InvalidPDA: Invalid PDA */
+export class CgInvalidPDAError extends ProgramError {
+  readonly name: string = 'InvalidPDA';
+
+  readonly code: number = 0x17a4; // 6052
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid PDA', program, cause);
+  }
+}
+codeToErrorMap.set(0x17a4, CgInvalidPDAError);
+nameToErrorMap.set('InvalidPDA', CgInvalidPDAError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

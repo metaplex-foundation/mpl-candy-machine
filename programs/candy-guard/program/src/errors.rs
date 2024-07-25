@@ -157,4 +157,7 @@ pub enum CandyGuardError {
 
     #[msg("Invalid account version")]
     InvalidAccountVersion,
+
+    #[msg("Invalid PDA")]
+    InvalidPDA,
 }

@@ -4,6 +4,7 @@ import {
   SolPaymentArgs,
 } from '../generated';
 import { GuardManifest, noopParser } from '../guards';
+import { findCandyMachineAuthorityPda } from '../hooked';
 
 /**
  * The solPayment guard is used to charge an
@@ -11,16 +12,20 @@ import { GuardManifest, noopParser } from '../guards';
  */
 export const solPaymentGuardManifest: GuardManifest<
   SolPaymentArgs,
-  SolPayment,
-  SolPaymentMintArgs
+  SolPayment
 > = {
   name: 'solPayment',
   serializer: getSolPaymentSerializer,
   mintParser: (context, mintContext, args) => ({
     data: new Uint8Array(),
-    remainingAccounts: [{ publicKey: args.destination, isWritable: true }],
+    remainingAccounts: [
+      {
+        publicKey: findCandyMachineAuthorityPda(context, {
+          candyMachine: mintContext.candyMachine,
+        })[0],
+        isWritable: true,
+      },
+    ],
   }),
   routeParser: noopParser,
 };
-
-export type SolPaymentMintArgs = Omit<SolPaymentArgs, 'lamports'>;

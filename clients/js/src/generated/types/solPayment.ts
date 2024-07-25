@@ -6,17 +6,8 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import {
-  mapAmountSerializer,
-  PublicKey,
-  SolAmount,
-} from '@metaplex-foundation/umi';
-import {
-  publicKey as publicKeySerializer,
-  Serializer,
-  struct,
-  u64,
-} from '@metaplex-foundation/umi/serializers';
+import { mapAmountSerializer, SolAmount } from '@metaplex-foundation/umi';
+import { Serializer, struct, u64 } from '@metaplex-foundation/umi/serializers';
 
 /**
  * Guard that charges an amount in SOL (lamports) for the mint.
@@ -26,7 +17,7 @@ import {
  * 0. `[]` Account to receive the funds.
  */
 
-export type SolPayment = { lamports: SolAmount; destination: PublicKey };
+export type SolPayment = { lamports: SolAmount };
 
 export type SolPaymentArgs = SolPayment;
 
@@ -35,10 +26,7 @@ export function getSolPaymentSerializer(): Serializer<
   SolPayment
 > {
   return struct<SolPayment>(
-    [
-      ['lamports', mapAmountSerializer(u64(), 'SOL', 9)],
-      ['destination', publicKeySerializer()],
-    ],
+    [['lamports', mapAmountSerializer(u64(), 'SOL', 9)]],
     { description: 'SolPayment' }
   ) as Serializer<SolPaymentArgs, SolPayment>;
 }

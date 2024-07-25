@@ -98,6 +98,14 @@ pub fn assert_keys_equal(key1: &Pubkey, key2: &Pubkey) -> Result<()> {
     }
 }
 
+pub fn assert_derivation(program_id: &Pubkey, account: &AccountInfo, path: &[&[u8]]) -> Result<u8> {
+    let (key, bump) = Pubkey::find_program_address(&path, program_id);
+    if key != *account.key {
+        return err!(CandyGuardError::InvalidPDA);
+    }
+    Ok(bump)
+}
+
 /// Return a padded string up to the specified length. If the specified
 /// string `value` is longer than the allowed `length`, return an error.
 pub fn fixed_length_string(value: String, length: usize) -> Result<String> {

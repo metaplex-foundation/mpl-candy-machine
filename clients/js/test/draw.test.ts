@@ -6,6 +6,7 @@ import {
   none,
   PublicKey,
   sol,
+  some,
   transactionBuilder,
   Umi,
 } from '@metaplex-foundation/umi';
@@ -112,7 +113,6 @@ test('it can mint from a candy guard with guards', async (t) => {
   // Given a candy machine with some guards.
   const umi = await createUmi();
 
-  const destination = generateSigner(umi).publicKey;
   const candyMachineSigner = await create(umi, {
     items: [
       {
@@ -123,7 +123,7 @@ test('it can mint from a candy guard with guards', async (t) => {
     startSale: true,
     guards: {
       botTax: { lamports: sol(0.01), lastInstruction: true },
-      solPayment: { lamports: sol(2), destination },
+      solPayment: { lamports: sol(2) },
     },
   });
   const candyMachine = candyMachineSigner.publicKey;
@@ -139,7 +139,7 @@ test('it can mint from a candy guard with guards', async (t) => {
         payer,
         buyer,
         mintArgs: {
-          solPayment: { destination },
+          solPayment: some(true),
         },
       })
     )
@@ -161,7 +161,6 @@ test('it can mint from a candy guard with groups', async (t) => {
   // Given a candy machine with guard groups.
   const umi = await createUmi();
 
-  const destination = generateSigner(umi).publicKey;
   const candyMachineSigner = await create(umi, {
     items: [
       {
@@ -172,7 +171,7 @@ test('it can mint from a candy guard with groups', async (t) => {
     startSale: true,
     guards: {
       botTax: { lamports: sol(0.01), lastInstruction: true },
-      solPayment: { lamports: sol(2), destination },
+      solPayment: { lamports: sol(2) },
     },
     groups: [
       { label: 'GROUP1', guards: { startDate: { date: yesterday() } } },
@@ -189,7 +188,7 @@ test('it can mint from a candy guard with groups', async (t) => {
       draw(umi, {
         candyMachine,
         buyer,
-        mintArgs: { solPayment: { destination } },
+        mintArgs: { solPayment: some(true) },
         group: 'GROUP1',
       })
     )
@@ -203,7 +202,6 @@ test('it cannot mint using the default guards if the candy guard has groups', as
   // Given a candy machine with guard groups.
   const umi = await createUmi();
 
-  const destination = generateSigner(umi).publicKey;
   const candyMachineSigner = await create(umi, {
     items: [
       {
@@ -212,7 +210,7 @@ test('it cannot mint using the default guards if the candy guard has groups', as
       },
     ],
     startSale: true,
-    guards: { solPayment: { lamports: sol(2), destination } },
+    guards: { solPayment: { lamports: sol(2) } },
     groups: [
       { label: 'GROUP1', guards: { startDate: { date: yesterday() } } },
       { label: 'GROUP2', guards: { startDate: { date: tomorrow() } } },
@@ -228,7 +226,7 @@ test('it cannot mint using the default guards if the candy guard has groups', as
       draw(umi, {
         candyMachine,
         buyer,
-        mintArgs: { solPayment: { destination } },
+        mintArgs: { solPayment: some(true) },
         group: none(),
       })
     )
@@ -242,7 +240,6 @@ test('it cannot mint from a group if the provided group label does not exist', a
   // Given a candy machine with no guard groups.
   const umi = await createUmi();
 
-  const destination = generateSigner(umi).publicKey;
   const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
@@ -251,7 +248,7 @@ test('it cannot mint from a group if the provided group label does not exist', a
       },
     ],
     startSale: true,
-    guards: { solPayment: { lamports: sol(2), destination } },
+    guards: { solPayment: { lamports: sol(2) } },
     groups: [{ label: 'GROUP1', guards: { startDate: { date: yesterday() } } }],
   });
 
@@ -263,7 +260,7 @@ test('it cannot mint from a group if the provided group label does not exist', a
       draw(umi, {
         candyMachine,
         buyer,
-        mintArgs: { solPayment: { destination } },
+        mintArgs: { solPayment: some(true) },
         group: 'GROUPX',
       })
     )
@@ -277,7 +274,6 @@ test('it can mint using an explicit payer', async (t) => {
   // Given a candy machine with guards.
   const umi = await createUmi();
 
-  const destination = generateSigner(umi).publicKey;
   const { publicKey: candyMachine } = await create(umi, {
     items: [
       {
@@ -286,7 +282,7 @@ test('it can mint using an explicit payer', async (t) => {
       },
     ],
     startSale: true,
-    guards: { solPayment: { lamports: sol(2), destination } },
+    guards: { solPayment: { lamports: sol(2) } },
   });
 
   // And an explicit payer with 10 SOL.
@@ -301,7 +297,7 @@ test('it can mint using an explicit payer', async (t) => {
         candyMachine,
         buyer,
         payer,
-        mintArgs: { solPayment: { destination } },
+        mintArgs: { solPayment: some(true) },
       })
     )
     .sendAndConfirm(umi);

@@ -703,10 +703,6 @@
           {
             "name": "lamports",
             "type": "u64"
-          },
-          {
-            "name": "destination",
-            "type": "publicKey"
           }
         ]
       }
@@ -1473,6 +1469,11 @@
       "code": 6051,
       "name": "InvalidAccountVersion",
       "msg": "Invalid account version"
+    },
+    {
+      "code": 6052,
+      "name": "InvalidPDA",
+      "msg": "Invalid PDA"
     }
   ],
   "metadata": {

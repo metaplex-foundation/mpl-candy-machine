@@ -1,5 +1,8 @@
 /* eslint-disable no-await-in-loop */
-import { setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
+import {
+  fetchToken,
+  setComputeUnitLimit,
+} from '@metaplex-foundation/mpl-toolbox';
 import {
   generateSigner,
   isEqualToAmount,
@@ -17,6 +20,7 @@ import {
   CandyMachine,
   draw,
   fetchCandyMachine,
+  findCandyMachineAuthorityPda,
   GumballState,
   startSale,
   TokenStandard,
@@ -24,6 +28,7 @@ import {
 import {
   assertItemBought,
   create,
+  createMintWithHolders,
   createNft,
   createUmi,
   tomorrow,
@@ -155,6 +160,65 @@ test('it can mint from a candy guard with guards', async (t) => {
   // And the candy machine was updated.
   const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
   t.like(candyMachineAccount, <CandyMachine>{ itemsRedeemed: 1n });
+});
+
+test('it can mint from a candy guard with token payment guard', async (t) => {
+  // Given a candy machine with some guards.
+  const umi = await createUmi();
+  const buyerUmi = await createUmi();
+  const candyMachineSigner = generateSigner(umi);
+  const candyMachine = candyMachineSigner.publicKey;
+  const destination = findCandyMachineAuthorityPda(umi, { candyMachine })[0];
+  const [tokenMint, destinationAta, identityAta] = await createMintWithHolders(
+    umi,
+    {
+      holders: [
+        { owner: destination, amount: 100 },
+        { owner: buyerUmi.identity, amount: 12 },
+      ],
+    }
+  );
+
+  await create(umi, {
+    candyMachine: candyMachineSigner,
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
+    guards: {
+      tokenPayment: { mint: tokenMint.publicKey, amount: 5 },
+    },
+  });
+
+  // When we mint from the candy guard.
+  await transactionBuilder()
+    .add(setComputeUnitLimit(buyerUmi, { units: 600_000 }))
+    .add(
+      draw(buyerUmi, {
+        candyMachine,
+        mintArgs: {
+          tokenPayment: { mint: tokenMint.publicKey },
+        },
+      })
+    )
+    .sendAndConfirm(buyerUmi);
+
+  // Then the mint was successful.
+  await assertItemBought(t, umi, {
+    candyMachine,
+    buyer: buyerUmi.identity.publicKey,
+  });
+
+  // And the treasury token received 5 tokens.
+  const destinationTokenAccount = await fetchToken(umi, destinationAta);
+  t.is(destinationTokenAccount.amount, 105n);
+
+  // And the payer lost 5 tokens.
+  const payerTokenAccount = await fetchToken(umi, identityAta);
+  t.is(payerTokenAccount.amount, 7n);
 });
 
 test('it can mint from a candy guard with groups', async (t) => {

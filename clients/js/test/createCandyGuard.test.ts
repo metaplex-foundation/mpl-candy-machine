@@ -64,7 +64,6 @@ test('it can create a candy guard with guards', async (t) => {
           tokenPayment: some({
             amount: 42,
             mint: tokenMint,
-            destinationAta: tokenDestination,
           }),
         },
       })
@@ -88,7 +87,6 @@ test('it can create a candy guard with guards', async (t) => {
       tokenPayment: some({
         amount: 42n,
         mint: tokenMint,
-        destinationAta: tokenDestination,
       }),
     },
     groups: [] as GuardGroup<GuardSet>[],

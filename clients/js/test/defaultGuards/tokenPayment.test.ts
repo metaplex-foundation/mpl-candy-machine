@@ -10,7 +10,7 @@ import {
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import test from 'ava';
-import { draw, TokenStandard } from '../../src';
+import { draw, findCandyMachineAuthorityPda, TokenStandard } from '../../src';
 import {
   assertBotTax,
   assertItemBought,
@@ -25,7 +25,9 @@ test('it transfers tokens from the payer to the destination', async (t) => {
   // - The destination treasury has 100 tokens.
   // - The payer has 12 tokens.
   const umi = await createUmi();
-  const destination = generateSigner(umi).publicKey;
+  const candyMachineSigner = generateSigner(umi);
+  const candyMachine = candyMachineSigner.publicKey;
+  const destination = findCandyMachineAuthorityPda(umi, { candyMachine })[0];
   const [tokenMint, destinationAta, identityAta] = await createMintWithHolders(
     umi,
     {
@@ -38,7 +40,8 @@ test('it transfers tokens from the payer to the destination', async (t) => {
 
   // And a loaded Candy Machine with a tokenPayment guard that requires 5 tokens.
 
-  const { publicKey: candyMachine } = await create(umi, {
+  await create(umi, {
+    candyMachine: candyMachineSigner,
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -49,7 +52,6 @@ test('it transfers tokens from the payer to the destination', async (t) => {
     guards: {
       tokenPayment: some({
         mint: tokenMint.publicKey,
-        destinationAta,
         amount: 5,
       }),
     },
@@ -62,9 +64,8 @@ test('it transfers tokens from the payer to the destination', async (t) => {
     .add(
       draw(umi, {
         candyMachine,
-
         mintArgs: {
-          tokenPayment: some({ mint: tokenMint.publicKey, destinationAta }),
+          tokenPayment: some({ mint: tokenMint.publicKey }),
         },
       })
     )
@@ -88,7 +89,9 @@ test('it allows minting even when the payer is different from the buyer', async 
   // - An explicit buyer has 12 tokens.
   const umi = await createUmi();
   const buyer = generateSigner(umi);
-  const destination = generateSigner(umi).publicKey;
+  const candyMachineSigner = generateSigner(umi);
+  const candyMachine = candyMachineSigner.publicKey;
+  const destination = findCandyMachineAuthorityPda(umi, { candyMachine })[0];
   const [tokenMint, destinationAta, buyerAta] = await createMintWithHolders(
     umi,
     {
@@ -101,7 +104,8 @@ test('it allows minting even when the payer is different from the buyer', async 
 
   // And a loaded Candy Machine with a tokenPayment guard that requires 5 tokens.
 
-  const { publicKey: candyMachine } = await create(umi, {
+  await create(umi, {
+    candyMachine: candyMachineSigner,
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -112,7 +116,6 @@ test('it allows minting even when the payer is different from the buyer', async 
     guards: {
       tokenPayment: some({
         mint: tokenMint.publicKey,
-        destinationAta,
         amount: 5,
       }),
     },
@@ -129,7 +132,7 @@ test('it allows minting even when the payer is different from the buyer', async 
         buyer,
 
         mintArgs: {
-          tokenPayment: some({ mint: tokenMint.publicKey, destinationAta }),
+          tokenPayment: some({ mint: tokenMint.publicKey }),
         },
       })
     )
@@ -150,7 +153,9 @@ test('it allows minting even when the payer is different from the buyer', async 
 test('it fails if the payer does not have enough tokens', async (t) => {
   // Given a mint account such that the payer has 4 tokens.
   const umi = await createUmi();
-  const destination = generateSigner(umi).publicKey;
+  const candyMachineSigner = generateSigner(umi);
+  const candyMachine = candyMachineSigner.publicKey;
+  const destination = findCandyMachineAuthorityPda(umi, { candyMachine })[0];
   const [tokenMint, destinationAta, identityAta] = await createMintWithHolders(
     umi,
     {
@@ -163,7 +168,8 @@ test('it fails if the payer does not have enough tokens', async (t) => {
 
   // And a loaded Candy Machine with a tokenPayment guard that requires 5 tokens.
 
-  const { publicKey: candyMachine } = await create(umi, {
+  await create(umi, {
+    candyMachine: candyMachineSigner,
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -174,7 +180,6 @@ test('it fails if the payer does not have enough tokens', async (t) => {
     guards: {
       tokenPayment: some({
         mint: tokenMint.publicKey,
-        destinationAta,
         amount: 5,
       }),
     },
@@ -189,7 +194,7 @@ test('it fails if the payer does not have enough tokens', async (t) => {
         candyMachine,
 
         mintArgs: {
-          tokenPayment: some({ mint: tokenMint.publicKey, destinationAta }),
+          tokenPayment: some({ mint: tokenMint.publicKey }),
         },
       })
     )
@@ -206,7 +211,9 @@ test('it fails if the payer does not have enough tokens', async (t) => {
 test('it charges a bot tax if the payer does not have enough tokens', async (t) => {
   // Given a mint account such that the payer has 4 tokens.
   const umi = await createUmi();
-  const destination = generateSigner(umi).publicKey;
+  const candyMachineSigner = generateSigner(umi);
+  const candyMachine = candyMachineSigner.publicKey;
+  const destination = findCandyMachineAuthorityPda(umi, { candyMachine })[0];
   const [tokenMint, destinationAta, identityAta] = await createMintWithHolders(
     umi,
     {
@@ -219,7 +226,8 @@ test('it charges a bot tax if the payer does not have enough tokens', async (t) 
 
   // And a loaded Candy Machine with a bot tax guard and a tokenPayment guard that requires 5 tokens.
 
-  const { publicKey: candyMachine } = await create(umi, {
+  await create(umi, {
+    candyMachine: candyMachineSigner,
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -231,7 +239,6 @@ test('it charges a bot tax if the payer does not have enough tokens', async (t) 
       botTax: some({ lamports: sol(0.1), lastInstruction: true }),
       tokenPayment: some({
         mint: tokenMint.publicKey,
-        destinationAta,
         amount: 5,
       }),
     },
@@ -246,7 +253,7 @@ test('it charges a bot tax if the payer does not have enough tokens', async (t) 
         candyMachine,
 
         mintArgs: {
-          tokenPayment: some({ mint: tokenMint.publicKey, destinationAta }),
+          tokenPayment: some({ mint: tokenMint.publicKey }),
         },
       })
     )

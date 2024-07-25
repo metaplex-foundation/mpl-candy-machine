@@ -839,10 +839,6 @@
           {
             "name": "mint",
             "type": "publicKey"
-          },
-          {
-            "name": "destinationAta",
-            "type": "publicKey"
           }
         ]
       }

@@ -33,11 +33,11 @@ pub fn claim_proceeds<'a, 'b>(
     let is_native = is_native_mint(candy_machine.settings.payment_mint);
 
     if !is_native {
-        assert_keys_equal(
-            payment_mint.unwrap().key(),
-            candy_machine.settings.payment_mint,
-            "Invalid payment mint",
-        )?;
+        require!(
+            payment_mint.is_some()
+                && payment_mint.unwrap().key() == candy_machine.settings.payment_mint,
+            CandyError::InvalidPaymentMint
+        );
     }
 
     // Proceeds are calculated as total amount paid by buyers divided by total number of items in the sale

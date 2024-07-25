@@ -119,6 +119,9 @@ pub enum CandyError {
     #[msg("Invalid mint")]
     InvalidMint,
 
+    #[msg("Invalid payment mint")]
+    InvalidPaymentMint,
+
     #[msg("Invalid seller")]
     InvalidSeller,
 

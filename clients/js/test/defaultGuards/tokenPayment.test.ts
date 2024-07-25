@@ -266,3 +266,58 @@ test('it charges a bot tax if the payer does not have enough tokens', async (t) 
   const payerTokenAccount = await fetchToken(umi, identityAta);
   t.is(payerTokenAccount.amount, 4n);
 });
+
+test('it fails if a different mint is provided in draw', async (t) => {
+  // Given a mint account such that the payer has 4 tokens.
+  const umi = await createUmi();
+  const candyMachineSigner = generateSigner(umi);
+  const candyMachine = candyMachineSigner.publicKey;
+  const destination = findCandyMachineAuthorityPda(umi, { candyMachine })[0];
+  const [tokenMint] = await createMintWithHolders(umi, {
+    holders: [
+      { owner: destination, amount: 0 },
+      { owner: umi.identity, amount: 4 },
+    ],
+  });
+
+  const [otherTokenMint] = await createMintWithHolders(umi, {
+    holders: [
+      { owner: destination, amount: 0 },
+      { owner: umi.identity, amount: 4 },
+    ],
+  });
+
+  // And a loaded Candy Machine with a tokenPayment guard that requires 5 tokens.
+  await create(umi, {
+    candyMachine: candyMachineSigner,
+    items: [
+      {
+        id: (await createNft(umi)).publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
+    guards: {
+      tokenPayment: some({
+        mint: tokenMint.publicKey,
+        amount: 5,
+      }),
+    },
+  });
+
+  // When we try to mint from it.
+  const promise = transactionBuilder()
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      draw(umi, {
+        candyMachine,
+        mintArgs: {
+          tokenPayment: some({ mint: otherTokenMint.publicKey }),
+        },
+      })
+    )
+    .sendAndConfirm(umi);
+
+  // Then we expect a program error.
+  await t.throwsAsync(promise, { message: /Public key mismatch/ });
+});

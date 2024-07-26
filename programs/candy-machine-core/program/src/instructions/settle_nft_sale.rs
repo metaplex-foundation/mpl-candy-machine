@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use utils::{get_verified_royalty_info, is_native_mint};
+use utils::get_verified_royalty_info;
 use crate::{
     assert_config_line, constants::{AUTHORITY_SEED, SELLER_HISTORY_SEED}, events::SettleItemSaleEvent, get_config_count, processors::{self, claim_proceeds, remove_from_loaded_bitmask}, state::CandyMachine, AssociatedToken, CandyError, ConfigLine, GumballState, SellerHistory, Token, TokenStandard
 };

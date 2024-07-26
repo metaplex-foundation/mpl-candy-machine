@@ -1,6 +1,5 @@
 import {
   dateTime,
-  generateSigner,
   sol,
   some,
   transactionBuilder,
@@ -142,7 +141,6 @@ test('it can remove all guards from a candy guard', async (t) => {
 test('it can update a single guard by passing the current data', async (t) => {
   // Given an existing candy guard with defaults guards and groups.
   const umi = await createUmi();
-  const destination = generateSigner(umi).publicKey;
   const candyGuard = await createCandyGuard(umi, {
     guards: {
       botTax: some({ lamports: sol(0.01), lastInstruction: true }),

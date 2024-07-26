@@ -603,83 +603,109 @@ export class CmInvalidMintError extends ProgramError {
 codeToErrorMap.set(0x1796, CmInvalidMintError);
 nameToErrorMap.set('InvalidMint', CmInvalidMintError);
 
+/** InvalidPaymentMint: Invalid payment mint */
+export class CmInvalidPaymentMintError extends ProgramError {
+  readonly name: string = 'InvalidPaymentMint';
+
+  readonly code: number = 0x1797; // 6039
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid payment mint', program, cause);
+  }
+}
+codeToErrorMap.set(0x1797, CmInvalidPaymentMintError);
+nameToErrorMap.set('InvalidPaymentMint', CmInvalidPaymentMintError);
+
 /** InvalidSeller: Invalid seller */
 export class CmInvalidSellerError extends ProgramError {
   readonly name: string = 'InvalidSeller';
 
-  readonly code: number = 0x1797; // 6039
+  readonly code: number = 0x1798; // 6040
 
   constructor(program: Program, cause?: Error) {
     super('Invalid seller', program, cause);
   }
 }
-codeToErrorMap.set(0x1797, CmInvalidSellerError);
+codeToErrorMap.set(0x1798, CmInvalidSellerError);
 nameToErrorMap.set('InvalidSeller', CmInvalidSellerError);
 
 /** InvalidBuyer: Invalid buyer */
 export class CmInvalidBuyerError extends ProgramError {
   readonly name: string = 'InvalidBuyer';
 
-  readonly code: number = 0x1798; // 6040
+  readonly code: number = 0x1799; // 6041
 
   constructor(program: Program, cause?: Error) {
     super('Invalid buyer', program, cause);
   }
 }
-codeToErrorMap.set(0x1798, CmInvalidBuyerError);
+codeToErrorMap.set(0x1799, CmInvalidBuyerError);
 nameToErrorMap.set('InvalidBuyer', CmInvalidBuyerError);
 
 /** UriTooLong: URI too long */
 export class CmUriTooLongError extends ProgramError {
   readonly name: string = 'UriTooLong';
 
-  readonly code: number = 0x1799; // 6041
+  readonly code: number = 0x179a; // 6042
 
   constructor(program: Program, cause?: Error) {
     super('URI too long', program, cause);
   }
 }
-codeToErrorMap.set(0x1799, CmUriTooLongError);
+codeToErrorMap.set(0x179a, CmUriTooLongError);
 nameToErrorMap.set('UriTooLong', CmUriTooLongError);
 
 /** InvalidProofPath: Invalid proof path */
 export class CmInvalidProofPathError extends ProgramError {
   readonly name: string = 'InvalidProofPath';
 
-  readonly code: number = 0x179a; // 6042
+  readonly code: number = 0x179b; // 6043
 
   constructor(program: Program, cause?: Error) {
     super('Invalid proof path', program, cause);
   }
 }
-codeToErrorMap.set(0x179a, CmInvalidProofPathError);
+codeToErrorMap.set(0x179b, CmInvalidProofPathError);
 nameToErrorMap.set('InvalidProofPath', CmInvalidProofPathError);
 
 /** InvalidSettingUpdate: Invalid setting update */
 export class CmInvalidSettingUpdateError extends ProgramError {
   readonly name: string = 'InvalidSettingUpdate';
 
-  readonly code: number = 0x179b; // 6043
+  readonly code: number = 0x179c; // 6044
 
   constructor(program: Program, cause?: Error) {
     super('Invalid setting update', program, cause);
   }
 }
-codeToErrorMap.set(0x179b, CmInvalidSettingUpdateError);
+codeToErrorMap.set(0x179c, CmInvalidSettingUpdateError);
 nameToErrorMap.set('InvalidSettingUpdate', CmInvalidSettingUpdateError);
 
 /** SellerTooManyItems: Seller has too many items */
 export class CmSellerTooManyItemsError extends ProgramError {
   readonly name: string = 'SellerTooManyItems';
 
-  readonly code: number = 0x179c; // 6044
+  readonly code: number = 0x179d; // 6045
 
   constructor(program: Program, cause?: Error) {
     super('Seller has too many items', program, cause);
   }
 }
-codeToErrorMap.set(0x179c, CmSellerTooManyItemsError);
+codeToErrorMap.set(0x179d, CmSellerTooManyItemsError);
 nameToErrorMap.set('SellerTooManyItems', CmSellerTooManyItemsError);
+
+/** NotAllSettled: Not all items have been settled */
+export class CmNotAllSettledError extends ProgramError {
+  readonly name: string = 'NotAllSettled';
+
+  readonly code: number = 0x179e; // 6046
+
+  constructor(program: Program, cause?: Error) {
+    super('Not all items have been settled', program, cause);
+  }
+}
+codeToErrorMap.set(0x179e, CmNotAllSettledError);
+nameToErrorMap.set('NotAllSettled', CmNotAllSettledError);
 
 /**
  * Attempts to resolve a custom program error from the provided error code.

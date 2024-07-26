@@ -139,4 +139,7 @@ pub enum CandyError {
 
     #[msg("Seller has too many items")]
     SellerTooManyItems,
+
+    #[msg("Not all items have been settled")]
+    NotAllSettled,
 }

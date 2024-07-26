@@ -21,7 +21,9 @@ import {
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
+import { findCandyMachineAuthorityPda } from '../../hooked';
 import {
+  expectPublicKey,
   getAccountMetasAndSigners,
   ResolvedAccount,
   ResolvedAccountsWithIndices,
@@ -33,6 +35,10 @@ export type DeleteCandyMachineInstructionAccounts = {
   candyMachine: PublicKey | Pda;
   /** Authority of the candy machine. */
   authority?: Signer;
+  authorityPda?: PublicKey | Pda;
+  /** Payment account for authority pda if using token payment */
+  authorityPdaPaymentAccount?: PublicKey | Pda;
+  tokenProgram?: PublicKey | Pda;
 };
 
 // Data.
@@ -67,7 +73,7 @@ export function getDeleteCandyMachineInstructionDataSerializer(): Serializer<
 
 // Instruction.
 export function deleteCandyMachine(
-  context: Pick<Context, 'identity' | 'programs'>,
+  context: Pick<Context, 'eddsa' | 'identity' | 'programs'>,
   input: DeleteCandyMachineInstructionAccounts
 ): TransactionBuilder {
   // Program ID.
@@ -84,11 +90,39 @@ export function deleteCandyMachine(
       value: input.candyMachine ?? null,
     },
     authority: { index: 1, isWritable: true, value: input.authority ?? null },
+    authorityPda: {
+      index: 2,
+      isWritable: true,
+      value: input.authorityPda ?? null,
+    },
+    authorityPdaPaymentAccount: {
+      index: 3,
+      isWritable: true,
+      value: input.authorityPdaPaymentAccount ?? null,
+    },
+    tokenProgram: {
+      index: 4,
+      isWritable: false,
+      value: input.tokenProgram ?? null,
+    },
   };
 
   // Default values.
   if (!resolvedAccounts.authority.value) {
     resolvedAccounts.authority.value = context.identity;
+  }
+  if (!resolvedAccounts.authorityPda.value) {
+    resolvedAccounts.authorityPda.value = findCandyMachineAuthorityPda(
+      context,
+      { candyMachine: expectPublicKey(resolvedAccounts.candyMachine.value) }
+    );
+  }
+  if (!resolvedAccounts.tokenProgram.value) {
+    resolvedAccounts.tokenProgram.value = context.programs.getPublicKey(
+      'splToken',
+      'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
+    );
+    resolvedAccounts.tokenProgram.isWritable = false;
   }
 
   // Accounts in order.

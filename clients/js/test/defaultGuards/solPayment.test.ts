@@ -70,7 +70,6 @@ test('it transfers SOL from the payer to the authority pda', async (t) => {
 test('it fails if the payer does not have enough funds', async (t) => {
   // Given a loaded Candy Machine with a solPayment guard costing 5 SOLs.
   const umi = await createUmi();
-  const destination = generateSigner(umi).publicKey;
 
   const { publicKey: candyMachine } = await create(umi, {
     items: [
@@ -110,7 +109,6 @@ test('it fails if the payer does not have enough funds', async (t) => {
 test('it charges a bot tax if the payer does not have enough funds', async (t) => {
   // Given a loaded Candy Machine with a solPayment guard costing 5 SOLs and a botTax guard.
   const umi = await createUmi();
-  const destination = generateSigner(umi).publicKey;
 
   const { publicKey: candyMachine } = await create(umi, {
     items: [

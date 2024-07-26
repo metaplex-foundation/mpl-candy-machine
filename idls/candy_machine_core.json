@@ -1375,6 +1375,25 @@
           "docs": [
             "Authority of the candy machine."
           ]
+        },
+        {
+          "name": "authorityPda",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authorityPdaPaymentAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Payment account for authority pda if using token payment"
+          ]
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
         }
       ],
       "args": []
@@ -1970,33 +1989,43 @@
     },
     {
       "code": 6039,
+      "name": "InvalidPaymentMint",
+      "msg": "Invalid payment mint"
+    },
+    {
+      "code": 6040,
       "name": "InvalidSeller",
       "msg": "Invalid seller"
     },
     {
-      "code": 6040,
+      "code": 6041,
       "name": "InvalidBuyer",
       "msg": "Invalid buyer"
     },
     {
-      "code": 6041,
+      "code": 6042,
       "name": "UriTooLong",
       "msg": "URI too long"
     },
     {
-      "code": 6042,
+      "code": 6043,
       "name": "InvalidProofPath",
       "msg": "Invalid proof path"
     },
     {
-      "code": 6043,
+      "code": 6044,
       "name": "InvalidSettingUpdate",
       "msg": "Invalid setting update"
     },
     {
-      "code": 6044,
+      "code": 6045,
       "name": "SellerTooManyItems",
       "msg": "Seller has too many items"
+    },
+    {
+      "code": 6046,
+      "name": "NotAllSettled",
+      "msg": "Not all items have been settled"
     }
   ],
   "metadata": {

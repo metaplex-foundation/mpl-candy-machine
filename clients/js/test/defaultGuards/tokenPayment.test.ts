@@ -156,15 +156,12 @@ test('it fails if the payer does not have enough tokens', async (t) => {
   const candyMachineSigner = generateSigner(umi);
   const candyMachine = candyMachineSigner.publicKey;
   const destination = findCandyMachineAuthorityPda(umi, { candyMachine })[0];
-  const [tokenMint, destinationAta, identityAta] = await createMintWithHolders(
-    umi,
-    {
-      holders: [
-        { owner: destination, amount: 0 },
-        { owner: umi.identity, amount: 4 },
-      ],
-    }
-  );
+  const [tokenMint, identityAta] = await createMintWithHolders(umi, {
+    holders: [
+      { owner: umi.identity, amount: 4 },
+      { owner: destination, amount: 0 },
+    ],
+  });
 
   // And a loaded Candy Machine with a tokenPayment guard that requires 5 tokens.
 
@@ -214,15 +211,12 @@ test('it charges a bot tax if the payer does not have enough tokens', async (t) 
   const candyMachineSigner = generateSigner(umi);
   const candyMachine = candyMachineSigner.publicKey;
   const destination = findCandyMachineAuthorityPda(umi, { candyMachine })[0];
-  const [tokenMint, destinationAta, identityAta] = await createMintWithHolders(
-    umi,
-    {
-      holders: [
-        { owner: destination, amount: 0 },
-        { owner: umi.identity, amount: 4 },
-      ],
-    }
-  );
+  const [tokenMint, identityAta] = await createMintWithHolders(umi, {
+    holders: [
+      { owner: umi.identity, amount: 4 },
+      { owner: destination, amount: 0 },
+    ],
+  });
 
   // And a loaded Candy Machine with a bot tax guard and a tokenPayment guard that requires 5 tokens.
 

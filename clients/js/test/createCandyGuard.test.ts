@@ -50,7 +50,6 @@ test('it can create a candy guard with guards', async (t) => {
   // When we create a new candy guard with guards.
   const gatekeeperNetwork = generateSigner(umi).publicKey;
   const tokenMint = generateSigner(umi).publicKey;
-  const tokenDestination = generateSigner(umi).publicKey;
   await transactionBuilder()
     .add(
       createCandyGuard(umi, {
@@ -99,7 +98,6 @@ test('it can create a candy guard with guard groups', async (t) => {
   const base = generateSigner(umi);
 
   // When we create a new candy guard with guard groups.
-  const solDestination = generateSigner(umi).publicKey;
   const gatekeeperNetwork = generateSigner(umi).publicKey;
   const tokenGateMint = generateSigner(umi).publicKey;
   const merkleRoot = new Uint8Array(Array(32).fill(42));

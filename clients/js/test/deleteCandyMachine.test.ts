@@ -82,25 +82,16 @@ test('it can delete a settled candy machine with native token', async (t) => {
   await assertItemBought(t, umi, { candyMachine, buyer: publicKey(buyer) });
 
   const payer = await generateSignerWithSol(umi, sol(10));
-  await transactionBuilder()
-    .add(setComputeUnitLimit(umi, { units: 600_000 }))
-    .add(
-      settleNftSale(umi, {
-        payer,
-        index: 0,
-        candyMachine,
-        buyer: buyer.publicKey,
-        seller: umi.identity.publicKey,
-        mint: nft.publicKey,
-      })
-    )
-    .addRemainingAccounts([
-      {
-        pubkey: umi.identity.publicKey,
-        isSigner: false,
-        isWritable: false,
-      },
-    ])
+  await settleNftSale(umi, {
+    payer,
+    index: 0,
+    candyMachine,
+    buyer: buyer.publicKey,
+    seller: umi.identity.publicKey,
+    mint: nft.publicKey,
+    creators: [umi.identity.publicKey],
+  })
+    .prepend(setComputeUnitLimit(umi, { units: 600_000 }))
     .sendAndConfirm(umi);
 
   // When we delete it.
@@ -181,23 +172,9 @@ test('it can delete a settled candy machine with payment token', async (t) => {
         seller: umi.identity.publicKey,
         mint: nft.publicKey,
         paymentMint: tokenMint.publicKey,
+        creators: [umi.identity.publicKey],
       })
     )
-    .addRemainingAccounts([
-      {
-        pubkey: umi.identity.publicKey,
-        isSigner: false,
-        isWritable: false,
-      },
-      {
-        pubkey: findAssociatedTokenPda(umi, {
-          mint: tokenMint.publicKey,
-          owner: umi.identity.publicKey,
-        })[0],
-        isSigner: false,
-        isWritable: true,
-      },
-    ])
     .sendAndConfirm(umi);
 
   // When we delete it.

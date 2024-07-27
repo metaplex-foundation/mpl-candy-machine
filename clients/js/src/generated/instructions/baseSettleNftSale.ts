@@ -41,7 +41,7 @@ import {
 } from '../shared';
 
 // Accounts.
-export type SettleNftSaleInstructionAccounts = {
+export type BaseSettleNftSaleInstructionAccounts = {
   /** Anyone can settle the sale */
   payer?: Signer;
   /** Candy machine account. */
@@ -84,46 +84,47 @@ export type SettleNftSaleInstructionAccounts = {
 };
 
 // Data.
-export type SettleNftSaleInstructionData = {
+export type BaseSettleNftSaleInstructionData = {
   discriminator: Array<number>;
   index: number;
 };
 
-export type SettleNftSaleInstructionDataArgs = { index: number };
+export type BaseSettleNftSaleInstructionDataArgs = { index: number };
 
-export function getSettleNftSaleInstructionDataSerializer(): Serializer<
-  SettleNftSaleInstructionDataArgs,
-  SettleNftSaleInstructionData
+export function getBaseSettleNftSaleInstructionDataSerializer(): Serializer<
+  BaseSettleNftSaleInstructionDataArgs,
+  BaseSettleNftSaleInstructionData
 > {
   return mapSerializer<
-    SettleNftSaleInstructionDataArgs,
+    BaseSettleNftSaleInstructionDataArgs,
     any,
-    SettleNftSaleInstructionData
+    BaseSettleNftSaleInstructionData
   >(
-    struct<SettleNftSaleInstructionData>(
+    struct<BaseSettleNftSaleInstructionData>(
       [
         ['discriminator', array(u8(), { size: 8 })],
         ['index', u32()],
       ],
-      { description: 'SettleNftSaleInstructionData' }
+      { description: 'BaseSettleNftSaleInstructionData' }
     ),
     (value) => ({
       ...value,
       discriminator: [31, 37, 41, 148, 108, 197, 35, 63],
     })
   ) as Serializer<
-    SettleNftSaleInstructionDataArgs,
-    SettleNftSaleInstructionData
+    BaseSettleNftSaleInstructionDataArgs,
+    BaseSettleNftSaleInstructionData
   >;
 }
 
 // Args.
-export type SettleNftSaleInstructionArgs = SettleNftSaleInstructionDataArgs;
+export type BaseSettleNftSaleInstructionArgs =
+  BaseSettleNftSaleInstructionDataArgs;
 
 // Instruction.
-export function settleNftSale(
+export function baseSettleNftSale(
   context: Pick<Context, 'eddsa' | 'identity' | 'payer' | 'programs'>,
-  input: SettleNftSaleInstructionAccounts & SettleNftSaleInstructionArgs
+  input: BaseSettleNftSaleInstructionAccounts & BaseSettleNftSaleInstructionArgs
 ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey(
@@ -230,7 +231,7 @@ export function settleNftSale(
   };
 
   // Arguments.
-  const resolvedArgs: SettleNftSaleInstructionArgs = { ...input };
+  const resolvedArgs: BaseSettleNftSaleInstructionArgs = { ...input };
 
   // Default values.
   if (!resolvedAccounts.payer.value) {
@@ -371,8 +372,8 @@ export function settleNftSale(
   );
 
   // Data.
-  const data = getSettleNftSaleInstructionDataSerializer().serialize(
-    resolvedArgs as SettleNftSaleInstructionDataArgs
+  const data = getBaseSettleNftSaleInstructionDataSerializer().serialize(
+    resolvedArgs as BaseSettleNftSaleInstructionDataArgs
   );
 
   // Bytes Created On Chain.

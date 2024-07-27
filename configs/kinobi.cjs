@@ -318,7 +318,7 @@ kinobi.update(
 			},
 		},
 		"mplCandyMachineCore.settleNftSale": {
-			name: "settleNftSale",
+			name: "baseSettleNftSale",
 			accounts: {
 				buyer: { defaultsTo: k.identityDefault() },
 				buyerTokenAccount: { defaultsTo: defaultsToAssociatedTokenPda("mint", "buyer") },

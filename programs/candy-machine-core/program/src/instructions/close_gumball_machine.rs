@@ -71,7 +71,7 @@ pub fn close_gumball_machine(ctx: Context<CloseGumballMachine>) -> Result<()> {
         let authority_pda_payment_account = &ctx.accounts.authority_pda_payment_account.as_ref().unwrap().to_account_info();
 
         if !authority_pda_payment_account.data_is_empty() {
-            assert_is_ata(authority_pda_payment_account, authority.key, &payment_mint)?;
+            assert_is_ata(authority_pda_payment_account, authority_pda.key, &payment_mint)?;
 
             let close_ix = close_account(
                 token_program.key, 

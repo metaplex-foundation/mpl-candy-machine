@@ -1,5 +1,4 @@
 import {
-  fetchToken,
   findAssociatedTokenPda,
   setComputeUnitLimit,
 } from '@metaplex-foundation/mpl-toolbox';
@@ -97,7 +96,6 @@ test('it can delete a settled candy machine with payment token', async (t) => {
 
   // Then the payment token account account no longer exists.
   t.true(await umi.rpc.accountExists(authorityPdaPaymentAccount));
-  console.log(await fetchToken(umi, authorityPdaPaymentAccount));
 
   const payer = await generateSignerWithSol(umi, sol(10));
   await transactionBuilder()
@@ -141,7 +139,7 @@ test('it can delete a settled candy machine with payment token', async (t) => {
 
   // When we delete it.
   await transactionBuilder()
-    .add(deleteCandyMachine(umi, { candyMachine }))
+    .add(deleteCandyMachine(umi, { candyMachine, authorityPdaPaymentAccount }))
     .sendAndConfirm(umi);
 
   // Then the candy machine account no longer exists.

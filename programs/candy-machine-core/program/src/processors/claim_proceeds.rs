@@ -113,7 +113,8 @@ pub fn claim_proceeds<'a, 'b>(
 
     let royalties_paid = pay_creator_royalties(
         authority_pda,
-        candy_machine.settings.payment_mint,
+        payment_mint,
+        authority_pda_payment_account,
         Some(fee_payer),
         royalty_info,
         remaining_accounts,
@@ -155,7 +156,8 @@ pub fn claim_proceeds<'a, 'b>(
 /// Pays creator fees to the creators in the metadata and returns total paid
 pub fn pay_creator_royalties<'a, 'b>(
     payer: &mut AccountInfo<'a>,
-    currency_mint: Pubkey,
+    payment_mint: Option<&AccountInfo<'a>>,
+    payer_token_account: Option<&AccountInfo<'a>>,
     fee_payer: Option<&AccountInfo<'a>>,
     verified_royalty_info: &RoyaltyInfo,
     remaining_accounts: &'b [AccountInfo<'a>],
@@ -180,20 +182,9 @@ pub fn pay_creator_royalties<'a, 'b>(
     }
 
     let mut total_paid = 0;
-    let is_native = is_native_mint(currency_mint);
+    let is_native = payment_mint.is_none() || is_native_mint(payment_mint.unwrap().key());
 
     let remaining_accounts_clone = &mut remaining_accounts.iter().clone();
-
-    let (currency_mint_account, payer_currency_account, _, _) = if is_native {
-        (None, None, None, None)
-    } else {
-        (
-            Some(next_account_info(remaining_accounts_clone)?),
-            Some(next_account_info(remaining_accounts_clone)?),
-            Some(next_account_info(remaining_accounts_clone)?),
-            Some(next_account_info(remaining_accounts_clone)?),
-        )
-    };
 
     for creator in creators {
         let creator_fee = (creator.share as u128)
@@ -223,9 +214,9 @@ pub fn pay_creator_royalties<'a, 'b>(
             transfer_from_pda(
                 payer,
                 &mut current_creator_info.to_account_info(),
-                payer_currency_account,
+                payer_token_account,
                 creator_token_account,
-                currency_mint_account,
+                payment_mint,
                 fee_payer,
                 ata_program,
                 token_program,
@@ -239,9 +230,9 @@ pub fn pay_creator_royalties<'a, 'b>(
             transfer(
                 payer,
                 current_creator_info,
-                payer_currency_account,
+                payer_token_account,
                 creator_token_account,
-                currency_mint_account,
+                payment_mint,
                 fee_payer,
                 ata_program,
                 token_program,

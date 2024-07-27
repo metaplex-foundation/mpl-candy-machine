@@ -242,8 +242,39 @@ export function settleNftSale(
       { candyMachine: expectPublicKey(resolvedAccounts.candyMachine.value) }
     );
   }
+  if (!resolvedAccounts.authorityPdaPaymentAccount.value) {
+    if (resolvedAccounts.paymentMint.value) {
+      resolvedAccounts.authorityPdaPaymentAccount.value =
+        findAssociatedTokenPda(context, {
+          mint: expectPublicKey(resolvedAccounts.paymentMint.value),
+          owner: expectPublicKey(resolvedAccounts.authorityPda.value),
+        });
+    }
+  }
   if (!resolvedAccounts.authority.value) {
     resolvedAccounts.authority.value = context.identity.publicKey;
+  }
+  if (!resolvedAccounts.authorityPaymentAccount.value) {
+    if (resolvedAccounts.paymentMint.value) {
+      resolvedAccounts.authorityPaymentAccount.value = findAssociatedTokenPda(
+        context,
+        {
+          mint: expectPublicKey(resolvedAccounts.paymentMint.value),
+          owner: expectPublicKey(resolvedAccounts.authority.value),
+        }
+      );
+    }
+  }
+  if (!resolvedAccounts.sellerPaymentAccount.value) {
+    if (resolvedAccounts.paymentMint.value) {
+      resolvedAccounts.sellerPaymentAccount.value = findAssociatedTokenPda(
+        context,
+        {
+          mint: expectPublicKey(resolvedAccounts.paymentMint.value),
+          owner: expectPublicKey(resolvedAccounts.seller.value),
+        }
+      );
+    }
   }
   if (!resolvedAccounts.sellerHistory.value) {
     resolvedAccounts.sellerHistory.value = findSellerHistoryPda(context, {

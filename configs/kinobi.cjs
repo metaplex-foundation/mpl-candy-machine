@@ -322,6 +322,21 @@ kinobi.update(
 			accounts: {
 				buyer: { defaultsTo: k.identityDefault() },
 				buyerTokenAccount: { defaultsTo: defaultsToAssociatedTokenPda("mint", "buyer") },
+				authorityPdaPaymentAccount: {
+					defaultsTo: k.conditionalDefault("account", "paymentMint", {
+						ifTrue: defaultsToAssociatedTokenPda("paymentMint", "authorityPda"),
+					}),
+				},
+				authorityPaymentAccount: {
+					defaultsTo: k.conditionalDefault("account", "paymentMint", {
+						ifTrue: defaultsToAssociatedTokenPda("paymentMint", "authority"),
+					}),
+				},
+				sellerPaymentAccount: {
+					defaultsTo: k.conditionalDefault("account", "paymentMint", {
+						ifTrue: defaultsToAssociatedTokenPda("paymentMint", "seller"),
+					}),
+				},
 			},
 		},
 		"mplCandyMachineCore.SetAuthority": { name: "SetCandyMachineAuthority" },

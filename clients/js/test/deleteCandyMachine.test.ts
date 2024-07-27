@@ -40,6 +40,78 @@ test('it can delete an empty candy machine', async (t) => {
   t.false(await umi.rpc.accountExists(candyMachine.publicKey));
 });
 
+test('it can delete a settled candy machine with native token', async (t) => {
+  // Given an existing candy machine.
+  const umi = await createUmi();
+  const buyerUmi = await createUmi();
+  const buyer = buyerUmi.identity;
+  const candyMachineSigner = generateSigner(umi);
+  const candyMachine = candyMachineSigner.publicKey;
+
+  const nft = await createNft(umi);
+
+  await create(umi, {
+    candyMachine: candyMachineSigner,
+    items: [
+      {
+        id: nft.publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
+    guards: {
+      solPayment: {
+        lamports: sol(1),
+      },
+    },
+  });
+
+  await transactionBuilder()
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      draw(buyerUmi, {
+        candyMachine,
+        mintArgs: {
+          solPayment: some(true),
+        },
+      })
+    )
+    .sendAndConfirm(buyerUmi);
+
+  // Then minting was successful.
+  await assertItemBought(t, umi, { candyMachine, buyer: publicKey(buyer) });
+
+  const payer = await generateSignerWithSol(umi, sol(10));
+  await transactionBuilder()
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      settleNftSale(umi, {
+        payer,
+        index: 0,
+        candyMachine,
+        buyer: buyer.publicKey,
+        seller: umi.identity.publicKey,
+        mint: nft.publicKey,
+      })
+    )
+    .addRemainingAccounts([
+      {
+        pubkey: umi.identity.publicKey,
+        isSigner: false,
+        isWritable: false,
+      },
+    ])
+    .sendAndConfirm(umi);
+
+  // When we delete it.
+  await transactionBuilder()
+    .add(deleteCandyMachine(umi, { candyMachine }))
+    .sendAndConfirm(umi);
+
+  // Then the candy machine account no longer exists.
+  t.false(await umi.rpc.accountExists(candyMachine));
+});
+
 test('it can delete a settled candy machine with payment token', async (t) => {
   // Given an existing candy machine.
   const umi = await createUmi();
@@ -109,15 +181,6 @@ test('it can delete a settled candy machine with payment token', async (t) => {
         seller: umi.identity.publicKey,
         mint: nft.publicKey,
         paymentMint: tokenMint.publicKey,
-        authorityPdaPaymentAccount,
-        authorityPaymentAccount: findAssociatedTokenPda(umi, {
-          mint: tokenMint.publicKey,
-          owner: umi.identity.publicKey,
-        })[0],
-        sellerPaymentAccount: findAssociatedTokenPda(umi, {
-          mint: tokenMint.publicKey,
-          owner: umi.identity.publicKey,
-        })[0],
       })
     )
     .addRemainingAccounts([

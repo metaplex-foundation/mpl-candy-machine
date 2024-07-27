@@ -9,8 +9,15 @@ import {
 } from '@metaplex-foundation/umi';
 import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
 import test from 'ava';
-import { CandyMachine, draw, fetchCandyMachine, TokenStandard } from '../src';
-import { settleNftSale } from '../src/generated/instructions/settleNftSale';
+import {
+  CandyMachine,
+  draw,
+  fetchCandyMachine,
+  findSellerHistoryPda,
+  safeFetchSellerHistory,
+  settleNftSale,
+  TokenStandard,
+} from '../src';
 import { create, createNft, createUmi } from './_setup';
 
 test('it can settle an nft sale', async (t) => {
@@ -63,15 +70,9 @@ test('it can settle an nft sale', async (t) => {
         authority: umi.identity.publicKey,
         seller: umi.identity.publicKey,
         mint: nft.publicKey,
+        creators: [umi.identity.publicKey],
       })
     )
-    .addRemainingAccounts([
-      {
-        pubkey: umi.identity.publicKey,
-        isSigner: false,
-        isWritable: true,
-      },
-    ])
     .sendAndConfirm(buyerUmi);
 
   const payerBalance = await umi.rpc.getBalance(payer.publicKey);
@@ -83,4 +84,11 @@ test('it can settle an nft sale', async (t) => {
     itemsRedeemed: 1n,
     itemsSettled: 1n,
   });
+
+  // Seller history should be closed
+  const sellerHistoryAccount = await safeFetchSellerHistory(
+    umi,
+    findSellerHistoryPda(umi, { candyMachine, seller: umi.identity.publicKey })
+  );
+  t.falsy(sellerHistoryAccount);
 });

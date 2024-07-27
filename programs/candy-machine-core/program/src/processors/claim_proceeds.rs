@@ -28,7 +28,9 @@ pub fn claim_proceeds<'a, 'b>(
     candy_machine.items_settled += 1;
     seller_history.item_count -= 1;
 
-    // TODO: Close seller history if item count is 0
+    if seller_history.item_count == 0 {
+        seller_history.close(seller.to_account_info())?;
+    }
 
     let is_native = is_native_mint(candy_machine.settings.payment_mint);
 

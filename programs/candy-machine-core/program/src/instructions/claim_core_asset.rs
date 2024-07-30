@@ -64,6 +64,7 @@ pub struct ClaimCoreAsset<'info> {
     rent: Sysvar<'info, Rent>,
 
     /// CHECK: Safe due to item check
+    #[account(mut)]
     asset: UncheckedAccount<'info>,
 
     /// CHECK: Safe due to item check

@@ -84,6 +84,7 @@ pub struct SettleCoreAssetSale<'info> {
     rent: Sysvar<'info, Rent>,
 
     /// CHECK: Safe due to item check
+    #[account(mut)]
     asset: UncheckedAccount<'info>,
 
     /// CHECK: Safe due to item check
@@ -148,6 +149,27 @@ pub fn settle_core_asset_sale<'info>(ctx: Context<'_, '_, '_, 'info, SettleCoreA
         &[ctx.bumps.authority_pda],
     ];
 
+    let account_info = candy_machine.to_account_info();
+    let mut data = account_info.data.borrow_mut();
+    let count = get_config_count(&data)?;
+    let last_index = count - 1;
+
+    if remove_from_loaded_bitmask(candy_machine.settings.item_capacity, last_index, *data)? {
+        processors::claim_core_asset(
+            authority_pda,
+            payer,
+            buyer,
+            seller,
+            asset,
+            collection,
+            mpl_core_program,
+            system_program,
+            &auth_seeds
+        )?;
+    }
+
+    drop(data);
+
     let proceeds = claim_proceeds(
         candy_machine, 
         seller_history,
@@ -169,27 +191,6 @@ pub fn settle_core_asset_sale<'info>(ctx: Context<'_, '_, '_, 'info, SettleCoreA
         rent, 
         &auth_seeds
     )?;
-
-    let account_info = candy_machine.to_account_info();
-    let mut data = account_info.data.borrow_mut();
-    let count = get_config_count(&data)?;
-    let last_index = count - 1;
-
-    if remove_from_loaded_bitmask(candy_machine.settings.item_capacity, last_index, *data)? {
-        processors::claim_core_asset(
-            authority_pda,
-            payer,
-            buyer,
-            seller,
-            asset,
-            collection,
-            mpl_core_program,
-            system_program,
-            &auth_seeds
-        )?;
-    }
-
-    drop(data);
 
     emit_cpi!(SettleItemSaleEvent {
         mint: asset.key(),

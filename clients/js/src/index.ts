@@ -13,5 +13,6 @@ export * from './merkle';
 export * from './plugin';
 export * from './programs';
 export * from './route';
+export * from './settleCoreAssetSale';
 export * from './settleNftSale';
 export * from './updateCandyGuard';

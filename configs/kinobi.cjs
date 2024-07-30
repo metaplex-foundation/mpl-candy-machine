@@ -339,6 +339,12 @@ kinobi.update(
 				},
 			},
 		},
+		"mplCandyMachineCore.settleCoreAssetSale": {
+			name: "baseSettleCoreAssetSale",
+			accounts: {
+				buyer: { defaultsTo: k.identityDefault() },
+			},
+		},
 		"mplCandyMachineCore.SetAuthority": { name: "SetCandyMachineAuthority" },
 		"mplCandyGuard.SetAuthority": { name: "SetCandyGuardAuthority" },
 		"mplCandyGuard.update": { name: "updateCandyGuard", internal: true },

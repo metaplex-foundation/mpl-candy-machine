@@ -36,7 +36,7 @@ import {
 } from '../shared';
 
 // Accounts.
-export type SettleCoreAssetSaleInstructionAccounts = {
+export type BaseSettleCoreAssetSaleInstructionAccounts = {
   /** Anyone can settle the sale */
   payer?: Signer;
   /** Candy machine account. */
@@ -55,7 +55,7 @@ export type SettleCoreAssetSaleInstructionAccounts = {
   /** Seller history account. */
   sellerHistory?: PublicKey | Pda;
   /** buyer of the nft */
-  buyer: PublicKey | Pda;
+  buyer?: PublicKey | Pda;
   /** Fee account for marketplace fee if using fee config */
   feeAccount?: PublicKey | Pda;
   /** Payment account for marketplace fee if using token payment */
@@ -74,45 +74,45 @@ export type SettleCoreAssetSaleInstructionAccounts = {
 };
 
 // Data.
-export type SettleCoreAssetSaleInstructionData = {
+export type BaseSettleCoreAssetSaleInstructionData = {
   discriminator: Array<number>;
   index: number;
 };
 
-export type SettleCoreAssetSaleInstructionDataArgs = { index: number };
+export type BaseSettleCoreAssetSaleInstructionDataArgs = { index: number };
 
-export function getSettleCoreAssetSaleInstructionDataSerializer(): Serializer<
-  SettleCoreAssetSaleInstructionDataArgs,
-  SettleCoreAssetSaleInstructionData
+export function getBaseSettleCoreAssetSaleInstructionDataSerializer(): Serializer<
+  BaseSettleCoreAssetSaleInstructionDataArgs,
+  BaseSettleCoreAssetSaleInstructionData
 > {
   return mapSerializer<
-    SettleCoreAssetSaleInstructionDataArgs,
+    BaseSettleCoreAssetSaleInstructionDataArgs,
     any,
-    SettleCoreAssetSaleInstructionData
+    BaseSettleCoreAssetSaleInstructionData
   >(
-    struct<SettleCoreAssetSaleInstructionData>(
+    struct<BaseSettleCoreAssetSaleInstructionData>(
       [
         ['discriminator', array(u8(), { size: 8 })],
         ['index', u32()],
       ],
-      { description: 'SettleCoreAssetSaleInstructionData' }
+      { description: 'BaseSettleCoreAssetSaleInstructionData' }
     ),
     (value) => ({ ...value, discriminator: [78, 55, 252, 82, 233, 15, 98, 51] })
   ) as Serializer<
-    SettleCoreAssetSaleInstructionDataArgs,
-    SettleCoreAssetSaleInstructionData
+    BaseSettleCoreAssetSaleInstructionDataArgs,
+    BaseSettleCoreAssetSaleInstructionData
   >;
 }
 
 // Args.
-export type SettleCoreAssetSaleInstructionArgs =
-  SettleCoreAssetSaleInstructionDataArgs;
+export type BaseSettleCoreAssetSaleInstructionArgs =
+  BaseSettleCoreAssetSaleInstructionDataArgs;
 
 // Instruction.
-export function settleCoreAssetSale(
+export function baseSettleCoreAssetSale(
   context: Pick<Context, 'eddsa' | 'identity' | 'payer' | 'programs'>,
-  input: SettleCoreAssetSaleInstructionAccounts &
-    SettleCoreAssetSaleInstructionArgs
+  input: BaseSettleCoreAssetSaleInstructionAccounts &
+    BaseSettleCoreAssetSaleInstructionArgs
 ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey(
@@ -187,7 +187,7 @@ export function settleCoreAssetSale(
       value: input.systemProgram ?? null,
     },
     rent: { index: 16, isWritable: false, value: input.rent ?? null },
-    asset: { index: 17, isWritable: false, value: input.asset ?? null },
+    asset: { index: 17, isWritable: true, value: input.asset ?? null },
     collection: {
       index: 18,
       isWritable: false,
@@ -207,7 +207,7 @@ export function settleCoreAssetSale(
   };
 
   // Arguments.
-  const resolvedArgs: SettleCoreAssetSaleInstructionArgs = { ...input };
+  const resolvedArgs: BaseSettleCoreAssetSaleInstructionArgs = { ...input };
 
   // Default values.
   if (!resolvedAccounts.payer.value) {
@@ -227,6 +227,9 @@ export function settleCoreAssetSale(
       candyMachine: expectPublicKey(resolvedAccounts.candyMachine.value),
       seller: expectPublicKey(resolvedAccounts.seller.value),
     });
+  }
+  if (!resolvedAccounts.buyer.value) {
+    resolvedAccounts.buyer.value = context.identity.publicKey;
   }
   if (!resolvedAccounts.tokenProgram.value) {
     resolvedAccounts.tokenProgram.value = context.programs.getPublicKey(
@@ -286,8 +289,8 @@ export function settleCoreAssetSale(
   );
 
   // Data.
-  const data = getSettleCoreAssetSaleInstructionDataSerializer().serialize(
-    resolvedArgs as SettleCoreAssetSaleInstructionDataArgs
+  const data = getBaseSettleCoreAssetSaleInstructionDataSerializer().serialize(
+    resolvedArgs as BaseSettleCoreAssetSaleInstructionDataArgs
   );
 
   // Bytes Created On Chain.

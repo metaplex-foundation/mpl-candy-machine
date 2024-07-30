@@ -161,7 +161,7 @@ export function claimCoreAsset(
       value: input.systemProgram ?? null,
     },
     rent: { index: 12, isWritable: false, value: input.rent ?? null },
-    asset: { index: 13, isWritable: false, value: input.asset ?? null },
+    asset: { index: 13, isWritable: true, value: input.asset ?? null },
     collection: {
       index: 14,
       isWritable: false,

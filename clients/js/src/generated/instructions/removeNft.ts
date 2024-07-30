@@ -118,7 +118,7 @@ export function removeNft(
       value: input.authorityPda ?? null,
     },
     authority: { index: 3, isWritable: false, value: input.authority ?? null },
-    seller: { index: 4, isWritable: false, value: input.seller ?? null },
+    seller: { index: 4, isWritable: true, value: input.seller ?? null },
     mint: { index: 5, isWritable: false, value: input.mint ?? null },
     tokenAccount: {
       index: 6,

@@ -114,7 +114,7 @@ export function removeCoreAsset(
       value: input.authorityPda ?? null,
     },
     authority: { index: 3, isWritable: false, value: input.authority ?? null },
-    seller: { index: 4, isWritable: false, value: input.seller ?? null },
+    seller: { index: 4, isWritable: true, value: input.seller ?? null },
     asset: { index: 5, isWritable: true, value: input.asset ?? null },
     collection: { index: 6, isWritable: true, value: input.collection ?? null },
     mplCoreProgram: {

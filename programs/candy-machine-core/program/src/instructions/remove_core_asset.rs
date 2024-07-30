@@ -51,6 +51,7 @@ pub struct RemoveCoreAsset<'info> {
     authority: Signer<'info>,
 
     /// CHECK: Safe due to item seller check
+    #[account(mut)]
     seller: UncheckedAccount<'info>,
 
     /// CHECK: Safe due to freeze
@@ -86,8 +87,6 @@ pub fn remove_core_asset(ctx: Context<RemoveCoreAsset>, index: u32) -> Result<()
         seller.key(),
         index,
     )?;
-
-    seller_history.item_count -= 1;
 
     let collection_info = if let Some(collection) = &ctx.accounts.collection {
         Some(collection.to_account_info())
@@ -156,6 +155,12 @@ pub fn remove_core_asset(ctx: Context<RemoveCoreAsset>, index: u32) -> Result<()
             .authority(Some(authority_pda))
             .system_program(system_program)
             .invoke_signed(&[&auth_seeds])?;
+    }
+
+    seller_history.item_count -= 1;
+
+    if seller_history.item_count == 0 {
+        seller_history.close(seller.to_account_info())?;
     }
 
     Ok(())

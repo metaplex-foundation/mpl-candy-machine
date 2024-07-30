@@ -26,11 +26,6 @@ pub fn claim_proceeds<'a, 'b>(
     auth_seeds: &[&[u8]],
 ) -> Result<u64> {
     candy_machine.items_settled += 1;
-    seller_history.item_count -= 1;
-
-    if seller_history.item_count == 0 {
-        seller_history.close(seller.to_account_info())?;
-    }
 
     let is_native = is_native_mint(candy_machine.settings.payment_mint);
 
@@ -148,8 +143,13 @@ pub fn claim_proceeds<'a, 'b>(
             rent,
             &auth_seeds,
             None,
-            curator_fee,
+            seller_proceeds,
         )?;
+    }
+
+    seller_history.item_count -= 1;
+    if seller_history.item_count == 0 {
+        seller_history.close(seller.to_account_info())?;
     }
 
     Ok(proceeds)

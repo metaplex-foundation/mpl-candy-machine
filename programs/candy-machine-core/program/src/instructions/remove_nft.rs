@@ -46,6 +46,7 @@ pub struct RemoveNft<'info> {
     authority: Signer<'info>,
 
     /// CHECK: Safe due to item seller check
+    #[account(mut)]
     seller: UncheckedAccount<'info>,
 
     /// CHECK: Safe due to transfer
@@ -97,8 +98,6 @@ pub fn remove_nft(ctx: Context<RemoveNft>, index: u32) -> Result<()> {
         seller.key(),
         index,
     )?;
-
-    seller_history.item_count -= 1;
 
     let auth_seeds = [
         AUTHORITY_SEED.as_bytes(),
@@ -181,6 +180,12 @@ pub fn remove_nft(ctx: Context<RemoveNft>, index: u32) -> Result<()> {
         ],
         &[&auth_seeds],
     )?;
+
+    seller_history.item_count -= 1;
+
+    if seller_history.item_count == 0 {
+        seller_history.close(seller.to_account_info())?;
+    }
 
     Ok(())
 }

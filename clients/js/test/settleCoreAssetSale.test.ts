@@ -1,10 +1,13 @@
 /* eslint-disable no-await-in-loop */
+import { AssetV1, fetchAssetV1 } from '@metaplex-foundation/mpl-core';
 import { setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
 import {
+  addAmounts,
   generateSigner,
   isEqualToAmount,
   sol,
   some,
+  subtractAmounts,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
@@ -13,6 +16,7 @@ import {
   CandyMachine,
   draw,
   fetchCandyMachine,
+  findCandyMachineAuthorityPda,
   findSellerHistoryPda,
   safeFetchSellerHistory,
   settleCoreAssetSale,
@@ -61,6 +65,12 @@ test('it can settle a core asset sale', async (t) => {
     )
     .sendAndConfirm(umi);
 
+  const sellerPreBalance = await umi.rpc.getBalance(umi.identity.publicKey);
+  const authorityPdaPreBalance = await umi.rpc.getBalance(
+    findCandyMachineAuthorityPda(umi, { candyMachine })[0]
+  );
+
+  // Then settle the sale
   await transactionBuilder()
     .add(setComputeUnitLimit(buyerUmi, { units: 600_000 }))
     .add(
@@ -78,6 +88,27 @@ test('it can settle a core asset sale', async (t) => {
   const payerBalance = await umi.rpc.getBalance(payer.publicKey);
   t.true(isEqualToAmount(payerBalance, sol(9), sol(0.1)));
 
+  const sellerPostBalance = await umi.rpc.getBalance(umi.identity.publicKey);
+  const authorityPdaPostBalance = await umi.rpc.getBalance(
+    findCandyMachineAuthorityPda(umi, { candyMachine })[0]
+  );
+
+  t.true(
+    isEqualToAmount(
+      sellerPostBalance,
+      addAmounts(sellerPreBalance, sol(1)),
+      sol(0.01)
+    )
+  );
+
+  t.true(
+    isEqualToAmount(
+      authorityPdaPostBalance,
+      subtractAmounts(authorityPdaPreBalance, sol(1)),
+      sol(0.01)
+    )
+  );
+
   // And the candy machine was updated.
   const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
   t.like(candyMachineAccount, <CandyMachine>{
@@ -91,4 +122,12 @@ test('it can settle a core asset sale', async (t) => {
     findSellerHistoryPda(umi, { candyMachine, seller: umi.identity.publicKey })
   );
   t.falsy(sellerHistoryAccount);
+
+  // Buyer should be the owner
+  const coreAsset = await fetchAssetV1(umi, asset.publicKey);
+  t.like(coreAsset, <AssetV1>{
+    freezeDelegate: undefined,
+    transferDelegate: undefined,
+    owner: buyer.publicKey,
+  });
 });

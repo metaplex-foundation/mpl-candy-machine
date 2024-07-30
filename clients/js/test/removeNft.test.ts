@@ -18,6 +18,7 @@ import {
   getMerkleProof,
   getMerkleRoot,
   removeNft,
+  safeFetchSellerHistory,
   SellerHistory,
   TokenStandard,
 } from '../src';
@@ -75,8 +76,8 @@ test('it can remove nfts from a candy machine', async (t) => {
     delegate: none(),
   });
 
-  // Seller history state is correct
-  const sellerHistoryAccount = await fetchSellerHistory(
+  // Seller history should no longer exist
+  const sellerHistoryAccount = await safeFetchSellerHistory(
     umi,
     findSellerHistoryPda(umi, {
       candyMachine: candyMachine.publicKey,
@@ -84,11 +85,7 @@ test('it can remove nfts from a candy machine', async (t) => {
     })[0]
   );
 
-  t.like(sellerHistoryAccount, <SellerHistory>{
-    candyMachine: candyMachine.publicKey,
-    seller: umi.identity.publicKey,
-    itemCount: 0n,
-  });
+  t.falsy(sellerHistoryAccount);
 });
 
 test('it can remove nfts at a lower index than last from a candy machine', async (t) => {
@@ -191,6 +188,21 @@ test('it can remove additional nfts from a candy machine', async (t) => {
     )
     .sendAndConfirm(umi);
 
+  // Seller history should no longer exist
+  const sellerHistoryAccount = await fetchSellerHistory(
+    umi,
+    findSellerHistoryPda(umi, {
+      candyMachine: candyMachine.publicKey,
+      seller: umi.identity.publicKey,
+    })[0]
+  );
+
+  t.like(sellerHistoryAccount, <SellerHistory>{
+    candyMachine: candyMachine.publicKey,
+    seller: umi.identity.publicKey,
+    itemCount: 1n,
+  });
+
   // When we remove an additional item from the Candy Machine.
   await transactionBuilder()
     .add(
@@ -220,23 +232,6 @@ test('it cannot remove nfts when the machine is empty', async (t) => {
   const candyMachine = await create(umi, { settings: { itemCapacity: 1 } });
   const nft = await createNft(umi);
 
-  // Add/remove an nft first so seller history is created
-  await transactionBuilder()
-    .add(
-      addNft(umi, {
-        candyMachine: candyMachine.publicKey,
-        mint: nft.publicKey,
-      })
-    )
-    .add(
-      removeNft(umi, {
-        candyMachine: candyMachine.publicKey,
-        index: 0,
-        mint: nft.publicKey,
-      })
-    )
-    .sendAndConfirm(umi);
-
   // When we try to remove an nft from the Candy Machine.
   const promise = transactionBuilder()
     .add(
@@ -250,7 +245,7 @@ test('it cannot remove nfts when the machine is empty', async (t) => {
 
   // Then we expect an error to be thrown.
   await t.throwsAsync(promise, {
-    message: /IndexGreaterThanLength/,
+    message: /AccountNotInitialized/,
   });
 });
 

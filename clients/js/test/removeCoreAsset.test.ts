@@ -10,6 +10,7 @@ import {
   getMerkleProof,
   getMerkleRoot,
   removeCoreAsset,
+  safeFetchSellerHistory,
   SellerHistory,
   TokenStandard,
 } from '../src';
@@ -61,8 +62,8 @@ test('it can remove core asset from a candy machine', async (t) => {
     owner: umi.identity.publicKey,
   });
 
-  // Seller history state is correct
-  const sellerHistoryAccount = await fetchSellerHistory(
+  // Seller history should no longer exist
+  const sellerHistoryAccount = await safeFetchSellerHistory(
     umi,
     findSellerHistoryPda(umi, {
       candyMachine: candyMachine.publicKey,
@@ -70,11 +71,7 @@ test('it can remove core asset from a candy machine', async (t) => {
     })[0]
   );
 
-  t.like(sellerHistoryAccount, <SellerHistory>{
-    candyMachine: candyMachine.publicKey,
-    seller: umi.identity.publicKey,
-    itemCount: 0n,
-  });
+  t.falsy(sellerHistoryAccount);
 });
 
 test('it can remove core asset at a lower index than last from a candy machine', async (t) => {
@@ -177,6 +174,20 @@ test('it can remove additional core asset from a candy machine', async (t) => {
     )
     .sendAndConfirm(umi);
 
+  const sellerHistoryAccount = await fetchSellerHistory(
+    umi,
+    findSellerHistoryPda(umi, {
+      candyMachine: candyMachine.publicKey,
+      seller: umi.identity.publicKey,
+    })[0]
+  );
+
+  t.like(sellerHistoryAccount, <SellerHistory>{
+    candyMachine: candyMachine.publicKey,
+    seller: umi.identity.publicKey,
+    itemCount: 1n,
+  });
+
   // When we remove an additional item from the Candy Machine.
   await transactionBuilder()
     .add(
@@ -206,23 +217,6 @@ test('it cannot remove core asset when the machine is empty', async (t) => {
   const candyMachine = await create(umi, { settings: { itemCapacity: 1 } });
   const coreAsset = await createCoreAsset(umi);
 
-  // Add/remove an asset first so seller history is created
-  await transactionBuilder()
-    .add(
-      addCoreAsset(umi, {
-        candyMachine: candyMachine.publicKey,
-        asset: coreAsset.publicKey,
-      })
-    )
-    .add(
-      removeCoreAsset(umi, {
-        candyMachine: candyMachine.publicKey,
-        index: 0,
-        asset: coreAsset.publicKey,
-      })
-    )
-    .sendAndConfirm(umi);
-
   // When we try to remove an nft from the Candy Machine.
   const promise = transactionBuilder()
     .add(
@@ -236,7 +230,7 @@ test('it cannot remove core asset when the machine is empty', async (t) => {
 
   // Then we expect an error to be thrown.
   await t.throwsAsync(promise, {
-    message: /IndexGreaterThanLength/,
+    message: /AccountNotInitialized/,
   });
 });
 

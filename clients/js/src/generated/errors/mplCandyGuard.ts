@@ -744,6 +744,19 @@ export class CgInvalidPDAError extends ProgramError {
 codeToErrorMap.set(0x17a4, CgInvalidPDAError);
 nameToErrorMap.set('InvalidPDA', CgInvalidPDAError);
 
+/** InvalidPaymentMint: Invalid payment mint */
+export class CgInvalidPaymentMintError extends ProgramError {
+  readonly name: string = 'InvalidPaymentMint';
+
+  readonly code: number = 0x17a5; // 6053
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid payment mint', program, cause);
+  }
+}
+codeToErrorMap.set(0x17a5, CgInvalidPaymentMintError);
+nameToErrorMap.set('InvalidPaymentMint', CgInvalidPaymentMintError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

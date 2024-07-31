@@ -160,4 +160,7 @@ pub enum CandyGuardError {
 
     #[msg("Invalid PDA")]
     InvalidPDA,
+
+    #[msg("Invalid payment mint")]
+    InvalidPaymentMint,
 }

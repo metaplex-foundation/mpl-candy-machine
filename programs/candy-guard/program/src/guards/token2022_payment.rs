@@ -46,6 +46,11 @@ impl Condition for Token2022Payment {
         _guard_set: &GuardSet,
         _mint_args: &[u8],
     ) -> Result<()> {
+        require!(
+            ctx.accounts.candy_machine.settings.payment_mint == self.mint,
+            CandyGuardError::InvalidPaymentMint
+        );
+
         // required accounts
         let token_account_index = ctx.account_cursor;
         let token_account_info = try_get_account_info(ctx.accounts.remaining, token_account_index)?;

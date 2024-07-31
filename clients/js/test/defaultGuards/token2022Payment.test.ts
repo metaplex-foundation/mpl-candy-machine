@@ -47,6 +47,9 @@ test('it transfers Token2022 tokens from the payer to the destination', async (t
       },
     ],
     startSale: true,
+    settings: {
+      paymentMint: tokenMint.publicKey,
+    },
     guards: {
       token2022Payment: some({
         mint: tokenMint.publicKey,
@@ -63,7 +66,6 @@ test('it transfers Token2022 tokens from the payer to the destination', async (t
     .add(
       draw(umi, {
         candyMachine,
-
         mintArgs: {
           token2022Payment: some({ mint: tokenMint.publicKey, destinationAta }),
         },

@@ -36,6 +36,11 @@ impl Condition for SolPayment {
         // validates that we received all required accounts
         let destination = try_get_account_info(ctx.accounts.remaining, index)?;
 
+        require!(
+            ctx.accounts.candy_machine.settings.payment_mint == spl_token::native_mint::id(),
+            CandyGuardError::InvalidPaymentMint
+        );
+
         let seeds = [
             AUTHORITY_SEED.as_bytes(),
             ctx.accounts.candy_machine.to_account_info().key.as_ref(),

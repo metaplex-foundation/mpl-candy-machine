@@ -1,3 +1,5 @@
+import { publicKey } from '@metaplex-foundation/umi';
+
 export const FEE_CONFIG_SIZE =
   32 + // fee account
   2; // fee bps
@@ -40,3 +42,7 @@ export const CANDY_GUARD_DATA =
 export const METADATA_SIZE: number = 679;
 
 export const MASTER_EDITION_SIZE: number = 282;
+
+export const NATIVE_MINT = publicKey(
+  'So11111111111111111111111111111111111111112'
+);

@@ -1470,6 +1470,11 @@
       "code": 6052,
       "name": "InvalidPDA",
       "msg": "Invalid PDA"
+    },
+    {
+      "code": 6053,
+      "name": "InvalidPaymentMint",
+      "msg": "Invalid payment mint"
     }
   ],
   "metadata": {

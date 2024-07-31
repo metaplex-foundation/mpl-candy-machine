@@ -8,6 +8,7 @@ use crate::state::{CandyGuard, SEED};
 
 pub fn wrap(ctx: Context<Wrap>) -> Result<()> {
     let candy_guard = &ctx.accounts.candy_guard;
+
     // PDA signer for the transaction
     let seeds = [SEED, &candy_guard.base.to_bytes(), &[candy_guard.bump]];
     let signer = [&seeds[..]];

@@ -49,6 +49,9 @@ test('it transfers tokens from the payer to the destination', async (t) => {
       },
     ],
     startSale: true,
+    settings: {
+      paymentMint: tokenMint.publicKey,
+    },
     guards: {
       tokenPayment: some({
         mint: tokenMint.publicKey,
@@ -113,6 +116,9 @@ test('it allows minting even when the payer is different from the buyer', async 
       },
     ],
     startSale: true,
+    settings: {
+      paymentMint: tokenMint.publicKey,
+    },
     guards: {
       tokenPayment: some({
         mint: tokenMint.publicKey,
@@ -174,6 +180,9 @@ test('it fails if the payer does not have enough tokens', async (t) => {
       },
     ],
     startSale: true,
+    settings: {
+      paymentMint: tokenMint.publicKey,
+    },
     guards: {
       tokenPayment: some({
         mint: tokenMint.publicKey,
@@ -229,6 +238,9 @@ test('it charges a bot tax if the payer does not have enough tokens', async (t) 
       },
     ],
     startSale: true,
+    settings: {
+      paymentMint: tokenMint.publicKey,
+    },
     guards: {
       botTax: some({ lamports: sol(0.1), lastInstruction: true }),
       tokenPayment: some({
@@ -291,6 +303,9 @@ test('it fails if a different mint is provided in draw', async (t) => {
       },
     ],
     startSale: true,
+    settings: {
+      paymentMint: tokenMint.publicKey,
+    },
     guards: {
       tokenPayment: some({
         mint: tokenMint.publicKey,

@@ -1,15 +1,17 @@
 import {
   Context,
+  PublicKey,
   transactionBuilder,
   TransactionBuilder,
 } from '@metaplex-foundation/umi';
+import { NATIVE_MINT } from './constants';
 import {
   createCandyGuard,
   CreateCandyGuardInstructionDataArgs,
 } from './createCandyGuard';
 import { createCandyMachine } from './createCandyMachine';
 import { DefaultGuardSetArgs } from './defaultGuards';
-import { wrap } from './generated';
+import { TokenPaymentArgs, wrap } from './generated';
 import { GuardRepository, GuardSetArgs } from './guards';
 import { findCandyGuardPda } from './hooked';
 
@@ -24,10 +26,14 @@ export const create = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
     },
   input: CreateInput<DA extends undefined ? DefaultGuardSetArgs : DA>
 ): Promise<TransactionBuilder> => {
+  // Auto-set payment mint if solPayment or tokenPayment is set.
+  input.settings.paymentMint = getPaymentMint(input);
+
   const { guards, groups, ...rest } = input;
   const candyGuard = findCandyGuardPda(context, {
     base: input.candyMachine.publicKey,
   });
+
   return transactionBuilder()
     .add(await createCandyMachine(context, rest))
     .add(
@@ -44,3 +50,35 @@ export const create = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
       })
     );
 };
+
+function getPaymentMint<DA extends GuardSetArgs = DefaultGuardSetArgs>(
+  input: CreateInput<DA extends undefined ? DefaultGuardSetArgs : DA>
+) {
+  // eslint-disable-next-line no-restricted-syntax
+  for (const group of input.groups ?? []) {
+    const mint = getPaymentMintFromGuards(group.guards);
+    if (mint) {
+      return mint;
+    }
+  }
+
+  return getPaymentMintFromGuards(input.guards);
+}
+
+function getPaymentMintFromGuards(
+  guards: Partial<GuardSetArgs> | undefined
+): PublicKey {
+  if (guards?.solPayment) {
+    return NATIVE_MINT;
+  }
+
+  if (guards?.tokenPayment) {
+    return (guards.tokenPayment as TokenPaymentArgs).mint;
+  }
+
+  if (guards?.token2022Payment) {
+    return (guards.token2022Payment as TokenPaymentArgs).mint;
+  }
+
+  return NATIVE_MINT;
+}

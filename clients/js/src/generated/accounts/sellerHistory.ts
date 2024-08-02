@@ -146,8 +146,8 @@ export function getSellerHistoryGpaBuilder(
   context: Pick<Context, 'rpc' | 'programs'>
 ) {
   const programId = context.programs.getPublicKey(
-    'mplCandyMachineCore',
-    'CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR'
+    'mplCandyMachine',
+    'MGUMqztv7MHgoHBYWbvMyL3E3NJ4UHfTwgLJUQAbKGa'
   );
   return gpaBuilder(context, programId)
     .registerFields<{
@@ -181,8 +181,8 @@ export function findSellerHistoryPda(
   }
 ): Pda {
   const programId = context.programs.getPublicKey(
-    'mplCandyMachineCore',
-    'CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR'
+    'mplCandyMachine',
+    'MGUMqztv7MHgoHBYWbvMyL3E3NJ4UHfTwgLJUQAbKGa'
   );
   return context.eddsa.findPda(programId, [
     string({ size: 'variable' }).serialize('seller_history'),

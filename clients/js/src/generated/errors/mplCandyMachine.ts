@@ -711,7 +711,7 @@ nameToErrorMap.set('NotAllSettled', CmNotAllSettledError);
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors
  */
-export function getMplCandyMachineCoreErrorFromCode(
+export function getMplCandyMachineErrorFromCode(
   code: number,
   program: Program,
   cause?: Error
@@ -724,7 +724,7 @@ export function getMplCandyMachineCoreErrorFromCode(
  * Attempts to resolve a custom program error from the provided error name, i.e. 'Unauthorized'.
  * @category Errors
  */
-export function getMplCandyMachineCoreErrorFromName(
+export function getMplCandyMachineErrorFromName(
   name: string,
   program: Program,
   cause?: Error

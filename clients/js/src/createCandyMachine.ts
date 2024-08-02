@@ -27,7 +27,7 @@ export const createCandyMachine = async (
         newAccount: input.candyMachine,
         lamports,
         space,
-        programId: context.programs.get('mplCandyMachineCore').publicKey,
+        programId: context.programs.get('mplCandyMachine').publicKey,
       })
     )
     .add(

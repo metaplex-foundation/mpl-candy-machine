@@ -13,10 +13,7 @@ import {
   TransactionBuilder,
   uniquePublicKeys,
 } from '@metaplex-foundation/umi';
-import {
-  fetchCandyMachine,
-  getMplCandyMachineCoreProgramId,
-} from './generated';
+import { fetchCandyMachine, getMplCandyMachineProgramId } from './generated';
 import { findCandyGuardPda } from './hooked';
 
 export const createLutForCandyMachine = async (
@@ -58,6 +55,6 @@ export const getLutAddressesForCandyMachine = async (
     getSplTokenProgramId(context),
     getSplAssociatedTokenProgramId(context),
     getMplTokenMetadataProgramId(context),
-    getMplCandyMachineCoreProgramId(context),
+    getMplCandyMachineProgramId(context),
   ]);
 };

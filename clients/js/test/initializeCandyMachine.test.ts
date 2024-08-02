@@ -29,7 +29,7 @@ test('it can initialize a new candy machine account', async (t) => {
       createAccountWithRent(umi, {
         newAccount: candyMachine,
         space: 5000,
-        programId: umi.programs.get('mplCandyMachineCore').publicKey,
+        programId: umi.programs.get('mplCandyMachine').publicKey,
       })
     )
     .sendAndConfirm(umi);

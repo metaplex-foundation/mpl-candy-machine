@@ -15,7 +15,7 @@ mod processors;
 mod state;
 mod utils;
 
-declare_id!("CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR");
+declare_id!("MGUMqztv7MHgoHBYWbvMyL3E3NJ4UHfTwgLJUQAbKGa");
 
 #[program]
 pub mod candy_machine_core {

@@ -7,4 +7,4 @@
  */
 
 export * from './mplCandyGuard';
-export * from './mplCandyMachineCore';
+export * from './mplCandyMachine';

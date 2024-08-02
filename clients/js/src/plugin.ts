@@ -24,7 +24,7 @@ import {
 } from './defaultGuards';
 import {
   createMplCandyGuardProgram,
-  createMplCandyMachineCoreProgram,
+  createMplCandyMachineProgram,
 } from './generated';
 import {
   CandyGuardProgram,
@@ -41,7 +41,7 @@ export const mplCandyMachine = (): UmiPlugin => ({
     umi.use(mplTokenMetadata());
 
     // Programs.
-    umi.programs.add(createMplCandyMachineCoreProgram(), false);
+    umi.programs.add(createMplCandyMachineProgram(), false);
     umi.programs.add(
       {
         ...createMplCandyGuardProgram(),

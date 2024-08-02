@@ -15,7 +15,7 @@ const kinobi = k.createFromIdls([
 kinobi.update(
 	new k.UpdateProgramsVisitor({
 		candyGuard: { name: "mplCandyGuard", prefix: "Cg" },
-		candyMachineCore: { name: "mplCandyMachineCore", prefix: "Cm" },
+		candyMachineCore: { name: "mplCandyMachine", prefix: "Cm" },
 	})
 );
 
@@ -167,7 +167,7 @@ const defaultsToSplAssociatedTokenProgram = () =>
 const defaultsToMplCoreProgram = () =>
 	k.programDefault("mplCoreProgram", "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d");
 const defaultsToProgram = () =>
-	k.programDefault("mplCandyMachineCore", "CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR");
+	k.programDefault("mplCandyMachine", "MGUMqztv7MHgoHBYWbvMyL3E3NJ4UHfTwgLJUQAbKGa");
 
 // Automatically recognize account default values.
 kinobi.update(
@@ -190,6 +190,11 @@ kinobi.update(
 		{
 			...defaultsToProgram(),
 			account: "program",
+			ignoreIfOptional: true,
+		},
+		{
+			...defaultsToProgram(),
+			account: "candyMachineProgram",
 			ignoreIfOptional: true,
 		},
 		{
@@ -262,14 +267,14 @@ kinobi.update(
 				},
 			},
 		},
-		"mplCandyMachineCore.initialize": { name: "initializeCandyMachine" },
-		"mplCandyMachineCore.addNft": {
+		"mplCandyMachine.initialize": { name: "initializeCandyMachine" },
+		"mplCandyMachine.addNft": {
 			name: "addNft",
 			accounts: {
 				seller: { defaultsTo: k.identityDefault() },
 			},
 		},
-		"mplCandyMachineCore.removeNft": {
+		"mplCandyMachine.removeNft": {
 			name: "removeNft",
 			accounts: {
 				authority: { defaultsTo: k.identityDefault() },
@@ -279,20 +284,20 @@ kinobi.update(
 				},
 			},
 		},
-		"mplCandyMachineCore.addCoreAsset": {
+		"mplCandyMachine.addCoreAsset": {
 			name: "addCoreAsset",
 			accounts: {
 				seller: { defaultsTo: k.identityDefault() },
 			},
 		},
-		"mplCandyMachineCore.removeCoreAsset": {
+		"mplCandyMachine.removeCoreAsset": {
 			name: "removeCoreAsset",
 			accounts: {
 				authority: { defaultsTo: k.identityDefault() },
 				seller: { defaultsTo: k.identityDefault() },
 			},
 		},
-		"mplCandyMachineCore.draw": {
+		"mplCandyMachine.draw": {
 			name: "drawFromCandyMachine",
 			accounts: {
 				buyer: { defaultsTo: k.identityDefault() },
@@ -317,7 +322,7 @@ kinobi.update(
 				candyGuard: { defaultsTo: defaultsToCandyGuardPda("candyMachine") },
 			},
 		},
-		"mplCandyMachineCore.settleNftSale": {
+		"mplCandyMachine.settleNftSale": {
 			name: "baseSettleNftSale",
 			accounts: {
 				buyer: { defaultsTo: k.identityDefault() },
@@ -339,16 +344,16 @@ kinobi.update(
 				},
 			},
 		},
-		"mplCandyMachineCore.settleCoreAssetSale": {
+		"mplCandyMachine.settleCoreAssetSale": {
 			name: "baseSettleCoreAssetSale",
 			accounts: {
 				buyer: { defaultsTo: k.identityDefault() },
 			},
 		},
-		"mplCandyMachineCore.SetAuthority": { name: "SetCandyMachineAuthority" },
+		"mplCandyMachine.SetAuthority": { name: "SetCandyMachineAuthority" },
 		"mplCandyGuard.SetAuthority": { name: "SetCandyGuardAuthority" },
 		"mplCandyGuard.update": { name: "updateCandyGuard", internal: true },
-		"mplCandyMachineCore.withdraw": { name: "deleteCandyMachine" },
+		"mplCandyMachine.withdraw": { name: "deleteCandyMachine" },
 		"mplCandyGuard.withdraw": { name: "deleteCandyGuard" },
 	})
 );

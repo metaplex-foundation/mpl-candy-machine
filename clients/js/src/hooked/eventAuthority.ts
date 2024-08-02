@@ -5,8 +5,8 @@ export function findEventAuthorityPda(
   context: Pick<Context, 'eddsa' | 'programs'>
 ): Pda {
   const programId = context.programs.getPublicKey(
-    'mplCandyMachineCore',
-    'CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR'
+    'mplCandyMachine',
+    'MGUMqztv7MHgoHBYWbvMyL3E3NJ4UHfTwgLJUQAbKGa'
   );
   return context.eddsa.findPda(programId, [
     string({ size: 'variable' }).serialize('__event_authority'),

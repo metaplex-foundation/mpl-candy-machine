@@ -114,7 +114,7 @@ export function getAllowListProofGpaBuilder(
 ) {
   const programId = context.programs.getPublicKey(
     'mplCandyGuard',
-    'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
+    'GGRDy4ieS7ExrUu313QkszyuT9o3BvDLuc3H5VLgCpSF'
   );
   return gpaBuilder(context, programId)
     .registerFields<{ timestamp: number | bigint }>({ timestamp: [0, i64()] })
@@ -143,7 +143,7 @@ export function findAllowListProofPda(
 ): Pda {
   const programId = context.programs.getPublicKey(
     'mplCandyGuard',
-    'Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g'
+    'GGRDy4ieS7ExrUu313QkszyuT9o3BvDLuc3H5VLgCpSF'
   );
   return context.eddsa.findPda(programId, [
     string({ size: 'variable' }).serialize('allow_list'),

@@ -13,22 +13,22 @@ import {
   PublicKey,
 } from '@metaplex-foundation/umi';
 import {
-  getMplCandyGuardErrorFromCode,
-  getMplCandyGuardErrorFromName,
+  getMplCandyMachineErrorFromCode,
+  getMplCandyMachineErrorFromName,
 } from '../errors';
 
-export const MPL_CANDY_GUARD_PROGRAM_ID =
-  'GGRDy4ieS7ExrUu313QkszyuT9o3BvDLuc3H5VLgCpSF' as PublicKey<'GGRDy4ieS7ExrUu313QkszyuT9o3BvDLuc3H5VLgCpSF'>;
+export const MPL_CANDY_MACHINE_PROGRAM_ID =
+  'MGUMqztv7MHgoHBYWbvMyL3E3NJ4UHfTwgLJUQAbKGa' as PublicKey<'MGUMqztv7MHgoHBYWbvMyL3E3NJ4UHfTwgLJUQAbKGa'>;
 
-export function createMplCandyGuardProgram(): Program {
+export function createMplCandyMachineProgram(): Program {
   return {
-    name: 'mplCandyGuard',
-    publicKey: MPL_CANDY_GUARD_PROGRAM_ID,
+    name: 'mplCandyMachine',
+    publicKey: MPL_CANDY_MACHINE_PROGRAM_ID,
     getErrorFromCode(code: number, cause?: Error) {
-      return getMplCandyGuardErrorFromCode(code, this, cause);
+      return getMplCandyMachineErrorFromCode(code, this, cause);
     },
     getErrorFromName(name: string, cause?: Error) {
-      return getMplCandyGuardErrorFromName(name, this, cause);
+      return getMplCandyMachineErrorFromName(name, this, cause);
     },
     isOnCluster() {
       return true;
@@ -36,20 +36,20 @@ export function createMplCandyGuardProgram(): Program {
   };
 }
 
-export function getMplCandyGuardProgram<T extends Program = Program>(
+export function getMplCandyMachineProgram<T extends Program = Program>(
   context: Pick<Context, 'programs'>,
   clusterFilter?: ClusterFilter
 ): T {
-  return context.programs.get<T>('mplCandyGuard', clusterFilter);
+  return context.programs.get<T>('mplCandyMachine', clusterFilter);
 }
 
-export function getMplCandyGuardProgramId(
+export function getMplCandyMachineProgramId(
   context: Pick<Context, 'programs'>,
   clusterFilter?: ClusterFilter
 ): PublicKey {
   return context.programs.getPublicKey(
-    'mplCandyGuard',
-    MPL_CANDY_GUARD_PROGRAM_ID,
+    'mplCandyMachine',
+    MPL_CANDY_MACHINE_PROGRAM_ID,
     clusterFilter
   );
 }

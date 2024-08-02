@@ -8,7 +8,7 @@ export function findCandyMachineAuthorityPda(
     candyMachine: PublicKey;
   }
 ): Pda {
-  const programId = context.programs.get('mplCandyMachineCore').publicKey;
+  const programId = context.programs.get('mplCandyMachine').publicKey;
   return context.eddsa.findPda(programId, [
     string({ size: 'variable' }).serialize('candy_machine'),
     publicKey().serialize(seeds.candyMachine),

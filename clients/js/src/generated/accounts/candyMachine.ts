@@ -105,8 +105,8 @@ export function getCandyMachineGpaBuilder(
   context: Pick<Context, 'rpc' | 'programs'>
 ) {
   const programId = context.programs.getPublicKey(
-    'mplCandyMachineCore',
-    'CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR'
+    'mplCandyMachine',
+    'MGUMqztv7MHgoHBYWbvMyL3E3NJ4UHfTwgLJUQAbKGa'
   );
   return gpaBuilder(context, programId)
     .registerFields<{

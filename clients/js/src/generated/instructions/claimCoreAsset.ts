@@ -110,8 +110,8 @@ export function claimCoreAsset(
 ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey(
-    'mplCandyMachineCore',
-    'CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR'
+    'mplCandyMachine',
+    'MGUMqztv7MHgoHBYWbvMyL3E3NJ4UHfTwgLJUQAbKGa'
   );
 
   // Accounts.
@@ -217,8 +217,8 @@ export function claimCoreAsset(
   }
   if (!resolvedAccounts.program.value) {
     resolvedAccounts.program.value = context.programs.getPublicKey(
-      'mplCandyMachineCore',
-      'CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR'
+      'mplCandyMachine',
+      'MGUMqztv7MHgoHBYWbvMyL3E3NJ4UHfTwgLJUQAbKGa'
     );
     resolvedAccounts.program.isWritable = false;
   }

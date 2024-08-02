@@ -188,6 +188,9 @@ test('it can mint from a candy guard with token payment guard', async (t) => {
       },
     ],
     startSale: true,
+    settings: {
+      paymentMint: tokenMint.publicKey,
+    },
     guards: {
       tokenPayment: { mint: tokenMint.publicKey, amount: 5 },
     },

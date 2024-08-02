@@ -5,7 +5,7 @@ use solana_program::sysvar;
 use crate::{
     constants::{
         CANDY_MACHINE_SIZE, CONFIG_LINE_SIZE
-    }, utils::*, CandyError, CandyMachine, GumballState
+    }, events::DrawItemEvent, utils::*, CandyError, CandyMachine, GumballState
 };
 
 /// Draws an item from the gumball machine.
@@ -54,10 +54,18 @@ pub fn draw<'info>(ctx: Context<'_, '_, '_, 'info, Draw<'info>>) -> Result<()> {
         recent_slothashes: ctx.accounts.recent_slothashes.to_account_info(),
     };
 
-    process_draw(
+    let index = process_draw(
         &mut ctx.accounts.candy_machine,
         accounts
-    )
+    )?;
+
+    emit_cpi!(DrawItemEvent {
+        authority: ctx.accounts.candy_machine.authority.key(),
+        buyer: ctx.accounts.buyer.key(),
+        index: index as u64,
+    });
+
+    Ok(())
 }
 
 /// Mint a new NFT.
@@ -68,7 +76,7 @@ pub fn draw<'info>(ctx: Context<'_, '_, '_, 'info, Draw<'info>>) -> Result<()> {
 pub(crate) fn process_draw(
     candy_machine: &mut Box<Account<'_, CandyMachine>>,
     accounts: DrawAccounts,
-) -> Result<()> {
+) -> Result<u64> {
     // are there items to be minted?
     if candy_machine.items_redeemed >= candy_machine.finalized_items_count {
         return err!(CandyError::CandyMachineEmpty);
@@ -83,14 +91,14 @@ pub(crate) fn process_draw(
     // seed for the random number is a combination of the slot_hash - timestamp
     let seed = u64::from_le_bytes(*most_recent).saturating_sub(clock.unix_timestamp as u64);
 
-    let remainder: usize = seed
+    let index: usize = seed
         .checked_rem(candy_machine.finalized_items_count - candy_machine.items_redeemed)
         .ok_or(CandyError::NumericalOverflowError)? as usize;
 
     set_config_line_buyer(
         candy_machine,
         accounts.buyer.key(),
-        remainder,
+        index,
         candy_machine.items_redeemed
     )?;
 
@@ -107,7 +115,7 @@ pub(crate) fn process_draw(
     // release the data borrow
     drop(data);
 
-    Ok(())
+    Ok(index as u64)
 }
 
 /// Selects and returns the information of a config line.

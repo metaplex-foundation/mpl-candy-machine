@@ -1789,17 +1789,7 @@
       "name": "DrawItemEvent",
       "fields": [
         {
-          "name": "mint",
-          "type": "publicKey",
-          "index": false
-        },
-        {
           "name": "authority",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "seller",
           "type": "publicKey",
           "index": false
         },
@@ -1809,32 +1799,8 @@
           "index": false
         },
         {
-          "name": "price",
+          "name": "index",
           "type": "u64",
-          "index": false
-        },
-        {
-          "name": "proceeds",
-          "type": "u64",
-          "index": false
-        },
-        {
-          "name": "paymentMint",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "feeConfig",
-          "type": {
-            "option": {
-              "defined": "FeeConfig"
-            }
-          },
-          "index": false
-        },
-        {
-          "name": "curatorFeeBps",
-          "type": "u16",
           "index": false
         }
       ]

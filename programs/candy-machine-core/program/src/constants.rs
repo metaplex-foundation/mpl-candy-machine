@@ -18,6 +18,7 @@ pub const GUMBALL_SETTINGS_BYTE_INDEX: usize = 8 // discriminator
     + 8                                       // items redeemed
     + 8                                       // finalized items count
     + 8                                       // items settled
+    + 8                                       // total revenue
     + 1; // state
 
 pub const FEE_CONFIG_SIZE: usize = 32 // fee account
@@ -31,8 +32,7 @@ pub const CANDY_MACHINE_SIZE: usize = GUMBALL_SETTINGS_BYTE_INDEX
     + 33                                    // add items merkle root
     + 2                                     // curator fee bps
     + 1                                     // hide sold items
-    + 32                                    // payment token
-    + 8; // price per draw
+    + 32; // payment token
 
 pub const CONFIG_LINE_SIZE: usize = 32// mint
     + 32 // seller

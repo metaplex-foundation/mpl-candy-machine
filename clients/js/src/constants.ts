@@ -14,6 +14,7 @@ export const CANDY_MACHINE_HIDDEN_SECTION =
   8 + // items redeemed
   8 + // finalized items count
   8 + // items settled
+  8 + // total revenue
   1 + // state
   200 + // uri
   8 + // item capacity
@@ -21,8 +22,7 @@ export const CANDY_MACHINE_HIDDEN_SECTION =
   33 + // add items merkle root
   2 + // curator fee bps
   1 + // hide sold items
-  32 + // payment token
-  8; // price per draw
+  32; // payment token
 
 export const CANDY_MACHINE_SIZE = CANDY_MACHINE_HIDDEN_SECTION;
 

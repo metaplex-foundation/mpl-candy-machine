@@ -581,9 +581,58 @@
             "SlotHashes sysvar cluster data.",
             ""
           ]
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false
         }
       ],
       "args": []
+    },
+    {
+      "name": "incrementTotalRevenue",
+      "docs": [
+        "Increments total revenue earned by the gumball machine.",
+        "",
+        "Only the candy machine mint authority is allowed to increment revenue. This is",
+        "required as token transfers don't occur in this program, but total is needed",
+        "when settling.",
+        "",
+        "# Accounts",
+        "",
+        "0. `[writable]` Candy Machine account (must be pre-allocated but zero content)",
+        "2. `[signer]` Candy Machine mint authority"
+      ],
+      "accounts": [
+        {
+          "name": "candyMachine",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Candy machine account."
+          ]
+        },
+        {
+          "name": "mintAuthority",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "Candy machine mint authority (mint only allowed for the mint_authority)."
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "revenue",
+          "type": "u64"
+        }
+      ]
     },
     {
       "name": "claimCoreAsset",
@@ -1462,6 +1511,13 @@
             "type": "u64"
           },
           {
+            "name": "totalRevenue",
+            "docs": [
+              "Amount of lamports/tokens received from purchases."
+            ],
+            "type": "u64"
+          },
+          {
             "name": "state",
             "docs": [
               "True if the authority has finalized details, which prevents adding more nfts."
@@ -1664,13 +1720,6 @@
               "Payment token for the mint"
             ],
             "type": "publicKey"
-          },
-          {
-            "name": "itemPrice",
-            "docs": [
-              "Price per draw"
-            ],
-            "type": "u64"
           }
         ]
       }
@@ -1737,7 +1786,7 @@
       ]
     },
     {
-      "name": "SettleItemSaleEvent",
+      "name": "DrawItemEvent",
       "fields": [
         {
           "name": "mint",
@@ -1766,6 +1815,55 @@
         },
         {
           "name": "proceeds",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "paymentMint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "feeConfig",
+          "type": {
+            "option": {
+              "defined": "FeeConfig"
+            }
+          },
+          "index": false
+        },
+        {
+          "name": "curatorFeeBps",
+          "type": "u16",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "SettleItemSaleEvent",
+      "fields": [
+        {
+          "name": "mint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "authority",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "seller",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "buyer",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "totalProceeds",
           "type": "u64",
           "index": false
         },

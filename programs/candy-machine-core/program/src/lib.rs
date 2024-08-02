@@ -126,6 +126,23 @@ pub mod candy_machine_core {
         instructions::draw(ctx)
     }
 
+    /// Increments total revenue earned by the gumball machine.
+    ///
+    /// Only the candy machine mint authority is allowed to increment revenue. This is
+    /// required as token transfers don't occur in this program, but total is needed
+    /// when settling.
+    ///
+    /// # Accounts
+    ///
+    ///   0. `[writable]` Candy Machine account (must be pre-allocated but zero content)
+    ///   2. `[signer]` Candy Machine mint authority
+    pub fn increment_total_revenue<'info>(
+        ctx: Context<'_, '_, '_, 'info, IncrementTotalRevenue<'info>>,
+        revenue: u64,
+    ) -> Result<()> {
+        instructions::increment_total_revenue(ctx, revenue)
+    }
+
     /// Settles a Core asset sale
     ///
     /// # Accounts

@@ -28,7 +28,7 @@ import {
   u32,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import { findCandyGuardPda } from '../../hooked';
+import { findCandyGuardPda, findEventAuthorityPda } from '../../hooked';
 import {
   expectPublicKey,
   getAccountMetasAndSigners,
@@ -74,6 +74,7 @@ export type DrawInstructionAccounts = {
    */
 
   recentSlothashes?: PublicKey | Pda;
+  gumballEventAuthority?: PublicKey | Pda;
 };
 
 // Data.
@@ -166,6 +167,11 @@ export function draw(
       isWritable: false,
       value: input.recentSlothashes ?? null,
     },
+    gumballEventAuthority: {
+      index: 10,
+      isWritable: false,
+      value: input.gumballEventAuthority ?? null,
+    },
   };
 
   // Arguments.
@@ -220,6 +226,10 @@ export function draw(
     resolvedAccounts.recentSlothashes.value = publicKey(
       'SysvarS1otHashes111111111111111111111111111'
     );
+  }
+  if (!resolvedAccounts.gumballEventAuthority.value) {
+    resolvedAccounts.gumballEventAuthority.value =
+      findEventAuthorityPda(context);
   }
 
   // Accounts in order.

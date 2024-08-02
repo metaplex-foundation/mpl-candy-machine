@@ -10,7 +10,12 @@ import {
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import test from 'ava';
-import { draw, findCandyMachineAuthorityPda, TokenStandard } from '../../src';
+import {
+  draw,
+  fetchCandyMachine,
+  findCandyMachineAuthorityPda,
+  TokenStandard,
+} from '../../src';
 import {
   assertBotTax,
   assertItemBought,
@@ -84,6 +89,10 @@ test('it transfers tokens from the payer to the destination', async (t) => {
   // And the payer lost 5 tokens.
   const payerTokenAccount = await fetchToken(umi, identityAta);
   t.is(payerTokenAccount.amount, 7n);
+
+  // Total revenue is incremented
+  const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
+  t.is(candyMachineAccount.totalRevenue, 5n, 'total revenue is incremented');
 });
 
 test('it allows minting even when the payer is different from the buyer', async (t) => {

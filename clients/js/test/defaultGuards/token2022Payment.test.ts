@@ -8,7 +8,7 @@ import {
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import test from 'ava';
-import { draw, TokenStandard } from '../../src';
+import { draw, fetchCandyMachine, TokenStandard } from '../../src';
 import {
   assertItemBought,
   create,
@@ -83,4 +83,8 @@ test('it transfers Token2022 tokens from the payer to the destination', async (t
   // And the payer lost 5 tokens.
   const payerTokenAccount = await fetchToken(umi, identityAta);
   t.is(payerTokenAccount.amount, 7n);
+
+  // Total revenue is incremented
+  const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
+  t.is(candyMachineAccount.totalRevenue, 5n, 'total revenue is incremented');
 });

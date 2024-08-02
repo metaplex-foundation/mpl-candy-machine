@@ -85,6 +85,8 @@ impl Condition for SolPayment {
             ],
         )?;
 
+        cpi_increment_total_revenue(ctx, self.lamports)?;
+
         Ok(())
     }
 }

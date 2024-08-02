@@ -23,6 +23,8 @@ pub struct CandyMachine {
     pub finalized_items_count: u64,
     /// Number of assets settled after sale.
     pub items_settled: u64,
+    /// Amount of lamports/tokens received from purchases.
+    pub total_revenue: u64,
     /// True if the authority has finalized details, which prevents adding more nfts.
     pub state: GumballState,
     /// User-defined settings
@@ -124,6 +126,4 @@ pub struct GumballSettings {
     pub hide_sold_items: bool,
     /// Payment token for the mint
     pub payment_mint: Pubkey,
-    /// Price per draw
-    pub item_price: u64,
 }

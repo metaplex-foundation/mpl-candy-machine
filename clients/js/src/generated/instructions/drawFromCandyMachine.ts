@@ -22,6 +22,7 @@ import {
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
+import { findEventAuthorityPda } from '../../hooked';
 import {
   getAccountMetasAndSigners,
   ResolvedAccount,
@@ -50,6 +51,8 @@ export type DrawFromCandyMachineInstructionAccounts = {
    */
 
   recentSlothashes?: PublicKey | Pda;
+  eventAuthority?: PublicKey | Pda;
+  program?: PublicKey | Pda;
 };
 
 // Data.
@@ -84,7 +87,7 @@ export function getDrawFromCandyMachineInstructionDataSerializer(): Serializer<
 
 // Instruction.
 export function drawFromCandyMachine(
-  context: Pick<Context, 'identity' | 'payer' | 'programs'>,
+  context: Pick<Context, 'eddsa' | 'identity' | 'payer' | 'programs'>,
   input: DrawFromCandyMachineInstructionAccounts
 ): TransactionBuilder {
   // Program ID.
@@ -117,6 +120,12 @@ export function drawFromCandyMachine(
       isWritable: false,
       value: input.recentSlothashes ?? null,
     },
+    eventAuthority: {
+      index: 6,
+      isWritable: false,
+      value: input.eventAuthority ?? null,
+    },
+    program: { index: 7, isWritable: false, value: input.program ?? null },
   };
 
   // Default values.
@@ -140,6 +149,16 @@ export function drawFromCandyMachine(
     resolvedAccounts.recentSlothashes.value = publicKey(
       'SysvarS1otHashes111111111111111111111111111'
     );
+  }
+  if (!resolvedAccounts.eventAuthority.value) {
+    resolvedAccounts.eventAuthority.value = findEventAuthorityPda(context);
+  }
+  if (!resolvedAccounts.program.value) {
+    resolvedAccounts.program.value = context.programs.getPublicKey(
+      'mplCandyMachine',
+      'MGUMqztv7MHgoHBYWbvMyL3E3NJ4UHfTwgLJUQAbKGa'
+    );
+    resolvedAccounts.program.isWritable = false;
   }
 
   // Accounts in order.

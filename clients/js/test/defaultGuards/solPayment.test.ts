@@ -2,6 +2,7 @@ import { setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
 import {
   generateSigner,
   isEqualToAmount,
+  lamports,
   publicKey,
   sol,
   some,
@@ -9,7 +10,12 @@ import {
 } from '@metaplex-foundation/umi';
 import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
 import test from 'ava';
-import { draw, findCandyMachineAuthorityPda, TokenStandard } from '../../src';
+import {
+  draw,
+  fetchCandyMachine,
+  findCandyMachineAuthorityPda,
+  TokenStandard,
+} from '../../src';
 import {
   assertBotTax,
   assertItemBought,
@@ -65,6 +71,13 @@ test('it transfers SOL from the payer to the authority pda', async (t) => {
   // And the payer lost SOLs.
   const payerBalance = await umi.rpc.getBalance(payer.publicKey);
   t.true(isEqualToAmount(payerBalance, sol(9), sol(0.1)), 'payer lost SOLs');
+
+  // Total revenue is incremented
+  const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
+  t.true(
+    isEqualToAmount(lamports(candyMachineAccount.totalRevenue), sol(1)),
+    'total revenue is incremented'
+  );
 });
 
 test('it fails if the payer does not have enough funds', async (t) => {

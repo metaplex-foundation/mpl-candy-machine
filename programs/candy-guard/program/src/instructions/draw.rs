@@ -28,6 +28,7 @@ pub fn draw<'c: 'info, 'info>(
         sysvar_instructions: ctx.accounts.sysvar_instructions.to_account_info(),
         token_metadata_program: ctx.accounts.token_metadata_program.to_account_info(),
         remaining: ctx.remaining_accounts,
+        gumball_event_authority: ctx.accounts.gumball_event_authority.to_account_info(),
     };
 
     // evaluation context for this transaction
@@ -107,6 +108,8 @@ fn cpi_draw(ctx: &EvaluationContext) -> Result<()> {
         buyer: ctx.accounts.buyer.clone(),
         system_program: ctx.accounts.system_program.clone(),
         recent_slothashes: ctx.accounts.recent_slothashes.clone(),
+        event_authority: ctx.accounts.gumball_event_authority.clone(),
+        program: ctx.accounts._candy_machine_program.clone(),
     });
 
     let mint_infos = mint_accounts.to_account_infos();
@@ -175,4 +178,7 @@ pub struct Draw<'info> {
     /// CHECK: account constraints checked in account trait
     #[account(address = sysvar::slot_hashes::id())]
     recent_slothashes: UncheckedAccount<'info>,
+
+    /// CHECK: safe due to check in gumball machine
+    gumball_event_authority: UncheckedAccount<'info>,
 }

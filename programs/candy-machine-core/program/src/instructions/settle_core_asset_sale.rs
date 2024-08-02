@@ -170,7 +170,7 @@ pub fn settle_core_asset_sale<'info>(ctx: Context<'_, '_, '_, 'info, SettleCoreA
 
     drop(data);
 
-    let proceeds = claim_proceeds(
+    let total_proceeds = claim_proceeds(
         candy_machine, 
         seller_history,
         payer,
@@ -197,8 +197,7 @@ pub fn settle_core_asset_sale<'info>(ctx: Context<'_, '_, '_, 'info, SettleCoreA
         authority: candy_machine.authority.key(),
         seller: seller.key(),
         buyer: buyer.key(),
-        price: candy_machine.settings.item_price,
-        proceeds,
+        total_proceeds,
         payment_mint: candy_machine.settings.payment_mint,
         fee_config: candy_machine.marketplace_fee_config,
         curator_fee_bps: candy_machine.settings.curator_fee_bps

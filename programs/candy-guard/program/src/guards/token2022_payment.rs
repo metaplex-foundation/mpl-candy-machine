@@ -126,6 +126,8 @@ impl Condition for Token2022Payment {
             ],
         )?;
 
+        cpi_increment_total_revenue(ctx, self.amount)?;
+
         Ok(())
     }
 }

@@ -71,6 +71,7 @@ pub fn initialize(
         items_redeemed: 0,
         finalized_items_count: 0,
         items_settled: 0,
+        total_revenue: 0,
         state,
         settings,
     };

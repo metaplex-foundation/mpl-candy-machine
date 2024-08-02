@@ -188,6 +188,11 @@ kinobi.update(
 			ignoreIfOptional: true,
 		},
 		{
+			...defaultsToEventAuthorityPda(),
+			account: "gumballEventAuthority",
+			ignoreIfOptional: true,
+		},
+		{
 			...defaultsToProgram(),
 			account: "program",
 			ignoreIfOptional: true,

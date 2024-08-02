@@ -5,12 +5,11 @@ use solana_program::sysvar;
 use crate::{
     constants::{
         CANDY_MACHINE_SIZE, CONFIG_LINE_SIZE
-    },
-    utils::*,
-    CandyError, CandyMachine, GumballState
+    }, utils::*, CandyError, CandyMachine, GumballState
 };
 
-/// Mints a new NFT.
+/// Draws an item from the gumball machine.
+#[event_cpi]
 #[derive(Accounts)]
 pub struct Draw<'info> {
     /// Candy machine account.

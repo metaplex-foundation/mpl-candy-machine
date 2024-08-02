@@ -90,6 +90,8 @@ impl Condition for TokenPayment {
             amount: self.amount,
         })?;
 
+        cpi_increment_total_revenue(ctx, self.amount)?;
+
         Ok(())
     }
 }

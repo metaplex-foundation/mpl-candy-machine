@@ -128,7 +128,6 @@ test('it can delete a settled candy machine with payment token', async (t) => {
     candyMachine: candyMachineSigner,
     settings: {
       paymentMint: tokenMint.publicKey,
-      itemPrice: 1,
     },
     items: [
       {

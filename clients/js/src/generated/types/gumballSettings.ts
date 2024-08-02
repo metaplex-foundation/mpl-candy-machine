@@ -34,8 +34,6 @@ export type GumballSettings = {
   hideSoldItems: boolean;
   /** Payment token for the mint */
   paymentMint: PublicKey;
-  /** Price per draw */
-  itemPrice: bigint;
 };
 
 export type GumballSettingsArgs = {
@@ -53,8 +51,6 @@ export type GumballSettingsArgs = {
   hideSoldItems: boolean;
   /** Payment token for the mint */
   paymentMint: PublicKey;
-  /** Price per draw */
-  itemPrice: number | bigint;
 };
 
 export function getGumballSettingsSerializer(): Serializer<
@@ -70,7 +66,6 @@ export function getGumballSettingsSerializer(): Serializer<
       ['curatorFeeBps', u16()],
       ['hideSoldItems', bool()],
       ['paymentMint', publicKeySerializer()],
-      ['itemPrice', u64()],
     ],
     { description: 'GumballSettings' }
   ) as Serializer<GumballSettingsArgs, GumballSettings>;

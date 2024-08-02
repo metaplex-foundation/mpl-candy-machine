@@ -130,6 +130,11 @@
             "SlotHashes sysvar cluster data.",
             ""
           ]
+        },
+        {
+          "name": "gumballEventAuthority",
+          "isMut": false,
+          "isSigner": false
         }
       ],
       "args": [

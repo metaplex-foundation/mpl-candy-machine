@@ -33,6 +33,7 @@ pub(crate) struct DrawAccounts<'b, 'c, 'info> {
     pub(crate) sysvar_instructions: AccountInfo<'info>,
     pub(crate) recent_slothashes: AccountInfo<'info>,
     pub(crate) remaining: &'c [AccountInfo<'info>],
+    pub(crate) gumball_event_authority: AccountInfo<'info>,
 }
 
 #[derive(Debug, Clone)]

@@ -118,6 +118,7 @@ export function getCandyMachineGpaBuilder(
       itemsRedeemed: number | bigint;
       finalizedItemsCount: number | bigint;
       itemsSettled: number | bigint;
+      totalRevenue: number | bigint;
       state: GumballStateArgs;
       settings: GumballSettingsArgs;
     }>({
@@ -129,6 +130,7 @@ export function getCandyMachineGpaBuilder(
       itemsRedeemed: [null, u64()],
       finalizedItemsCount: [null, u64()],
       itemsSettled: [null, u64()],
+      totalRevenue: [null, u64()],
       state: [null, getGumballStateSerializer()],
       settings: [null, getGumballSettingsSerializer()],
     })

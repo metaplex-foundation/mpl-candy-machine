@@ -46,6 +46,8 @@ export type CandyMachineAccountData = {
   finalizedItemsCount: bigint;
   /** Number of assets settled after sale. */
   itemsSettled: bigint;
+  /** Amount of lamports/tokens received from purchases. */
+  totalRevenue: bigint;
   /** True if the authority has finalized details, which prevents adding more nfts. */
   state: GumballState;
   /** User-defined settings */
@@ -67,6 +69,8 @@ export type CandyMachineAccountDataArgs = {
   finalizedItemsCount: number | bigint;
   /** Number of assets settled after sale. */
   itemsSettled: number | bigint;
+  /** Amount of lamports/tokens received from purchases. */
+  totalRevenue: number | bigint;
   /** True if the authority has finalized details, which prevents adding more nfts. */
   state: GumballStateArgs;
   /** User-defined settings */
@@ -92,6 +96,7 @@ export function getCandyMachineAccountDataSerializer(): Serializer<
         ['itemsRedeemed', u64()],
         ['finalizedItemsCount', u64()],
         ['itemsSettled', u64()],
+        ['totalRevenue', u64()],
         ['state', getGumballStateSerializer()],
         ['settings', getGumballSettingsSerializer()],
       ],

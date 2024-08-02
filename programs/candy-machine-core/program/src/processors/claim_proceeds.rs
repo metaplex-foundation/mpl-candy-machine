@@ -37,13 +37,12 @@ pub fn claim_proceeds<'a, 'b>(
         );
     }
 
-    // Proceeds are calculated as total amount paid by buyers divided by total number of items in the sale
-    let proceeds = (candy_machine.settings.item_price as u128)
-        .checked_mul(candy_machine.items_redeemed as u128)
-        .ok_or(CandyError::NumericalOverflowError)?
-        .checked_div(candy_machine.finalized_items_count as u128)
-        .ok_or(CandyError::NumericalOverflowError)? as u64;
-    msg!("Proceeds: {}", proceeds);
+    // Proceeds are calculated as total amount paid by buyers divided by total number of items in the gumball machine
+    let total_proceeds = candy_machine
+        .total_revenue
+        .checked_div(candy_machine.finalized_items_count)
+        .ok_or(CandyError::NumericalOverflowError)?;
+    msg!("Proceeds: {}", total_proceeds);
 
     let marketplace_fee_bps = if let Some(fee_confg) = candy_machine.marketplace_fee_config {
         fee_confg.fee_bps
@@ -51,7 +50,7 @@ pub fn claim_proceeds<'a, 'b>(
         0
     };
 
-    let marketplace_fee = get_bps_of(proceeds, marketplace_fee_bps)?;
+    let marketplace_fee = get_bps_of(total_proceeds, marketplace_fee_bps)?;
     msg!("Marketplace fee: {}", marketplace_fee);
 
     if marketplace_fee > 0 {
@@ -72,7 +71,7 @@ pub fn claim_proceeds<'a, 'b>(
         )?;
     }
 
-    let curator_fee = get_bps_of(proceeds, candy_machine.settings.curator_fee_bps)?;
+    let curator_fee = get_bps_of(total_proceeds, candy_machine.settings.curator_fee_bps)?;
     msg!("Curator fee: {}", curator_fee);
 
     if curator_fee > 0 {
@@ -93,7 +92,7 @@ pub fn claim_proceeds<'a, 'b>(
         )?;
     }
 
-    let price_less_fees = proceeds
+    let price_less_fees = total_proceeds
         .checked_sub(marketplace_fee)
         .ok_or(CandyError::NumericalOverflowError)?
         .checked_sub(curator_fee)
@@ -152,7 +151,7 @@ pub fn claim_proceeds<'a, 'b>(
         seller_history.close(seller.to_account_info())?;
     }
 
-    Ok(proceeds)
+    Ok(total_proceeds)
 }
 
 /// Pays creator fees to the creators in the metadata and returns total paid

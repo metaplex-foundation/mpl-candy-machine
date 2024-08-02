@@ -1,11 +1,13 @@
 use std::collections::BTreeMap;
 
 pub use anchor_lang::prelude::*;
+use anchor_lang::Discriminator;
+use solana_program::{instruction::Instruction, program::invoke_signed};
 
 pub use crate::{errors::CandyGuardError, instructions::draw::*, state::GuardSet};
 use crate::{
     instructions::{DrawAccounts, Route, RouteContext},
-    state::CandyGuardData,
+    state::{CandyGuardData, SEED},
 };
 
 pub use address_gate::AddressGate;
@@ -186,4 +188,36 @@ pub fn get_account_info<T>(remaining_accounts: &[T], index: usize) -> Option<&T>
     } else {
         None
     }
+}
+
+fn cpi_increment_total_revenue(ctx: &EvaluationContext, revenue: u64) -> Result<()> {
+    let candy_guard = &ctx.accounts.candy_guard;
+
+    // candy machine mint instruction accounts
+    let accounts = Box::new(
+        mpl_candy_machine_core::cpi::accounts::IncrementTotalRevenue {
+            candy_machine: ctx.accounts.candy_machine.to_account_info(),
+            mint_authority: candy_guard.to_account_info(),
+        },
+    );
+
+    let ix_infos = accounts.to_account_infos();
+    let ix_metas = accounts.to_account_metas(None);
+    let mut ix_data =
+        mpl_candy_machine_core::instruction::IncrementTotalRevenue::DISCRIMINATOR.to_vec();
+    ix_data.extend(&revenue.to_le_bytes());
+
+    let ix = Instruction {
+        program_id: mpl_candy_machine_core::ID,
+        accounts: ix_metas,
+        data: ix_data,
+    };
+
+    // PDA signer for the transaction
+    let seeds = [SEED, &candy_guard.base.to_bytes(), &[candy_guard.bump]];
+    let signer = [&seeds[..]];
+
+    invoke_signed(&ix, &ix_infos, &signer)?;
+
+    Ok(())
 }

@@ -264,7 +264,7 @@ kinobi.update(
 kinobi.update(
 	new k.UpdateInstructionsVisitor({
 		"mplCandyGuard.initialize": {
-			name: "createCandyGuard",
+			name: "initializeCandyGuard",
 			internal: true,
 			accounts: {
 				candyGuard: {

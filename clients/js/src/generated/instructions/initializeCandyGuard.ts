@@ -32,7 +32,7 @@ import {
 } from '../shared';
 
 // Accounts.
-export type CreateCandyGuardInstructionAccounts = {
+export type InitializeCandyGuardInstructionAccounts = {
   candyGuard?: PublicKey | Pda;
   base: Signer;
   authority?: PublicKey | Pda;
@@ -41,47 +41,48 @@ export type CreateCandyGuardInstructionAccounts = {
 };
 
 // Data.
-export type CreateCandyGuardInstructionData = {
+export type InitializeCandyGuardInstructionData = {
   discriminator: Array<number>;
   data: Uint8Array;
 };
 
-export type CreateCandyGuardInstructionDataArgs = { data: Uint8Array };
+export type InitializeCandyGuardInstructionDataArgs = { data: Uint8Array };
 
-export function getCreateCandyGuardInstructionDataSerializer(): Serializer<
-  CreateCandyGuardInstructionDataArgs,
-  CreateCandyGuardInstructionData
+export function getInitializeCandyGuardInstructionDataSerializer(): Serializer<
+  InitializeCandyGuardInstructionDataArgs,
+  InitializeCandyGuardInstructionData
 > {
   return mapSerializer<
-    CreateCandyGuardInstructionDataArgs,
+    InitializeCandyGuardInstructionDataArgs,
     any,
-    CreateCandyGuardInstructionData
+    InitializeCandyGuardInstructionData
   >(
-    struct<CreateCandyGuardInstructionData>(
+    struct<InitializeCandyGuardInstructionData>(
       [
         ['discriminator', array(u8(), { size: 8 })],
         ['data', bytes({ size: u32() })],
       ],
-      { description: 'CreateCandyGuardInstructionData' }
+      { description: 'InitializeCandyGuardInstructionData' }
     ),
     (value) => ({
       ...value,
       discriminator: [175, 175, 109, 31, 13, 152, 155, 237],
     })
   ) as Serializer<
-    CreateCandyGuardInstructionDataArgs,
-    CreateCandyGuardInstructionData
+    InitializeCandyGuardInstructionDataArgs,
+    InitializeCandyGuardInstructionData
   >;
 }
 
 // Args.
-export type CreateCandyGuardInstructionArgs =
-  CreateCandyGuardInstructionDataArgs;
+export type InitializeCandyGuardInstructionArgs =
+  InitializeCandyGuardInstructionDataArgs;
 
 // Instruction.
-export function createCandyGuard(
+export function initializeCandyGuard(
   context: Pick<Context, 'eddsa' | 'identity' | 'payer' | 'programs'>,
-  input: CreateCandyGuardInstructionAccounts & CreateCandyGuardInstructionArgs
+  input: InitializeCandyGuardInstructionAccounts &
+    InitializeCandyGuardInstructionArgs
 ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey(
@@ -103,7 +104,7 @@ export function createCandyGuard(
   };
 
   // Arguments.
-  const resolvedArgs: CreateCandyGuardInstructionArgs = { ...input };
+  const resolvedArgs: InitializeCandyGuardInstructionArgs = { ...input };
 
   // Default values.
   if (!resolvedAccounts.candyGuard.value) {
@@ -138,8 +139,8 @@ export function createCandyGuard(
   );
 
   // Data.
-  const data = getCreateCandyGuardInstructionDataSerializer().serialize(
-    resolvedArgs as CreateCandyGuardInstructionDataArgs
+  const data = getInitializeCandyGuardInstructionDataSerializer().serialize(
+    resolvedArgs as InitializeCandyGuardInstructionDataArgs
   );
 
   // Bytes Created On Chain.

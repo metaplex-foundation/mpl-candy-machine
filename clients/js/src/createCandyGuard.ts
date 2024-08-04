@@ -6,9 +6,9 @@ import {
 import { CANDY_GUARD_DATA } from './constants';
 import { DefaultGuardSetArgs } from './defaultGuards';
 import {
-  createCandyGuard as baseCreateCandyGuard,
-  CreateCandyGuardInstructionAccounts,
-} from './generated/instructions/createCandyGuard';
+  initializeCandyGuard,
+  InitializeCandyGuardInstructionAccounts,
+} from './generated/instructions/initializeCandyGuard';
 import {
   CandyGuardProgram,
   GuardRepository,
@@ -21,7 +21,7 @@ import {
   getCandyGuardDataSerializer,
 } from './hooked';
 
-export { CreateCandyGuardInstructionAccounts };
+export { InitializeCandyGuardInstructionAccounts };
 
 export type CreateCandyGuardInstructionData<D extends GuardSet> = {
   discriminator: Array<number>;
@@ -31,10 +31,10 @@ export type CreateCandyGuardInstructionDataArgs<DA extends GuardSetArgs> =
   Partial<CandyGuardDataArgs<DA>>;
 
 export function createCandyGuard<DA extends GuardSetArgs = DefaultGuardSetArgs>(
-  context: Parameters<typeof baseCreateCandyGuard>[0] & {
+  context: Parameters<typeof initializeCandyGuard>[0] & {
     guards: GuardRepository;
   },
-  input: CreateCandyGuardInstructionAccounts &
+  input: InitializeCandyGuardInstructionAccounts &
     CreateCandyGuardInstructionDataArgs<
       DA extends undefined ? DefaultGuardSetArgs : DA
     >
@@ -52,7 +52,7 @@ export function createCandyGuard<DA extends GuardSetArgs = DefaultGuardSetArgs>(
 
   return transactionBuilder([
     {
-      ...baseCreateCandyGuard(context, { ...rest, data }).items[0],
+      ...initializeCandyGuard(context, { ...rest, data }).items[0],
       bytesCreatedOnChain: ACCOUNT_HEADER_SIZE + CANDY_GUARD_DATA + data.length,
     },
   ]);

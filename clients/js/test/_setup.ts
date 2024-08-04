@@ -41,7 +41,6 @@ import {
   CandyGuardDataArgs,
   ConfigLineInput,
   createCandyGuard as baseCreateCandyGuard,
-  CreateCandyGuardInstructionAccounts,
   CreateCandyGuardInstructionDataArgs,
   createCandyMachine as baseCreateCandyMachineV2,
   DefaultGuardSetArgs,
@@ -50,6 +49,7 @@ import {
   GuardSetArgs,
   GumballSettings,
   GumballSettingsArgs,
+  InitializeCandyGuardInstructionAccounts,
   mplCandyMachine,
   startSale,
   TokenStandard,
@@ -293,7 +293,7 @@ export const createCandyGuard = async <
 >(
   umi: Umi,
   input: Partial<
-    CreateCandyGuardInstructionAccounts &
+    InitializeCandyGuardInstructionAccounts &
       CreateCandyGuardInstructionDataArgs<
         DA extends undefined ? DefaultGuardSetArgs : DA
       >

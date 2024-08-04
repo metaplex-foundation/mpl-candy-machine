@@ -2,12 +2,12 @@
   "name": "@mallow-labs/mallow-gumball",
   "version": "0.1.0",
   "description": "Client library for Gumball Machine related programs",
-  "main": "./dist/esm/src/index.js",
-  "types": "dist/esm/src/index.d.ts",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "scripts": {
-    "dev": "concurrently \"tsc -p tsconfig.cjs.json --watch\" \"tsc --watch\"",
-    "build": "pnpm --filter @mallow-labs/mallow-gumball build:server",
-    "build:server": "rimraf dist/ && tsc && tsc -p tsconfig.cjs.json",
+    "dev": "tsc --watch",
+    "build": "rimraf dist && tsc -p tsconfig.json",
+    "build:server": "rimraf dist/ && tsc",
     "build:docs": "typedoc",
     "test": "ava",
     "lint": "eslint --ext js,ts,tsx src",
@@ -16,7 +16,7 @@
     "format:fix": "prettier --write src test"
   },
   "files": [
-    "/dist/esm/src"
+    "/dist/src"
   ],
   "publishConfig": {
     "access": "public",
@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@metaplex-foundation/mpl-core": "^1.0.2",
-    "@metaplex-foundation/mpl-token-metadata": "3.0.0-alpha.27",
+		"@metaplex-foundation/mpl-token-metadata": "^3.2.1",
     "@metaplex-foundation/mpl-toolbox": "^0.9.0",
     "@noble/hashes": "^1.2.0",
     "merkletreejs": "^0.3.9"
@@ -67,8 +67,8 @@
     "typescript": {
       "compile": false,
       "rewritePaths": {
-        "src/": "dist/cjs/src/",
-        "test/": "dist/cjs/test/"
+        "src/": "dist/src/",
+        "test/": "dist/test/"
       }
     }
   },

@@ -9,8 +9,8 @@ import {
   u32,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import { TokenStandard } from 'src/generated';
 import { CANDY_MACHINE_HIDDEN_SECTION } from '../constants';
+import { TokenStandard } from '../generated';
 import {
   CandyMachineAccountData as BaseCandyMachineAccountData,
   CandyMachineAccountDataArgs as BaseCandyMachineAccountDataArgs,

@@ -24,9 +24,14 @@ test('it can create a candy machine with an associated candy guard', async (t) =
   const umi = await createUmi();
 
   // When we create a new candy machine with an associated candy guard.
+  const feeAccount = generateSigner(umi).publicKey;
   const candyMachine = generateSigner(umi);
   const createInstructions = await create(umi, {
     candyMachine,
+    feeConfig: some({
+      feeAccount,
+      feeBps: 500,
+    }),
     guards: {
       botTax: some({ lamports: sol(0.01), lastInstruction: true }),
       solPayment: some({ lamports: sol(2) }),
@@ -59,5 +64,9 @@ test('it can create a candy machine with an associated candy guard', async (t) =
     publicKey: publicKey(candyMachine),
     authority: publicKey(umi.identity),
     mintAuthority: publicKey(candyGuard),
+    marketplaceFeeConfig: some({
+      feeAccount,
+      feeBps: 500,
+    }),
   });
 });

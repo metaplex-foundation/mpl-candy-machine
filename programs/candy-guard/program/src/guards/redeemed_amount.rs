@@ -26,10 +26,10 @@ impl Condition for RedeemedAmount {
         _guard_set: &GuardSet,
         _mint_args: &[u8],
     ) -> Result<()> {
-        let candy_machine = &ctx.accounts.candy_machine;
+        let gumball_machine = &ctx.accounts.gumball_machine;
 
-        if candy_machine.items_redeemed >= self.maximum {
-            return err!(CandyGuardError::MaximumRedeemedAmount);
+        if gumball_machine.items_redeemed >= self.maximum {
+            return err!(GumballGuardError::MaximumRedeemedAmount);
         }
 
         Ok(())

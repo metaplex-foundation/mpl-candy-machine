@@ -13,11 +13,11 @@ import {
 import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
 import test from 'ava';
 import {
-  CandyMachine,
   draw,
-  fetchCandyMachine,
-  findCandyMachineAuthorityPda,
+  fetchGumballMachine,
+  findGumballMachineAuthorityPda,
   findSellerHistoryPda,
+  GumballMachine,
   safeFetchSellerHistory,
   settleCoreAssetSale,
   TokenStandard,
@@ -25,15 +25,15 @@ import {
 import { create, createCoreAsset, createUmi } from './_setup';
 
 test('it can settle a core asset sale', async (t) => {
-  // Given a candy machine with some guards.
+  // Given a gumball machine with some guards.
   const umi = await createUmi();
   const asset = await createCoreAsset(umi);
 
-  const candyMachineSigner = generateSigner(umi);
-  const candyMachine = candyMachineSigner.publicKey;
+  const gumballMachineSigner = generateSigner(umi);
+  const gumballMachine = gumballMachineSigner.publicKey;
 
   await create(umi, {
-    candyMachine: candyMachineSigner,
+    gumballMachine: gumballMachineSigner,
     items: [
       {
         id: asset.publicKey,
@@ -47,7 +47,7 @@ test('it can settle a core asset sale', async (t) => {
     },
   });
 
-  // When we mint from the candy guard.
+  // When we mint from the gumball guard.
   const buyerUmi = await createUmi();
   const buyer = buyerUmi.identity;
   const payer = await generateSignerWithSol(umi, sol(10));
@@ -55,7 +55,7 @@ test('it can settle a core asset sale', async (t) => {
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
         payer,
         buyer,
         mintArgs: {
@@ -67,7 +67,7 @@ test('it can settle a core asset sale', async (t) => {
 
   const sellerPreBalance = await umi.rpc.getBalance(umi.identity.publicKey);
   const authorityPdaPreBalance = await umi.rpc.getBalance(
-    findCandyMachineAuthorityPda(umi, { candyMachine })[0]
+    findGumballMachineAuthorityPda(umi, { gumballMachine: gumballMachine })[0]
   );
 
   // Then settle the sale
@@ -76,7 +76,7 @@ test('it can settle a core asset sale', async (t) => {
     .add(
       settleCoreAssetSale(buyerUmi, {
         index: 0,
-        candyMachine,
+        gumballMachine,
         authority: umi.identity.publicKey,
         seller: umi.identity.publicKey,
         asset: asset.publicKey,
@@ -90,7 +90,7 @@ test('it can settle a core asset sale', async (t) => {
 
   const sellerPostBalance = await umi.rpc.getBalance(umi.identity.publicKey);
   const authorityPdaPostBalance = await umi.rpc.getBalance(
-    findCandyMachineAuthorityPda(umi, { candyMachine })[0]
+    findGumballMachineAuthorityPda(umi, { gumballMachine: gumballMachine })[0]
   );
 
   t.true(
@@ -109,9 +109,9 @@ test('it can settle a core asset sale', async (t) => {
     )
   );
 
-  // And the candy machine was updated.
-  const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
-  t.like(candyMachineAccount, <CandyMachine>{
+  // And the gumball machine was updated.
+  const gumballMachineAccount = await fetchGumballMachine(umi, gumballMachine);
+  t.like(gumballMachineAccount, <GumballMachine>{
     itemsRedeemed: 1n,
     itemsSettled: 1n,
   });
@@ -119,7 +119,10 @@ test('it can settle a core asset sale', async (t) => {
   // Seller history should be closed
   const sellerHistoryAccount = await safeFetchSellerHistory(
     umi,
-    findSellerHistoryPda(umi, { candyMachine, seller: umi.identity.publicKey })
+    findSellerHistoryPda(umi, {
+      gumballMachine,
+      seller: umi.identity.publicKey,
+    })
   );
   t.falsy(sellerHistoryAccount);
 

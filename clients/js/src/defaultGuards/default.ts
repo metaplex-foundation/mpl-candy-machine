@@ -59,7 +59,7 @@ import { TokenGateMintArgs } from './tokenGate';
 import { TokenPaymentMintArgs } from './tokenPayment';
 
 /**
- * The arguments for all default Candy Machine guards.
+ * The arguments for all default Gumball Machine guards.
  */
 export type DefaultGuardSetArgs = GuardSetArgs & {
   botTax: OptionOrNullable<BotTaxArgs>;
@@ -84,7 +84,7 @@ export type DefaultGuardSetArgs = GuardSetArgs & {
 };
 
 /**
- * The data for all default Candy Machine guards.
+ * The data for all default Gumball Machine guards.
  */
 export type DefaultGuardSet = GuardSet & {
   botTax: Option<BotTax>;
@@ -109,7 +109,7 @@ export type DefaultGuardSet = GuardSet & {
 };
 
 /**
- * The mint arguments for all default Candy Machine guards.
+ * The mint arguments for all default Gumball Machine guards.
  */
 export type DefaultGuardSetMintArgs = GuardSetMintArgs & {
   // botTax: no mint settings
@@ -134,7 +134,7 @@ export type DefaultGuardSetMintArgs = GuardSetMintArgs & {
 };
 
 /**
- * The route arguments for all default Candy Machine guards.
+ * The route arguments for all default Gumball Machine guards.
  */
 export type DefaultGuardSetRouteArgs = GuardSetRouteArgs & {
   // botTax: no route settings
@@ -159,7 +159,7 @@ export type DefaultGuardSetRouteArgs = GuardSetRouteArgs & {
 };
 
 /** @internal */
-export const defaultCandyGuardNames: string[] = [
+export const defaultGumballGuardNames: string[] = [
   'botTax',
   'solPayment',
   'tokenPayment',
@@ -183,7 +183,7 @@ export const defaultCandyGuardNames: string[] = [
 
 /** @internal */
 export const emptyDefaultGuardSetArgs: DefaultGuardSetArgs =
-  defaultCandyGuardNames.reduce((acc, name) => {
+  defaultGumballGuardNames.reduce((acc, name) => {
     acc[name] = none();
     return acc;
   }, {} as DefaultGuardSetArgs);

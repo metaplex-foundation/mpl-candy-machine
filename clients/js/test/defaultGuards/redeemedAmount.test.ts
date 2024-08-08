@@ -11,10 +11,10 @@ import {
 } from '../_setup';
 
 test('it allows minting until a threshold of NFTs have been redeemed', async (t) => {
-  // Given a loaded Candy Machine with a redeemedAmount guard with a threshold of 1 NFT.
+  // Given a loaded Gumball Machine with a redeemedAmount guard with a threshold of 1 NFT.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -37,20 +37,20 @@ test('it allows minting until a threshold of NFTs have been redeemed', async (t)
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
       })
     )
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertItemBought(t, umi, { candyMachine });
+  await assertItemBought(t, umi, { gumballMachine });
 });
 
 test('it forbids minting once the redeemed threshold has been reached', async (t) => {
-  // Given a loaded Candy Machine with a redeemedAmount guard with a threshold of 1 NFT.
+  // Given a loaded Gumball Machine with a redeemedAmount guard with a threshold of 1 NFT.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -73,11 +73,11 @@ test('it forbids minting once the redeemed threshold has been reached', async (t
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
       })
     )
     .sendAndConfirm(umi);
-  await assertItemBought(t, umi, { candyMachine });
+  await assertItemBought(t, umi, { gumballMachine });
 
   // When we try to mint its second item.
 
@@ -85,7 +85,7 @@ test('it forbids minting once the redeemed threshold has been reached', async (t
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
       })
     )
     .sendAndConfirm(umi);
@@ -95,11 +95,11 @@ test('it forbids minting once the redeemed threshold has been reached', async (t
 });
 
 test('it charges a bot tax when trying to mint once the threshold has been reached', async (t) => {
-  // Given a loaded Candy Machine with a bot tax guard
+  // Given a loaded Gumball Machine with a bot tax guard
   // and a redeemedAmount guard with a threshold of 1 NFT.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -123,11 +123,11 @@ test('it charges a bot tax when trying to mint once the threshold has been reach
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
       })
     )
     .sendAndConfirm(umi);
-  await assertItemBought(t, umi, { candyMachine });
+  await assertItemBought(t, umi, { gumballMachine });
 
   // When we try to mint its second item.
 
@@ -135,7 +135,7 @@ test('it charges a bot tax when trying to mint once the threshold has been reach
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
       })
     )
     .sendAndConfirm(umi);

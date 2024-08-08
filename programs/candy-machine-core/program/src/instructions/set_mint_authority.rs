@@ -1,25 +1,25 @@
 use anchor_lang::prelude::*;
 
-use crate::CandyMachine;
+use crate::GumballMachine;
 
-pub fn set_mint_authority(ctx: Context<SetMintAuthority>) -> Result<()> {
-    let candy_machine = &mut ctx.accounts.candy_machine;
-
-    candy_machine.mint_authority = ctx.accounts.mint_authority.key();
-
-    Ok(())
-}
-
-/// Sets a new candy machine authority.
+/// Sets a new gumball machine authority.
 #[derive(Accounts)]
 pub struct SetMintAuthority<'info> {
-    /// Candy Machine account.
+    /// Gumball Machine account.
     #[account(mut, has_one = authority)]
-    candy_machine: Account<'info, CandyMachine>,
+    gumball_machine: Account<'info, GumballMachine>,
 
-    /// Candy Machine authority
+    /// Gumball Machine authority
     authority: Signer<'info>,
 
-    /// New candy machine authority
+    /// New gumball machine authority
     mint_authority: Signer<'info>,
+}
+
+pub fn set_mint_authority(ctx: Context<SetMintAuthority>) -> Result<()> {
+    let gumball_machine = &mut ctx.accounts.gumball_machine;
+
+    gumball_machine.mint_authority = ctx.accounts.mint_authority.key();
+
+    Ok(())
 }

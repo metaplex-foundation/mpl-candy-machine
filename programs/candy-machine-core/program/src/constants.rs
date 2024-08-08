@@ -5,7 +5,7 @@ pub const MPL_TOKEN_AUTH_RULES_PROGRAM: Pubkey =
     pubkey!("auth9SigNpDKz4sJJ1DfCTuZrZNSAgh9sFD3rboVmgg");
 
 // Seed used to derive the authority PDA address.
-pub const AUTHORITY_SEED: &str = "candy_machine";
+pub const AUTHORITY_SEED: &str = "gumball_machine";
 
 // Seed used to derive the seller history PDA address.
 pub const SELLER_HISTORY_SEED: &str = "seller_history";
@@ -25,7 +25,7 @@ pub const FEE_CONFIG_SIZE: usize = 32 // fee account
     + 2; // bps
 
 // Determine the start of the account hidden section.
-pub const CANDY_MACHINE_SIZE: usize = GUMBALL_SETTINGS_BYTE_INDEX
+pub const GUMBALL_MACHINE_SIZE: usize = GUMBALL_SETTINGS_BYTE_INDEX
     + MAX_URI_LENGTH                        // uri
     + 8                                     // item capacity
     + 2                                     // items per seller

@@ -2,7 +2,7 @@
 name = "mpl-candy-guard-derive"
 version = "0.2.0"
 edition = "2021"
-description = "Procedural macro for automating the implementation of Metaplex Candy Guard."
+description = "Procedural macro for automating the implementation of Metaplex Gumball Guard."
 authors = ["Metaplex Developers <dev@metaplex.com>"]
 repository = "https://github.com/metaplex-foundation/mpl-candy-guard"
 license-file = "../LICENSE"

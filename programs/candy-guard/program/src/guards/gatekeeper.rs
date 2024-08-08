@@ -57,7 +57,7 @@ impl Condition for Gatekeeper {
         //     &self.gatekeeper_network,
         //     None,
         // )
-        // .map_err(|_| error!(CandyGuardError::GatewayTokenInvalid))?;
+        // .map_err(|_| error!(GumballGuardError::GatewayTokenInvalid))?;
 
         // if self.expire_on_use {
         //     // if expire on use is true, two more accounts are needed.

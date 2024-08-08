@@ -25,7 +25,7 @@ import { GuardManifest } from '../guards';
  * Here is an example.
  *
  * ```ts
- * import { getMerkleProof, getMerkleRoot } from '@metaplex-foundation/mpl-candy-machine';
+ * import { getMerkleProof, getMerkleRoot } from '@metaplex-foundation/mpl-gumball-machine';
  * const allowList = [
  *   'Ur1CbWSGsXCdedknRbJsEk7urwAvu1uddmQv51nAnXB',
  *   'GjwcWFQYzemBtpUoN5fMAP2FZviTtMRWCmrppGuTthJS',
@@ -57,8 +57,8 @@ export const allowListGuardManifest: GuardManifest<
         publicKey: findAllowListProofPda(context, {
           merkleRoot: args.merkleRoot,
           user: mintContext.buyer.publicKey,
-          candyMachine: mintContext.candyMachine,
-          candyGuard: mintContext.candyGuard,
+          gumballMachine: mintContext.gumballMachine,
+          gumballGuard: mintContext.gumballGuard,
         })[0],
       },
     ],
@@ -71,8 +71,8 @@ export const allowListGuardManifest: GuardManifest<
         publicKey: findAllowListProofPda(context, {
           merkleRoot: args.merkleRoot,
           user: publicKey(args.buyer ?? routeContext.payer),
-          candyMachine: routeContext.candyMachine,
-          candyGuard: routeContext.candyGuard,
+          gumballMachine: routeContext.gumballMachine,
+          gumballGuard: routeContext.gumballGuard,
         })[0],
       },
       { isWritable: false, publicKey: getSplSystemProgramId(context) },

@@ -3,7 +3,7 @@ use super::*;
 use mpl_candy_machine_core::constants::AUTHORITY_SEED;
 use solana_program::{program::invoke, system_instruction};
 
-use crate::{errors::CandyGuardError, state::GuardType, utils::assert_derivation};
+use crate::{errors::GumballGuardError, state::GuardType, utils::assert_derivation};
 
 /// Guard that charges an amount in SOL (lamports) for the mint.
 ///
@@ -37,13 +37,13 @@ impl Condition for SolPayment {
         let destination = try_get_account_info(ctx.accounts.remaining, index)?;
 
         require!(
-            ctx.accounts.candy_machine.settings.payment_mint == spl_token::native_mint::id(),
-            CandyGuardError::InvalidPaymentMint
+            ctx.accounts.gumball_machine.settings.payment_mint == spl_token::native_mint::id(),
+            GumballGuardError::InvalidPaymentMint
         );
 
         let seeds = [
             AUTHORITY_SEED.as_bytes(),
-            ctx.accounts.candy_machine.to_account_info().key.as_ref(),
+            ctx.accounts.gumball_machine.to_account_info().key.as_ref(),
         ];
         assert_derivation(&mpl_candy_machine_core::ID, destination, &seeds)?;
 
@@ -57,7 +57,7 @@ impl Condition for SolPayment {
                 self.lamports,
                 ctx.accounts.payer.lamports(),
             );
-            return err!(CandyGuardError::NotEnoughSOL);
+            return err!(GumballGuardError::NotEnoughSOL);
         }
 
         Ok(())

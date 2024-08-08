@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use utils::get_verified_royalty_info;
 use crate::{
-    assert_config_line, constants::AUTHORITY_SEED, events::ClaimItemEvent, processors, state::CandyMachine, AssociatedToken, CandyError, ConfigLine, GumballState, Token, TokenStandard
+    assert_config_line, constants::AUTHORITY_SEED, events::ClaimItemEvent, processors, state::GumballMachine, AssociatedToken, GumballError, ConfigLine, GumballState, Token, TokenStandard
 };
 
 /// Settles a legacy NFT sale
@@ -12,19 +12,19 @@ pub struct ClaimNft<'info> {
     #[account(mut)]
     payer: Signer<'info>,
 
-    /// Candy machine account.
+    /// Gumball machine account.
     #[account(
         mut,
-        constraint = candy_machine.state == GumballState::SaleLive || candy_machine.state == GumballState::SaleEnded @ CandyError::InvalidState
+        constraint = gumball_machine.state == GumballState::SaleLive || gumball_machine.state == GumballState::SaleEnded @ GumballError::InvalidState
     )]
-    candy_machine: Box<Account<'info, CandyMachine>>,
+    gumball_machine: Box<Account<'info, GumballMachine>>,
 
     /// CHECK: Safe due to seeds constraint
     #[account(
         mut,
         seeds = [
             AUTHORITY_SEED.as_bytes(), 
-            candy_machine.key().as_ref()
+            gumball_machine.key().as_ref()
         ],
         bump
     )]
@@ -97,7 +97,7 @@ pub struct ClaimNft<'info> {
 }
 
 pub fn claim_nft<'info>(ctx: Context<'_, '_, '_, 'info, ClaimNft<'info>>, index: u32) -> Result<()> {
-    let candy_machine = &mut ctx.accounts.candy_machine;
+    let gumball_machine = &mut ctx.accounts.gumball_machine;
     let payer = &ctx.accounts.payer.to_account_info();
     let buyer = &ctx.accounts.buyer.to_account_info();
     let buyer_token_account = &ctx.accounts.buyer_token_account.to_account_info();
@@ -115,7 +115,7 @@ pub fn claim_nft<'info>(ctx: Context<'_, '_, '_, 'info, ClaimNft<'info>>, index:
     let mint = &ctx.accounts.mint.to_account_info();
 
     assert_config_line(
-        candy_machine,
+        gumball_machine,
         index,
         ConfigLine {
             mint: mint.key(),
@@ -129,7 +129,7 @@ pub fn claim_nft<'info>(ctx: Context<'_, '_, '_, 'info, ClaimNft<'info>>, index:
 
     let auth_seeds = [
         AUTHORITY_SEED.as_bytes(),
-        candy_machine.to_account_info().key.as_ref(),
+        gumball_machine.to_account_info().key.as_ref(),
         &[ctx.bumps.authority_pda],
     ];
 
@@ -155,7 +155,7 @@ pub fn claim_nft<'info>(ctx: Context<'_, '_, '_, 'info, ClaimNft<'info>>, index:
 
     emit_cpi!(ClaimItemEvent {
         mint: mint.key(),
-        authority: candy_machine.authority.key(),
+        authority: gumball_machine.authority.key(),
         seller: seller.key(),
         buyer: buyer.key()
     });

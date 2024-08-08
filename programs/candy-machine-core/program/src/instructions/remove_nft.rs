@@ -1,8 +1,8 @@
 use crate::{
     constants::{AUTHORITY_SEED, SELLER_HISTORY_SEED},
     processors,
-    state::CandyMachine,
-    AssociatedToken, CandyError, GumballState, SellerHistory, Token,
+    state::GumballMachine,
+    AssociatedToken, GumballError, GumballState, SellerHistory, Token,
 };
 use anchor_lang::prelude::*;
 use mpl_token_metadata::instructions::{ThawDelegatedAccountCpi, ThawDelegatedAccountCpiAccounts};
@@ -13,23 +13,23 @@ use spl_token::instruction::transfer_checked;
 /// Add nft to a gumball machine.
 #[derive(Accounts)]
 pub struct RemoveNft<'info> {
-    /// Candy Machine account.
+    /// Gumball Machine account.
     #[account(
         mut,
-        constraint = candy_machine.state != GumballState::SaleLive @ CandyError::InvalidState,
+        constraint = gumball_machine.state != GumballState::SaleLive @ GumballError::InvalidState,
     )]
-    candy_machine: Account<'info, CandyMachine>,
+    gumball_machine: Account<'info, GumballMachine>,
 
     /// Seller history account.
     #[account(
 		mut,
 		seeds = [
 			SELLER_HISTORY_SEED.as_bytes(),
-			candy_machine.key().as_ref(),
+			gumball_machine.key().as_ref(),
             seller.key().as_ref(),
 		],
 		bump,
-        has_one = candy_machine,
+        has_one = gumball_machine,
         has_one = seller,
 	)]
     seller_history: Box<Account<'info, SellerHistory>>,
@@ -37,12 +37,12 @@ pub struct RemoveNft<'info> {
     /// CHECK: Safe due to seeds constraint
     #[account(
         mut,
-        seeds = [AUTHORITY_SEED.as_bytes(), candy_machine.to_account_info().key.as_ref()],
+        seeds = [AUTHORITY_SEED.as_bytes(), gumball_machine.to_account_info().key.as_ref()],
         bump
     )]
     authority_pda: UncheckedAccount<'info>,
 
-    /// Authority allowed to remove the nft (must be the candy machine auth or the seller of the nft)
+    /// Authority allowed to remove the nft (must be the gumball machine auth or the seller of the nft)
     authority: Signer<'info>,
 
     /// CHECK: Safe due to item seller check
@@ -88,11 +88,11 @@ pub fn remove_nft(ctx: Context<RemoveNft>, index: u32) -> Result<()> {
     let edition = &ctx.accounts.edition.to_account_info();
     let mint = &ctx.accounts.mint.to_account_info();
     let seller = &ctx.accounts.seller.to_account_info();
-    let candy_machine = &mut ctx.accounts.candy_machine;
+    let gumball_machine = &mut ctx.accounts.gumball_machine;
     let seller_history = &mut ctx.accounts.seller_history;
 
     processors::remove_item(
-        candy_machine,
+        gumball_machine,
         authority.key(),
         mint.key(),
         seller.key(),
@@ -101,7 +101,7 @@ pub fn remove_nft(ctx: Context<RemoveNft>, index: u32) -> Result<()> {
 
     let auth_seeds = [
         AUTHORITY_SEED.as_bytes(),
-        ctx.accounts.candy_machine.to_account_info().key.as_ref(),
+        ctx.accounts.gumball_machine.to_account_info().key.as_ref(),
         &[ctx.bumps.authority_pda],
     ];
 

@@ -3,12 +3,12 @@ import { generateSigner, transactionBuilder } from '@metaplex-foundation/umi';
 import test from 'ava';
 import {
   addCoreAsset,
-  CandyMachine,
-  fetchCandyMachine,
+  fetchGumballMachine,
   fetchSellerHistory,
   findSellerHistoryPda,
   getMerkleProof,
   getMerkleRoot,
+  GumballMachine,
   removeCoreAsset,
   safeFetchSellerHistory,
   SellerHistory,
@@ -16,17 +16,17 @@ import {
 } from '../src';
 import { create, createCoreAsset, createUmi } from './_setup';
 
-test('it can remove core asset from a candy machine', async (t) => {
-  // Given a Candy Machine with 5 coreAssets.
+test('it can remove core asset from a gumball machine', async (t) => {
+  // Given a Gumball Machine with 5 coreAssets.
   const umi = await createUmi();
-  const candyMachine = await create(umi, { settings: { itemCapacity: 5 } });
+  const gumballMachine = await create(umi, { settings: { itemCapacity: 5 } });
   const coreAsset = await createCoreAsset(umi);
 
-  // When we add an nft to the Candy Machine.
+  // When we add an nft to the Gumball Machine.
   await transactionBuilder()
     .add(
       addCoreAsset(umi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         asset: coreAsset.publicKey,
       })
     )
@@ -36,20 +36,20 @@ test('it can remove core asset from a candy machine', async (t) => {
   await transactionBuilder()
     .add(
       removeCoreAsset(umi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         index: 0,
         asset: coreAsset.publicKey,
       })
     )
     .sendAndConfirm(umi);
 
-  // Then the Candy Machine has been updated properly.
-  const candyMachineAccount = await fetchCandyMachine(
+  // Then the Gumball Machine has been updated properly.
+  const gumballMachineAccount = await fetchGumballMachine(
     umi,
-    candyMachine.publicKey
+    gumballMachine.publicKey
   );
 
-  t.like(candyMachineAccount, <Pick<CandyMachine, 'itemsLoaded' | 'items'>>{
+  t.like(gumballMachineAccount, <Pick<GumballMachine, 'itemsLoaded' | 'items'>>{
     itemsLoaded: 0,
     items: [],
   });
@@ -66,7 +66,7 @@ test('it can remove core asset from a candy machine', async (t) => {
   const sellerHistoryAccount = await safeFetchSellerHistory(
     umi,
     findSellerHistoryPda(umi, {
-      candyMachine: candyMachine.publicKey,
+      gumballMachine: gumballMachine.publicKey,
       seller: umi.identity.publicKey,
     })[0]
   );
@@ -74,26 +74,26 @@ test('it can remove core asset from a candy machine', async (t) => {
   t.falsy(sellerHistoryAccount);
 });
 
-test('it can remove core asset at a lower index than last from a candy machine', async (t) => {
-  // Given a Candy Machine with 5 coreAssets.
+test('it can remove core asset at a lower index than last from a gumball machine', async (t) => {
+  // Given a Gumball Machine with 5 coreAssets.
   const umi = await createUmi();
-  const candyMachine = await create(umi, { settings: { itemCapacity: 5 } });
+  const gumballMachine = await create(umi, { settings: { itemCapacity: 5 } });
   const coreAssets = await Promise.all([
     createCoreAsset(umi),
     createCoreAsset(umi),
   ]);
 
-  // When we add two coreAssets to the Candy Machine.
+  // When we add two coreAssets to the Gumball Machine.
   await transactionBuilder()
     .add(
       addCoreAsset(umi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         asset: coreAssets[0].publicKey,
       })
     )
     .add(
       addCoreAsset(umi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         asset: coreAssets[1].publicKey,
       })
     )
@@ -103,20 +103,20 @@ test('it can remove core asset at a lower index than last from a candy machine',
   await transactionBuilder()
     .add(
       removeCoreAsset(umi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         index: 0,
         asset: coreAssets[0].publicKey,
       })
     )
     .sendAndConfirm(umi);
 
-  // Then the Candy Machine has been updated properly.
-  const candyMachineAccount = await fetchCandyMachine(
+  // Then the Gumball Machine has been updated properly.
+  const gumballMachineAccount = await fetchGumballMachine(
     umi,
-    candyMachine.publicKey
+    gumballMachine.publicKey
   );
 
-  t.like(candyMachineAccount, <Pick<CandyMachine, 'itemsLoaded' | 'items'>>{
+  t.like(gumballMachineAccount, <Pick<GumballMachine, 'itemsLoaded' | 'items'>>{
     itemsLoaded: 1,
     items: [
       {
@@ -139,10 +139,10 @@ test('it can remove core asset at a lower index than last from a candy machine',
   });
 });
 
-test('it can remove additional core asset from a candy machine', async (t) => {
-  // Given a Candy Machine with 5 coreAssets.
+test('it can remove additional core asset from a gumball machine', async (t) => {
+  // Given a Gumball Machine with 5 coreAssets.
   const umi = await createUmi();
-  const candyMachine = await create(umi, { settings: { itemCapacity: 2 } });
+  const gumballMachine = await create(umi, { settings: { itemCapacity: 2 } });
   const coreAssets = await Promise.all([
     createCoreAsset(umi),
     createCoreAsset(umi),
@@ -151,23 +151,23 @@ test('it can remove additional core asset from a candy machine', async (t) => {
   await transactionBuilder()
     .add(
       addCoreAsset(umi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         asset: coreAssets[0].publicKey,
       })
     )
     .add(
       addCoreAsset(umi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         asset: coreAssets[1].publicKey,
       })
     )
     .sendAndConfirm(umi);
 
-  // When we remove an additional item from the Candy Machine.
+  // When we remove an additional item from the Gumball Machine.
   await transactionBuilder()
     .add(
       removeCoreAsset(umi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         asset: coreAssets[0].publicKey,
         index: 0,
       })
@@ -177,51 +177,51 @@ test('it can remove additional core asset from a candy machine', async (t) => {
   const sellerHistoryAccount = await fetchSellerHistory(
     umi,
     findSellerHistoryPda(umi, {
-      candyMachine: candyMachine.publicKey,
+      gumballMachine: gumballMachine.publicKey,
       seller: umi.identity.publicKey,
     })[0]
   );
 
   t.like(sellerHistoryAccount, <SellerHistory>{
-    candyMachine: candyMachine.publicKey,
+    gumballMachine: gumballMachine.publicKey,
     seller: umi.identity.publicKey,
     itemCount: 1n,
   });
 
-  // When we remove an additional item from the Candy Machine.
+  // When we remove an additional item from the Gumball Machine.
   await transactionBuilder()
     .add(
       removeCoreAsset(umi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         asset: coreAssets[1].publicKey,
         index: 0,
       })
     )
     .sendAndConfirm(umi);
 
-  // Then the Candy Machine has been updated properly.
-  const candyMachineAccount = await fetchCandyMachine(
+  // Then the Gumball Machine has been updated properly.
+  const gumballMachineAccount = await fetchGumballMachine(
     umi,
-    candyMachine.publicKey
+    gumballMachine.publicKey
   );
 
-  t.like(candyMachineAccount, <Pick<CandyMachine, 'itemsLoaded' | 'items'>>{
+  t.like(gumballMachineAccount, <Pick<GumballMachine, 'itemsLoaded' | 'items'>>{
     itemsLoaded: 0,
     items: [],
   });
 });
 
 test('it cannot remove core asset when the machine is empty', async (t) => {
-  // Given an existing Candy Machine with a capacity of 1 item.
+  // Given an existing Gumball Machine with a capacity of 1 item.
   const umi = await createUmi();
-  const candyMachine = await create(umi, { settings: { itemCapacity: 1 } });
+  const gumballMachine = await create(umi, { settings: { itemCapacity: 1 } });
   const coreAsset = await createCoreAsset(umi);
 
-  // When we try to remove an nft from the Candy Machine.
+  // When we try to remove an nft from the Gumball Machine.
   const promise = transactionBuilder()
     .add(
       removeCoreAsset(umi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         asset: coreAsset.publicKey,
         index: 0,
       })
@@ -235,16 +235,16 @@ test('it cannot remove core asset when the machine is empty', async (t) => {
 });
 
 test('it cannot remove core asset as a different seller', async (t) => {
-  // Given a Candy Machine with 5 coreAssets.
+  // Given a Gumball Machine with 5 coreAssets.
   const umi = await createUmi();
-  const candyMachine = await create(umi, { settings: { itemCapacity: 1 } });
+  const gumballMachine = await create(umi, { settings: { itemCapacity: 1 } });
   const nft = await createCoreAsset(umi);
 
-  // When we add an nft to the Candy Machine.
+  // When we add an nft to the Gumball Machine.
   await transactionBuilder()
     .add(
       addCoreAsset(umi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         asset: nft.publicKey,
       })
     )
@@ -255,7 +255,7 @@ test('it cannot remove core asset as a different seller', async (t) => {
     .add(
       removeCoreAsset(umi, {
         authority: generateSigner(umi),
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         index: 0,
         asset: nft.publicKey,
       })
@@ -268,20 +268,20 @@ test('it cannot remove core asset as a different seller', async (t) => {
 });
 
 test('it can remove another seller core asset as the gumball authority', async (t) => {
-  // Given a Candy Machine with one nft.
+  // Given a Gumball Machine with one nft.
   const umi = await createUmi();
   const otherSellerUmi = await createUmi();
   const sellersMerkleRoot = getMerkleRoot([otherSellerUmi.identity.publicKey]);
-  const candyMachine = await create(umi, {
+  const gumballMachine = await create(umi, {
     settings: { itemCapacity: 1, sellersMerkleRoot },
   });
   const coreAsset = await createCoreAsset(otherSellerUmi);
 
-  // When we add an nft to the Candy Machine.
+  // When we add an nft to the Gumball Machine.
   await transactionBuilder()
     .add(
       addCoreAsset(otherSellerUmi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         asset: coreAsset.publicKey,
         sellerProofPath: getMerkleProof(
           [otherSellerUmi.identity.publicKey],
@@ -291,11 +291,11 @@ test('it can remove another seller core asset as the gumball authority', async (
     )
     .sendAndConfirm(otherSellerUmi);
 
-  // Then remove the nft as the candy machine authority
+  // Then remove the nft as the gumball machine authority
   await transactionBuilder()
     .add(
       removeCoreAsset(umi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         index: 0,
         asset: coreAsset.publicKey,
         seller: otherSellerUmi.identity.publicKey,
@@ -303,13 +303,13 @@ test('it can remove another seller core asset as the gumball authority', async (
     )
     .sendAndConfirm(umi);
 
-  // Then the Candy Machine has been updated properly.
-  const candyMachineAccount = await fetchCandyMachine(
+  // Then the Gumball Machine has been updated properly.
+  const gumballMachineAccount = await fetchGumballMachine(
     umi,
-    candyMachine.publicKey
+    gumballMachine.publicKey
   );
 
-  t.like(candyMachineAccount, <Pick<CandyMachine, 'itemsLoaded' | 'items'>>{
+  t.like(gumballMachineAccount, <Pick<GumballMachine, 'itemsLoaded' | 'items'>>{
     itemsLoaded: 0,
     items: [],
   });
@@ -333,20 +333,20 @@ test('it can remove another seller core asset as the gumball authority', async (
 });
 
 test('it can remove own asset as non gumball authority', async (t) => {
-  // Given a Candy Machine with one nft.
+  // Given a Gumball Machine with one nft.
   const umi = await createUmi();
   const otherSellerUmi = await createUmi();
   const sellersMerkleRoot = getMerkleRoot([otherSellerUmi.identity.publicKey]);
-  const candyMachine = await create(umi, {
+  const gumballMachine = await create(umi, {
     settings: { itemCapacity: 1, sellersMerkleRoot },
   });
   const coreAsset = await createCoreAsset(otherSellerUmi);
 
-  // When we add an nft to the Candy Machine.
+  // When we add an nft to the Gumball Machine.
   await transactionBuilder()
     .add(
       addCoreAsset(otherSellerUmi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         asset: coreAsset.publicKey,
         sellerProofPath: getMerkleProof(
           [otherSellerUmi.identity.publicKey],
@@ -356,24 +356,24 @@ test('it can remove own asset as non gumball authority', async (t) => {
     )
     .sendAndConfirm(otherSellerUmi);
 
-  // Then remove the nft as the candy machine authority
+  // Then remove the nft as the gumball machine authority
   await transactionBuilder()
     .add(
       removeCoreAsset(otherSellerUmi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         index: 0,
         asset: coreAsset.publicKey,
       })
     )
     .sendAndConfirm(otherSellerUmi);
 
-  // Then the Candy Machine has been updated properly.
-  const candyMachineAccount = await fetchCandyMachine(
+  // Then the Gumball Machine has been updated properly.
+  const gumballMachineAccount = await fetchGumballMachine(
     umi,
-    candyMachine.publicKey
+    gumballMachine.publicKey
   );
 
-  t.like(candyMachineAccount, <Pick<CandyMachine, 'itemsLoaded' | 'items'>>{
+  t.like(gumballMachineAccount, <Pick<GumballMachine, 'itemsLoaded' | 'items'>>{
     itemsLoaded: 0,
     items: [],
   });

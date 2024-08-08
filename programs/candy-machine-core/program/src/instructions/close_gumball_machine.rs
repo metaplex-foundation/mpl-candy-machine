@@ -2,21 +2,20 @@ use anchor_lang::prelude::*;
 use solana_program::program::invoke_signed;
 use spl_token::instruction::close_account;
 use utils::{assert_is_ata, is_native_mint};
+use crate::{constants::AUTHORITY_SEED, get_config_count, GumballError, GumballMachine, Token};
 
-use crate::{constants::AUTHORITY_SEED, get_config_count, CandyError, CandyMachine, Token};
-
-/// Withdraw the rent SOL from the candy machine account.
+/// Withdraw the rent SOL from the gumball machine account.
 #[derive(Accounts)]
 pub struct CloseGumballMachine<'info> {
-    /// Candy Machine acccount.
+    /// Gumball Machine acccount.
     #[account(
         mut, 
         close = authority, 
         has_one = authority, 
     )]
-    candy_machine: Account<'info, CandyMachine>,
+    gumball_machine: Account<'info, GumballMachine>,
 
-    /// Authority of the candy machine.
+    /// Authority of the gumball machine.
     #[account(mut)]
     authority: Signer<'info>,
 
@@ -25,7 +24,7 @@ pub struct CloseGumballMachine<'info> {
         mut,
         seeds = [
             AUTHORITY_SEED.as_bytes(), 
-            candy_machine.key().as_ref()
+            gumball_machine.key().as_ref()
         ],
         bump
     )]
@@ -40,7 +39,7 @@ pub struct CloseGumballMachine<'info> {
 }
 
 pub fn close_gumball_machine(ctx: Context<CloseGumballMachine>) -> Result<()> {
-    let account_info = ctx.accounts.candy_machine.to_account_info();
+    let account_info = ctx.accounts.gumball_machine.to_account_info();
     let account_data = account_info.data.borrow();
     let config_count = get_config_count(&account_data)? as u64;
 
@@ -51,18 +50,18 @@ pub fn close_gumball_machine(ctx: Context<CloseGumballMachine>) -> Result<()> {
 
     // Ensure all items have been settled/claimed
     require!(
-        config_count == ctx.accounts.candy_machine.items_settled,
-        CandyError::NotAllSettled
+        config_count == ctx.accounts.gumball_machine.items_settled,
+        GumballError::NotAllSettled
     );
 
     let token_program = &ctx.accounts.token_program.to_account_info();
     let authority = &ctx.accounts.authority.to_account_info();
     let authority_pda = &ctx.accounts.authority_pda.to_account_info();
-    let payment_mint = ctx.accounts.candy_machine.settings.payment_mint;
+    let payment_mint = ctx.accounts.gumball_machine.settings.payment_mint;
 
     let auth_seeds = [
         AUTHORITY_SEED.as_bytes(),
-        ctx.accounts.candy_machine.to_account_info().key.as_ref(),
+        ctx.accounts.gumball_machine.to_account_info().key.as_ref(),
         &[ctx.bumps.authority_pda],
     ];
 

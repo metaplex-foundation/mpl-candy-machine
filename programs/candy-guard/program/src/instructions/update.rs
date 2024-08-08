@@ -1,20 +1,20 @@
 use anchor_lang::prelude::*;
+use mpl_candy_machine_core::{GumballMachine, GumballState};
 use solana_program::{
     entrypoint::MAX_PERMITTED_DATA_INCREASE, program::invoke, system_instruction,
 };
-
 use crate::{
-    errors::CandyGuardError,
-    state::{CandyGuard, CandyGuardData, DATA_OFFSET, SEED},
+    errors::GumballGuardError,
+    state::{GumballGuard, GumballGuardData, DATA_OFFSET, SEED},
 };
 
 pub fn update(ctx: Context<Update>, data: Vec<u8>) -> Result<()> {
-    // deserializes the candy guard data
-    let data = CandyGuardData::load(&data)?;
+    // deserializes the gumball guard data
+    let data = GumballGuardData::load(&data)?;
     // validates guard settings
     data.verify()?;
 
-    let account_info = ctx.accounts.candy_guard.to_account_info();
+    let account_info = ctx.accounts.gumball_guard.to_account_info();
 
     // check whether we need to grow or shrink the account size or not
     if data.account_size() != account_info.data_len() {
@@ -24,13 +24,13 @@ pub fn update(ctx: Context<Update>, data: Vec<u8>) -> Result<()> {
 
         if difference > 0 {
             if difference as usize > MAX_PERMITTED_DATA_INCREASE {
-                return err!(CandyGuardError::DataIncrementLimitExceeded);
+                return err!(GumballGuardError::DataIncrementLimitExceeded);
             }
 
             let lamports_diff = Rent::get()?
                 .minimum_balance(data.account_size())
                 .checked_sub(snapshot)
-                .ok_or(CandyGuardError::NumericalOverflowError)?;
+                .ok_or(GumballGuardError::NumericalOverflowError)?;
 
             msg!("Funding {} lamports for account realloc", lamports_diff);
 
@@ -49,7 +49,7 @@ pub fn update(ctx: Context<Update>, data: Vec<u8>) -> Result<()> {
         } else {
             let lamports_diff = snapshot
                 .checked_sub(Rent::get()?.minimum_balance(data.account_size()))
-                .ok_or(CandyGuardError::NumericalOverflowError)?;
+                .ok_or(GumballGuardError::NumericalOverflowError)?;
 
             msg!(
                 "Withdrawing {} lamports from account realloc",
@@ -62,7 +62,7 @@ pub fn update(ctx: Context<Update>, data: Vec<u8>) -> Result<()> {
             **payer.lamports.borrow_mut() = payer
                 .lamports()
                 .checked_add(lamports_diff)
-                .ok_or(CandyGuardError::NumericalOverflowError)?;
+                .ok_or(GumballGuardError::NumericalOverflowError)?;
         }
 
         msg!("Account realloc by {} bytes", difference);
@@ -85,10 +85,17 @@ pub struct Update<'info> {
     #[account(
         mut,
         has_one = authority,
-        seeds = [SEED, candy_guard.base.key().as_ref()],
-        bump = candy_guard.bump
+        seeds = [SEED, gumball_guard.base.key().as_ref()],
+        bump = gumball_guard.bump
     )]
-    pub candy_guard: Account<'info, CandyGuard>,
+    pub gumball_guard: Account<'info, GumballGuard>,
+    /// Gumball machine account.
+    #[account(
+        mut, 
+        constraint = gumball_guard.key() == gumball_machine.mint_authority,
+        constraint = gumball_machine.state == GumballState::None @ GumballGuardError::InvalidGumballMachineState
+    )]
+    pub gumball_machine: Box<Account<'info, GumballMachine>>,
     pub authority: Signer<'info>,
     // Payer for the account resizing.
     pub payer: Signer<'info>,

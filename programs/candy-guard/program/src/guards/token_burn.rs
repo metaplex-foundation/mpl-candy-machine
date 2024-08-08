@@ -50,7 +50,7 @@ impl Condition for TokenBurn {
             // is the mint account the one expected?
             assert_keys_equal(&token_gate_mint.key(), &self.mint)?;
         } else {
-            return err!(CandyGuardError::NotEnoughTokens);
+            return err!(GumballGuardError::NotEnoughTokens);
         }
 
         ctx.indices.insert("token_burn_index", token_gate_index);

@@ -3,7 +3,7 @@ use mpl_candy_machine_core::constants::AUTHORITY_SEED;
 use super::*;
 
 use crate::{
-    errors::CandyGuardError,
+    errors::GumballGuardError,
     state::GuardType,
     utils::{assert_is_token_account, spl_token_transfer, TokenTransferParams},
 };
@@ -39,8 +39,8 @@ impl Condition for TokenPayment {
         _mint_args: &[u8],
     ) -> Result<()> {
         require!(
-            ctx.accounts.candy_machine.settings.payment_mint == self.mint,
-            CandyGuardError::InvalidPaymentMint
+            ctx.accounts.gumball_machine.settings.payment_mint == self.mint,
+            GumballGuardError::InvalidPaymentMint
         );
 
         // token
@@ -52,7 +52,7 @@ impl Condition for TokenPayment {
 
         let seeds = [
             AUTHORITY_SEED.as_bytes(),
-            ctx.accounts.candy_machine.to_account_info().key.as_ref(),
+            ctx.accounts.gumball_machine.to_account_info().key.as_ref(),
         ];
         let (authority_pda, _) = Pubkey::find_program_address(&seeds, &mpl_candy_machine_core::ID);
         assert_is_token_account(destination_ata, &authority_pda, &self.mint)?;
@@ -61,7 +61,7 @@ impl Condition for TokenPayment {
             assert_is_token_account(token_account_info, ctx.accounts.buyer.key, &self.mint)?;
 
         if token_account.amount < self.amount {
-            return err!(CandyGuardError::NotEnoughTokens);
+            return err!(GumballGuardError::NotEnoughTokens);
         }
 
         ctx.indices

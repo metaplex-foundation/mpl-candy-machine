@@ -26,7 +26,7 @@ impl Condition for AddressGate {
         _mint_args: &[u8],
     ) -> Result<()> {
         if !cmp_pubkeys(&ctx.accounts.buyer.key(), &self.address) {
-            return err!(CandyGuardError::AddressNotAuthorized);
+            return err!(GumballGuardError::AddressNotAuthorized);
         }
 
         Ok(())

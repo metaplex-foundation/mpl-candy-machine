@@ -11,41 +11,41 @@ import {
 import test from 'ava';
 import {
   addNft,
-  CandyMachine,
-  fetchCandyMachine,
+  fetchGumballMachine,
   fetchSellerHistory,
-  findCandyMachineAuthorityPda,
+  findGumballMachineAuthorityPda,
   findSellerHistoryPda,
   getMerkleProof,
   getMerkleRoot,
+  GumballMachine,
   SellerHistory,
   TokenStandard,
 } from '../src';
 import { create, createNft, createUmi } from './_setup';
 
-test('it can add nft to a candy machine as the authority', async (t) => {
-  // Given a Candy Machine with 5 nfts.
+test('it can add nft to a gumball machine as the authority', async (t) => {
+  // Given a Gumball Machine with 5 nfts.
   const umi = await createUmi();
-  const candyMachine = await create(umi, { settings: { itemCapacity: 5 } });
+  const gumballMachine = await create(umi, { settings: { itemCapacity: 5 } });
   const nft = await createNft(umi);
 
-  // When we add an nft to the Candy Machine.
+  // When we add an nft to the Gumball Machine.
   await transactionBuilder()
     .add(
       addNft(umi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         mint: nft.publicKey,
       })
     )
     .sendAndConfirm(umi);
 
-  // Then the Candy Machine has been updated properly.
-  const candyMachineAccount = await fetchCandyMachine(
+  // Then the Gumball Machine has been updated properly.
+  const gumballMachineAccount = await fetchGumballMachine(
     umi,
-    candyMachine.publicKey
+    gumballMachine.publicKey
   );
 
-  t.like(candyMachineAccount, <Pick<CandyMachine, 'itemsLoaded' | 'items'>>{
+  t.like(gumballMachineAccount, <Pick<GumballMachine, 'itemsLoaded' | 'items'>>{
     itemsLoaded: 1,
     items: [
       {
@@ -71,8 +71,8 @@ test('it can add nft to a candy machine as the authority', async (t) => {
     state: TokenState.Frozen,
     owner: umi.identity.publicKey,
     delegate: some(
-      findCandyMachineAuthorityPda(umi, {
-        candyMachine: candyMachine.publicKey,
+      findGumballMachineAuthorityPda(umi, {
+        gumballMachine: gumballMachine.publicKey,
       })[0]
     ),
   });
@@ -81,33 +81,33 @@ test('it can add nft to a candy machine as the authority', async (t) => {
   const sellerHistoryAccount = await fetchSellerHistory(
     umi,
     findSellerHistoryPda(umi, {
-      candyMachine: candyMachine.publicKey,
+      gumballMachine: gumballMachine.publicKey,
       seller: umi.identity.publicKey,
     })[0]
   );
 
   t.like(sellerHistoryAccount, <SellerHistory>{
-    candyMachine: candyMachine.publicKey,
+    gumballMachine: gumballMachine.publicKey,
     seller: umi.identity.publicKey,
     itemCount: 1n,
   });
 });
 
 test('it can add nft to a gumball machine as allowlisted seller', async (t) => {
-  // Given a Candy Machine with 5 nfts.
+  // Given a Gumball Machine with 5 nfts.
   const umi = await createUmi();
   const otherSellerUmi = await createUmi();
   const sellersMerkleRoot = getMerkleRoot([otherSellerUmi.identity.publicKey]);
-  const candyMachine = await create(umi, {
+  const gumballMachine = await create(umi, {
     settings: { itemCapacity: 5, sellersMerkleRoot },
   });
   const nft = await createNft(otherSellerUmi);
 
-  // When we add an nft to the Candy Machine.
+  // When we add an nft to the Gumball Machine.
   await transactionBuilder()
     .add(
       addNft(otherSellerUmi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         mint: nft.publicKey,
         sellerProofPath: getMerkleProof(
           [otherSellerUmi.identity.publicKey],
@@ -117,13 +117,13 @@ test('it can add nft to a gumball machine as allowlisted seller', async (t) => {
     )
     .sendAndConfirm(otherSellerUmi);
 
-  // Then the Candy Machine has been updated properly.
-  const candyMachineAccount = await fetchCandyMachine(
+  // Then the Gumball Machine has been updated properly.
+  const gumballMachineAccount = await fetchGumballMachine(
     umi,
-    candyMachine.publicKey
+    gumballMachine.publicKey
   );
 
-  t.like(candyMachineAccount, <Pick<CandyMachine, 'itemsLoaded' | 'items'>>{
+  t.like(gumballMachineAccount, <Pick<GumballMachine, 'itemsLoaded' | 'items'>>{
     itemsLoaded: 1,
     items: [
       {
@@ -149,15 +149,15 @@ test('it can add nft to a gumball machine as allowlisted seller', async (t) => {
     state: TokenState.Frozen,
     owner: otherSellerUmi.identity.publicKey,
     delegate: some(
-      findCandyMachineAuthorityPda(umi, {
-        candyMachine: candyMachine.publicKey,
+      findGumballMachineAuthorityPda(umi, {
+        gumballMachine: gumballMachine.publicKey,
       })[0]
     ),
   });
 });
 
 test('it can add nft to a gumball machine as allowlisted seller on allowlist of 10K addresses', async (t) => {
-  // Given a Candy Machine with 5 nfts.
+  // Given a Gumball Machine with 5 nfts.
   const umi = await createUmi();
   const otherSellerUmi = await createUmi();
   const addresses = Array.from(
@@ -166,16 +166,16 @@ test('it can add nft to a gumball machine as allowlisted seller on allowlist of 
   );
   addresses.push(otherSellerUmi.identity.publicKey);
   const sellersMerkleRoot = getMerkleRoot(addresses);
-  const candyMachine = await create(umi, {
+  const gumballMachine = await create(umi, {
     settings: { itemCapacity: 5, sellersMerkleRoot },
   });
   const nft = await createNft(otherSellerUmi);
 
-  // When we add an nft to the Candy Machine.
+  // When we add an nft to the Gumball Machine.
   await transactionBuilder()
     .add(
       addNft(otherSellerUmi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         mint: nft.publicKey,
         sellerProofPath: getMerkleProof(
           addresses,
@@ -185,13 +185,13 @@ test('it can add nft to a gumball machine as allowlisted seller on allowlist of 
     )
     .sendAndConfirm(otherSellerUmi);
 
-  // Then the Candy Machine has been updated properly.
-  const candyMachineAccount = await fetchCandyMachine(
+  // Then the Gumball Machine has been updated properly.
+  const gumballMachineAccount = await fetchGumballMachine(
     umi,
-    candyMachine.publicKey
+    gumballMachine.publicKey
   );
 
-  t.like(candyMachineAccount, <Pick<CandyMachine, 'itemsLoaded' | 'items'>>{
+  t.like(gumballMachineAccount, <Pick<GumballMachine, 'itemsLoaded' | 'items'>>{
     itemsLoaded: 1,
     items: [
       {
@@ -217,25 +217,25 @@ test('it can add nft to a gumball machine as allowlisted seller on allowlist of 
     state: TokenState.Frozen,
     owner: otherSellerUmi.identity.publicKey,
     delegate: some(
-      findCandyMachineAuthorityPda(umi, {
-        candyMachine: candyMachine.publicKey,
+      findGumballMachineAuthorityPda(umi, {
+        gumballMachine: gumballMachine.publicKey,
       })[0]
     ),
   });
 });
 
 test('it cannot add nft as non gumball authority when there is no seller allowlist set', async (t) => {
-  // Given a Candy Machine with 5 nfts.
+  // Given a Gumball Machine with 5 nfts.
   const umi = await createUmi();
   const otherSellerUmi = await createUmi();
-  const candyMachine = await create(umi, { settings: { itemCapacity: 5 } });
+  const gumballMachine = await create(umi, { settings: { itemCapacity: 5 } });
   const nft = await createNft(otherSellerUmi);
 
-  // When we add an nft to the Candy Machine.
+  // When we add an nft to the Gumball Machine.
   const promise = transactionBuilder()
     .add(
       addNft(otherSellerUmi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         mint: nft.publicKey,
       })
     )
@@ -245,10 +245,10 @@ test('it cannot add nft as non gumball authority when there is no seller allowli
 });
 
 test('it cannot add nft as non-allowlisted seller when there is a seller allowlist set', async (t) => {
-  // Given a Candy Machine with 5 nfts.
+  // Given a Gumball Machine with 5 nfts.
   const umi = await createUmi();
   const otherSellerUmi = await createUmi();
-  const candyMachine = await create(umi, {
+  const gumballMachine = await create(umi, {
     settings: {
       itemCapacity: 5,
       sellersMerkleRoot: getMerkleRoot([umi.identity.publicKey]),
@@ -256,11 +256,11 @@ test('it cannot add nft as non-allowlisted seller when there is a seller allowli
   });
   const nft = await createNft(otherSellerUmi);
 
-  // When we add an nft to the Candy Machine.
+  // When we add an nft to the Gumball Machine.
   const promise = transactionBuilder()
     .add(
       addNft(otherSellerUmi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         mint: nft.publicKey,
       })
     )
@@ -269,38 +269,38 @@ test('it cannot add nft as non-allowlisted seller when there is a seller allowli
   await t.throwsAsync(promise, { message: /InvalidProofPath/ });
 });
 
-test('it can append additional nfts to a candy machine', async (t) => {
-  // Given a Candy Machine with 5 nfts.
+test('it can append additional nfts to a gumball machine', async (t) => {
+  // Given a Gumball Machine with 5 nfts.
   const umi = await createUmi();
-  const candyMachine = await create(umi, { settings: { itemCapacity: 2 } });
+  const gumballMachine = await create(umi, { settings: { itemCapacity: 2 } });
   const nfts = await Promise.all([createNft(umi), createNft(umi)]);
 
   await transactionBuilder()
     .add(
       addNft(umi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         mint: nfts[0].publicKey,
       })
     )
     .sendAndConfirm(umi);
 
-  // When we add an additional item to the Candy Machine.
+  // When we add an additional item to the Gumball Machine.
   await transactionBuilder()
     .add(
       addNft(umi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         mint: nfts[1].publicKey,
       })
     )
     .sendAndConfirm(umi);
 
-  // Then the Candy Machine has been updated properly.
-  const candyMachineAccount = await fetchCandyMachine(
+  // Then the Gumball Machine has been updated properly.
+  const gumballMachineAccount = await fetchGumballMachine(
     umi,
-    candyMachine.publicKey
+    gumballMachine.publicKey
   );
 
-  t.like(candyMachineAccount, <Pick<CandyMachine, 'itemsLoaded' | 'items'>>{
+  t.like(gumballMachineAccount, <Pick<GumballMachine, 'itemsLoaded' | 'items'>>{
     itemsLoaded: 2,
     items: [
       {
@@ -323,23 +323,23 @@ test('it can append additional nfts to a candy machine', async (t) => {
   });
 });
 
-test('it cannot add nfts that would make the candy machine exceed the maximum capacity', async (t) => {
-  // Given an existing Candy Machine with a capacity of 1 item.
+test('it cannot add nfts that would make the gumball machine exceed the maximum capacity', async (t) => {
+  // Given an existing Gumball Machine with a capacity of 1 item.
   const umi = await createUmi();
-  const candyMachine = await create(umi, { settings: { itemCapacity: 1 } });
+  const gumballMachine = await create(umi, { settings: { itemCapacity: 1 } });
   const nfts = await Promise.all([createNft(umi), createNft(umi)]);
 
-  // When we try to add 2 nfts to the Candy Machine.
+  // When we try to add 2 nfts to the Gumball Machine.
   const promise = transactionBuilder()
     .add(
       addNft(umi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         mint: nfts[0].publicKey,
       })
     )
     .add(
       addNft(umi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         mint: nfts[1].publicKey,
       })
     )
@@ -351,26 +351,26 @@ test('it cannot add nfts that would make the candy machine exceed the maximum ca
   });
 });
 
-test('it cannot add nfts once the candy machine is fully loaded', async (t) => {
-  // Given an existing Candy Machine with 2 nfts loaded and a capacity of 2 nfts.
+test('it cannot add nfts once the gumball machine is fully loaded', async (t) => {
+  // Given an existing Gumball Machine with 2 nfts loaded and a capacity of 2 nfts.
   const umi = await createUmi();
-  const candyMachine = await create(umi, { settings: { itemCapacity: 1 } });
+  const gumballMachine = await create(umi, { settings: { itemCapacity: 1 } });
   const nft = await createNft(umi);
 
   await transactionBuilder()
     .add(
       addNft(umi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         mint: nft.publicKey,
       })
     )
     .sendAndConfirm(umi);
 
-  // When we try to add one more item to the Candy Machine.
+  // When we try to add one more item to the Gumball Machine.
   const promise = transactionBuilder()
     .add(
       addNft(umi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         mint: (await createNft(umi)).publicKey,
       })
     )
@@ -383,11 +383,11 @@ test('it cannot add nfts once the candy machine is fully loaded', async (t) => {
 });
 
 test('it cannot add more nfts than allowed per seller', async (t) => {
-  // Given a Candy Machine with 5 nfts.
+  // Given a Gumball Machine with 5 nfts.
   const umi = await createUmi();
   const otherSellerUmi = await createUmi();
   const sellersMerkleRoot = getMerkleRoot([otherSellerUmi.identity.publicKey]);
-  const candyMachine = await create(umi, {
+  const gumballMachine = await create(umi, {
     settings: { itemCapacity: 2, itemsPerSeller: 1, sellersMerkleRoot },
   });
   const nfts = await Promise.all([
@@ -395,11 +395,11 @@ test('it cannot add more nfts than allowed per seller', async (t) => {
     createNft(otherSellerUmi),
   ]);
 
-  // When we add an nft to the Candy Machine.
+  // When we add an nft to the Gumball Machine.
   await transactionBuilder()
     .add(
       addNft(otherSellerUmi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         mint: nfts[0].publicKey,
         sellerProofPath: getMerkleProof(
           [otherSellerUmi.identity.publicKey],
@@ -412,7 +412,7 @@ test('it cannot add more nfts than allowed per seller', async (t) => {
   const promise = transactionBuilder()
     .add(
       addNft(otherSellerUmi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         mint: nfts[1].publicKey,
         sellerProofPath: getMerkleProof(
           [otherSellerUmi.identity.publicKey],

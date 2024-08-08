@@ -1,3 +1,3 @@
-pub use candy_guard::*;
+pub use gumball_guard::*;
 
-pub mod candy_guard;
+pub mod gumball_guard;

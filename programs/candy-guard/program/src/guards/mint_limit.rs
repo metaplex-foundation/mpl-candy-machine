@@ -14,7 +14,7 @@ use crate::{
 ///
 ///   0. `[writable]` Mint counter PDA. The PDA is derived
 ///                   using the seed `["mint_limit", mint guard id, payer key,
-///                   candy guard pubkey, candy machine pubkey]`.
+///                   gumball guard pubkey, gumball machine pubkey]`.
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug)]
 pub struct MintLimit {
     /// Unique identifier of the mint limit.
@@ -33,7 +33,7 @@ impl Guard for MintLimit {
         GuardType::as_mask(GuardType::MintLimit)
     }
 
-    fn verify(data: &CandyGuardData) -> Result<()> {
+    fn verify(data: &GumballGuardData) -> Result<()> {
         let mut ids = HashSet::new();
 
         if let Some(mint_limit) = &data.default.mint_limit {
@@ -44,7 +44,7 @@ impl Guard for MintLimit {
             for group in groups {
                 if let Some(mint_limit) = &group.guards.mint_limit {
                     if ids.contains(&mint_limit.id) {
-                        return err!(CandyGuardError::DuplicatedMintLimitId);
+                        return err!(GumballGuardError::DuplicatedMintLimitId);
                     }
 
                     ids.insert(mint_limit.id);
@@ -68,15 +68,15 @@ impl Condition for MintLimit {
         ctx.account_cursor += 1;
 
         let minter = ctx.accounts.buyer.key();
-        let candy_guard_key = &ctx.accounts.candy_guard.key();
-        let candy_machine_key = &ctx.accounts.candy_machine.key();
+        let gumball_guard_key = &ctx.accounts.gumball_guard.key();
+        let gumball_machine_key = &ctx.accounts.gumball_machine.key();
 
         let seeds = [
             MintCounter::PREFIX_SEED,
             &[self.id],
             minter.as_ref(),
-            candy_guard_key.as_ref(),
-            candy_machine_key.as_ref(),
+            gumball_guard_key.as_ref(),
+            gumball_machine_key.as_ref(),
         ];
         let (pda, _) = Pubkey::find_program_address(&seeds, &crate::ID);
 
@@ -90,11 +90,11 @@ impl Condition for MintLimit {
             let mint_counter = MintCounter::try_from_slice(&account_data)?;
 
             if mint_counter.count >= self.limit {
-                return err!(CandyGuardError::AllowedMintLimitReached);
+                return err!(GumballGuardError::AllowedMintLimitReached);
             }
         } else if self.limit < 1 {
             // sanity check: if the limit is set to less than 1 we cannot proceed
-            return err!(CandyGuardError::AllowedMintLimitReached);
+            return err!(GumballGuardError::AllowedMintLimitReached);
         }
 
         Ok(())
@@ -111,15 +111,15 @@ impl Condition for MintLimit {
 
         if counter.data_is_empty() {
             let minter = ctx.accounts.buyer.key();
-            let candy_guard_key = &ctx.accounts.candy_guard.key();
-            let candy_machine_key = &ctx.accounts.candy_machine.key();
+            let gumball_guard_key = &ctx.accounts.gumball_guard.key();
+            let gumball_machine_key = &ctx.accounts.gumball_machine.key();
 
             let seeds = [
                 MintCounter::PREFIX_SEED,
                 &[self.id],
                 minter.as_ref(),
-                candy_guard_key.as_ref(),
-                candy_machine_key.as_ref(),
+                gumball_guard_key.as_ref(),
+                gumball_machine_key.as_ref(),
             ];
             let (pda, bump) = Pubkey::find_program_address(&seeds, &crate::ID);
 
@@ -128,8 +128,8 @@ impl Condition for MintLimit {
                 MintCounter::PREFIX_SEED,
                 &[self.id],
                 minter.as_ref(),
-                candy_guard_key.as_ref(),
-                candy_machine_key.as_ref(),
+                gumball_guard_key.as_ref(),
+                gumball_machine_key.as_ref(),
                 &[bump],
             ];
 

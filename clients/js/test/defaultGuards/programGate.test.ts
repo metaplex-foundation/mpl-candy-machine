@@ -21,11 +21,11 @@ import {
 } from '../_setup';
 
 test('it allows minting with specified program in transaction', async (t) => {
-  // Given a loaded Candy Machine with a programGate guard allowing the memo program.
+  // Given a loaded Gumball Machine with a programGate guard allowing the memo program.
   const umi = await createUmi();
   const memoProgram = getSplMemoProgramId(umi);
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -45,21 +45,21 @@ test('it allows minting with specified program in transaction', async (t) => {
     .add(addMemo(umi, { memo: 'Instruction from the Memo program' }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
       })
     )
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertItemBought(t, umi, { candyMachine });
+  await assertItemBought(t, umi, { gumballMachine });
 });
 
 test('it allows minting even when the payer is different from the buyer', async (t) => {
-  // Given a loaded Candy Machine with a programGate guard allowing the memo program.
+  // Given a loaded Gumball Machine with a programGate guard allowing the memo program.
   const umi = await createUmi();
   const memoProgram = getSplMemoProgramId(umi);
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -81,7 +81,7 @@ test('it allows minting even when the payer is different from the buyer', async 
     .add(addMemo(umi, { memo: 'Instruction from the Memo program' }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         buyer,
       })
@@ -89,14 +89,14 @@ test('it allows minting even when the payer is different from the buyer', async 
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertItemBought(t, umi, { candyMachine, buyer: publicKey(buyer) });
+  await assertItemBought(t, umi, { gumballMachine, buyer: publicKey(buyer) });
 });
 
 test('it forbids minting with unspecified program in transaction', async (t) => {
-  // Given a loaded Candy Machine with a programGate guard allowing no additional programs.
+  // Given a loaded Gumball Machine with a programGate guard allowing no additional programs.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -116,7 +116,7 @@ test('it forbids minting with unspecified program in transaction', async (t) => 
     .add(addMemo(umi, { memo: 'Instruction from the Memo program' }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
       })
     )
     .sendAndConfirm(umi);
@@ -125,8 +125,8 @@ test('it forbids minting with unspecified program in transaction', async (t) => 
   await t.throwsAsync(promise, { message: /UnauthorizedProgramFound/ });
 });
 
-test('it forbids candy machine creation with more than 5 specified programs', async (t) => {
-  // When we try to create a Candy Machine with a
+test('it forbids gumball machine creation with more than 5 specified programs', async (t) => {
+  // When we try to create a Gumball Machine with a
   // programGate guard allowing more than 5 programs.
   const umi = await createUmi();
   const memoProgram = getSplMemoProgramId(umi);
@@ -151,11 +151,11 @@ test('it forbids candy machine creation with more than 5 specified programs', as
 });
 
 test('it charges a bot tax when minting with unspecified program in transaction', async (t) => {
-  // Given a loaded Candy Machine with a botTax guard
+  // Given a loaded Gumball Machine with a botTax guard
   // and a programGate guard allowing no additional programs.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -176,7 +176,7 @@ test('it charges a bot tax when minting with unspecified program in transaction'
     .add(addMemo(umi, { memo: 'Instruction from the Memo program' }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
       })
     )
     .sendAndConfirm(umi);

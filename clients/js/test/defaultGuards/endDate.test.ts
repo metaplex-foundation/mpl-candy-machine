@@ -13,10 +13,10 @@ import {
 } from '../_setup';
 
 test('it allows minting before the end date', async (t) => {
-  // Given a candy machine with an end date in the future.
+  // Given a gumball machine with an end date in the future.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -35,20 +35,20 @@ test('it allows minting before the end date', async (t) => {
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
       })
     )
     .sendAndConfirm(umi);
 
   // Then the mint was successful.
-  await assertItemBought(t, umi, { candyMachine });
+  await assertItemBought(t, umi, { gumballMachine });
 });
 
 test('it forbids minting after the end date', async (t) => {
-  // Given a candy machine with an end date in the past.
+  // Given a gumball machine with an end date in the past.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -67,7 +67,7 @@ test('it forbids minting after the end date', async (t) => {
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
       })
     )
     .sendAndConfirm(umi);
@@ -77,10 +77,10 @@ test('it forbids minting after the end date', async (t) => {
 });
 
 test('it charges a bot tax when trying to mint after the end date', async (t) => {
-  // Given a candy machine with a bot tax and end date in the past.
+  // Given a gumball machine with a bot tax and end date in the past.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -100,7 +100,7 @@ test('it charges a bot tax when trying to mint after the end date', async (t) =>
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
       })
     )
     .sendAndConfirm(umi);

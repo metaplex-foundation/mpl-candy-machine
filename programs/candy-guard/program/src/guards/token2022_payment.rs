@@ -7,7 +7,7 @@ use spl_token_2022::{
 use super::*;
 
 use crate::{
-    errors::CandyGuardError,
+    errors::GumballGuardError,
     state::GuardType,
     utils::{assert_keys_equal, assert_owned_by},
 };
@@ -47,8 +47,8 @@ impl Condition for Token2022Payment {
         _mint_args: &[u8],
     ) -> Result<()> {
         require!(
-            ctx.accounts.candy_machine.settings.payment_mint == self.mint,
-            CandyGuardError::InvalidPaymentMint
+            ctx.accounts.gumball_machine.settings.payment_mint == self.mint,
+            GumballGuardError::InvalidPaymentMint
         );
 
         // required accounts
@@ -75,7 +75,7 @@ impl Condition for Token2022Payment {
         assert_keys_equal(&token_account.base.mint, &self.mint)?;
 
         if token_account.base.amount < self.amount {
-            return err!(CandyGuardError::NotEnoughTokens);
+            return err!(GumballGuardError::NotEnoughTokens);
         }
 
         // mint

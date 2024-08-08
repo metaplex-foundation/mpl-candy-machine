@@ -29,27 +29,30 @@ kinobi.update(
 );
 
 // Reusable seeds.
-const candyGuardSeed = k.publicKeySeed("candyGuard", "The address of the Candy Guard account");
-const candyMachineSeed = k.publicKeySeed(
-	"candyMachine",
-	"The address of the Candy Machine account"
+const gumballGuardSeed = k.publicKeySeed(
+	"gumballGuard",
+	"The address of the Gumball Guard account"
+);
+const gumballMachineSeed = k.publicKeySeed(
+	"gumballMachine",
+	"The address of the Gumball Machine account"
 );
 const userSeed = k.publicKeySeed("user", "The address of the wallet trying to mint");
 
 // Update accounts.
 kinobi.update(
 	new k.UpdateAccountsVisitor({
-		candyGuard: {
+		gumballGuard: {
 			internal: true,
 			seeds: [
-				k.stringConstantSeed("candy_guard"),
-				k.publicKeySeed("base", "The base address which the Candy Guard PDA derives from"),
+				k.stringConstantSeed("gumball_guard"),
+				k.publicKeySeed("base", "The base address which the Gumball Guard PDA derives from"),
 			],
 		},
 		sellerHistory: {
 			seeds: [
 				k.stringConstantSeed("seller_history"),
-				candyMachineSeed,
+				gumballMachineSeed,
 				k.publicKeySeed("seller", "The seller this history is tracking"),
 			],
 		},
@@ -61,11 +64,11 @@ kinobi.update(
 				k.variableSeed(
 					"id",
 					k.numberTypeNode("u8"),
-					"A unique identifier in the context of a Candy Machine/Candy Guard combo"
+					"A unique identifier in the context of a Gumball Machine/Gumball Guard combo"
 				),
 				userSeed,
-				candyGuardSeed,
-				candyMachineSeed,
+				gumballGuardSeed,
+				gumballMachineSeed,
 			],
 		},
 		allowListProof: {
@@ -79,16 +82,16 @@ kinobi.update(
 					"The Merkle Root used when verifying the user"
 				),
 				userSeed,
-				candyGuardSeed,
-				candyMachineSeed,
+				gumballGuardSeed,
+				gumballMachineSeed,
 			],
 		},
 		freezeEscrow: {
 			seeds: [
 				k.stringConstantSeed("freeze_escrow"),
 				k.publicKeySeed("destination", "The wallet that will eventually receive the funds"),
-				candyGuardSeed,
-				candyMachineSeed,
+				gumballGuardSeed,
+				gumballMachineSeed,
 			],
 		},
 		allocationTracker: {
@@ -97,8 +100,8 @@ kinobi.update(
 			seeds: [
 				k.stringConstantSeed("allocation"),
 				k.variableSeed("id", k.numberTypeNode("u8"), "Unique identifier of the allocation"),
-				candyGuardSeed,
-				candyMachineSeed,
+				gumballGuardSeed,
+				gumballMachineSeed,
 			],
 		},
 	})
@@ -107,7 +110,7 @@ kinobi.update(
 // Update defined types.
 kinobi.update(
 	new k.UpdateDefinedTypesVisitor({
-		candyGuardData: { delete: true },
+		gumballGuardData: { delete: true },
 		guardSet: { delete: true },
 		group: { delete: true },
 	})
@@ -142,13 +145,13 @@ const defaultsToEventAuthorityPda = () =>
 	k.pdaDefault("eventAuthority", {
 		importFrom: "hooked",
 	});
-const defaultsToCandyMachineAuthorityPda = (candyMachine = "candyMachine") =>
-	k.pdaDefault("candyMachineAuthority", {
+const defaultsToGumballMachineAuthorityPda = (gumballMachine = "gumballMachine") =>
+	k.pdaDefault("gumballMachineAuthority", {
 		importFrom: "hooked",
-		seeds: { candyMachine: k.accountDefault(candyMachine) },
+		seeds: { gumballMachine: k.accountDefault(gumballMachine) },
 	});
-const defaultsToCandyGuardPda = (base = "base") =>
-	k.pdaDefault("candyGuard", {
+const defaultsToGumballGuardPda = (base = "base") =>
+	k.pdaDefault("gumballGuard", {
 		importFrom: "hooked",
 		seeds: { base: k.accountDefault(base) },
 	});
@@ -179,7 +182,7 @@ kinobi.update(
 		},
 		{
 			...k.identityDefault(),
-			account: "candyMachineAuthority",
+			account: "gumballMachineAuthority",
 			ignoreIfOptional: true,
 		},
 		{
@@ -199,7 +202,7 @@ kinobi.update(
 		},
 		{
 			...defaultsToProgram(),
-			account: "candyMachineProgram",
+			account: "gumballMachineProgram",
 			ignoreIfOptional: true,
 		},
 		{
@@ -218,13 +221,13 @@ kinobi.update(
 			ignoreIfOptional: true,
 		},
 		{
-			...defaultsToCandyMachineAuthorityPda(),
+			...defaultsToGumballMachineAuthorityPda(),
 			account: "authorityPda",
 			ignoreIfOptional: true,
 		},
 		{
-			...defaultsToCandyMachineAuthorityPda(),
-			account: "candyMachineAuthorityPda",
+			...defaultsToGumballMachineAuthorityPda(),
+			account: "gumballMachineAuthorityPda",
 			ignoreIfOptional: true,
 		},
 		{
@@ -264,15 +267,15 @@ kinobi.update(
 kinobi.update(
 	new k.UpdateInstructionsVisitor({
 		"mplCandyGuard.initialize": {
-			name: "initializeCandyGuard",
+			name: "initializeGumballGuard",
 			internal: true,
 			accounts: {
-				candyGuard: {
-					defaultsTo: k.pdaDefault("candyGuard", { importFrom: "hooked" }),
+				gumballGuard: {
+					defaultsTo: k.pdaDefault("gumballGuard", { importFrom: "hooked" }),
 				},
 			},
 		},
-		"mplCandyMachine.initialize": { name: "initializeCandyMachine" },
+		"mplCandyMachine.initialize": { name: "initializeGumballMachine" },
 		"mplCandyMachine.addNft": {
 			name: "addNft",
 			accounts: {
@@ -303,7 +306,7 @@ kinobi.update(
 			},
 		},
 		"mplCandyMachine.draw": {
-			name: "drawFromCandyMachine",
+			name: "drawFromGumballMachine",
 			accounts: {
 				buyer: { defaultsTo: k.identityDefault() },
 			},
@@ -314,7 +317,7 @@ kinobi.update(
 				label: { name: "group" },
 			},
 			accounts: {
-				candyGuard: { defaultsTo: defaultsToCandyGuardPda("candyMachine") },
+				gumballGuard: { defaultsTo: defaultsToGumballGuardPda("gumballMachine") },
 				buyer: { defaultsTo: k.identityDefault() },
 			},
 		},
@@ -324,7 +327,7 @@ kinobi.update(
 				label: { name: "group" },
 			},
 			accounts: {
-				candyGuard: { defaultsTo: defaultsToCandyGuardPda("candyMachine") },
+				gumballGuard: { defaultsTo: defaultsToGumballGuardPda("gumballMachine") },
 			},
 		},
 		"mplCandyMachine.settleNftSale": {
@@ -355,11 +358,11 @@ kinobi.update(
 				buyer: { defaultsTo: k.identityDefault() },
 			},
 		},
-		"mplCandyMachine.SetAuthority": { name: "SetCandyMachineAuthority" },
-		"mplCandyGuard.SetAuthority": { name: "SetCandyGuardAuthority" },
-		"mplCandyGuard.update": { name: "updateCandyGuard", internal: true },
-		"mplCandyMachine.withdraw": { name: "deleteCandyMachine" },
-		"mplCandyGuard.withdraw": { name: "deleteCandyGuard" },
+		"mplCandyMachine.SetAuthority": { name: "SetGumballMachineAuthority" },
+		"mplCandyGuard.SetAuthority": { name: "SetGumballGuardAuthority" },
+		"mplCandyGuard.update": { name: "updateGumballGuard", internal: true },
+		"mplCandyMachine.withdraw": { name: "deleteGumballMachine" },
+		"mplCandyGuard.withdraw": { name: "deleteGumballGuard" },
 	})
 );
 
@@ -370,7 +373,7 @@ kinobi.update(
 	new k.SetStructDefaultValuesVisitor({
 		addNftInstructionData: addItemDefaultArgs,
 		addCoreAssetInstructionData: addItemDefaultArgs,
-		initializeCandyMachineInstructionData: {
+		initializeGumballMachineInstructionData: {
 			feeConfig: k.vNone(),
 		},
 	})
@@ -389,7 +392,7 @@ kinobi.update(
 // Custom serializers.
 kinobi.update(
 	new k.UseCustomAccountSerializerVisitor({
-		candyMachine: { extract: true },
+		gumballMachine: { extract: true },
 	})
 );
 

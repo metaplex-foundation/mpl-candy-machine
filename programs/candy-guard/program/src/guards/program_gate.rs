@@ -5,7 +5,7 @@ use solana_program::{
 };
 
 use super::*;
-use crate::{errors::CandyGuardError, state::GuardType, utils::cmp_pubkeys};
+use crate::{errors::GumballGuardError, state::GuardType, utils::cmp_pubkeys};
 
 // Default list of authorized programs.
 pub static DEFAULT_PROGRAMS: &[Pubkey] = &[
@@ -37,10 +37,10 @@ impl Guard for ProgramGate {
         GuardType::as_mask(GuardType::ProgramGate)
     }
 
-    fn verify(data: &CandyGuardData) -> Result<()> {
+    fn verify(data: &GumballGuardData) -> Result<()> {
         if let Some(program_gate) = &data.default.program_gate {
             if program_gate.additional.len() > MAXIMUM_SIZE {
-                return err!(CandyGuardError::ExceededProgramListSize);
+                return err!(GumballGuardError::ExceededProgramListSize);
             }
         }
 
@@ -48,7 +48,7 @@ impl Guard for ProgramGate {
             for group in groups {
                 if let Some(program_gate) = &group.guards.program_gate {
                     if program_gate.additional.len() > MAXIMUM_SIZE {
-                        return err!(CandyGuardError::ExceededProgramListSize);
+                        return err!(GumballGuardError::ExceededProgramListSize);
                     }
                 }
             }
@@ -105,7 +105,7 @@ pub fn verify_programs(sysvar: &AccountInfo, programs: &[Pubkey]) -> Result<()> 
         msg!("Transaction had ix with program id {}", program_id);
         // if we reach this point, the program id was not found in the
         // programs list (the validation will fail)
-        return err!(CandyGuardError::UnauthorizedProgramFound);
+        return err!(GumballGuardError::UnauthorizedProgramFound);
     }
 
     Ok(())

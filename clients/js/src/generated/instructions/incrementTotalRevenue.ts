@@ -30,9 +30,9 @@ import {
 
 // Accounts.
 export type IncrementTotalRevenueInstructionAccounts = {
-  /** Candy machine account. */
-  candyMachine: PublicKey | Pda;
-  /** Candy machine mint authority (mint only allowed for the mint_authority). */
+  /** Gumball machine account. */
+  gumballMachine: PublicKey | Pda;
+  /** Gumball machine mint authority (mint only allowed for the mint_authority). */
   mintAuthority?: Signer;
 };
 
@@ -90,10 +90,10 @@ export function incrementTotalRevenue(
 
   // Accounts.
   const resolvedAccounts: ResolvedAccountsWithIndices = {
-    candyMachine: {
+    gumballMachine: {
       index: 0,
       isWritable: true,
-      value: input.candyMachine ?? null,
+      value: input.gumballMachine ?? null,
     },
     mintAuthority: {
       index: 1,

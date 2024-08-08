@@ -28,7 +28,7 @@ import {
 } from '../_setup';
 
 test('it transfers an NFT from the payer to the destination', async (t) => {
-  // Given a loaded Candy Machine with an nftPayment guard on a required collection.
+  // Given a loaded Gumball Machine with an nftPayment guard on a required collection.
   const umi = await createUmi();
   const destination = generateSigner(umi).publicKey;
   const requiredCollectionAuthority = generateSigner(umi);
@@ -36,7 +36,7 @@ test('it transfers an NFT from the payer to the destination', async (t) => {
     authority: requiredCollectionAuthority,
   });
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -62,7 +62,7 @@ test('it transfers an NFT from the payer to the destination', async (t) => {
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         mintArgs: {
           nftPayment: some({
@@ -77,7 +77,7 @@ test('it transfers an NFT from the payer to the destination', async (t) => {
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertItemBought(t, umi, { candyMachine });
+  await assertItemBought(t, umi, { gumballMachine });
 
   // And the NFT now belongs to the NFT destination.
   const updatedNft = await fetchDigitalAssetWithAssociatedToken(
@@ -89,7 +89,7 @@ test('it transfers an NFT from the payer to the destination', async (t) => {
 });
 
 test('it allows minting even when the payer is different from the buyer', async (t) => {
-  // Given a loaded Candy Machine with an nftPayment guard on a required collection.
+  // Given a loaded Gumball Machine with an nftPayment guard on a required collection.
   const umi = await createUmi();
   const destination = generateSigner(umi).publicKey;
   const requiredCollectionAuthority = generateSigner(umi);
@@ -97,7 +97,7 @@ test('it allows minting even when the payer is different from the buyer', async 
     authority: requiredCollectionAuthority,
   });
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -124,7 +124,7 @@ test('it allows minting even when the payer is different from the buyer', async 
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         buyer,
 
@@ -141,7 +141,7 @@ test('it allows minting even when the payer is different from the buyer', async 
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertItemBought(t, umi, { candyMachine, buyer: publicKey(buyer) });
+  await assertItemBought(t, umi, { gumballMachine, buyer: publicKey(buyer) });
 
   // And the NFT now belongs to the NFT destination.
   const updatedNft = await fetchDigitalAssetWithAssociatedToken(
@@ -153,7 +153,7 @@ test('it allows minting even when the payer is different from the buyer', async 
 });
 
 test('it works when the provided NFT is not on an associated token account', async (t) => {
-  // Given a loaded Candy Machine with an nftPayment guard on a required collection.
+  // Given a loaded Gumball Machine with an nftPayment guard on a required collection.
   const umi = await createUmi();
   const destination = generateSigner(umi).publicKey;
   const requiredCollectionAuthority = generateSigner(umi);
@@ -161,7 +161,7 @@ test('it works when the provided NFT is not on an associated token account', asy
     authority: requiredCollectionAuthority,
   });
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -203,7 +203,7 @@ test('it works when the provided NFT is not on an associated token account', asy
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         mintArgs: {
           nftPayment: some({
@@ -219,7 +219,7 @@ test('it works when the provided NFT is not on an associated token account', asy
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertItemBought(t, umi, { candyMachine });
+  await assertItemBought(t, umi, { gumballMachine });
 
   // And the NFT now belongs to the NFT destination.
   const updatedNft = await fetchDigitalAssetWithAssociatedToken(
@@ -231,7 +231,7 @@ test('it works when the provided NFT is not on an associated token account', asy
 });
 
 test('it fails if the payer does not own the right NFT', async (t) => {
-  // Given a loaded Candy Machine with an nftPayment guard on a required collection.
+  // Given a loaded Gumball Machine with an nftPayment guard on a required collection.
   const umi = await createUmi();
   const destination = generateSigner(umi).publicKey;
   const requiredCollectionAuthority = generateSigner(umi);
@@ -239,7 +239,7 @@ test('it fails if the payer does not own the right NFT', async (t) => {
     authority: requiredCollectionAuthority,
   });
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -263,7 +263,7 @@ test('it fails if the payer does not own the right NFT', async (t) => {
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         mintArgs: {
           nftPayment: some({
@@ -282,7 +282,7 @@ test('it fails if the payer does not own the right NFT', async (t) => {
 });
 
 test('it fails if the payer tries to provide an NFT from an unverified collection', async (t) => {
-  // Given a loaded Candy Machine with an nftPayment guard on a required collection.
+  // Given a loaded Gumball Machine with an nftPayment guard on a required collection.
   const umi = await createUmi();
   const destination = generateSigner(umi).publicKey;
   const requiredCollectionAuthority = generateSigner(umi);
@@ -290,7 +290,7 @@ test('it fails if the payer tries to provide an NFT from an unverified collectio
     authority: requiredCollectionAuthority,
   });
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -315,7 +315,7 @@ test('it fails if the payer tries to provide an NFT from an unverified collectio
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         mintArgs: {
           nftPayment: some({
@@ -334,7 +334,7 @@ test('it fails if the payer tries to provide an NFT from an unverified collectio
 });
 
 test('it charges a bot tax when trying to pay with the wrong NFT', async (t) => {
-  // Given a loaded Candy Machine with an nftPayment guard on a required collection and a bot tax.
+  // Given a loaded Gumball Machine with an nftPayment guard on a required collection and a bot tax.
   const umi = await createUmi();
   const destination = generateSigner(umi).publicKey;
   const requiredCollectionAuthority = generateSigner(umi);
@@ -342,7 +342,7 @@ test('it charges a bot tax when trying to pay with the wrong NFT', async (t) => 
     authority: requiredCollectionAuthority,
   });
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -367,7 +367,7 @@ test('it charges a bot tax when trying to pay with the wrong NFT', async (t) => 
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         mintArgs: {
           nftPayment: some({
@@ -386,7 +386,7 @@ test('it charges a bot tax when trying to pay with the wrong NFT', async (t) => 
 });
 
 test('it transfers a Programmable NFT from the payer to the destination', async (t) => {
-  // Given a loaded Candy Machine with an nftPayment guard on a required collection.
+  // Given a loaded Gumball Machine with an nftPayment guard on a required collection.
   const umi = await createUmi();
   const destination = generateSigner(umi).publicKey;
   const requiredCollectionAuthority = generateSigner(umi);
@@ -394,7 +394,7 @@ test('it transfers a Programmable NFT from the payer to the destination', async 
     authority: requiredCollectionAuthority,
   });
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -421,7 +421,7 @@ test('it transfers a Programmable NFT from the payer to the destination', async 
     .add(setComputeUnitLimit(umi, { units: 800_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         mintArgs: {
           nftPayment: some({
@@ -437,7 +437,7 @@ test('it transfers a Programmable NFT from the payer to the destination', async 
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertItemBought(t, umi, { candyMachine });
+  await assertItemBought(t, umi, { gumballMachine });
 
   // And the NFT now belongs to the NFT destination.
   const updatedNft = await fetchDigitalAssetWithAssociatedToken(

@@ -1,12 +1,12 @@
 use std::collections::BTreeMap;
 
 use anchor_lang::{prelude::*, solana_program::sysvar, Discriminator};
-use mpl_candy_machine_core::CandyMachine;
+use mpl_candy_machine_core::GumballMachine;
 use solana_program::{instruction::Instruction, program::invoke_signed};
 
 use crate::{
     guards::EvaluationContext,
-    state::{CandyGuard, CandyGuardData, GuardSet, DATA_OFFSET, SEED},
+    state::{GuardSet, GumballGuard, GumballGuardData, DATA_OFFSET, SEED},
 };
 
 use super::{DrawAccounts, Token};
@@ -17,9 +17,9 @@ pub fn draw<'c: 'info, 'info>(
     label: Option<String>,
 ) -> Result<()> {
     let accounts = DrawAccounts {
-        candy_guard: &ctx.accounts.candy_guard,
-        candy_machine: &ctx.accounts.candy_machine,
-        _candy_machine_program: ctx.accounts.candy_machine_program.to_account_info(),
+        gumball_guard: &ctx.accounts.gumball_guard,
+        gumball_machine: &ctx.accounts.gumball_machine,
+        _gumball_machine_program: ctx.accounts.gumball_machine_program.to_account_info(),
         payer: ctx.accounts.payer.to_account_info(),
         buyer: ctx.accounts.buyer.to_account_info(),
         recent_slothashes: ctx.accounts.recent_slothashes.to_account_info(),
@@ -47,15 +47,15 @@ pub fn process_draw(
     mint_args: Vec<u8>,
     label: Option<String>,
 ) -> Result<()> {
-    let account_info = ctx.accounts.candy_guard.to_account_info();
+    let account_info = ctx.accounts.gumball_guard.to_account_info();
     let account_data = account_info.data.borrow();
     // loads the active guard set
-    let guard_set = match CandyGuardData::active_set(&account_data[DATA_OFFSET..], label) {
+    let guard_set = match GumballGuardData::active_set(&account_data[DATA_OFFSET..], label) {
         Ok(guard_set) => guard_set,
         Err(error) => {
             // load the default guard set to look for the bot_tax since errors only occur
             // when trying to load guard set groups
-            let guard_set = CandyGuardData::load(&account_data[DATA_OFFSET..])?;
+            let guard_set = GumballGuardData::load(&account_data[DATA_OFFSET..])?;
             return process_error(ctx, &guard_set.default, error);
         }
     };
@@ -96,20 +96,20 @@ fn process_error(ctx: &EvaluationContext, guard_set: &GuardSet, error: Error) ->
     }
 }
 
-/// Send a mint transaction to the candy machine.
+/// Send a mint transaction to the gumball machine.
 fn cpi_draw(ctx: &EvaluationContext) -> Result<()> {
-    let candy_guard = &ctx.accounts.candy_guard;
+    let gumball_guard = &ctx.accounts.gumball_guard;
 
-    // candy machine mint instruction accounts
+    // gumball machine mint instruction accounts
     let mint_accounts = Box::new(mpl_candy_machine_core::cpi::accounts::Draw {
-        candy_machine: ctx.accounts.candy_machine.to_account_info(),
-        mint_authority: candy_guard.to_account_info(),
+        gumball_machine: ctx.accounts.gumball_machine.to_account_info(),
+        mint_authority: gumball_guard.to_account_info(),
         payer: ctx.accounts.payer.clone(),
         buyer: ctx.accounts.buyer.clone(),
         system_program: ctx.accounts.system_program.clone(),
         recent_slothashes: ctx.accounts.recent_slothashes.clone(),
         event_authority: ctx.accounts.gumball_event_authority.clone(),
-        program: ctx.accounts._candy_machine_program.clone(),
+        program: ctx.accounts._gumball_machine_program.clone(),
     });
 
     let mint_infos = mint_accounts.to_account_infos();
@@ -122,7 +122,7 @@ fn cpi_draw(ctx: &EvaluationContext) -> Result<()> {
     };
 
     // PDA signer for the transaction
-    let seeds = [SEED, &candy_guard.base.to_bytes(), &[candy_guard.bump]];
+    let seeds = [SEED, &gumball_guard.base.to_bytes(), &[gumball_guard.bump]];
     let signer = [&seeds[..]];
 
     invoke_signed(&mint_ix, &mint_infos, &signer)?;
@@ -133,19 +133,19 @@ fn cpi_draw(ctx: &EvaluationContext) -> Result<()> {
 /// Mint an NFT.
 #[derive(Accounts)]
 pub struct Draw<'info> {
-    /// Candy Guard account.
-    #[account(seeds = [SEED, candy_guard.base.key().as_ref()], bump = candy_guard.bump)]
-    candy_guard: Account<'info, CandyGuard>,
+    /// Gumball Guard account.
+    #[account(seeds = [SEED, gumball_guard.base.key().as_ref()], bump = gumball_guard.bump)]
+    gumball_guard: Account<'info, GumballGuard>,
 
-    /// Candy Machine program account.
+    /// Gumball Machine program account.
     ///
     /// CHECK: account constraints checked in account trait
     #[account(address = mpl_candy_machine_core::id())]
-    candy_machine_program: AccountInfo<'info>,
+    gumball_machine_program: AccountInfo<'info>,
 
-    /// Candy machine account.
-    #[account(mut, constraint = candy_guard.key() == candy_machine.mint_authority)]
-    candy_machine: Box<Account<'info, CandyMachine>>,
+    /// Gumball machine account.
+    #[account(mut, constraint = gumball_guard.key() == gumball_machine.mint_authority)]
+    gumball_machine: Box<Account<'info, GumballMachine>>,
 
     /// Payer for the mint (SOL) fees.
     #[account(mut)]

@@ -1,15 +1,14 @@
+use crate::state::GumballGuard;
 use anchor_lang::prelude::*;
 pub use draw::*;
 pub use initialize::*;
-use mpl_candy_machine_core::CandyMachine;
+use mpl_candy_machine_core::GumballMachine;
 pub use route::*;
 pub use set_authority::*;
 pub use unwrap::*;
 pub use update::*;
 pub use withdraw::*;
 pub use wrap::*;
-
-use crate::state::CandyGuard;
 
 pub mod draw;
 pub mod initialize;
@@ -22,11 +21,11 @@ pub mod wrap;
 
 /// Accounts to mint an NFT.
 pub(crate) struct DrawAccounts<'b, 'c, 'info> {
-    pub(crate) candy_guard: &'b Account<'info, CandyGuard>,
-    pub(crate) candy_machine: &'b Account<'info, CandyMachine>,
+    pub(crate) gumball_guard: &'b Account<'info, GumballGuard>,
+    pub(crate) gumball_machine: &'b Account<'info, GumballMachine>,
     pub(crate) payer: AccountInfo<'info>,
     pub(crate) buyer: AccountInfo<'info>,
-    pub(crate) _candy_machine_program: AccountInfo<'info>,
+    pub(crate) _gumball_machine_program: AccountInfo<'info>,
     pub(crate) token_metadata_program: AccountInfo<'info>,
     pub(crate) spl_token_program: AccountInfo<'info>,
     pub(crate) system_program: AccountInfo<'info>,

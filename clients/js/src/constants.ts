@@ -4,7 +4,7 @@ export const FEE_CONFIG_SIZE =
   32 + // fee account
   2; // fee bps
 
-export const CANDY_MACHINE_HIDDEN_SECTION =
+export const GUMBALL_MACHINE_HIDDEN_SECTION =
   8 + // discriminator
   1 + // version
   32 + // authority
@@ -24,7 +24,7 @@ export const CANDY_MACHINE_HIDDEN_SECTION =
   1 + // hide sold items
   32; // payment token
 
-export const CANDY_MACHINE_SIZE = CANDY_MACHINE_HIDDEN_SECTION;
+export const GUMBALL_MACHINE_SIZE = GUMBALL_MACHINE_HIDDEN_SECTION;
 
 export const CONFIG_LINE_SIZE =
   32 + // mint
@@ -32,8 +32,8 @@ export const CONFIG_LINE_SIZE =
   32 + // buyer
   1; // token standard
 
-export const CANDY_GUARD_LABEL_SIZE = 6;
-export const CANDY_GUARD_DATA =
+export const GUMBALL_GUARD_LABEL_SIZE = 6;
+export const GUMBALL_GUARD_DATA =
   8 + // discriminator
   32 + // base
   1 + // bump

@@ -164,18 +164,18 @@ export class CgExceededLengthError extends ProgramError {
 codeToErrorMap.set(0x177a, CgExceededLengthError);
 nameToErrorMap.set('ExceededLength', CgExceededLengthError);
 
-/** CandyMachineEmpty: Candy machine is empty */
-export class CgCandyMachineEmptyError extends ProgramError {
-  readonly name: string = 'CandyMachineEmpty';
+/** GumballMachineEmpty: Gumball machine is empty */
+export class CgGumballMachineEmptyError extends ProgramError {
+  readonly name: string = 'GumballMachineEmpty';
 
   readonly code: number = 0x177b; // 6011
 
   constructor(program: Program, cause?: Error) {
-    super('Candy machine is empty', program, cause);
+    super('Gumball machine is empty', program, cause);
   }
 }
-codeToErrorMap.set(0x177b, CgCandyMachineEmptyError);
-nameToErrorMap.set('CandyMachineEmpty', CgCandyMachineEmptyError);
+codeToErrorMap.set(0x177b, CgGumballMachineEmptyError);
+nameToErrorMap.set('GumballMachineEmpty', CgGumballMachineEmptyError);
 
 /** InstructionNotFound: No instruction was found */
 export class CgInstructionNotFoundError extends ProgramError {
@@ -692,14 +692,14 @@ nameToErrorMap.set(
   CgAllocationGuardNotEnabledError
 );
 
-/** InvalidMintAuthority: Candy machine has an invalid mint authority */
+/** InvalidMintAuthority: Gumball machine has an invalid mint authority */
 export class CgInvalidMintAuthorityError extends ProgramError {
   readonly name: string = 'InvalidMintAuthority';
 
   readonly code: number = 0x17a1; // 6049
 
   constructor(program: Program, cause?: Error) {
-    super('Candy machine has an invalid mint authority', program, cause);
+    super('Gumball machine has an invalid mint authority', program, cause);
   }
 }
 codeToErrorMap.set(0x17a1, CgInvalidMintAuthorityError);
@@ -756,6 +756,22 @@ export class CgInvalidPaymentMintError extends ProgramError {
 }
 codeToErrorMap.set(0x17a5, CgInvalidPaymentMintError);
 nameToErrorMap.set('InvalidPaymentMint', CgInvalidPaymentMintError);
+
+/** InvalidGumballMachineState: Invalid gumball machine state */
+export class CgInvalidGumballMachineStateError extends ProgramError {
+  readonly name: string = 'InvalidGumballMachineState';
+
+  readonly code: number = 0x17a6; // 6054
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid gumball machine state', program, cause);
+  }
+}
+codeToErrorMap.set(0x17a6, CgInvalidGumballMachineStateError);
+nameToErrorMap.set(
+  'InvalidGumballMachineState',
+  CgInvalidGumballMachineStateError
+);
 
 /**
  * Attempts to resolve a custom program error from the provided error code.

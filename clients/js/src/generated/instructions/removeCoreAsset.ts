@@ -22,7 +22,7 @@ import {
   u32,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import { findCandyMachineAuthorityPda } from '../../hooked';
+import { findGumballMachineAuthorityPda } from '../../hooked';
 import { findSellerHistoryPda } from '../accounts';
 import {
   expectPublicKey,
@@ -33,8 +33,8 @@ import {
 
 // Accounts.
 export type RemoveCoreAssetInstructionAccounts = {
-  /** Candy Machine account. */
-  candyMachine: PublicKey | Pda;
+  /** Gumball Machine account. */
+  gumballMachine: PublicKey | Pda;
   /** Seller history account. */
   sellerHistory?: PublicKey | Pda;
   authorityPda?: PublicKey | Pda;
@@ -98,10 +98,10 @@ export function removeCoreAsset(
 
   // Accounts.
   const resolvedAccounts: ResolvedAccountsWithIndices = {
-    candyMachine: {
+    gumballMachine: {
       index: 0,
       isWritable: true,
-      value: input.candyMachine ?? null,
+      value: input.gumballMachine ?? null,
     },
     sellerHistory: {
       index: 1,
@@ -138,14 +138,14 @@ export function removeCoreAsset(
   }
   if (!resolvedAccounts.sellerHistory.value) {
     resolvedAccounts.sellerHistory.value = findSellerHistoryPda(context, {
-      candyMachine: expectPublicKey(resolvedAccounts.candyMachine.value),
+      gumballMachine: expectPublicKey(resolvedAccounts.gumballMachine.value),
       seller: expectPublicKey(resolvedAccounts.seller.value),
     });
   }
   if (!resolvedAccounts.authorityPda.value) {
-    resolvedAccounts.authorityPda.value = findCandyMachineAuthorityPda(
+    resolvedAccounts.authorityPda.value = findGumballMachineAuthorityPda(
       context,
-      { candyMachine: expectPublicKey(resolvedAccounts.candyMachine.value) }
+      { gumballMachine: expectPublicKey(resolvedAccounts.gumballMachine.value) }
     );
   }
   if (!resolvedAccounts.authority.value) {

@@ -20,7 +20,7 @@ import {
  *
  * 0. `[writable]` Allocation tracker PDA. The PDA is derived
  * using the seed `["allocation", allocation id,
- * candy guard pubkey, candy machine pubkey]`.
+ * gumball guard pubkey, gumball machine pubkey]`.
  */
 
 export type Allocation = {

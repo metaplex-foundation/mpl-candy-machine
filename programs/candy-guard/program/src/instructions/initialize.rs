@@ -1,19 +1,19 @@
 use anchor_lang::prelude::*;
 
-use crate::state::{CandyGuard, CandyGuardData, DATA_OFFSET, SEED};
+use crate::state::{GumballGuard, GumballGuardData, DATA_OFFSET, SEED};
 
 pub fn initialize(ctx: Context<Initialize>, data: Vec<u8>) -> Result<()> {
-    // deserializes the candy guard data
-    let data = CandyGuardData::load(&data)?;
+    // deserializes the gumball guard data
+    let data = GumballGuardData::load(&data)?;
     // validates guard settings
     data.verify()?;
 
-    let candy_guard = &mut ctx.accounts.candy_guard;
-    candy_guard.base = ctx.accounts.base.key();
-    candy_guard.bump = ctx.bumps.candy_guard;
-    candy_guard.authority = ctx.accounts.authority.key();
+    let gumball_guard = &mut ctx.accounts.gumball_guard;
+    gumball_guard.base = ctx.accounts.base.key();
+    gumball_guard.bump = ctx.bumps.gumball_guard;
+    gumball_guard.authority = ctx.accounts.authority.key();
 
-    let account_info = candy_guard.to_account_info();
+    let account_info = gumball_guard.to_account_info();
     let mut account_data = account_info.data.borrow_mut();
 
     data.save(&mut account_data[DATA_OFFSET..])
@@ -29,8 +29,8 @@ pub struct Initialize<'info> {
         seeds = [SEED, base.key().as_ref()],
         bump
     )]
-    pub candy_guard: Account<'info, CandyGuard>,
-    // Base key of the candy guard PDA
+    pub gumball_guard: Account<'info, GumballGuard>,
+    // Base key of the gumball guard PDA
     pub base: Signer<'info>,
     /// CHECK: authority can be any account and is not written to or read
     authority: UncheckedAccount<'info>,

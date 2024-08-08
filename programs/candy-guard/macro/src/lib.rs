@@ -79,7 +79,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
                         #name.save(data, cursor - #ty::size())?;
                         features = #ty::enable(features);
                     } else {
-                        return err!(crate::errors::CandyGuardError::InvalidAccountSize);
+                        return err!(crate::errors::GumballGuardError::InvalidAccountSize);
                     }
                 }
             }
@@ -239,11 +239,11 @@ pub fn derive(input: TokenStream) -> TokenStream {
             ) -> anchor_lang::Result<()> {
                 match args.guard {
                     #(#route_arm,)*
-                    _ => err!(CandyGuardError::InstructionNotFound)
+                    _ => err!(GumballGuardError::InstructionNotFound)
                 }
             }
 
-            pub fn verify(data: &CandyGuardData) -> Result<()> {
+            pub fn verify(data: &GumballGuardData) -> Result<()> {
                 #(#verify)*
 
                 Ok(())

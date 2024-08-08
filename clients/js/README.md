@@ -1,4 +1,4 @@
-# JavaScript client for Mpl Candy Machine
+# JavaScript client for Mpl Gumball Machine
 
 A Umi-compatible JavaScript library for candy machines.
 

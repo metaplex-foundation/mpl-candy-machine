@@ -40,7 +40,7 @@ impl Condition for TokenGate {
         let account = assert_is_ata(token_gate_account, &ctx.accounts.buyer.key(), &self.mint)?;
 
         if account.amount < self.amount {
-            return err!(CandyGuardError::NotEnoughTokens);
+            return err!(GumballGuardError::NotEnoughTokens);
         }
 
         Ok(())

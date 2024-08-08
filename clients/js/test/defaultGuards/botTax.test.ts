@@ -11,10 +11,10 @@ import {
 } from '../_setup';
 
 test('it does nothing if all conditions are valid', async (t) => {
-  // Given a candy machine with a bot tax guard.
+  // Given a gumball machine with a bot tax guard.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -33,20 +33,20 @@ test('it does nothing if all conditions are valid', async (t) => {
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
       })
     )
     .sendAndConfirm(umi);
 
   // Then the mint was successful.
-  await assertItemBought(t, umi, { candyMachine });
+  await assertItemBought(t, umi, { gumballMachine });
 });
 
 test('it optionally charges a bot tax if the mint instruction is not the last one', async (t) => {
-  // Given a candy machine with a bot tax guard with lastInstruction set to true.
+  // Given a gumball machine with a bot tax guard with lastInstruction set to true.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -65,7 +65,7 @@ test('it optionally charges a bot tax if the mint instruction is not the last on
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
       })
     )
     .add(addMemo(umi, { memo: 'I am a post-mint instruction' }))

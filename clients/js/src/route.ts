@@ -19,7 +19,7 @@ import {
   parseRouteArgs,
   RouteContext,
 } from './guards';
-import { findCandyGuardPda } from './hooked';
+import { findGumballGuardPda } from './hooked';
 
 export { RouteInstructionAccounts };
 
@@ -57,12 +57,13 @@ export function route<
 ): TransactionBuilder {
   const { routeArgs = {}, group = none(), ...rest } = input;
   const program = context.programs.get<CandyGuardProgram>('mplCandyGuard');
-  const candyMachine = publicKey(input.candyMachine, false);
+  const gumballMachine = publicKey(input.gumballMachine, false);
   const routeContext: RouteContext = {
     payer: input.payer ?? context.payer,
-    candyMachine,
-    candyGuard: publicKey(
-      input.candyGuard ?? findCandyGuardPda(context, { base: candyMachine }),
+    gumballMachine,
+    gumballGuard: publicKey(
+      input.gumballGuard ??
+        findGumballGuardPda(context, { base: gumballMachine }),
       false
     ),
   };

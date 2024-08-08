@@ -35,10 +35,10 @@ export type MintContext = {
   buyer: Signer;
   /** The wallet to use for SOL fees. */
   payer: Signer;
-  /** The address of the Candy Machine we are using. */
-  candyMachine: PublicKey;
-  /** The address of the Candy Guard we are using. */
-  candyGuard: PublicKey;
+  /** The address of the Gumball Machine we are using. */
+  gumballMachine: PublicKey;
+  /** The address of the Gumball Guard we are using. */
+  gumballGuard: PublicKey;
 };
 
 export type RouteContext = Omit<MintContext, 'buyer' | 'mint'>;

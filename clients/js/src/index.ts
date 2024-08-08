@@ -1,9 +1,9 @@
 export * as AnchorIdls from './anchorIdls';
 export * from './constants';
 export * from './create';
-export * from './createCandyGuard';
-export * from './createCandyMachine';
-export * from './createLutForCandyMachine';
+export * from './createGumballGuard';
+export * from './createGumballMachine';
+export * from './createLutForGumballMachine';
 export * from './defaultGuards';
 export * from './draw';
 export * from './errors';
@@ -16,4 +16,4 @@ export * from './programs';
 export * from './route';
 export * from './settleCoreAssetSale';
 export * from './settleNftSale';
-export * from './updateCandyGuard';
+export * from './updateGumballGuard';

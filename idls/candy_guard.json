@@ -5,11 +5,11 @@
     {
       "name": "initialize",
       "docs": [
-        "Create a new candy guard account."
+        "Create a new gumball guard account."
       ],
       "accounts": [
         {
-          "name": "candyGuard",
+          "name": "gumballGuard",
           "isMut": true,
           "isSigner": false
         },
@@ -44,32 +44,32 @@
     {
       "name": "draw",
       "docs": [
-        "Mint an NFT from a candy machine wrapped in the candy guard."
+        "Mint an NFT from a gumball machine wrapped in the gumball guard."
       ],
       "accounts": [
         {
-          "name": "candyGuard",
+          "name": "gumballGuard",
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Candy Guard account."
+            "Gumball Guard account."
           ]
         },
         {
-          "name": "candyMachineProgram",
+          "name": "gumballMachineProgram",
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Candy Machine program account.",
+            "Gumball Machine program account.",
             ""
           ]
         },
         {
-          "name": "candyMachine",
+          "name": "gumballMachine",
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "Candy machine account."
+            "Gumball machine account."
           ]
         },
         {
@@ -157,12 +157,12 @@
       ],
       "accounts": [
         {
-          "name": "candyGuard",
+          "name": "gumballGuard",
           "isMut": false,
           "isSigner": false
         },
         {
-          "name": "candyMachine",
+          "name": "gumballMachine",
           "isMut": true,
           "isSigner": false
         },
@@ -190,11 +190,11 @@
     {
       "name": "setAuthority",
       "docs": [
-        "Set a new authority of the candy guard."
+        "Set a new authority of the gumball guard."
       ],
       "accounts": [
         {
-          "name": "candyGuard",
+          "name": "gumballGuard",
           "isMut": true,
           "isSigner": false
         },
@@ -214,12 +214,12 @@
     {
       "name": "unwrap",
       "docs": [
-        "Remove a candy guard from a candy machine, setting the authority to the",
-        "candy guard authority."
+        "Remove a gumball guard from a gumball machine, setting the authority to the",
+        "gumball guard authority."
       ],
       "accounts": [
         {
-          "name": "candyGuard",
+          "name": "gumballGuard",
           "isMut": false,
           "isSigner": false
         },
@@ -229,17 +229,17 @@
           "isSigner": true
         },
         {
-          "name": "candyMachine",
+          "name": "gumballMachine",
           "isMut": true,
           "isSigner": false
         },
         {
-          "name": "candyMachineAuthority",
+          "name": "gumballMachineAuthority",
           "isMut": false,
           "isSigner": true
         },
         {
-          "name": "candyMachineProgram",
+          "name": "gumballMachineProgram",
           "isMut": false,
           "isSigner": false
         }
@@ -249,13 +249,21 @@
     {
       "name": "update",
       "docs": [
-        "Update the candy guard configuration."
+        "Update the gumball guard configuration."
       ],
       "accounts": [
         {
-          "name": "candyGuard",
+          "name": "gumballGuard",
           "isMut": true,
           "isSigner": false
+        },
+        {
+          "name": "gumballMachine",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Gumball machine account."
+          ]
         },
         {
           "name": "authority",
@@ -283,11 +291,11 @@
     {
       "name": "withdraw",
       "docs": [
-        "Withdraw the rent SOL from the candy guard account."
+        "Withdraw the rent SOL from the gumball guard account."
       ],
       "accounts": [
         {
-          "name": "candyGuard",
+          "name": "gumballGuard",
           "isMut": true,
           "isSigner": false
         },
@@ -302,12 +310,12 @@
     {
       "name": "wrap",
       "docs": [
-        "Add a candy guard to a candy machine. After the guard is added, mint",
-        "is only allowed through the candy guard."
+        "Add a gumball guard to a gumball machine. After the guard is added, mint",
+        "is only allowed through the gumball guard."
       ],
       "accounts": [
         {
-          "name": "candyGuard",
+          "name": "gumballGuard",
           "isMut": false,
           "isSigner": false
         },
@@ -317,17 +325,17 @@
           "isSigner": true
         },
         {
-          "name": "candyMachine",
+          "name": "gumballMachine",
           "isMut": true,
           "isSigner": false
         },
         {
-          "name": "candyMachineProgram",
+          "name": "gumballMachineProgram",
           "isMut": false,
           "isSigner": false
         },
         {
-          "name": "candyMachineAuthority",
+          "name": "gumballMachineAuthority",
           "isMut": false,
           "isSigner": true
         }
@@ -337,7 +345,7 @@
   ],
   "accounts": [
     {
-      "name": "CandyGuard",
+      "name": "GumballGuard",
       "type": {
         "kind": "struct",
         "fields": [
@@ -382,7 +390,7 @@
         "",
         "0. `[writable]` Allocation tracker PDA. The PDA is derived",
         "using the seed `[\"allocation\", allocation id,",
-        "candy guard pubkey, candy machine pubkey]`."
+        "gumball guard pubkey, gumball machine pubkey]`."
       ],
       "type": {
         "kind": "struct",
@@ -427,7 +435,7 @@
         "List of accounts required:",
         "",
         "0. `[]` Pda created by the merkle proof instruction (seeds `[\"allow_list\", merke tree root,",
-        "payer key, candy guard pubkey, candy machine pubkey]`)."
+        "payer key, gumball guard pubkey, gumball machine pubkey]`)."
       ],
       "type": {
         "kind": "struct",
@@ -544,7 +552,7 @@
         "",
         "0. `[writable]` Mint counter PDA. The PDA is derived",
         "using the seed `[\"mint_limit\", mint guard id, payer key,",
-        "candy guard pubkey, candy machine pubkey]`."
+        "gumball guard pubkey, gumball machine pubkey]`."
       ],
       "type": {
         "kind": "struct",
@@ -876,7 +884,7 @@
       }
     },
     {
-      "name": "CandyGuardData",
+      "name": "GumballGuardData",
       "type": {
         "kind": "struct",
         "fields": [
@@ -1268,8 +1276,8 @@
     },
     {
       "code": 6011,
-      "name": "CandyMachineEmpty",
-      "msg": "Candy machine is empty"
+      "name": "GumballMachineEmpty",
+      "msg": "Gumball machine is empty"
     },
     {
       "code": 6012,
@@ -1459,7 +1467,7 @@
     {
       "code": 6049,
       "name": "InvalidMintAuthority",
-      "msg": "Candy machine has an invalid mint authority"
+      "msg": "Gumball machine has an invalid mint authority"
     },
     {
       "code": 6050,
@@ -1480,6 +1488,11 @@
       "code": 6053,
       "name": "InvalidPaymentMint",
       "msg": "Invalid payment mint"
+    },
+    {
+      "code": 6054,
+      "name": "InvalidGumballMachineState",
+      "msg": "Invalid gumball machine state"
     }
   ],
   "metadata": {

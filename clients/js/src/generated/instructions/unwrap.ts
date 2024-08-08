@@ -29,11 +29,11 @@ import {
 
 // Accounts.
 export type UnwrapInstructionAccounts = {
-  candyGuard: PublicKey | Pda;
+  gumballGuard: PublicKey | Pda;
   authority?: Signer;
-  candyMachine: PublicKey | Pda;
-  candyMachineAuthority?: Signer;
-  candyMachineProgram?: PublicKey | Pda;
+  gumballMachine: PublicKey | Pda;
+  gumballMachineAuthority?: Signer;
+  gumballMachineProgram?: PublicKey | Pda;
 };
 
 // Data.
@@ -70,26 +70,26 @@ export function unwrap(
 
   // Accounts.
   const resolvedAccounts: ResolvedAccountsWithIndices = {
-    candyGuard: {
+    gumballGuard: {
       index: 0,
       isWritable: false,
-      value: input.candyGuard ?? null,
+      value: input.gumballGuard ?? null,
     },
     authority: { index: 1, isWritable: false, value: input.authority ?? null },
-    candyMachine: {
+    gumballMachine: {
       index: 2,
       isWritable: true,
-      value: input.candyMachine ?? null,
+      value: input.gumballMachine ?? null,
     },
-    candyMachineAuthority: {
+    gumballMachineAuthority: {
       index: 3,
       isWritable: false,
-      value: input.candyMachineAuthority ?? null,
+      value: input.gumballMachineAuthority ?? null,
     },
-    candyMachineProgram: {
+    gumballMachineProgram: {
       index: 4,
       isWritable: false,
-      value: input.candyMachineProgram ?? null,
+      value: input.gumballMachineProgram ?? null,
     },
   };
 
@@ -97,15 +97,16 @@ export function unwrap(
   if (!resolvedAccounts.authority.value) {
     resolvedAccounts.authority.value = context.identity;
   }
-  if (!resolvedAccounts.candyMachineAuthority.value) {
-    resolvedAccounts.candyMachineAuthority.value = context.identity;
+  if (!resolvedAccounts.gumballMachineAuthority.value) {
+    resolvedAccounts.gumballMachineAuthority.value = context.identity;
   }
-  if (!resolvedAccounts.candyMachineProgram.value) {
-    resolvedAccounts.candyMachineProgram.value = context.programs.getPublicKey(
-      'mplCandyMachine',
-      'CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR'
-    );
-    resolvedAccounts.candyMachineProgram.isWritable = false;
+  if (!resolvedAccounts.gumballMachineProgram.value) {
+    resolvedAccounts.gumballMachineProgram.value =
+      context.programs.getPublicKey(
+        'mplCandyMachine',
+        'MGUMqztv7MHgoHBYWbvMyL3E3NJ4UHfTwgLJUQAbKGa'
+      );
+    resolvedAccounts.gumballMachineProgram.isWritable = false;
   }
 
   // Accounts in order.

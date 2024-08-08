@@ -1,17 +1,17 @@
-# Metaplex Candy Machine Core (a.k.a. Candy Machine V3)
+# Metaplex Gumball Machine Core (a.k.a. Gumball Machine V3)
 
 ## Overview
 
-The Metaplex Protocol's `Candy Machine` is the leading minting and distribution program for fair NFT
+The Metaplex Protocol's `Gumball Machine` is the leading minting and distribution program for fair NFT
 collection launches on Solana. It allows creators to bring their asset metadata on-chain and
 provides a mechanism to create (mint) NFTs from the on-chain configuration &mdash; in both
-deterministic and non-deterministic (random) way, like a traditional candy machine.
+deterministic and non-deterministic (random) way, like a traditional gumball machine.
 
-The latest iteration of the `Candy Machine` program retains the core functionality of minting an NFT
+The latest iteration of the `Gumball Machine` program retains the core functionality of minting an NFT
 only, while any access control configuration is now done by the new
-[`Candy Guard`](https://github.com/metaplex-foundation/mpl-candy-guard) program.
+[`Gumball Guard`](https://github.com/metaplex-foundation/mpl-candy-guard) program.
 
-The `Candy Machine` program is responsible for:
+The `Gumball Machine` program is responsible for:
 
 - config line (asset) management: configuration of how many assets are available and their metadata
   information;
@@ -20,7 +20,7 @@ The `Candy Machine` program is responsible for:
 
 ### Why separating mint logic and access control?
 
-Previous versions of the `Candy Machine` included access controls to limit who can mint, when
+Previous versions of the `Gumball Machine` included access controls to limit who can mint, when
 minting is allowed and other settings related to the mint (e.g., price) as part of its minting
 procedure. While the combination of the _mint logic_ with _access controls_ works, this design makes
 it complex to add more features or to remove undesired ones.
@@ -30,70 +30,70 @@ control settings, whithout the risks and complexities of breaking the minting lo
 control logic can be implemented in isolation and users can choose to enable/disable individual
 ones.
 
-### Who can mint from a Candy Machine?
+### Who can mint from a Gumball Machine?
 
-Each `Candy Machine` account has two authorities associated: an `authority` and `mint_authority`.
-The `authority` has permission to manage the configuration of the candy machine. This include adding
+Each `Gumball Machine` account has two authorities associated: an `authority` and `mint_authority`.
+The `authority` has permission to manage the configuration of the gumball machine. This include adding
 config lines (assets), updating its settings, changing authority/mint authorities and
 closing/withdrawing the account.
 
-The `mint_authority` is the only address that is able to mint from a candy machine &mdash; the only
-requirement being that there are NFTs to be minted from it. The `authority` of the candy machine can
+The `mint_authority` is the only address that is able to mint from a gumball machine &mdash; the only
+requirement being that there are NFTs to be minted from it. The `authority` of the gumball machine can
 delegate the `mint_authority` to another address, either a wallet or PDA. This separation allows
 maximum flexibility and enables composability, since other programs can be set as `mint_authority`
-and provide additional features on top of the candy machine. An example of this is the
-[`Candy Guard`](https://github.com/metaplex-foundation/mpl-candy-guard) program, which provides
-access control guards for the candy machine.
+and provide additional features on top of the gumball machine. An example of this is the
+[`Gumball Guard`](https://github.com/metaplex-foundation/mpl-candy-guard) program, which provides
+access control guards for the gumball machine.
 
 ## Account
 
-The `Candy Machine` configuration is stored in a single account, which includes settings that
-control the behaviour of the candy machine and metadata information for the NFTs minted through it.
+The `Gumball Machine` configuration is stored in a single account, which includes settings that
+control the behaviour of the gumball machine and metadata information for the NFTs minted through it.
 The account data is represented by the
-[`CandyMachine`](https://github.com/metaplex-foundation/metaplex-program-library/blob/febo/candy-machine-core/candy-machine-core/program/src/state/candy_machine.rs)
+[`GumballMachine`](https://github.com/metaplex-foundation/metaplex-program-library/blob/febo/candy-machine-core/candy-machine-core/program/src/state/gumball_machine.rs)
 struct, which include references to auxiliary structs
-[`Creator`](https://github.com/metaplex-foundation/metaplex-program-library/blob/febo/candy-machine-core/candy-machine-core/program/src/state/candy_machine_data.rs),
-[`ConfigLineSettings`](https://github.com/metaplex-foundation/metaplex-program-library/blob/febo/candy-machine-core/candy-machine-core/program/src/state/candy_machine_data.rs)
+[`Creator`](https://github.com/metaplex-foundation/metaplex-program-library/blob/febo/candy-machine-core/candy-machine-core/program/src/state/gumball_machine_data.rs),
+[`ConfigLineSettings`](https://github.com/metaplex-foundation/metaplex-program-library/blob/febo/candy-machine-core/candy-machine-core/program/src/state/gumball_machine_data.rs)
 and
-[`HiddenSettings`](https://github.com/metaplex-foundation/metaplex-program-library/blob/febo/candy-machine-core/candy-machine-core/program/src/state/candy_machine_data.rs).
+[`HiddenSettings`](https://github.com/metaplex-foundation/metaplex-program-library/blob/febo/candy-machine-core/candy-machine-core/program/src/state/gumball_machine_data.rs).
 
-| Field                       | Offset | Size | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| --------------------------- | ------ | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| &mdash;                     | 0      | 8    | Anchor account discriminator.                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `account_version`           | 8      | 1    | [`AccountVersion`](https://github.com/metaplex-foundation/metaplex-program-library/blob/febo/candy-machine-core/candy-machine-core/program/src/state/candy_machine.rs)                                                                                                                                                                                                                                                                                                                 |
-| `token_standard`            | 9      | 1    | `u8` indicating the token standard of minted NFTs (`0 = NFT` and `4 = pNFT`)                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `features`                  | 10     | 6    | `[u8; 6]` field to be used as a binary flag to support future features while maintaing backwards compatibility.                                                                                                                                                                                                                                                                                                                                                                        |
-| `authority`                 | 16     | 32   | `PubKey` of the authority address that controls the candy machine.                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `mint_authority`            | 48     | 32   | `PubKey` of the address allowed to mint from the candy machine.                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `collection_mint`           | 80     | 32   | `PubKey` of the collection NFT; each NFT minted from the candy machine will be part of this collection.                                                                                                                                                                                                                                                                                                                                                                                |
-| `items_redeemed`            | 112    | 8    | Number of NFTs minted.                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `data`                      |        |      | [`CandyMachineData`](https://github.com/metaplex-foundation/metaplex-program-library/blob/febo/candy-machine-core/candy-machine-core/program/src/state/candy_machine_data.rs)                                                                                                                                                                                                                                                                                                          |
-| - `item_capacity`           | 120    | 8    | Total number of NFTs available.                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| - `symbol`                  | 128    | 14   | `string` representing the token symbol: `length` (4 bytes) + `symbol` (10 bytes).                                                                                                                                                                                                                                                                                                                                                                                                      |
-| - `seller_fee_basis_points` | 142    | 2    | Royalties percentage awarded to creators (value between 0 and 1000).                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| - `max_supply`              | 144    | 8    | Indicates how many copies (editions) of an NFT can be created after it is minted; this is usually set to `0`.                                                                                                                                                                                                                                                                                                                                                                          |
-| - `is_mutable`              | 152    | 1    | Indicates whether the minted NFT is mutable or not.                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| - `creators`                | 153    | ~    | An array of [`Creator`](https://github.com/metaplex-foundation/metaplex-program-library/blob/febo/candy-machine-core/candy-machine-core/program/src/state/candy_machine_data.rs#L29) and their share of the royalties; this array is limited to 5 creators. **Note:** since the `creators` field is an array of variable length, we cannot guarantee the byte position of any field that follows (Notice the tilde ~ in the fields below). Each creator contains the following fields: |
-| -- `address`                | ~      | 32   | The public key of the creator                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| -- `verified`               | ~      | 1    | The public key of the creator                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| -- `share`                  | ~      | 1    | The public key of the creator                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| - `config_line_settings`    | ~      | 1    | (optional) [`ConfigLineSettings`](https://github.com/metaplex-foundation/metaplex-program-library/blob/febo/candy-machine-core/candy-machine-core/program/src/state/candy_machine_data.rs#L51)                                                                                                                                                                                                                                                                                         |
-| -- `prefix_name`            | ~      | 36   | `string` representing the common part of the name of NFTs.                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| -- `name_length`            | ~      | 4    | `u32` specifying the number of bytes for the remaining part of the name.                                                                                                                                                                                                                                                                                                                                                                                                               |
-| -- `prefix_uri`             | ~      | 204  | `string` representing the common part of the URI of NFTs.                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| -- `uri_length`             | ~      | 4    | `u32` specifying the number of bytes for the remaining part of the URI.                                                                                                                                                                                                                                                                                                                                                                                                                |
-| -- `is_sequential`          | ~      | 1    | Indicates whether the mint index generation is sequential or not.                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| - `hidden_settings`         | ~      | 1    | (optional) [`HiddenSettings`](https://github.com/metaplex-foundation/metaplex-program-library/blob/febo/candy-machine-core/candy-machine-core/program/src/state/candy_machine_data.rs#L40)                                                                                                                                                                                                                                                                                             |
-| -- `name`                   | ~      | 36   | `string` representing the name of NFTs.                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| -- `uri`                    | ~      | 204  | `uri` for the metadata of NFTs.                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| -- `hash`                   | ~      | 32   | `string` representing the hash value of the file that contain the mapping of (mint index, NFT metadata).                                                                                                                                                                                                                                                                                                                                                                               |
-| _hidden section_            | 850    | ~    | (optional) Hidden data section to avoid unnecessary deserialisation. This section of the account is not represented by structs and data is store/retrieved using byte offsets. The hidden data section is not present when `hiddenSettings` are used, since there is no need to store config line settings.                                                                                                                                                                            |
-| - _items_                   | 850    | 4    | Number of NFTs (items) added to the candy machine; eventually this will be the same as `item_capacity`.                                                                                                                                                                                                                                                                                                                                                                                |
-| - _config lines_            | 854    | ~    | A sequence of name and uri pairs representing each NFT; the length of these are determined by `name_length + uri_length`; there will `item_capacity * (name + uri)` pairs in total.                                                                                                                                                                                                                                                                                                    |
-| - _byte mask_               | ~      | ~    | A byte section of length equal to `(item_capacity / 8) + 1` with binary flags to indicate which config lines have been added.                                                                                                                                                                                                                                                                                                                                                          |
-| - _mint indices_            | ~      | ~    | A sequence of `u32` values representing the available mint indices; the usable indices are determined by: valid indices start at the mint number (`items_redeemed`) if `is_sequential` is `true`; otherwise, valid mint indices start from offset 0 until the offset determined by `item_capacity - items_redeemed`.                                                                                                                                                                   |
-| - _rule set flag_           | ~      | 1    | (optional) A bit to indicate if the account contains a rule set (only applicable to `pNFT`).                                                                                                                                                                                                                                                                                                                                                                                           |
-| - _rule set_                | ~      | 32   | (optional) Pubkey of the rule set; this rule set will be added to newly minted `pNFT`s.                                                                                                                                                                                                                                                                                                                                                                                                |
+| Field                       | Offset | Size | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| --------------------------- | ------ | ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| &mdash;                     | 0      | 8    | Anchor account discriminator.                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `account_version`           | 8      | 1    | [`AccountVersion`](https://github.com/metaplex-foundation/metaplex-program-library/blob/febo/candy-machine-core/candy-machine-core/program/src/state/gumball_machine.rs)                                                                                                                                                                                                                                                                                                                 |
+| `token_standard`            | 9      | 1    | `u8` indicating the token standard of minted NFTs (`0 = NFT` and `4 = pNFT`)                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `features`                  | 10     | 6    | `[u8; 6]` field to be used as a binary flag to support future features while maintaing backwards compatibility.                                                                                                                                                                                                                                                                                                                                                                          |
+| `authority`                 | 16     | 32   | `PubKey` of the authority address that controls the gumball machine.                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `mint_authority`            | 48     | 32   | `PubKey` of the address allowed to mint from the gumball machine.                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `collection_mint`           | 80     | 32   | `PubKey` of the collection NFT; each NFT minted from the gumball machine will be part of this collection.                                                                                                                                                                                                                                                                                                                                                                                |
+| `items_redeemed`            | 112    | 8    | Number of NFTs minted.                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `data`                      |        |      | [`GumballMachineData`](https://github.com/metaplex-foundation/metaplex-program-library/blob/febo/candy-machine-core/candy-machine-core/program/src/state/gumball_machine_data.rs)                                                                                                                                                                                                                                                                                                        |
+| - `item_capacity`           | 120    | 8    | Total number of NFTs available.                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| - `symbol`                  | 128    | 14   | `string` representing the token symbol: `length` (4 bytes) + `symbol` (10 bytes).                                                                                                                                                                                                                                                                                                                                                                                                        |
+| - `seller_fee_basis_points` | 142    | 2    | Royalties percentage awarded to creators (value between 0 and 1000).                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| - `max_supply`              | 144    | 8    | Indicates how many copies (editions) of an NFT can be created after it is minted; this is usually set to `0`.                                                                                                                                                                                                                                                                                                                                                                            |
+| - `is_mutable`              | 152    | 1    | Indicates whether the minted NFT is mutable or not.                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| - `creators`                | 153    | ~    | An array of [`Creator`](https://github.com/metaplex-foundation/metaplex-program-library/blob/febo/candy-machine-core/candy-machine-core/program/src/state/gumball_machine_data.rs#L29) and their share of the royalties; this array is limited to 5 creators. **Note:** since the `creators` field is an array of variable length, we cannot guarantee the byte position of any field that follows (Notice the tilde ~ in the fields below). Each creator contains the following fields: |
+| -- `address`                | ~      | 32   | The public key of the creator                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| -- `verified`               | ~      | 1    | The public key of the creator                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| -- `share`                  | ~      | 1    | The public key of the creator                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| - `config_line_settings`    | ~      | 1    | (optional) [`ConfigLineSettings`](https://github.com/metaplex-foundation/metaplex-program-library/blob/febo/candy-machine-core/candy-machine-core/program/src/state/gumball_machine_data.rs#L51)                                                                                                                                                                                                                                                                                         |
+| -- `prefix_name`            | ~      | 36   | `string` representing the common part of the name of NFTs.                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| -- `name_length`            | ~      | 4    | `u32` specifying the number of bytes for the remaining part of the name.                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| -- `prefix_uri`             | ~      | 204  | `string` representing the common part of the URI of NFTs.                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| -- `uri_length`             | ~      | 4    | `u32` specifying the number of bytes for the remaining part of the URI.                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| -- `is_sequential`          | ~      | 1    | Indicates whether the mint index generation is sequential or not.                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| - `hidden_settings`         | ~      | 1    | (optional) [`HiddenSettings`](https://github.com/metaplex-foundation/metaplex-program-library/blob/febo/candy-machine-core/candy-machine-core/program/src/state/gumball_machine_data.rs#L40)                                                                                                                                                                                                                                                                                             |
+| -- `name`                   | ~      | 36   | `string` representing the name of NFTs.                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| -- `uri`                    | ~      | 204  | `uri` for the metadata of NFTs.                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| -- `hash`                   | ~      | 32   | `string` representing the hash value of the file that contain the mapping of (mint index, NFT metadata).                                                                                                                                                                                                                                                                                                                                                                                 |
+| _hidden section_            | 850    | ~    | (optional) Hidden data section to avoid unnecessary deserialisation. This section of the account is not represented by structs and data is store/retrieved using byte offsets. The hidden data section is not present when `hiddenSettings` are used, since there is no need to store config line settings.                                                                                                                                                                              |
+| - _items_                   | 850    | 4    | Number of NFTs (items) added to the gumball machine; eventually this will be the same as `item_capacity`.                                                                                                                                                                                                                                                                                                                                                                                |
+| - _config lines_            | 854    | ~    | A sequence of name and uri pairs representing each NFT; the length of these are determined by `name_length + uri_length`; there will `item_capacity * (name + uri)` pairs in total.                                                                                                                                                                                                                                                                                                      |
+| - _byte mask_               | ~      | ~    | A byte section of length equal to `(item_capacity / 8) + 1` with binary flags to indicate which config lines have been added.                                                                                                                                                                                                                                                                                                                                                            |
+| - _mint indices_            | ~      | ~    | A sequence of `u32` values representing the available mint indices; the usable indices are determined by: valid indices start at the mint number (`items_redeemed`) if `is_sequential` is `true`; otherwise, valid mint indices start from offset 0 until the offset determined by `item_capacity - items_redeemed`.                                                                                                                                                                     |
+| - _rule set flag_           | ~      | 1    | (optional) A bit to indicate if the account contains a rule set (only applicable to `pNFT`).                                                                                                                                                                                                                                                                                                                                                                                             |
+| - _rule set_                | ~      | 32   | (optional) Pubkey of the rule set; this rule set will be added to newly minted `pNFT`s.                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 ## Instructions
 
@@ -103,87 +103,87 @@ and
 ### 📄 `add_config_lines`
 
 This instruction adds config lines to the hidden data section of the account. It can only be used if
-the candy machine has `config_line_settings`.
+the gumball machine has `config_line_settings`.
 
 <details>
   <summary>Accounts</summary>
 
-| Name            | Writable | Signer | Description                                |
-| --------------- | :------: | :----: | ------------------------------------------ |
-| `candy_machine` |    ✅    |        | The `CandyMachine` account.                |
-| `authority`     |          |   ✅   | Public key of the candy machine authority. |
+| Name              | Writable | Signer | Description                                  |
+| ----------------- | :------: | :----: | -------------------------------------------- |
+| `gumball_machine` |    ✅    |        | The `GumballMachine` account.                |
+| `authority`       |          |   ✅   | Public key of the gumball machine authority. |
 
 </details>
 
 <details>
   <summary>Arguments</summary>
 
-| Argument       | Offset | Size | Description                                                                                                                                                                                                                 |
-| -------------- | ------ | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `index`        | 0      | 4    | Index from which the lines will be added.                                                                                                                                                                                   |
-| `config_lines` | 4      | ~    | Array of [`ConfigLine`](https://github.com/metaplex-foundation/metaplex-program-library/blob/febo/candy-machine-core/candy-machine-core/program/src/state/candy_machine.rs#L33) objects representing the lines to be added. |
+| Argument       | Offset | Size | Description                                                                                                                                                                                                                   |
+| -------------- | ------ | ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `index`        | 0      | 4    | Index from which the lines will be added.                                                                                                                                                                                     |
+| `config_lines` | 4      | ~    | Array of [`ConfigLine`](https://github.com/metaplex-foundation/metaplex-program-library/blob/febo/candy-machine-core/candy-machine-core/program/src/state/gumball_machine.rs#L33) objects representing the lines to be added. |
 
 </details>
 
 ### 📄 `initialize` (deprecated)
 
-This instruction creates and initializes a new `CandyMachine` account. It requires that the
-CandyMachine account has been created with the expected size before executing this instruction.
+This instruction creates and initializes a new `GumballMachine` account. It requires that the
+GumballMachine account has been created with the expected size before executing this instruction.
 
 <details>
   <summary>Accounts</summary>
 
-| Name                          | Writable | Signer | Description                                                          |
-| ----------------------------- | :------: | :----: | -------------------------------------------------------------------- |
-| `candy_machine`               |    ✅    |        | The `CandyMachine` account.                                          |
-| `authority_pda`               |    ✅    |        | Authority PDA key (seeds `["candy_machine", candy_machine pubkey]`). |
-| `authority`                   |          |        | Public key of the candy machine authority.                           |
-| `payer`                       |    ✅    |   ✅   | Payer of the transaction.                                            |
-| `collection_metadata`         |          |        | Metadata account of the collection.                                  |
-| `collection_mint`             |          |        | Mint account of the collection.                                      |
-| `collection_master_edition`   |          |        | Master Edition account of the collection.                            |
-| `collection_update_authority` |    ✅    |   ✅   | Update authority of the collection.                                  |
-| `collection_authority_record` |    ✅    |        | Authority Record PDA of the collection.                              |
-| `token_metadata_program`      |          |        | Metaplex `TokenMetadata` program ID.                                 |
-| `system_program`              |          |        | `SystemProgram` account.                                             |
+| Name                          | Writable | Signer | Description                                                              |
+| ----------------------------- | :------: | :----: | ------------------------------------------------------------------------ |
+| `gumball_machine`             |    ✅    |        | The `GumballMachine` account.                                            |
+| `authority_pda`               |    ✅    |        | Authority PDA key (seeds `["gumball_machine", gumball_machine pubkey]`). |
+| `authority`                   |          |        | Public key of the gumball machine authority.                             |
+| `payer`                       |    ✅    |   ✅   | Payer of the transaction.                                                |
+| `collection_metadata`         |          |        | Metadata account of the collection.                                      |
+| `collection_mint`             |          |        | Mint account of the collection.                                          |
+| `collection_master_edition`   |          |        | Master Edition account of the collection.                                |
+| `collection_update_authority` |    ✅    |   ✅   | Update authority of the collection.                                      |
+| `collection_authority_record` |    ✅    |        | Authority Record PDA of the collection.                                  |
+| `token_metadata_program`      |          |        | Metaplex `TokenMetadata` program ID.                                     |
+| `system_program`              |          |        | `SystemProgram` account.                                                 |
 
 </details>
 
 <details>
   <summary>Arguments</summary>
 
-| Argument | Offset | Size | Description                |
-| -------- | ------ | ---- | -------------------------- |
-| `data`   | 0      | ~    | `CandyMachineData` object. |
+| Argument | Offset | Size | Description                  |
+| -------- | ------ | ---- | ---------------------------- |
+| `data`   | 0      | ~    | `GumballMachineData` object. |
 
 </details>
 
 ### 📄 `initialize_v2`
 
-This instruction creates and initializes a new `CandyMachine` account that support multiple token standard. It requires that the
-CandyMachine account has been created with the expected size before executing this instruction. A Candy Machine created through this
+This instruction creates and initializes a new `GumballMachine` account that support multiple token standard. It requires that the
+GumballMachine account has been created with the expected size before executing this instruction. A Gumball Machine created through this
 instruction will have its `AccountVersion` set to `V2`.
 
 <details>
   <summary>Accounts</summary>
 
-| Name                          | Writable | Signer | Description                                                          |
-| ----------------------------- | :------: | :----: | -------------------------------------------------------------------- |
-| `candy_machine`               |    ✅    |        | The `CandyMachine` account.                                          |
-| `authority_pda`               |    ✅    |        | Authority PDA key (seeds `["candy_machine", candy_machine pubkey]`). |
-| `authority`                   |          |        | Public key of the candy machine authority.                           |
-| `payer`                       |    ✅    |   ✅   | Payer of the transaction.                                            |
-| `rule_set`                    |          |        | (optional) Rule set to be added to newly minted NFTs.                |
-| `collection_metadata`         |          |        | Metadata account of the collection.                                  |
-| `collection_mint`             |          |        | Mint account of the collection.                                      |
-| `collection_master_edition`   |          |        | Master Edition account of the collection.                            |
-| `collection_update_authority` |    ✅    |   ✅   | Update authority of the collection.                                  |
-| `collection_delegate_record`  |    ✅    |        | Token Metadata collection delegate record                            |
-| `token_metadata_program`      |          |        | Metaplex `TokenMetadata` program ID.                                 |
-| `system_program`              |          |        | `SystemProgram` account.                                             |
-| `sysvar_instructions`         |          |        | `sysvar::instructions` account.                                      |
-| `authorization_rules_program` |          |        | Token Authorization Rules program.                                   |
-| `authorization_rules`         |          |        | Token Authorization Rules account.                                   |
+| Name                          | Writable | Signer | Description                                                              |
+| ----------------------------- | :------: | :----: | ------------------------------------------------------------------------ |
+| `gumball_machine`             |    ✅    |        | The `GumballMachine` account.                                            |
+| `authority_pda`               |    ✅    |        | Authority PDA key (seeds `["gumball_machine", gumball_machine pubkey]`). |
+| `authority`                   |          |        | Public key of the gumball machine authority.                             |
+| `payer`                       |    ✅    |   ✅   | Payer of the transaction.                                                |
+| `rule_set`                    |          |        | (optional) Rule set to be added to newly minted NFTs.                    |
+| `collection_metadata`         |          |        | Metadata account of the collection.                                      |
+| `collection_mint`             |          |        | Mint account of the collection.                                          |
+| `collection_master_edition`   |          |        | Master Edition account of the collection.                                |
+| `collection_update_authority` |    ✅    |   ✅   | Update authority of the collection.                                      |
+| `collection_delegate_record`  |    ✅    |        | Token Metadata collection delegate record                                |
+| `token_metadata_program`      |          |        | Metaplex `TokenMetadata` program ID.                                     |
+| `system_program`              |          |        | `SystemProgram` account.                                                 |
+| `sysvar_instructions`         |          |        | `sysvar::instructions` account.                                          |
+| `authorization_rules_program` |          |        | Token Authorization Rules program.                                       |
+| `authorization_rules`         |          |        | Token Authorization Rules account.                                       |
 
 </details>
 
@@ -192,24 +192,24 @@ instruction will have its `AccountVersion` set to `V2`.
 
 | Argument         | Offset | Size | Description                                                    |
 | ---------------- | ------ | ---- | -------------------------------------------------------------- |
-| `data`           | 0      | ~    | `CandyMachineData` object.                                     |
+| `data`           | 0      | ~    | `GumballMachineData` object.                                   |
 | `token_standard` | ~      | 1    | `u8` indicating the token standard (`0 = NFT` and `4 = pNFT`). |
 
 </details>
 
 ### 📄 `mint` (deprecated)
 
-This instruction mints an NFT from the Candy Machine. Only the mint authority is able to mint from
-the Candy Machine.
+This instruction mints an NFT from the Gumball Machine. Only the mint authority is able to mint from
+the Gumball Machine.
 
 <details>
   <summary>Accounts</summary>
 
 | Name                          | Writable | Signer | Description                                                                               |
 | ----------------------------- | :------: | :----: | ----------------------------------------------------------------------------------------- | -------- |
-| `candy_machine`               |    ✅    |        | The `CandyMachine` account.                                                               |
-| `authority_pda`               |    ✅    |        | Authority PDA key (seeds `["candy_machine", candy_machine pubkey]`).                      |
-| `mint_authority`              |          |   ✅   | Public key of the candy machine mint authority.                                           |
+| `gumball_machine`             |    ✅    |        | The `GumballMachine` account.                                                             |
+| `authority_pda`               |    ✅    |        | Authority PDA key (seeds `["gumball_machine", gumball_machine pubkey]`).                  |
+| `mint_authority`              |          |   ✅   | Public key of the gumball machine mint authority.                                         |
 | `payer`                       |    ✅    |   ✅   | Payer of the transaction.                                                                 |
 | `nft_mint`                    |    ✅    |        | Mint account for the NFT. The account should be created before executing the instruction. |
 | `nft_mint_authority`          |          |   ✅   | Mint authority of the NFT.                                                                |
@@ -236,17 +236,17 @@ None.
 
 ### 📄 `mint_v2`
 
-This instruction mints both `NFT` or `pNFT` from the Candy Machine. Only the mint authority is able to mint from
-the Candy Machine.
+This instruction mints both `NFT` or `pNFT` from the Gumball Machine. Only the mint authority is able to mint from
+the Gumball Machine.
 
 <details>
   <summary>Accounts</summary>
 
 | Name                          | Writable | Signer | Description                                                                                                                 |
 | ----------------------------- | :------: | :----: | --------------------------------------------------------------------------------------------------------------------------- |
-| `candy_machine`               |    ✅    |        | The `CandyMachine` account.                                                                                                 |
-| `authority_pda`               |    ✅    |        | Authority PDA key (seeds `["candy_machine", candy_machine pubkey]`).                                                        |
-| `mint_authority`              |          |   ✅   | Public key of the candy machine mint authority.                                                                             |
+| `gumball_machine`             |    ✅    |        | The `GumballMachine` account.                                                                                               |
+| `authority_pda`               |    ✅    |        | Authority PDA key (seeds `["gumball_machine", gumball_machine pubkey]`).                                                    |
+| `mint_authority`              |          |   ✅   | Public key of the gumball machine mint authority.                                                                           |
 | `payer`                       |    ✅    |   ✅   | Payer of the transaction.                                                                                                   |
 | `nft_owner`                   |          |        | NFT token account owner.                                                                                                    |
 | `nft_mint`                    |    ✅    |        | Mint account for the NFT. The account should be created before executing the instruction.                                   |
@@ -280,17 +280,17 @@ None.
 
 ### 📄 `set_authority`
 
-This instruction changes the authority of the candy machine. Note that this operation is
-irreversible, once you change the authority of the Candy Machine, the current authority will lose
+This instruction changes the authority of the gumball machine. Note that this operation is
+irreversible, once you change the authority of the Gumball Machine, the current authority will lose
 the right to operate it.
 
 <details>
   <summary>Accounts</summary>
 
-| Name            | Writable | Signer | Description                                |
-| --------------- | :------: | :----: | ------------------------------------------ |
-| `candy_machine` |    ✅    |        | The `CandyMachine` account.                |
-| `authority`     |          |   ✅   | Public key of the candy machine authority. |
+| Name              | Writable | Signer | Description                                  |
+| ----------------- | :------: | :----: | -------------------------------------------- |
+| `gumball_machine` |    ✅    |        | The `GumballMachine` account.                |
+| `authority`       |          |   ✅   | Public key of the gumball machine authority. |
 
 </details>
 
@@ -305,28 +305,28 @@ the right to operate it.
 
 ### 📄 `set_collection` (deprecated)
 
-This instruction sets the collection to be used by the Candy Machine. The collection can only be
+This instruction sets the collection to be used by the Gumball Machine. The collection can only be
 changed if no NFTs have been minted.
 
 <details>
   <summary>Accounts</summary>
 
-| Name                              | Writable | Signer | Description                                                          |
-| --------------------------------- | :------: | :----: | -------------------------------------------------------------------- |
-| `candy_machine`                   |    ✅    |        | The `CandyMachine` account.                                          |
-| `authority`                       |          |   ✅   | Public key of the candy machine authority.                           |
-| `authority_pda`                   |    ✅    |        | Authority PDA key (seeds `["candy_machine", candy_machine pubkey]`). |
-| `payer`                           |    ✅    |   ✅   | Payer of the transaction.                                            |
-| `collection_mint`                 |          |        | Mint account of the current collection.                              |
-| `collection_metadata`             |          |        | Metadata account of the current collection.                          |
-| `collection_authority_record`     |    ✅    |        | Authority Record PDA of the current collection.                      |
-| `new_collection_update_authority` |    ✅    |   ✅   | Authority Record PDA of the new collection.                          |
-| `new_collection_metadata`         |          |        | Metadata account of the new collection.                              |
-| `new_collection_mint`             |          |        | Mint account of the new collection.                                  |
-| `new_collection_master_edition`   |          |        | Master Edition account of the new collection.                        |
-| `new_collection_authority_record` |    ✅    |        | Authority Record PDA of the new collection.                          |
-| `token_metadata_program`          |          |        | Metaplex `TokenMetadata` program ID.                                 |
-| `system_program`                  |          |        | `SystemProgram` account.                                             |
+| Name                              | Writable | Signer | Description                                                              |
+| --------------------------------- | :------: | :----: | ------------------------------------------------------------------------ |
+| `gumball_machine`                 |    ✅    |        | The `GumballMachine` account.                                            |
+| `authority`                       |          |   ✅   | Public key of the gumball machine authority.                             |
+| `authority_pda`                   |    ✅    |        | Authority PDA key (seeds `["gumball_machine", gumball_machine pubkey]`). |
+| `payer`                           |    ✅    |   ✅   | Payer of the transaction.                                                |
+| `collection_mint`                 |          |        | Mint account of the current collection.                                  |
+| `collection_metadata`             |          |        | Metadata account of the current collection.                              |
+| `collection_authority_record`     |    ✅    |        | Authority Record PDA of the current collection.                          |
+| `new_collection_update_authority` |    ✅    |   ✅   | Authority Record PDA of the new collection.                              |
+| `new_collection_metadata`         |          |        | Metadata account of the new collection.                                  |
+| `new_collection_mint`             |          |        | Mint account of the new collection.                                      |
+| `new_collection_master_edition`   |          |        | Master Edition account of the new collection.                            |
+| `new_collection_authority_record` |    ✅    |        | Authority Record PDA of the new collection.                              |
+| `token_metadata_program`          |          |        | Metaplex `TokenMetadata` program ID.                                     |
+| `system_program`                  |          |        | `SystemProgram` account.                                                 |
 
 </details>
 
@@ -339,32 +339,32 @@ None.
 
 ### 📄 `set_collection_v2`
 
-This instruction sets the collection to be used by Candy Machine's `AccountVersion::V1` or `AccountVersion::V2`. The collection can only be
+This instruction sets the collection to be used by Gumball Machine's `AccountVersion::V1` or `AccountVersion::V2`. The collection can only be
 changed if no (p)NFTs have been minted.
 
 <details>
   <summary>Accounts</summary>
 
-| Name                              | Writable | Signer | Description                                                          |
-| --------------------------------- | :------: | :----: | -------------------------------------------------------------------- |
-| `candy_machine`                   |    ✅    |        | The `CandyMachine` account.                                          |
-| `authority`                       |          |   ✅   | Public key of the candy machine authority.                           |
-| `authority_pda`                   |    ✅    |        | Authority PDA key (seeds `["candy_machine", candy_machine pubkey]`). |
-| `payer`                           |    ✅    |   ✅   | Payer of the transaction.                                            |
-| `collection_update_authority`     |          |        | Update authority account of the current collection.                  |
-| `collection_mint`                 |          |        | Mint account of the current collection.                              |
-| `collection_metadata`             |          |        | Metadata account of the current collection.                          |
-| `collection_delegate_record`      |    ✅    |        | Metadata Delegate Record of the current collection.                  |
-| `new_collection_update_authority` |    ✅    |   ✅   | Authority Record PDA of the new collection.                          |
-| `new_collection_mint`             |          |        | Mint account of the new collection.                                  |
-| `new_collection_metadata`         |          |        | Metadata account of the new collection.                              |
-| `new_collection_master_edition`   |          |        | Master Edition account of the new collection.                        |
-| `new_collection_delegate_record`  |    ✅    |        | Metadata Delegate Record of the new collection.                      |
-| `token_metadata_program`          |          |        | Metaplex `TokenMetadata` program ID.                                 |
-| `system_program`                  |          |        | `SystemProgram` account.                                             |
-| `sysvar_instructions`             |          |        | `sysvar::instructions` account.                                      |
-| `authorization_rules_program`     |          |        | (optional) Token Authorization Rules program.                        |
-| `authorization_rules`             |          |        | (optional) Token Authorization Rules account.                        |
+| Name                              | Writable | Signer | Description                                                              |
+| --------------------------------- | :------: | :----: | ------------------------------------------------------------------------ |
+| `gumball_machine`                 |    ✅    |        | The `GumballMachine` account.                                            |
+| `authority`                       |          |   ✅   | Public key of the gumball machine authority.                             |
+| `authority_pda`                   |    ✅    |        | Authority PDA key (seeds `["gumball_machine", gumball_machine pubkey]`). |
+| `payer`                           |    ✅    |   ✅   | Payer of the transaction.                                                |
+| `collection_update_authority`     |          |        | Update authority account of the current collection.                      |
+| `collection_mint`                 |          |        | Mint account of the current collection.                                  |
+| `collection_metadata`             |          |        | Metadata account of the current collection.                              |
+| `collection_delegate_record`      |    ✅    |        | Metadata Delegate Record of the current collection.                      |
+| `new_collection_update_authority` |    ✅    |   ✅   | Authority Record PDA of the new collection.                              |
+| `new_collection_mint`             |          |        | Mint account of the new collection.                                      |
+| `new_collection_metadata`         |          |        | Metadata account of the new collection.                                  |
+| `new_collection_master_edition`   |          |        | Master Edition account of the new collection.                            |
+| `new_collection_delegate_record`  |    ✅    |        | Metadata Delegate Record of the new collection.                          |
+| `token_metadata_program`          |          |        | Metaplex `TokenMetadata` program ID.                                     |
+| `system_program`                  |          |        | `SystemProgram` account.                                                 |
+| `sysvar_instructions`             |          |        | `sysvar::instructions` account.                                          |
+| `authorization_rules_program`     |          |        | (optional) Token Authorization Rules program.                            |
+| `authorization_rules`             |          |        | (optional) Token Authorization Rules account.                            |
 
 </details>
 
@@ -377,18 +377,18 @@ None.
 
 ### 📄 `set_mint_authority`
 
-This instruction changes the mint authority of the Candy Machine. Note that this operation is
-irreversible, once you change the mint authority of the Candy Machine, the current mint authority
-will lose the right to mint from the Candy Machine.
+This instruction changes the mint authority of the Gumball Machine. Note that this operation is
+irreversible, once you change the mint authority of the Gumball Machine, the current mint authority
+will lose the right to mint from the Gumball Machine.
 
 <details>
   <summary>Accounts</summary>
 
-| Name             | Writable | Signer | Description                                |
-| ---------------- | :------: | :----: | ------------------------------------------ |
-| `candy_machine`  |    ✅    |        | The `CandyMachine` account.                |
-| `authority`      |          |   ✅   | Public key of the candy machine authority. |
-| `mint_authority` |          |   ✅   | Public key of the new mint authority.      |
+| Name              | Writable | Signer | Description                                  |
+| ----------------- | :------: | :----: | -------------------------------------------- |
+| `gumball_machine` |    ✅    |        | The `GumballMachine` account.                |
+| `authority`       |          |   ✅   | Public key of the gumball machine authority. |
+| `mint_authority`  |          |   ✅   | Public key of the new mint authority.        |
 
 </details>
 
@@ -401,28 +401,28 @@ None.
 
 ### 📄 `set_token_standard`
 
-This instruction sets the token standard and (optional) rule set to be used by the Candy Machine. It will also update the version of the Candy Machine account to `V2` and set a Medatada Collection delegate (instead of the Authority Record PDA).
+This instruction sets the token standard and (optional) rule set to be used by the Gumball Machine. It will also update the version of the Gumball Machine account to `V2` and set a Medatada Collection delegate (instead of the Authority Record PDA).
 
 <details>
   <summary>Accounts</summary>
 
-| Name                          | Writable | Signer | Description                                                          |
-| ----------------------------- | :------: | :----: | -------------------------------------------------------------------- |
-| `candy_machine`               |    ✅    |        | The `CandyMachine` account.                                          |
-| `authority`                   |          |   ✅   | Public key of the candy machine authority.                           |
-| `authority_pda`               |    ✅    |        | Authority PDA key (seeds `["candy_machine", candy_machine pubkey]`). |
-| `payer`                       |    ✅    |   ✅   | Payer of the transaction.                                            |
-| `rule_set`                    |          |        | (optional) Rule set to be added to newly minted NFTs.                |
-| `collection_delegate_record`  |    ✅    |        | Metadata Delegate Record of the current collection.                  |
-| `collection_mint`             |          |        | Mint account of the current collection.                              |
-| `collection_metadata`         |          |        | Metadata account of the current collection.                          |
-| `collection_authority_record` |    ✅    |        | (optional) Authority Record PDA of the current collection.           |
-| `collection_update_authority` |          |        | Update authority account of the current collection.                  |
-| `token_metadata_program`      |          |        | Metaplex `TokenMetadata` program ID.                                 |
-| `system_program`              |          |        | `SystemProgram` account.                                             |
-| `sysvar_instructions`         |          |        | `sysvar::instructions` account.                                      |
-| `authorization_rules_program` |          |        | (optional) Token Authorization Rules program.                        |
-| `authorization_rules`         |          |        | (optional) Token Authorization Rules account.                        |
+| Name                          | Writable | Signer | Description                                                              |
+| ----------------------------- | :------: | :----: | ------------------------------------------------------------------------ |
+| `gumball_machine`             |    ✅    |        | The `GumballMachine` account.                                            |
+| `authority`                   |          |   ✅   | Public key of the gumball machine authority.                             |
+| `authority_pda`               |    ✅    |        | Authority PDA key (seeds `["gumball_machine", gumball_machine pubkey]`). |
+| `payer`                       |    ✅    |   ✅   | Payer of the transaction.                                                |
+| `rule_set`                    |          |        | (optional) Rule set to be added to newly minted NFTs.                    |
+| `collection_delegate_record`  |    ✅    |        | Metadata Delegate Record of the current collection.                      |
+| `collection_mint`             |          |        | Mint account of the current collection.                                  |
+| `collection_metadata`         |          |        | Metadata account of the current collection.                              |
+| `collection_authority_record` |    ✅    |        | (optional) Authority Record PDA of the current collection.               |
+| `collection_update_authority` |          |        | Update authority account of the current collection.                      |
+| `token_metadata_program`      |          |        | Metaplex `TokenMetadata` program ID.                                     |
+| `system_program`              |          |        | `SystemProgram` account.                                                 |
+| `sysvar_instructions`         |          |        | `sysvar::instructions` account.                                          |
+| `authorization_rules_program` |          |        | (optional) Token Authorization Rules program.                            |
+| `authorization_rules`         |          |        | (optional) Token Authorization Rules account.                            |
 
 </details>
 
@@ -437,7 +437,7 @@ This instruction sets the token standard and (optional) rule set to be used by t
 
 ### 📄 `update`
 
-This instruction updates the configuration of the Candy Machine. There are restrictions on which
+This instruction updates the configuration of the Gumball Machine. There are restrictions on which
 configuration can be updated:
 
 - `item_capacity`: can only be updated when `hidden_settings` are used.
@@ -451,34 +451,34 @@ configuration can be updated:
 <details>
   <summary>Accounts</summary>
 
-| Name            | Writable | Signer | Description                                |
-| --------------- | :------: | :----: | ------------------------------------------ |
-| `candy_machine` |    ✅    |        | The `CandyMachine` account.                |
-| `authority`     |          |   ✅   | Public key of the candy machine authority. |
+| Name              | Writable | Signer | Description                                  |
+| ----------------- | :------: | :----: | -------------------------------------------- |
+| `gumball_machine` |    ✅    |        | The `GumballMachine` account.                |
+| `authority`       |          |   ✅   | Public key of the gumball machine authority. |
 
 </details>
 
 <details>
   <summary>Arguments</summary>
 
-| Argument | Offset | Size | Description                |
-| -------- | ------ | ---- | -------------------------- |
-| `data`   | 0      | ~    | `CandyMachineData` object. |
+| Argument | Offset | Size | Description                  |
+| -------- | ------ | ---- | ---------------------------- |
+| `data`   | 0      | ~    | `GumballMachineData` object. |
 
 </details>
 
 ### 📄 `withdraw`
 
 This instruction withdraws the rent lamports from the account and closes it. After executing this
-instruction, the Candy Machine will not be operational.
+instruction, the Gumball Machine will not be operational.
 
 <details>
   <summary>Accounts</summary>
 
-| Name            | Writable | Signer | Description                                |
-| --------------- | :------: | :----: | ------------------------------------------ |
-| `candy_machine` |    ✅    |        | The `CandyMachine` account.                |
-| `authority`     |    ✅    |   ✅   | Public key of the candy machine authority. |
+| Name              | Writable | Signer | Description                                  |
+| ----------------- | :------: | :----: | -------------------------------------------- |
+| `gumball_machine` |    ✅    |        | The `GumballMachine` account.                |
+| `authority`       |    ✅    |   ✅   | Public key of the gumball machine authority. |
 
 </details>
 
@@ -491,14 +491,14 @@ None.
 
 ## Features
 
-Main improvements over the previous Candy Machine program.
+Main improvements over the previous Gumball Machine program.
 
 ### Account space utilization
 
 It is now possible to define a pattern to store the `name` and `uri` configuration in the format of
 `prefix_name + name` and `prefix_uri + uri`, where both `prefix_name` and `prefix_uri` are shared
 among all config lines. This provides account space saving, since there is no need to store repeated
-bytes in the account, leading to the possibility of creating larger Candy Machines and reducing the
+bytes in the account, leading to the possibility of creating larger Gumball Machines and reducing the
 cost of deployment.
 
 Instead of storing full URIs &mdash; e.g.,
@@ -523,7 +523,7 @@ NFT is minted.
 
 ### Hidden settings with "automatic" reveal
 
-Hidden settings are the most space efficient way to create a `Candy Machine` since no config lines
+Hidden settings are the most space efficient way to create a `Gumball Machine` since no config lines
 are stored on the account. At the same time, it is necessary to run an update metadata procedure
 &mdash; dubbed **reveal** &mdash; after the mint to set each individual name and URI on the metadata
 of minted NFTs.
@@ -546,8 +546,8 @@ is **sequential**.
 
 Currently the random index generation uses a sequential procedure to find the next available mint
 index. While this procedure works for most cases, it is not efficient (in terms of compute units)
-and it can reach the limit of compute units on large Candy Machine deploys.
+and it can reach the limit of compute units on large Gumball Machine deploys.
 
-The new Candy Machine uses an improved procedure that consumes a fixed amount of compute units
+The new Gumball Machine uses an improved procedure that consumes a fixed amount of compute units
 regardless of the number of items and, at the same time, shuffles the values to improve their
 unpredictability.

@@ -10,9 +10,9 @@ import { GuardManifest, noopParser } from '../guards';
  * The mintLimit guard allows to specify a limit on the
  * number of mints for each individual wallet.
  *
- * The limit is set per wallet, per candy machine and per
+ * The limit is set per wallet, per gumball machine and per
  * identified (provided in the settings) to allow multiple
- * mint limits within a Candy Machine. This is particularly
+ * mint limits within a Gumball Machine. This is particularly
  * useful when using groups of guards and we want each of them
  * to have a different mint limit.
  */
@@ -30,8 +30,8 @@ export const mintLimitGuardManifest: GuardManifest<
         publicKey: findMintCounterPda(context, {
           id: args.id,
           user: mintContext.buyer.publicKey,
-          candyMachine: mintContext.candyMachine,
-          candyGuard: mintContext.candyGuard,
+          gumballMachine: mintContext.gumballMachine,
+          gumballGuard: mintContext.gumballGuard,
         })[0],
         isWritable: true,
       },

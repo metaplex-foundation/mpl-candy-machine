@@ -29,9 +29,9 @@ import {
 
 // Accounts.
 export type StartSaleInstructionAccounts = {
-  /** Candy machine account. */
-  candyMachine: PublicKey | Pda;
-  /** Candy Machine authority. This is the address that controls the upate of the candy machine. */
+  /** Gumball machine account. */
+  gumballMachine: PublicKey | Pda;
+  /** Gumball Machine authority. This is the address that controls the upate of the gumball machine. */
   authority?: Signer;
 };
 
@@ -73,10 +73,10 @@ export function startSale(
 
   // Accounts.
   const resolvedAccounts: ResolvedAccountsWithIndices = {
-    candyMachine: {
+    gumballMachine: {
       index: 0,
       isWritable: true,
-      value: input.candyMachine ?? null,
+      value: input.gumballMachine ?? null,
     },
     authority: { index: 1, isWritable: true, value: input.authority ?? null },
   };

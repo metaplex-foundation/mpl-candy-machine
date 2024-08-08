@@ -12,8 +12,8 @@ import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
 import test from 'ava';
 import {
   draw,
-  fetchCandyMachine,
-  findCandyMachineAuthorityPda,
+  fetchGumballMachine,
+  findGumballMachineAuthorityPda,
   TokenStandard,
 } from '../../src';
 import {
@@ -25,10 +25,10 @@ import {
 } from '../_setup';
 
 test('it transfers SOL from the payer to the authority pda', async (t) => {
-  // Given a loaded Candy Machine with a solPayment guard.
+  // Given a loaded Gumball Machine with a solPayment guard.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -49,7 +49,7 @@ test('it transfers SOL from the payer to the authority pda', async (t) => {
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
         buyer,
         payer,
         mintArgs: { solPayment: some(true) },
@@ -58,10 +58,12 @@ test('it transfers SOL from the payer to the authority pda', async (t) => {
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertItemBought(t, umi, { candyMachine, buyer: publicKey(buyer) });
+  await assertItemBought(t, umi, { gumballMachine, buyer: publicKey(buyer) });
 
   // And the treasury received SOLs.
-  const authorityPda = findCandyMachineAuthorityPda(umi, { candyMachine })[0];
+  const authorityPda = findGumballMachineAuthorityPda(umi, {
+    gumballMachine: gumballMachine,
+  })[0];
   const treasuryBalance = await umi.rpc.getBalance(authorityPda);
   t.true(
     isEqualToAmount(treasuryBalance, sol(1), sol(0.001)),
@@ -73,18 +75,18 @@ test('it transfers SOL from the payer to the authority pda', async (t) => {
   t.true(isEqualToAmount(payerBalance, sol(9), sol(0.1)), 'payer lost SOLs');
 
   // Total revenue is incremented
-  const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
+  const gumballMachineAccount = await fetchGumballMachine(umi, gumballMachine);
   t.true(
-    isEqualToAmount(lamports(candyMachineAccount.totalRevenue), sol(1)),
+    isEqualToAmount(lamports(gumballMachineAccount.totalRevenue), sol(1)),
     'total revenue is incremented'
   );
 });
 
 test('it fails if the payer does not have enough funds', async (t) => {
-  // Given a loaded Candy Machine with a solPayment guard costing 5 SOLs.
+  // Given a loaded Gumball Machine with a solPayment guard costing 5 SOLs.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -104,7 +106,7 @@ test('it fails if the payer does not have enough funds', async (t) => {
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
         payer,
         mintArgs: { solPayment: some(true) },
       })
@@ -120,10 +122,10 @@ test('it fails if the payer does not have enough funds', async (t) => {
 });
 
 test('it charges a bot tax if the payer does not have enough funds', async (t) => {
-  // Given a loaded Candy Machine with a solPayment guard costing 5 SOLs and a botTax guard.
+  // Given a loaded Gumball Machine with a solPayment guard costing 5 SOLs and a botTax guard.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -144,7 +146,7 @@ test('it charges a bot tax if the payer does not have enough funds', async (t) =
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
         payer,
         mintArgs: { solPayment: some(true) },
       })

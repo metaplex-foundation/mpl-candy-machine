@@ -10,7 +10,7 @@ import {
   draw,
   fetchAllocationTracker,
   findAllocationTrackerPda,
-  findCandyGuardPda,
+  findGumballGuardPda,
   route,
   TokenStandard,
 } from '../../src';
@@ -23,10 +23,10 @@ import {
 } from '../_setup';
 
 test('it allows minting when the allocation limit is not reached', async (t) => {
-  // Given a loaded Candy Machine with an allocation limit of 5.
+  // Given a loaded Gumball Machine with an allocation limit of 5.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -47,11 +47,11 @@ test('it allows minting when the allocation limit is not reached', async (t) => 
   await transactionBuilder()
     .add(
       route(umi, {
-        candyMachine,
+        gumballMachine,
         guard: 'allocation',
         routeArgs: {
           id: 1,
-          candyGuardAuthority: umi.identity,
+          gumballGuardAuthority: umi.identity,
         },
       })
     )
@@ -63,7 +63,7 @@ test('it allows minting when the allocation limit is not reached', async (t) => 
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         mintArgs: { allocation: some({ id: 1 }) },
       })
@@ -71,23 +71,23 @@ test('it allows minting when the allocation limit is not reached', async (t) => 
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertItemBought(t, umi, { candyMachine });
+  await assertItemBought(t, umi, { gumballMachine });
 
   // And the mint tracker PDA was incremented.
   const trackerPda = findAllocationTrackerPda(umi, {
     id: 1,
-    candyMachine,
-    candyGuard: findCandyGuardPda(umi, { base: candyMachine })[0],
+    gumballMachine,
+    gumballGuard: findGumballGuardPda(umi, { base: gumballMachine })[0],
   });
   const trackerPdaAccount = await fetchAllocationTracker(umi, trackerPda);
   t.is(trackerPdaAccount.count, 1);
 });
 
 test('it forbids minting when the allocation limit is reached', async (t) => {
-  // Given a loaded Candy Machine with an allocation limit of 1.
+  // Given a loaded Gumball Machine with an allocation limit of 1.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -108,11 +108,11 @@ test('it forbids minting when the allocation limit is reached', async (t) => {
   await transactionBuilder()
     .add(
       route(umi, {
-        candyMachine,
+        gumballMachine,
         guard: 'allocation',
         routeArgs: {
           id: 1,
-          candyGuardAuthority: umi.identity,
+          gumballGuardAuthority: umi.identity,
         },
       })
     )
@@ -124,7 +124,7 @@ test('it forbids minting when the allocation limit is reached', async (t) => {
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         mintArgs: { allocation: some({ id: 1 }) },
       })
@@ -136,7 +136,7 @@ test('it forbids minting when the allocation limit is reached', async (t) => {
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         mintArgs: { allocation: some({ id: 1 }) },
       })
@@ -148,10 +148,10 @@ test('it forbids minting when the allocation limit is reached', async (t) => {
 });
 
 test('the allocation limit is local to each id', async (t) => {
-  // Given a loaded Candy Machine with two allocation limits of 1.
+  // Given a loaded Gumball Machine with two allocation limits of 1.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -184,22 +184,22 @@ test('the allocation limit is local to each id', async (t) => {
   await transactionBuilder()
     .add(
       route(umi, {
-        candyMachine,
+        gumballMachine,
         guard: 'allocation',
         routeArgs: {
           id: 1,
-          candyGuardAuthority: umi.identity,
+          gumballGuardAuthority: umi.identity,
         },
         group: some('GROUPA'),
       })
     )
     .add(
       route(umi, {
-        candyMachine,
+        gumballMachine,
         guard: 'allocation',
         routeArgs: {
           id: 2,
-          candyGuardAuthority: umi.identity,
+          gumballGuardAuthority: umi.identity,
         },
         group: some('GROUPB'),
       })
@@ -212,22 +212,22 @@ test('the allocation limit is local to each id', async (t) => {
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
         buyer: buyerA,
         mintArgs: { allocation: some({ id: 1 }) },
         group: some('GROUPA'),
       })
     )
     .sendAndConfirm(umi);
-  await assertItemBought(t, umi, { candyMachine, buyer: buyerA.publicKey });
+  await assertItemBought(t, umi, { gumballMachine, buyer: buyerA.publicKey });
 
-  // When buyer B mints from the same Candy Machine but from a different group.
+  // When buyer B mints from the same Gumball Machine but from a different group.
   const buyerB = generateSigner(umi);
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
         buyer: buyerB,
         mintArgs: { allocation: some({ id: 2 }) },
         group: some('GROUPB'),
@@ -236,14 +236,14 @@ test('the allocation limit is local to each id', async (t) => {
     .sendAndConfirm(umi);
 
   // Then minting was successful as the limit is per id.
-  await assertItemBought(t, umi, { candyMachine, buyer: buyerB.publicKey });
+  await assertItemBought(t, umi, { gumballMachine, buyer: buyerB.publicKey });
 });
 
 test('it charges a bot tax when trying to mint after the limit', async (t) => {
-  // Given a loaded Candy Machine with an allocation limit of 1 and a bot tax guard.
+  // Given a loaded Gumball Machine with an allocation limit of 1 and a bot tax guard.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -265,11 +265,11 @@ test('it charges a bot tax when trying to mint after the limit', async (t) => {
   await transactionBuilder()
     .add(
       route(umi, {
-        candyMachine,
+        gumballMachine,
         guard: 'allocation',
         routeArgs: {
           id: 1,
-          candyGuardAuthority: umi.identity,
+          gumballGuardAuthority: umi.identity,
         },
       })
     )
@@ -280,19 +280,19 @@ test('it charges a bot tax when trying to mint after the limit', async (t) => {
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         mintArgs: { allocation: some({ id: 1 }) },
       })
     )
     .sendAndConfirm(umi);
 
-  // When the identity tries to mint from the same Candy Machine again.
+  // When the identity tries to mint from the same Gumball Machine again.
   const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         mintArgs: { allocation: some({ id: 1 }) },
       })

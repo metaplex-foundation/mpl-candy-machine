@@ -16,10 +16,10 @@ import {
 } from '../_setup';
 
 test('it allows minting from a specific address only', async (t) => {
-  // Given a loaded Candy Machine with an addressGate guard.
+  // Given a loaded Gumball Machine with an addressGate guard.
   const umi = await createUmi();
   const allowedAddress = generateSigner(umi);
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -38,7 +38,7 @@ test('it allows minting from a specific address only', async (t) => {
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
         buyer: allowedAddress,
       })
     )
@@ -46,16 +46,16 @@ test('it allows minting from a specific address only', async (t) => {
 
   // Then minting was successful.
   await assertItemBought(t, umi, {
-    candyMachine,
+    gumballMachine,
     buyer: allowedAddress.publicKey,
   });
 });
 
 test('it forbids minting from anyone else', async (t) => {
-  // Given a candy machine with an addressGate guard.
+  // Given a gumball machine with an addressGate guard.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -74,7 +74,7 @@ test('it forbids minting from anyone else', async (t) => {
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
         buyer: unauthorizedMinter,
       })
     )
@@ -85,10 +85,10 @@ test('it forbids minting from anyone else', async (t) => {
 });
 
 test('it charges a bot tax when trying to mint using the wrong address', async (t) => {
-  // Given a candy machine with an addressGate guard and a bot tax.
+  // Given a gumball machine with an addressGate guard and a bot tax.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -109,7 +109,7 @@ test('it charges a bot tax when trying to mint using the wrong address', async (
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
         buyer: unauthorizedMinter,
       })
     )

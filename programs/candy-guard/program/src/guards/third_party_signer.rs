@@ -33,7 +33,7 @@ impl Condition for ThirdPartySigner {
         let signer_account = try_get_account_info(ctx.accounts.remaining, signer_index)?;
 
         if !(cmp_pubkeys(signer_account.key, &self.signer_key) && signer_account.is_signer) {
-            return err!(CandyGuardError::MissingRequiredSignature);
+            return err!(GumballGuardError::MissingRequiredSignature);
         }
 
         Ok(())

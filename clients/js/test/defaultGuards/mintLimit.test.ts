@@ -10,7 +10,7 @@ import test from 'ava';
 import {
   draw,
   fetchMintCounter,
-  findCandyGuardPda,
+  findGumballGuardPda,
   findMintCounterPda,
   TokenStandard,
 } from '../../src';
@@ -23,10 +23,10 @@ import {
 } from '../_setup';
 
 test('it allows minting when the mint limit is not reached', async (t) => {
-  // Given a loaded Candy Machine with a mint limit of 5.
+  // Given a loaded Gumball Machine with a mint limit of 5.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -49,7 +49,7 @@ test('it allows minting when the mint limit is not reached', async (t) => {
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         mintArgs: { mintLimit: some({ id: 1 }) },
       })
@@ -57,24 +57,24 @@ test('it allows minting when the mint limit is not reached', async (t) => {
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertItemBought(t, umi, { candyMachine });
+  await assertItemBought(t, umi, { gumballMachine });
 
   // And the mint limit PDA was incremented.
   const counterPda = findMintCounterPda(umi, {
     id: 1,
     user: umi.identity.publicKey,
-    candyMachine,
-    candyGuard: findCandyGuardPda(umi, { base: candyMachine })[0],
+    gumballMachine,
+    gumballGuard: findGumballGuardPda(umi, { base: gumballMachine })[0],
   });
   const counterAccount = await fetchMintCounter(umi, counterPda);
   t.is(counterAccount.count, 1);
 });
 
 test('it allows minting even when the payer is different from the buyer', async (t) => {
-  // Given a loaded Candy Machine with a mint limit of 5.
+  // Given a loaded Gumball Machine with a mint limit of 5.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -98,7 +98,7 @@ test('it allows minting even when the payer is different from the buyer', async 
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         buyer,
 
@@ -108,24 +108,24 @@ test('it allows minting even when the payer is different from the buyer', async 
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertItemBought(t, umi, { candyMachine, buyer: publicKey(buyer) });
+  await assertItemBought(t, umi, { gumballMachine, buyer: publicKey(buyer) });
 
   // And the mint limit PDA was incremented for that buyer.
   const counterPda = findMintCounterPda(umi, {
     id: 1,
     user: buyer.publicKey,
-    candyMachine,
-    candyGuard: findCandyGuardPda(umi, { base: candyMachine })[0],
+    gumballMachine,
+    gumballGuard: findGumballGuardPda(umi, { base: gumballMachine })[0],
   });
   const counterAccount = await fetchMintCounter(umi, counterPda);
   t.is(counterAccount.count, 1);
 });
 
 test('it forbids minting when the mint limit is reached', async (t) => {
-  // Given a loaded Candy Machine with a mint limit of 1.
+  // Given a loaded Gumball Machine with a mint limit of 1.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -148,19 +148,19 @@ test('it forbids minting when the mint limit is reached', async (t) => {
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         mintArgs: { mintLimit: some({ id: 42 }) },
       })
     )
     .sendAndConfirm(umi);
 
-  // When that same identity tries to mint from the same Candy Machine again.
+  // When that same identity tries to mint from the same Gumball Machine again.
   const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
         mintArgs: { mintLimit: some({ id: 42 }) },
       })
     )
@@ -171,10 +171,10 @@ test('it forbids minting when the mint limit is reached', async (t) => {
 });
 
 test('the mint limit is local to each wallet', async (t) => {
-  // Given a loaded Candy Machine with a mint limit of 1.
+  // Given a loaded Gumball Machine with a mint limit of 1.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -198,7 +198,7 @@ test('the mint limit is local to each wallet', async (t) => {
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         buyer: buyerA,
 
@@ -206,16 +206,16 @@ test('the mint limit is local to each wallet', async (t) => {
       })
     )
     .sendAndConfirm(umi);
-  await assertItemBought(t, umi, { candyMachine, buyer: publicKey(buyerA) });
+  await assertItemBought(t, umi, { gumballMachine, buyer: publicKey(buyerA) });
 
-  // When buyer B mints from the same Candy Machine.
+  // When buyer B mints from the same Gumball Machine.
   const buyerB = generateSigner(umi);
 
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         buyer: buyerB,
 
@@ -225,14 +225,14 @@ test('the mint limit is local to each wallet', async (t) => {
     .sendAndConfirm(umi);
 
   // Then minting was successful as the limit is per wallet.
-  await assertItemBought(t, umi, { candyMachine, buyer: publicKey(buyerB) });
+  await assertItemBought(t, umi, { gumballMachine, buyer: publicKey(buyerB) });
 });
 
 test('it charges a bot tax when trying to mint after the limit', async (t) => {
-  // Given a loaded Candy Machine with a mint limit of 1 and a bot tax guard.
+  // Given a loaded Gumball Machine with a mint limit of 1 and a bot tax guard.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -256,20 +256,20 @@ test('it charges a bot tax when trying to mint after the limit', async (t) => {
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         mintArgs: { mintLimit: some({ id: 42 }) },
       })
     )
     .sendAndConfirm(umi);
 
-  // When the identity tries to mint from the same Candy Machine again.
+  // When the identity tries to mint from the same Gumball Machine again.
 
   const { signature } = await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         mintArgs: { mintLimit: some({ id: 42 }) },
       })

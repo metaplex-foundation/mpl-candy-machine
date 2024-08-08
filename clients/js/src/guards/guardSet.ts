@@ -17,7 +17,7 @@ import {
   reverseSerializer,
   Serializer,
 } from '@metaplex-foundation/umi/serializers';
-import { UnregisteredCandyGuardError } from '../errors';
+import { UnregisteredGumballGuardError } from '../errors';
 import {
   GuardInstructionExtras,
   GuardRemainingAccount,
@@ -133,7 +133,7 @@ export function parseRouteArgs<
   const manifests = context.guards.forProgram(program);
   const guardIndex = manifests.findIndex((m) => m.name === guard);
   if (guardIndex < 0) {
-    throw new UnregisteredCandyGuardError(guard);
+    throw new UnregisteredGumballGuardError(guard);
   }
   const manifest = manifests[guardIndex];
   const extras = manifest.routeParser(context, routeContext, routeArgs);

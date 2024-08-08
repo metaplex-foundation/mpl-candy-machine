@@ -1,10 +1,13 @@
-# Metaplex Candy Guard
+# Metaplex Gumball Guard
+
 ---
 
 ### 💡 Update:
-From Candy Guard v0.2.0, the serialization logic for the arguments of the `initialize` and `update` instructions expect a `[u8]` represeting the custom serialized struct. This is to ensure adding new guards in the future does not affect clients.
 
-If you are using the `mpl-candy-guard` npm package, you can serialize the `CandyMachineData` object using:
+From Gumball Guard v0.2.0, the serialization logic for the arguments of the `initialize` and `update` instructions expect a `[u8]` represeting the custom serialized struct. This is to ensure adding new guards in the future does not affect clients.
+
+If you are using the `mpl-candy-guard` npm package, you can serialize the `GumballMachineData` object using:
+
 ```typescript
 import { serialize } from '@metaplex-foundation/mpl-candy-guard';
 
@@ -12,40 +15,42 @@ const data = { ... };
 const serializedData = serialize(data);
 ```
 
-If you are using the `mpl-candy-guard` Rust crate, you can serialize the `CandyMachineData` struct using:
+If you are using the `mpl-candy-guard` Rust crate, you can serialize the `GumballMachineData` struct using:
+
 ```rust
-let data = CandyGuardData { ... };
+let data = GumballGuardData { ... };
 let mut serialized_data = vec![0; data.size()];
 data.save(&mut serialized_data)?;
 ```
+
 ---
 
 ## Overview
 
-The new `Candy Guard` program is designed to take away the **access control** logic from the `Candy Machine` to handle the additional mint features, while the Candy Machine program retains its core mint functionality &mdash; the creation of the NFT. This not only provides a clear separation between **access controls** and **mint logic**, it also provides a modular and flexible architecture to add or remove mint features without having to modify the Candy Machine program.
+The new `Gumball Guard` program is designed to take away the **access control** logic from the `Gumball Machine` to handle the additional mint features, while the Gumball Machine program retains its core mint functionality &mdash; the creation of the NFT. This not only provides a clear separation between **access controls** and **mint logic**, it also provides a modular and flexible architecture to add or remove mint features without having to modify the Gumball Machine program.
 
-The access control on a Candy Guard is encapsulated in individuals guards representing a specific rule that needs to be satisfied, which can be enabled or disabled. For example, the live date of the mint is represented as the `LiveDate` guard. This guard is satisfied only if the transaction time is on or after the configured start time on the guard. Other guards can validate different aspects of the access control – e.g., ensuring that the user holds a specific token (token gating).
+The access control on a Gumball Guard is encapsulated in individuals guards representing a specific rule that needs to be satisfied, which can be enabled or disabled. For example, the live date of the mint is represented as the `LiveDate` guard. This guard is satisfied only if the transaction time is on or after the configured start time on the guard. Other guards can validate different aspects of the access control – e.g., ensuring that the user holds a specific token (token gating).
 
 > **Note**
-> The Candy Guard program can only be used in combination with `Candy Machine Core` (`Candy Machine V3`) accounts. When a Candy Guard is used in combination with a Candy Machine, it becomes its mint authority and minting is only possible through the Candy Guard.
+> The Gumball Guard program can only be used in combination with `Gumball Machine Core` (`Gumball Machine V3`) accounts. When a Gumball Guard is used in combination with a Gumball Machine, it becomes its mint authority and minting is only possible through the Gumball Guard.
 
 ### How the program works?
 
 ![image](https://user-images.githubusercontent.com/729235/192335006-d4f2c573-165f-4c5a-aef7-7428cd74bb2b.png)
 
-The main purpose of the Candy Guard program is to hold the configuration of mint **guards** and apply them before a user can mint from a candy machine. If all enabled guard conditions are valid, the mint transaction is forwarded to the Candy Machine.
+The main purpose of the Gumball Guard program is to hold the configuration of mint **guards** and apply them before a user can mint from a gumball machine. If all enabled guard conditions are valid, the mint transaction is forwarded to the Gumball Machine.
 
 When a mint transaction is received, the program performs the following steps:
 
 1. Validates the transaction against all enabled guards.
    - If any of the guards fail at this point, the transaction is subject to the `BotTax` (when the `BotTax` guard is enabled) and the transaction is then aborted.
 2. After evaluating that all guards are valid, it invokes the `pre_actions` function on each guard. This function is responsible to perform any action **before** the mint (e.g., take payment for the mint).
-3. Then the transaction is forwarded to the Candy Machine program to mint the NFT.
+3. Then the transaction is forwarded to the Gumball Machine program to mint the NFT.
 4. Finally, it invokes the `post_actions` function on each enabled guard. This function is responsible to perform any action **after** the mint (e.g., freeze the NFT, change the update authority).
 
-A **guard** is a modular piece of code that can be easily added to the Candy Guard program, providing great flexibility and simplicity to support specific features without having to modify directly the Candy Machine program. Adding new guards is supported by conforming to specific interfaces, with changes isolated to the individual guard – e.g., each guard can be created and modified in isolation. This architecture also provides the flexibility to enable/disable guards without requiring code changes, as each guard has an enable/disable "switch".
+A **guard** is a modular piece of code that can be easily added to the Gumball Guard program, providing great flexibility and simplicity to support specific features without having to modify directly the Gumball Machine program. Adding new guards is supported by conforming to specific interfaces, with changes isolated to the individual guard – e.g., each guard can be created and modified in isolation. This architecture also provides the flexibility to enable/disable guards without requiring code changes, as each guard has an enable/disable "switch".
 
-The Candy Guard program contains a set of core access control guards that can be enabled/disabled:
+The Gumball Guard program contains a set of core access control guards that can be enabled/disabled:
 
 - `AddressGate`: restricts the mint to a single address
 - `Allocation`: specify the maximum number of mints in a group (guard set)
@@ -72,17 +77,16 @@ Along with those guads, amazing teams in the community are making guard programs
 
 - Civic: Civic Pass Guard ([Integration Docs](https://docs.civic.com/integrations/adding-civic-pass-protection-to-candy-machine-v3))
 
-
 ## Account
 
-The Candy Guard configuration is stored in a single account. The information regarding the guards that are enable is stored in a "hidden" section of the account to avoid unnecessary deserialization.
+The Gumball Guard configuration is stored in a single account. The information regarding the guards that are enable is stored in a "hidden" section of the account to avoid unnecessary deserialization.
 
 | Field             | Offset | Size | Description                                                                                                                 |
 | ----------------- | ------ | ---- | --------------------------------------------------------------------------------------------------------------------------- |
 | &mdash;           | 0      | 8    | Anchor account discriminator.                                                                                               |
-| `base`            | 8      | 32   | `PubKey` to derive the PDA key. The seed is defined by `["candy_guard", base pubkey]`.                                      |
+| `base`            | 8      | 32   | `PubKey` to derive the PDA key. The seed is defined by `["gumball_guard", base pubkey]`.                                    |
 | `bump`            | 40     | 1    | `u8` representing the bump of the derivation.                                                                               |
-| `authority`       | 41     | 32   | `PubKey` of the authority address that controls the Candy Guard.                                                            |
+| `authority`       | 41     | 32   | `PubKey` of the authority address that controls the Gumball Guard.                                                          |
 | _hidden section_  | 73     | ~    | Hidden data section to avoid unnecessary deserialization. This section of the account is used to serialize the guards data. |
 | - _features_      | 73     | 8    | Feature flags indicating which guards are serialized.                                                                       |
 | - _guard set_     | 81     | ~    | (optional) A sequence of serialized guard structs.                                                                          |
@@ -98,18 +102,18 @@ Since the number of guards enabled and groups is variable, the account size is d
 
 ### 📄 `initialize`
 
-This instruction creates and initializes a new `CandyGuard` account.
+This instruction creates and initializes a new `GumballGuard` account.
 
 <details>
   <summary>Accounts</summary>
 
-| Name             | Writable | Signer | Description                                                                                         |
-| ---------------- | :------: | :----: | --------------------------------------------------------------------------------------------------- |
-| `candy_guard`    |    ✅    |        | The `CandyGuard` account PDA key. The PDA is derived using the seed `["candy_guard", base pubkey]`. |
-| `base`           |          |   ✅   | Base public key for the PDA derivation.                                                             |
-| `authority`      |          |        | Public key of the candy guard authority.                                                            |
-| `payer`          |          |   ✅   | Payer of the transaction.                                                                           |
-| `system_program` |          |        | `SystemProgram` account.                                                                            |
+| Name             | Writable | Signer | Description                                                                                             |
+| ---------------- | :------: | :----: | ------------------------------------------------------------------------------------------------------- |
+| `gumball_guard`  |    ✅    |        | The `GumballGuard` account PDA key. The PDA is derived using the seed `["gumball_guard", base pubkey]`. |
+| `base`           |          |   ✅   | Base public key for the PDA derivation.                                                                 |
+| `authority`      |          |        | Public key of the gumball guard authority.                                                              |
+| `payer`          |          |   ✅   | Payer of the transaction.                                                                               |
+| `system_program` |          |        | `SystemProgram` account.                                                                                |
 
 </details>
 
@@ -118,41 +122,42 @@ This instruction creates and initializes a new `CandyGuard` account.
   
 | Argument                      | Offset | Size | Description               |
 | ----------------------------- | ------ | ---- | ------------------------- |
-| `data`                        | 0      | ~    | Serialized `CandyGuardData` object as `[u8]`. |
+| `data`                        | 0      | ~    | Serialized `GumballGuardData` object as `[u8]`. |
 
-The instruction uses a [custom serialization](https://docs.rs/mpl-candy-guard/0.1.1/mpl_candy_guard/state/candy_guard/struct.CandyGuardData.html#method.save) in order to maintain backwards compatibility with previous versions of the `CandyGuardData` struct.
+The instruction uses a [custom serialization](https://docs.rs/mpl-candy-guard/0.1.1/mpl_gumball_guard/state/gumball_guard/struct.GumballGuardData.html#method.save) in order to maintain backwards compatibility with previous versions of the `GumballGuardData` struct.
+
 </details>
 
 ### 📄 `mint` (deprecated)
 
-This instruction mints an NFT from a Candy Machine "wrapped" by a Candy Guard. Only when the transaction is succesfully validated, it is forwarded to the Candy Machine.
+This instruction mints an NFT from a Gumball Machine "wrapped" by a Gumball Guard. Only when the transaction is succesfully validated, it is forwarded to the Gumball Machine.
 
 <details>
   <summary>Accounts</summary>
 
-| Name                          | Writable | Signer | Description                                                                                         |
-| ----------------------------- | :------: | :----: | --------------------------------------------------------------------------------------------------- |
-| `candy_guard`                 |          |        | The `CandyGuard` account PDA key. The PDA is derived using the seed `["candy_guard", base pubkey]`. |
-| `candy_machine_program`       |          |        | `CandyMachine` program ID.                                                                          |
-| `candy_machine`               |    ✅    |        | The `CandyMachine` account.                                                                         |
-| `candy_machine_authority_pda` |    ✅    |        | Authority PDA key (seeds `["candy_machine", candy_machine pubkey]`).                                |
-| `payer`                       |    ✅    |   ✅   | Payer of the transaction.                                                                           |
-| `nft_metadata`                |    ✅    |        | Metadata account of the NFT.                                                                        |
-| `nft_mint`                    |    ✅    |        | Mint account for the NFT. The account should be created before executing the instruction.           |
-| `nft_mint_authority`          |          |   ✅   | Mint authority of the NFT.                                                                          |
-| `nft_master_edition`          |    ✅    |        | Master Edition account of the NFT.                                                                  |
-| `collection_authority_record` |          |        | Authority Record PDA of the collection.                                                             |
-| `collection_mint`             |          |        | Mint account of the collection.                                                                     |
-| `collection_metadata`         |    ✅    |        | Metadata account of the collection.                                                                 |
-| `collection_master_edition`   |          |        | Master Edition account of the collection.                                                           |
-| `collection_update_authority` |          |        | Update authority of the collection.                                                                 |
-| `token_metadata_program`      |          |        | Metaplex `TokenMetadata` program ID.                                                                |
-| `token_program`               |          |        | `spl-token` program ID.                                                                             |
-| `system_program`              |          |        | `SystemProgram` account.                                                                            |
-| `rent`                        |          |        | `Rent` account.                                                                                     |
-| `recent_slothashes`           |          |        | `SlotHashes` account.                                                                               |
-| `instruction_sysvar_account`  |          |        | `Sysvar1nstructions` account.                                                                       |
-| _remaining accounts_          |          |        | (optional) A list of optional accounts required by individual guards.                               |
+| Name                          | Writable | Signer | Description                                                                                             |
+| ----------------------------- | :------: | :----: | ------------------------------------------------------------------------------------------------------- |
+| `gumball_guard`               |          |        | The `GumballGuard` account PDA key. The PDA is derived using the seed `["gumball_guard", base pubkey]`. |
+| `candy_machine_program`       |          |        | `GumballMachine` program ID.                                                                            |
+| `candy_machine`               |    ✅    |        | The `GumballMachine` account.                                                                           |
+| `candy_machine_authority_pda` |    ✅    |        | Authority PDA key (seeds `["candy_machine", candy_machine pubkey]`).                                    |
+| `payer`                       |    ✅    |   ✅   | Payer of the transaction.                                                                               |
+| `nft_metadata`                |    ✅    |        | Metadata account of the NFT.                                                                            |
+| `nft_mint`                    |    ✅    |        | Mint account for the NFT. The account should be created before executing the instruction.               |
+| `nft_mint_authority`          |          |   ✅   | Mint authority of the NFT.                                                                              |
+| `nft_master_edition`          |    ✅    |        | Master Edition account of the NFT.                                                                      |
+| `collection_authority_record` |          |        | Authority Record PDA of the collection.                                                                 |
+| `collection_mint`             |          |        | Mint account of the collection.                                                                         |
+| `collection_metadata`         |    ✅    |        | Metadata account of the collection.                                                                     |
+| `collection_master_edition`   |          |        | Master Edition account of the collection.                                                               |
+| `collection_update_authority` |          |        | Update authority of the collection.                                                                     |
+| `token_metadata_program`      |          |        | Metaplex `TokenMetadata` program ID.                                                                    |
+| `token_program`               |          |        | `spl-token` program ID.                                                                                 |
+| `system_program`              |          |        | `SystemProgram` account.                                                                                |
+| `rent`                        |          |        | `Rent` account.                                                                                         |
+| `recent_slothashes`           |          |        | `SlotHashes` account.                                                                                   |
+| `instruction_sysvar_account`  |          |        | `Sysvar1nstructions` account.                                                                           |
+| _remaining accounts_          |          |        | (optional) A list of optional accounts required by individual guards.                                   |
 
 </details>
 
@@ -167,39 +172,39 @@ This instruction mints an NFT from a Candy Machine "wrapped" by a Candy Guard. O
 
 ### 📄 `mint_v2`
 
-This instruction mints both `NFT` or `pNFT` from a Candy Machine "wrapped" by a Candy Guard. Only when the transaction is succesfully validated, it is forwarded to the Candy Machine. 
+This instruction mints both `NFT` or `pNFT` from a Gumball Machine "wrapped" by a Gumball Guard. Only when the transaction is succesfully validated, it is forwarded to the Gumball Machine.
 
 <details>
   <summary>Accounts</summary>
 
-| Name                          | Writable | Signer | Description                                                                                         |
-| ----------------------------- | :------: | :----: | --------------------------------------------------------------------------------------------------- |
-| `candy_guard`                 |          |        | The `CandyGuard` account PDA key. The PDA is derived using the seed `["candy_guard", base pubkey]`. |
-| `candy_machine_program`       |          |        | `CandyMachine` program ID.                                                                          |
-| `candy_machine`               |    ✅    |        | The `CandyMachine` account.                                                                         |
-| `candy_machine_authority_pda` |    ✅    |        | Authority PDA key (seeds `["candy_machine", candy_machine pubkey]`).                                |
-| `payer`                       |    ✅    |   ✅   | Payer of the transaction.                                                                           |
-| `minter`                      |    ✅    |   ✅   | Minter (owner) of the NFT.                                                                           |
-| `nft_mint`                    |    ✅    |        | Mint account for the NFT. The account should be created before executing the instruction.           |
-| `nft_mint_authority`          |          |   ✅   | Mint authority of the NFT.                                                                          |
-| `nft_metadata`                |    ✅    |        | Metadata account of the NFT.                                                                        |
-| `nft_master_edition`          |    ✅    |        | Master Edition account of the NFT.                                                                  |
-| `token`                       |    ✅    |       | (optional) NFT token account.                                                 |
-| `token_record`                |    ✅    |       | (optional) Metadata `TokenRecord` account (required for `pNFT`)               |
-| `collection_delegate_record`  |          |        | Metadata Delegate Record of the collection.   |
-| `collection_mint`             |          |        | Mint account of the collection.                                                                     |
-| `collection_metadata`         |    ✅    |        | Metadata account of the collection.                                                                 |
-| `collection_master_edition`   |          |        | Master Edition account of the collection.                                                           |
-| `collection_update_authority` |          |        | Update authority of the collection.                                                                 |
-| `token_metadata_program`      |          |        | Metaplex `TokenMetadata` program ID.                                                                |
-| `spl_token_program`           |          |        | `spl-token` program ID.                                                                             |
-| `spl_ata_program`             |          |        | (optional) `spl` associated token program.            |
-| `system_program`              |          |        | `SystemProgram` account.                                                                            |
-| `sysvar_instructions`         |          |        | `sysvar::instructions` account.                                      |
-| `recent_slothashes`           |          |        | SlotHashes sysvar cluster data.                                      |
-| `authorization_rules_program` |          |        | (optional) Token Authorization Rules program.                                   |
-| `authorization_rules`         |          |        | (optional) Token Authorization Rules account.                                   |
-| _remaining accounts_          |          |        | (optional) A list of optional accounts required by individual guards.                               |
+| Name                          | Writable | Signer | Description                                                                                             |
+| ----------------------------- | :------: | :----: | ------------------------------------------------------------------------------------------------------- |
+| `gumball_guard`               |          |        | The `GumballGuard` account PDA key. The PDA is derived using the seed `["gumball_guard", base pubkey]`. |
+| `candy_machine_program`       |          |        | `GumballMachine` program ID.                                                                            |
+| `candy_machine`               |    ✅    |        | The `GumballMachine` account.                                                                           |
+| `candy_machine_authority_pda` |    ✅    |        | Authority PDA key (seeds `["candy_machine", candy_machine pubkey]`).                                    |
+| `payer`                       |    ✅    |   ✅   | Payer of the transaction.                                                                               |
+| `minter`                      |    ✅    |   ✅   | Minter (owner) of the NFT.                                                                              |
+| `nft_mint`                    |    ✅    |        | Mint account for the NFT. The account should be created before executing the instruction.               |
+| `nft_mint_authority`          |          |   ✅   | Mint authority of the NFT.                                                                              |
+| `nft_metadata`                |    ✅    |        | Metadata account of the NFT.                                                                            |
+| `nft_master_edition`          |    ✅    |        | Master Edition account of the NFT.                                                                      |
+| `token`                       |    ✅    |        | (optional) NFT token account.                                                                           |
+| `token_record`                |    ✅    |        | (optional) Metadata `TokenRecord` account (required for `pNFT`)                                         |
+| `collection_delegate_record`  |          |        | Metadata Delegate Record of the collection.                                                             |
+| `collection_mint`             |          |        | Mint account of the collection.                                                                         |
+| `collection_metadata`         |    ✅    |        | Metadata account of the collection.                                                                     |
+| `collection_master_edition`   |          |        | Master Edition account of the collection.                                                               |
+| `collection_update_authority` |          |        | Update authority of the collection.                                                                     |
+| `token_metadata_program`      |          |        | Metaplex `TokenMetadata` program ID.                                                                    |
+| `spl_token_program`           |          |        | `spl-token` program ID.                                                                                 |
+| `spl_ata_program`             |          |        | (optional) `spl` associated token program.                                                              |
+| `system_program`              |          |        | `SystemProgram` account.                                                                                |
+| `sysvar_instructions`         |          |        | `sysvar::instructions` account.                                                                         |
+| `recent_slothashes`           |          |        | SlotHashes sysvar cluster data.                                                                         |
+| `authorization_rules_program` |          |        | (optional) Token Authorization Rules program.                                                           |
+| `authorization_rules`         |          |        | (optional) Token Authorization Rules account.                                                           |
+| _remaining accounts_          |          |        | (optional) A list of optional accounts required by individual guards.                                   |
 
 </details>
 
@@ -221,8 +226,8 @@ This instruction routes the transaction to a guard, allowing the execution of cu
 
 | Name                 | Writable | Signer | Description                                                               |
 | -------------------- | :------: | :----: | ------------------------------------------------------------------------- |
-| `candy_guard`        |          |        | The `CandyGuard` account PDA key.                                         |
-| `candy_machine`      |    ✅    |        | The `CandyMachine` account.                                               |
+| `gumball_guard`      |          |        | The `GumballGuard` account PDA key.                                       |
+| `candy_machine`      |    ✅    |        | The `GumballMachine` account.                                             |
 | `payer`              |    ✅    |   ✅   | Payer of the transaction.                                                 |
 | _remaining accounts_ |          |        | (optional) A list of optional accounts required by the guard instruction. |
 
@@ -241,18 +246,18 @@ This instruction routes the transaction to a guard, allowing the execution of cu
 
 ### 📄 `unwrap`
 
-This instruction removes a Candy Guard from a Candy Machine, setting the mint authority of the Candy Machine to be the Candy Machine authority. The Candy Gard `public key` must match the Candy Machine `mint_authority` for this instruction to succeed.
+This instruction removes a Gumball Guard from a Gumball Machine, setting the mint authority of the Gumball Machine to be the Gumball Machine authority. The Gumball Gard `public key` must match the Gumball Machine `mint_authority` for this instruction to succeed.
 
 <details>
   <summary>Accounts</summary>
 
 | Name                      | Writable | Signer | Description                                  |
 | ------------------------- | :------: | :----: | -------------------------------------------- |
-| `candy_guard`             |          |        | The `CandyGuard` account PDA key.            |
-| `authority`               |          |   ✅   | Public key of the `candy_guard` authority.   |
-| `candy_machine`           |    ✅    |        | The `CandyMachine` account.                  |
+| `gumball_guard`           |          |        | The `GumballGuard` account PDA key.          |
+| `authority`               |          |   ✅   | Public key of the `gumball_guard` authority. |
+| `candy_machine`           |    ✅    |        | The `GumballMachine` account.                |
 | `candy_machine_authority` |          |   ✅   | Public key of the `candy_machine` authority. |
-| `candy_machine_program`   |          |        | `CandyMachine` program ID.                   |
+| `candy_machine_program`   |          |        | `GumballMachine` program ID.                 |
 
 </details>
 
@@ -264,17 +269,17 @@ None.
 
 ### 📄 `update`
 
-This instruction updates the Candy Guard configuration. Given that there is a flexible number of guards and groups that can be present, this instruction will resize the account accordingly, either increasing or decreasing the account size. Therefore, there will be either a charge for rent or a withdraw of rent lamports.
+This instruction updates the Gumball Guard configuration. Given that there is a flexible number of guards and groups that can be present, this instruction will resize the account accordingly, either increasing or decreasing the account size. Therefore, there will be either a charge for rent or a withdraw of rent lamports.
 
 <details>
   <summary>Accounts</summary>
 
-| Name             | Writable | Signer | Description                                |
-| ---------------- | :------: | :----: | ------------------------------------------ |
-| `candy_guard`    |    ✅    |        | The `CandyGuard` account PDA key.          |
-| `authority`      |          |        | Public key of the `candy_guard` authority. |
-| `payer`          |          |   ✅   | Payer of the transaction.                  |
-| `system_program` |          |        | `SystemProgram` account.                   |
+| Name             | Writable | Signer | Description                                  |
+| ---------------- | :------: | :----: | -------------------------------------------- |
+| `gumball_guard`  |    ✅    |        | The `GumballGuard` account PDA key.          |
+| `authority`      |          |        | Public key of the `gumball_guard` authority. |
+| `payer`          |          |   ✅   | Payer of the transaction.                    |
+| `system_program` |          |        | `SystemProgram` account.                     |
 
 </details>
 
@@ -283,22 +288,23 @@ This instruction updates the Candy Guard configuration. Given that there is a fl
   
 | Argument                      | Offset | Size | Description               |
 | ----------------------------- | ------ | ---- | ------------------------- |
-| `data`                        | 0      | ~    | Serialized `CandyGuardData` object as `[u8]`. |
+| `data`                        | 0      | ~    | Serialized `GumballGuardData` object as `[u8]`. |
 
-The instruction uses a [custom serialization](https://docs.rs/mpl-candy-guard/0.1.1/mpl_candy_guard/state/candy_guard/struct.CandyGuardData.html#method.save) in order to maintain backwards compatibility with previous versions of the `CandyGuardData` struct.
+The instruction uses a [custom serialization](https://docs.rs/mpl-candy-guard/0.1.1/mpl_gumball_guard/state/gumball_guard/struct.GumballGuardData.html#method.save) in order to maintain backwards compatibility with previous versions of the `GumballGuardData` struct.
+
 </details>
 
 ### 📄 `withdraw`
 
-This instruction withdraws the rent lamports from the account and closes it. After executing this instruction, the Candy Guard account will not be operational.
+This instruction withdraws the rent lamports from the account and closes it. After executing this instruction, the Gumball Guard account will not be operational.
 
 <details>
   <summary>Accounts</summary>
 
-| Name          | Writable | Signer | Description                                |
-| ------------- | :------: | :----: | ------------------------------------------ |
-| `candy_guard` |    ✅    |        | The `CandyGuard` account.                  |
-| `authority`   |    ✅    |   ✅   | Public key of the `candy_guard` authority. |
+| Name            | Writable | Signer | Description                                  |
+| --------------- | :------: | :----: | -------------------------------------------- |
+| `gumball_guard` |    ✅    |        | The `GumballGuard` account.                  |
+| `authority`     |    ✅    |   ✅   | Public key of the `gumball_guard` authority. |
 
 </details>
 
@@ -310,18 +316,18 @@ None.
 
 ### 📄 `wrap`
 
-This instruction adds a Candy Guard to a Candy Machine. After the guard is added, minting is only allowed through the Candy Guard.
+This instruction adds a Gumball Guard to a Gumball Machine. After the guard is added, minting is only allowed through the Gumball Guard.
 
 <details>
   <summary>Accounts</summary>
 
 | Name                      | Writable | Signer | Description                                  |
 | ------------------------- | :------: | :----: | -------------------------------------------- |
-| `candy_guard`             |          |        | The `CandyGuard` account PDA key.            |
-| `authority`               |          |   ✅   | Public key of the `candy_guard` authority.   |
-| `candy_machine`           |    ✅    |        | The `CandyMachine` account.                  |
+| `gumball_guard`           |          |        | The `GumballGuard` account PDA key.          |
+| `authority`               |          |   ✅   | Public key of the `gumball_guard` authority. |
+| `candy_machine`           |    ✅    |        | The `GumballMachine` account.                |
 | `candy_machine_authority` |          |   ✅   | Public key of the `candy_machine` authority. |
-| `candy_machine_program`   |          |        | `CandyMachine` program ID.                   |
+| `candy_machine_program`   |          |        | `GumballMachine` program ID.                 |
 
 </details>
 
@@ -357,9 +363,9 @@ The `Allocation` guard specifies the maximum number of mints allowed in a group 
 <details>
   <summary>Accounts</summary>
 
-| Name           | Writable | Signer | Description                                                                                                                              |
-| -------------- | :------: | :----: | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `mint_tracker` |    ✅    |        | Mint tracker PDA. The PDA is derived using the seed `["allocation", allocation id, candy guard pubkey, candy machine pubkey]` |
+| Name           | Writable | Signer | Description                                                                                                                       |
+| -------------- | :------: | :----: | --------------------------------------------------------------------------------------------------------------------------------- |
+| `mint_tracker` |    ✅    |        | Mint tracker PDA. The PDA is derived using the seed `["allocation", allocation id, gumball guard pubkey, gumball machine pubkey]` |
 
 </details>
 
@@ -370,11 +376,11 @@ The allocation PDA needs to be created before the first mint transaction is vali
 <details>
   <summary>Accounts</summary>
 
-| Name             | Writable | Signer | Description                                                                                                                      |
-| ---------------- | :------: | :----: | -------------------------------------------------------------------------------------------------------------------------------- |
-| `proof_pda`      |    ✅    |        | PDA to represent the allocation (seed `["allocation", allocation id, candy guard pubkey, candy machine pubkey]`). |
-| `authority`      |          |   ✅   | Candy Guard authority
-| `system_program` |          |        | System program account. |
+| Name             | Writable | Signer | Description                                                                                                           |
+| ---------------- | :------: | :----: | --------------------------------------------------------------------------------------------------------------------- |
+| `proof_pda`      |    ✅    |        | PDA to represent the allocation (seed `["allocation", allocation id, gumball guard pubkey, gumball machine pubkey]`). |
+| `authority`      |          |   ✅   | Gumball Guard authority                                                                                               |
+| `system_program` |          |        | System program account.                                                                                               |
 
 </details>
 <details>
@@ -400,9 +406,9 @@ The `AllowList` guard validates the payer's address against a merkle tree-based 
 <details>
   <summary>Accounts</summary>
 
-| Name        | Writable | Signer | Description                                                                                                            |
-| ----------- | :------: | :----: | ---------------------------------------------------------------------------------------------------------------------- |
-| `proof_pda` |          |        | PDA of the merkle proof (seed `["allow_list", merkle tree root, minter key, candy guard pubkey, candy machine pubkey]`). |
+| Name        | Writable | Signer | Description                                                                                                                  |
+| ----------- | :------: | :----: | ---------------------------------------------------------------------------------------------------------------------------- |
+| `proof_pda` |          |        | PDA of the merkle proof (seed `["allow_list", merkle tree root, minter key, gumball guard pubkey, gumball machine pubkey]`). |
 
 </details>
 
@@ -413,11 +419,11 @@ The merkle proof validation needs to be completed before the mint transaction. T
 <details>
   <summary>Accounts</summary>
 
-| Name             | Writable | Signer | Description                                                                                                                      |
-| ---------------- | :------: | :----: | -------------------------------------------------------------------------------------------------------------------------------- |
-| `proof_pda`      |    ✅    |        | PDA to represent the merkle proof (seed `["allow_list", merkle tree root, payer/minter key, candy guard pubkey, candy machine pubkey]`). |
-| `system_program` |          |        | System program account.                                                                                                          |
-| `minter`         |          |        | (optional) Minter account to validate. |
+| Name             | Writable | Signer | Description                                                                                                                                  |
+| ---------------- | :------: | :----: | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `proof_pda`      |    ✅    |        | PDA to represent the merkle proof (seed `["allow_list", merkle tree root, payer/minter key, gumball guard pubkey, gumball machine pubkey]`). |
+| `system_program` |          |        | System program account.                                                                                                                      |
+| `minter`         |          |        | (optional) Minter account to validate.                                                                                                       |
 
 </details>
 <details>
@@ -472,11 +478,11 @@ The `FreezeSolPayment` guard is used to charge an amount in SOL (lamports) for t
 <details>
   <summary>Accounts</summary>
 
-| Name         | Writable | Signer | Description                                                                                                            |
-| ------------ | :------: | :----: | ---------------------------------------------------------------------------------------------------------------------- |
-| `freeze_pda` |    ✅    |        | Freeze PDA to receive the funds (seeds `["freeze_escrow", destination pubkey, candy guard pubkey, candy machine pubkey]`). |
-| `nft_ata` |          |        | Associate token account of the NFT (seeds `[payer pubkey, token program pubkey, nft mint pubkey]`). |
-| `rule_set` |          |        | (optional) Authorization rule set for the minted pNFT. |
+| Name         | Writable | Signer | Description                                                                                                                    |
+| ------------ | :------: | :----: | ------------------------------------------------------------------------------------------------------------------------------ |
+| `freeze_pda` |    ✅    |        | Freeze PDA to receive the funds (seeds `["freeze_escrow", destination pubkey, gumball guard pubkey, gumball machine pubkey]`). |
+| `nft_ata`    |          |        | Associate token account of the NFT (seeds `[payer pubkey, token program pubkey, nft mint pubkey]`).                            |
+| `rule_set`   |          |        | (optional) Authorization rule set for the minted pNFT.                                                                         |
 
 </details>
 
@@ -487,11 +493,11 @@ The `FreezeSolPayment` guard is used to charge an amount in SOL (lamports) for t
 <details>
   <summary>Accounts</summary>
 
-| Name             | Writable | Signer | Description                                                                                                                      |
-| ---------------- | :------: | :----: | -------------------------------------------------------------------------------------------------------------------------------- |
-| `freeze_pda`     |    ✅    |        | Freeze PDA to receive the funds (seeds `["freeze_escrow", destination pubkey, candy guard pubkey, candy machine pubkey]`). |
-| `authority`      |         |   ✅   | Candy Guard authority. |
-| `system_program` |         |        | System program account. |
+| Name             | Writable | Signer | Description                                                                                                                    |
+| ---------------- | :------: | :----: | ------------------------------------------------------------------------------------------------------------------------------ |
+| `freeze_pda`     |    ✅    |        | Freeze PDA to receive the funds (seeds `["freeze_escrow", destination pubkey, gumball guard pubkey, gumball machine pubkey]`). |
+| `authority`      |          |   ✅   | Gumball Guard authority.                                                                                                       |
+| `system_program` |          |        | System program account.                                                                                                        |
 
 </details>
 <details>
@@ -511,25 +517,26 @@ The `FreezeSolPayment` guard is used to charge an amount in SOL (lamports) for t
 <details>
   <summary>Accounts</summary>
 
-| Name                     | Writable | Signer | Description                                                                                                                       |
-| ------------------------- | :------: | :----: | --------------------------------------------------------------------------------------------------------------------------------  |
-| `freeze_pda`              |    ✅    |        | Freeze PDA to receive the funds (seeds `["freeze_escrow", destination pubkey, candy guard pubkey, candy machine pubkey]`).         |
-| `nft_mint`                |          |        | Mint account for the NFT. |
-| `owner`                   |          |        | Address of the owner of the NFT. |
-| `nft_ata`                 |    ✅    |        | Associate token account of the NFT (seeds `[owner pubkey, token program pubkey, nft mint pubkey]`). |
-| `nft_master_edition`      |          |        | Master Edition account of the NFT. |
-| `token_program`           |          |        | `spl-token` program ID.                                                                             |
-| `token_metadata_program`  |          |        | Metaplex `TokenMetadata` program.  |
-|                           |          |        | _Below are accounts required for pNFTs:_  |
-| `nft_metadata`            |    ✅    |        | Metadata account of the NFT.  |
-| `freeze_pda_ata`          |    ✅    |        | Freeze PDA associated token account of the NFT.  |
-| `system_program`          |          |        | System program.  |
-| `sysvar_instructions`     |          |        | Sysvar instructions account.  |
-| `spl_ata_program`         |          |        | SPL Associated Token Account program.  |
-| `owner_token_record`      |    ✅    |        | Owner token record account.  |
-| `freeze_pda_token_record` |    ✅    |        | Freeze PDA token record account.  |
-| `authorization_rules_program` |      |        | (optional) Token Authorization Rules program.  |
-| `authorization_rules`     |          |        | (optional) Token Authorization Rules account.  |
+| Name                          | Writable | Signer | Description                                                                                                                    |
+| ----------------------------- | :------: | :----: | ------------------------------------------------------------------------------------------------------------------------------ |
+| `freeze_pda`                  |    ✅    |        | Freeze PDA to receive the funds (seeds `["freeze_escrow", destination pubkey, gumball guard pubkey, gumball machine pubkey]`). |
+| `nft_mint`                    |          |        | Mint account for the NFT.                                                                                                      |
+| `owner`                       |          |        | Address of the owner of the NFT.                                                                                               |
+| `nft_ata`                     |    ✅    |        | Associate token account of the NFT (seeds `[owner pubkey, token program pubkey, nft mint pubkey]`).                            |
+| `nft_master_edition`          |          |        | Master Edition account of the NFT.                                                                                             |
+| `token_program`               |          |        | `spl-token` program ID.                                                                                                        |
+| `token_metadata_program`      |          |        | Metaplex `TokenMetadata` program.                                                                                              |
+|                               |          |        | _Below are accounts required for pNFTs:_                                                                                       |
+| `nft_metadata`                |    ✅    |        | Metadata account of the NFT.                                                                                                   |
+| `freeze_pda_ata`              |    ✅    |        | Freeze PDA associated token account of the NFT.                                                                                |
+| `system_program`              |          |        | System program.                                                                                                                |
+| `sysvar_instructions`         |          |        | Sysvar instructions account.                                                                                                   |
+| `spl_ata_program`             |          |        | SPL Associated Token Account program.                                                                                          |
+| `owner_token_record`          |    ✅    |        | Owner token record account.                                                                                                    |
+| `freeze_pda_token_record`     |    ✅    |        | Freeze PDA token record account.                                                                                               |
+| `authorization_rules_program` |          |        | (optional) Token Authorization Rules program.                                                                                  |
+| `authorization_rules`         |          |        | (optional) Token Authorization Rules account.                                                                                  |
+
 </details>
 <details>
   <summary>Arguments</summary>
@@ -549,12 +556,12 @@ Unlock funds is only enabled after all frozen NFTs are thaw.
 <details>
   <summary>Accounts</summary>
 
-| Name             | Writable | Signer | Description                                                                                                                      |
-| ---------------- | :------: | :----: | -------------------------------------------------------------------------------------------------------------------------------- |
-| `freeze_pda`     |    ✅    |        | Freeze PDA to receive the funds (seeds `["freeze_escrow", destination pubkey, candy guard pubkey, candy machine pubkey]`).     |
-| `authority`      |          |   ✅   | Candy Guard authority. |
-| `destination`    |    ✅    |        | Address to receive the funds (must match the `destination` address of the guard configuration). |
-| `system_program` |          |        | `SystemProgram` account.                                                                            |
+| Name             | Writable | Signer | Description                                                                                                                    |
+| ---------------- | :------: | :----: | ------------------------------------------------------------------------------------------------------------------------------ |
+| `freeze_pda`     |    ✅    |        | Freeze PDA to receive the funds (seeds `["freeze_escrow", destination pubkey, gumball guard pubkey, gumball machine pubkey]`). |
+| `authority`      |          |   ✅   | Gumball Guard authority.                                                                                                       |
+| `destination`    |    ✅    |        | Address to receive the funds (must match the `destination` address of the guard configuration).                                |
+| `system_program` |          |        | `SystemProgram` account.                                                                                                       |
 
 </details>
 <details>
@@ -567,7 +574,6 @@ Unlock funds is only enabled after all frozen NFTs are thaw.
 | - *data*     | 1    |                                            |
 | -- *ix*      | 1    | `FreezeInstruction.UnlockFunds`            |
 </details>
-
 
 ### `FreezeTokenPayment`
 
@@ -586,13 +592,13 @@ The `FreezeTokenPayment` guard is used to charge an amount in a specified spl-to
 <details>
   <summary>Accounts</summary>
 
-| Name            | Writable | Signer | Description                                                                                                            |
-| --------------- | :------: | :----: | ---------------------------------------------------------------------------------------------------------------------- |
-| `freeze_pda`    |    ✅    |        | Freeze PDA to receive the funds (seeds `["freeze_escrow", destination_ata pubkey, candy guard pubkey, candy machine pubkey]`). |
-| `nft_ata`       |          |        | Associate token account of the NFT (seeds `[payer pubkey, token program pubkey, nft mint pubkey]`). |
-| `token_account` |    ✅    |        | Token account holding the required amount (seeds `[payer pubkey, token program pubkey, mint pubkey]`). |
-| `freeze_ata`    |    ✅    |        | Associate token account of the Freeze PDA (seeds `[freeze PDA pubkey, token program pubkey, nft mint pubkey]`).
-| `rule_set` |          |        | (optional) Authorization rule set for the minted pNFT. |
+| Name            | Writable | Signer | Description                                                                                                                        |
+| --------------- | :------: | :----: | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `freeze_pda`    |    ✅    |        | Freeze PDA to receive the funds (seeds `["freeze_escrow", destination_ata pubkey, gumball guard pubkey, gumball machine pubkey]`). |
+| `nft_ata`       |          |        | Associate token account of the NFT (seeds `[payer pubkey, token program pubkey, nft mint pubkey]`).                                |
+| `token_account` |    ✅    |        | Token account holding the required amount (seeds `[payer pubkey, token program pubkey, mint pubkey]`).                             |
+| `freeze_ata`    |    ✅    |        | Associate token account of the Freeze PDA (seeds `[freeze PDA pubkey, token program pubkey, nft mint pubkey]`).                    |
+| `rule_set`      |          |        | (optional) Authorization rule set for the minted pNFT.                                                                             |
 
 </details>
 
@@ -603,16 +609,16 @@ The `FreezeTokenPayment` guard is used to charge an amount in a specified spl-to
 <details>
   <summary>Accounts</summary>
 
-| Name                      | Writable | Signer | Description                                                                                                                      |
-| ------------------------- | :------: | :----: | -------------------------------------------------------------------------------------------------------------------------------- |
-| `freeze_pda`              |    ✅    |        | Freeze PDA to receive the funds (seeds `["freeze_escrow", destination_ata pubkey, candy guard pubkey, candy machine pubkey]`). |
-| `authority`               |          |   ✅   | Candy Guard authority. |
-| `system_program`          |          |        | System program account. |
-| `freeze_ata`              |    ✅    |        | Associate token account of the Freeze PDA (seeds `[freeze PDA pubkey, token program pubkey, nft mint pubkey]`). |
-| `token_mint`              |          |        | Token mint account (must match the `mint` address of the guard configuration). |
-| `token_program`           |          |        | `spl-token` program ID. |
-| `associate_token_program` |          |        | Associate token program account. |
-| `destination_ata`         |    ✅    |        | Address to receive the funds (must match the `destination_ata` address of the guard configuration). |
+| Name                      | Writable | Signer | Description                                                                                                                        |
+| ------------------------- | :------: | :----: | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `freeze_pda`              |    ✅    |        | Freeze PDA to receive the funds (seeds `["freeze_escrow", destination_ata pubkey, gumball guard pubkey, gumball machine pubkey]`). |
+| `authority`               |          |   ✅   | Gumball Guard authority.                                                                                                           |
+| `system_program`          |          |        | System program account.                                                                                                            |
+| `freeze_ata`              |    ✅    |        | Associate token account of the Freeze PDA (seeds `[freeze PDA pubkey, token program pubkey, nft mint pubkey]`).                    |
+| `token_mint`              |          |        | Token mint account (must match the `mint` address of the guard configuration).                                                     |
+| `token_program`           |          |        | `spl-token` program ID.                                                                                                            |
+| `associate_token_program` |          |        | Associate token program account.                                                                                                   |
+| `destination_ata`         |    ✅    |        | Address to receive the funds (must match the `destination_ata` address of the guard configuration).                                |
 
 </details>
 <details>
@@ -632,25 +638,26 @@ The `FreezeTokenPayment` guard is used to charge an amount in a specified spl-to
 <details>
   <summary>Accounts</summary>
 
-| Name                 | Writable | Signer | Description                                                                                                                      |
-| -------------------- | :------: | :----: | -------------------------------------------------------------------------------------------------------------------------------- |
-| `freeze_pda`         |    ✅    |        | Freeze PDA to receive the funds (seeds `["freeze_escrow", destination_ata pubkey, candy guard pubkey, candy machine pubkey]`).     |
-| `nft_mint`           |          |        | Mint account for the NFT. |
-| `owner`              |          |        | Address of the owner of the NFT. |
-| `nft_ata`            |    ✅    |        | Associate token account of the NFT (seeds `[owner pubkey, token program pubkey, nft mint pubkey]`). |
-| `nft_master_edition` |          |        | Master Edition account of the NFT. |
-| `token_program`      |          |        | `spl-token` program ID.                                                                             |
-| `system_program`     |          |        | `SystemProgram` account.                                                                            |
-|                           |          |        | _Below are accounts required for pNFTs:_  |
-| `nft_metadata`            |    ✅    |        | Metadata account of the NFT.  |
-| `freeze_pda_ata`          |    ✅    |        | Freeze PDA associated token account of the NFT.  |
-| `system_program`          |          |        | System program.  |
-| `sysvar_instructions`     |          |        | Sysvar instructions account.  |
-| `spl_ata_program`         |          |        | SPL Associated Token Account program.  |
-| `owner_token_record`      |    ✅    |        | Owner token record account.  |
-| `freeze_pda_token_record` |    ✅    |        | Freeze PDA token record account.  |
-| `authorization_rules_program` |      |        | (optional) Token Authorization Rules program.  |
-| `authorization_rules`     |          |        | (optional) Token Authorization Rules account.  |
+| Name                          | Writable | Signer | Description                                                                                                                        |
+| ----------------------------- | :------: | :----: | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `freeze_pda`                  |    ✅    |        | Freeze PDA to receive the funds (seeds `["freeze_escrow", destination_ata pubkey, gumball guard pubkey, gumball machine pubkey]`). |
+| `nft_mint`                    |          |        | Mint account for the NFT.                                                                                                          |
+| `owner`                       |          |        | Address of the owner of the NFT.                                                                                                   |
+| `nft_ata`                     |    ✅    |        | Associate token account of the NFT (seeds `[owner pubkey, token program pubkey, nft mint pubkey]`).                                |
+| `nft_master_edition`          |          |        | Master Edition account of the NFT.                                                                                                 |
+| `token_program`               |          |        | `spl-token` program ID.                                                                                                            |
+| `system_program`              |          |        | `SystemProgram` account.                                                                                                           |
+|                               |          |        | _Below are accounts required for pNFTs:_                                                                                           |
+| `nft_metadata`                |    ✅    |        | Metadata account of the NFT.                                                                                                       |
+| `freeze_pda_ata`              |    ✅    |        | Freeze PDA associated token account of the NFT.                                                                                    |
+| `system_program`              |          |        | System program.                                                                                                                    |
+| `sysvar_instructions`         |          |        | Sysvar instructions account.                                                                                                       |
+| `spl_ata_program`             |          |        | SPL Associated Token Account program.                                                                                              |
+| `owner_token_record`          |    ✅    |        | Owner token record account.                                                                                                        |
+| `freeze_pda_token_record`     |    ✅    |        | Freeze PDA token record account.                                                                                                   |
+| `authorization_rules_program` |          |        | (optional) Token Authorization Rules program.                                                                                      |
+| `authorization_rules`         |          |        | (optional) Token Authorization Rules account.                                                                                      |
+
 </details>
 <details>
   <summary>Arguments</summary>
@@ -670,14 +677,14 @@ Unlock funds is only enabled after all frozen NFTs are thaw.
 <details>
   <summary>Accounts</summary>
 
-| Name              | Writable | Signer | Description                                                                                                                      |
-| ----------------- | :------: | :----: | -------------------------------------------------------------------------------------------------------------------------------- |
-| `freeze_pda`      |    ✅    |        | Freeze PDA to receive the funds (seeds `["freeze_escrow", destination_ata pubkey, candy guard pubkey, candy machine pubkey]`).     |
-| `authority`       |          |   ✅   | Candy Guard authority. |
-| `freeze_ata`      |    ✅    |        | Associate token account of the Freeze PDA (seeds `[freeze PDA pubkey, token program pubkey, nft mint pubkey]`). |
-| `destination_ata` |    ✅    |        | Address to receive the funds (must match the `destination_ata` address of the guard configuration). |
-| `token_program`   |          |        | `spl-token` program ID. |
-| `system_program`  |          |        | `SystemProgram` account.                                                                            |
+| Name              | Writable | Signer | Description                                                                                                                        |
+| ----------------- | :------: | :----: | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `freeze_pda`      |    ✅    |        | Freeze PDA to receive the funds (seeds `["freeze_escrow", destination_ata pubkey, gumball guard pubkey, gumball machine pubkey]`). |
+| `authority`       |          |   ✅   | Gumball Guard authority.                                                                                                           |
+| `freeze_ata`      |    ✅    |        | Associate token account of the Freeze PDA (seeds `[freeze PDA pubkey, token program pubkey, nft mint pubkey]`).                    |
+| `destination_ata` |    ✅    |        | Address to receive the funds (must match the `destination_ata` address of the guard configuration).                                |
+| `token_program`   |          |        | `spl-token` program ID.                                                                                                            |
+| `system_program`  |          |        | `SystemProgram` account.                                                                                                           |
 
 </details>
 <details>
@@ -727,9 +734,9 @@ The `MintLimit` guard allows to specify a limit on the number of mints for each 
 <details>
   <summary>Accounts</summary>
 
-| Name         | Writable | Signer | Description                                                                                                                              |
-| ------------ | :------: | :----: | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `mint_count` |    ✅    |        | Mint counter PDA. The PDA is derived using the seed `["mint_limit", mint guard id, payer key, candy guard pubkey, candy machine pubkey]` |
+| Name         | Writable | Signer | Description                                                                                                                                  |
+| ------------ | :------: | :----: | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mint_count` |    ✅    |        | Mint counter PDA. The PDA is derived using the seed `["mint_limit", mint guard id, payer key, gumball guard pubkey, gumball machine pubkey]` |
 
 </details>
 
@@ -746,13 +753,13 @@ The `NftBurn` guard restricts the mint to holders of another NFT (token), requir
 <details>
   <summary>Accounts</summary>
 
-| Name                           | Writable | Signer | Description                             |
-| ------------------------------ | :------: | :----: | --------------------------------------- |
-| `nft_account`                  |    ✅    |        | Token account of the NFT.               |
-| `nft_metadata`                 |    ✅    |        | Metadata account of the NFT.            |
-| `nft_edition`                  |    ✅    |        | Master Edition account of the NFT.      |
-| `nft_mint_account`             |    ✅    |        | Mint account of the NFT.                |
-| `nft_mint_collection_metadata` |    ✅    |        | Collection metadata account of the NFT. |
+| Name                           | Writable | Signer | Description                                |
+| ------------------------------ | :------: | :----: | ------------------------------------------ |
+| `nft_account`                  |    ✅    |        | Token account of the NFT.                  |
+| `nft_metadata`                 |    ✅    |        | Metadata account of the NFT.               |
+| `nft_edition`                  |    ✅    |        | Master Edition account of the NFT.         |
+| `nft_mint_account`             |    ✅    |        | Mint account of the NFT.                   |
+| `nft_mint_collection_metadata` |    ✅    |        | Collection metadata account of the NFT.    |
 | `nft_token_record`             |    ✅    |        | (optional) Token Record of the NFT (pNFT). |
 
 </details>
@@ -791,18 +798,18 @@ The `NftPayment` guard is a payment guard that charges another NFT (token) from 
 <details>
   <summary>Accounts</summary>
 
-| Name               | Writable | Signer | Description                                                                            |
-| ------------------ | :------: | :----: | -------------------------------------------------------------------------------------- |
-| `nft_account`      |    ✅    |        | Token account of the NFT.                                                              |
-| `nft_metadata`     |    ✅    |        | Metadata account of the NFT.                                                           |
-| `nft_mint_account` |          |        | Mint account of the NFT.                                                               |
-| `destination`      |          |        | Account to receive the NFT.                                                            |
-| `destination_ata`  |    ✅    |        | Destination PDA key (seeds `[destination pubkey, token program id, nft_mint pubkey]`). |
-| `atoken_progam`    |          |        | `spl-associate-token` program.                  |
-| `owner_token_record`       |    ✅    |        | (optional) Owner token record account (pNFT).  |
-| `destination_token_record` |    ✅    |        | (optional) Freeze PDA token record account (pNFT).  |
-| `authorization_rules_program` |      |        | (optional) Token Authorization Rules program (pNFT).  |
-| `authorization_rules`     |          |        | (optional) Token Authorization Rules account (pNFT).  |
+| Name                          | Writable | Signer | Description                                                                            |
+| ----------------------------- | :------: | :----: | -------------------------------------------------------------------------------------- |
+| `nft_account`                 |    ✅    |        | Token account of the NFT.                                                              |
+| `nft_metadata`                |    ✅    |        | Metadata account of the NFT.                                                           |
+| `nft_mint_account`            |          |        | Mint account of the NFT.                                                               |
+| `destination`                 |          |        | Account to receive the NFT.                                                            |
+| `destination_ata`             |    ✅    |        | Destination PDA key (seeds `[destination pubkey, token program id, nft_mint pubkey]`). |
+| `atoken_progam`               |          |        | `spl-associate-token` program.                                                         |
+| `owner_token_record`          |    ✅    |        | (optional) Owner token record account (pNFT).                                          |
+| `destination_token_record`    |    ✅    |        | (optional) Freeze PDA token record account (pNFT).                                     |
+| `authorization_rules_program` |          |        | (optional) Token Authorization Rules program (pNFT).                                   |
+| `authorization_rules`         |          |        | (optional) Token Authorization Rules account (pNFT).                                   |
 
 </details>
 
@@ -824,7 +831,7 @@ pub struct RedeemedAmount {
 }
 ```
 
-The `RedeemedAmount` guard stops the mint when the number of `items_redeemed` of the Candy Machine reaches the configured `maximum` amount.
+The `RedeemedAmount` guard stops the mint when the number of `items_redeemed` of the Gumball Machine reaches the configured `maximum` amount.
 
 ### `SolPayment`
 

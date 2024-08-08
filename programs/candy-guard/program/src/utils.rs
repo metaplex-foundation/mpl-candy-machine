@@ -7,7 +7,7 @@ use solana_program::{
 };
 use spl_associated_token_account::get_associated_token_address;
 
-use crate::errors::CandyGuardError;
+use crate::errors::GumballGuardError;
 
 // Empty value used for string padding.
 const NULL_STRING: &str = "\0";
@@ -59,7 +59,7 @@ pub fn cmp_pubkeys(a: &Pubkey, b: &Pubkey) -> bool {
 pub fn assert_initialized<T: Pack + IsInitialized>(account_info: &AccountInfo) -> Result<T> {
     let account: T = T::unpack_unchecked(&account_info.data.borrow())?;
     if !account.is_initialized() {
-        err!(CandyGuardError::Uninitialized)
+        err!(GumballGuardError::Uninitialized)
     } else {
         Ok(account)
     }
@@ -92,7 +92,7 @@ pub fn assert_is_token_account(
 
 pub fn assert_keys_equal(key1: &Pubkey, key2: &Pubkey) -> Result<()> {
     if !cmp_pubkeys(key1, key2) {
-        err!(CandyGuardError::PublicKeyMismatch)
+        err!(GumballGuardError::PublicKeyMismatch)
     } else {
         Ok(())
     }
@@ -101,7 +101,7 @@ pub fn assert_keys_equal(key1: &Pubkey, key2: &Pubkey) -> Result<()> {
 pub fn assert_derivation(program_id: &Pubkey, account: &AccountInfo, path: &[&[u8]]) -> Result<u8> {
     let (key, bump) = Pubkey::find_program_address(&path, program_id);
     if key != *account.key {
-        return err!(CandyGuardError::InvalidPDA);
+        return err!(GumballGuardError::InvalidPDA);
     }
     Ok(bump)
 }
@@ -111,7 +111,7 @@ pub fn assert_derivation(program_id: &Pubkey, account: &AccountInfo, path: &[&[u
 pub fn fixed_length_string(value: String, length: usize) -> Result<String> {
     if length < value.len() {
         // the value is larger than the allowed length
-        return err!(CandyGuardError::ExceededLength);
+        return err!(GumballGuardError::ExceededLength);
     }
 
     let padding = NULL_STRING.repeat(length - value.len());
@@ -120,7 +120,7 @@ pub fn fixed_length_string(value: String, length: usize) -> Result<String> {
 
 pub fn assert_owned_by(account: &AccountInfo, owner: &Pubkey) -> Result<()> {
     if !cmp_pubkeys(account.owner, owner) {
-        err!(CandyGuardError::IncorrectOwner)
+        err!(GumballGuardError::IncorrectOwner)
     } else {
         Ok(())
     }
@@ -151,7 +151,7 @@ pub fn spl_token_burn(params: TokenBurnParams) -> Result<()> {
         &[source, mint, authority, token_program],
         seeds.as_slice(),
     );
-    result.map_err(|_| CandyGuardError::TokenBurnFailed.into())
+    result.map_err(|_| GumballGuardError::TokenBurnFailed.into())
 }
 
 pub fn spl_token_transfer(params: TokenTransferParams<'_, '_>) -> Result<()> {
@@ -182,7 +182,7 @@ pub fn spl_token_transfer(params: TokenTransferParams<'_, '_>) -> Result<()> {
         &signer_seeds,
     );
 
-    result.map_err(|_| CandyGuardError::TokenTransferFailed.into())
+    result.map_err(|_| GumballGuardError::TokenTransferFailed.into())
 }
 
 #[macro_export]

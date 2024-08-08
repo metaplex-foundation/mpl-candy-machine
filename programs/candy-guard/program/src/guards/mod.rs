@@ -4,10 +4,10 @@ pub use anchor_lang::prelude::*;
 use anchor_lang::Discriminator;
 use solana_program::{instruction::Instruction, program::invoke_signed};
 
-pub use crate::{errors::CandyGuardError, instructions::draw::*, state::GuardSet};
+pub use crate::{errors::GumballGuardError, instructions::draw::*, state::GuardSet};
 use crate::{
     instructions::{DrawAccounts, Route, RouteContext},
-    state::{CandyGuardData, SEED},
+    state::{GumballGuardData, SEED},
 };
 
 pub use address_gate::AddressGate;
@@ -108,7 +108,7 @@ pub trait Guard: Condition + AnchorSerialize + AnchorDeserialize {
         _route_context: RouteContext<'info>,
         _data: Vec<u8>,
     ) -> Result<()> {
-        err!(CandyGuardError::InstructionNotFound)
+        err!(GumballGuardError::InstructionNotFound)
     }
 
     /// Returns whether the guards is enabled or not on the specified features.
@@ -148,9 +148,9 @@ pub trait Guard: Condition + AnchorSerialize + AnchorDeserialize {
         }
     }
 
-    /// Verifies that the candy guard configuration is valid according to the rules
+    /// Verifies that the gumball guard configuration is valid according to the rules
     /// of the guard.
-    fn verify(_data: &CandyGuardData) -> Result<()> {
+    fn verify(_data: &GumballGuardData) -> Result<()> {
         Ok(())
     }
 }
@@ -176,7 +176,7 @@ pub fn try_get_account_info<T>(remaining_accounts: &[T], index: usize) -> Result
     if index < remaining_accounts.len() {
         Ok(&remaining_accounts[index])
     } else {
-        err!(CandyGuardError::MissingRemainingAccount)
+        err!(GumballGuardError::MissingRemainingAccount)
     }
 }
 
@@ -191,13 +191,13 @@ pub fn get_account_info<T>(remaining_accounts: &[T], index: usize) -> Option<&T>
 }
 
 fn cpi_increment_total_revenue(ctx: &EvaluationContext, revenue: u64) -> Result<()> {
-    let candy_guard = &ctx.accounts.candy_guard;
+    let gumball_guard = &ctx.accounts.gumball_guard;
 
-    // candy machine mint instruction accounts
+    // gumball machine mint instruction accounts
     let accounts = Box::new(
         mpl_candy_machine_core::cpi::accounts::IncrementTotalRevenue {
-            candy_machine: ctx.accounts.candy_machine.to_account_info(),
-            mint_authority: candy_guard.to_account_info(),
+            gumball_machine: ctx.accounts.gumball_machine.to_account_info(),
+            mint_authority: gumball_guard.to_account_info(),
         },
     );
 
@@ -214,7 +214,7 @@ fn cpi_increment_total_revenue(ctx: &EvaluationContext, revenue: u64) -> Result<
     };
 
     // PDA signer for the transaction
-    let seeds = [SEED, &candy_guard.base.to_bytes(), &[candy_guard.bump]];
+    let seeds = [SEED, &gumball_guard.base.to_bytes(), &[gumball_guard.bump]];
     let signer = [&seeds[..]];
 
     invoke_signed(&ix, &ix_infos, &signer)?;

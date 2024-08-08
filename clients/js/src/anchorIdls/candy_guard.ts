@@ -4,10 +4,10 @@ export type CandyGuard = {
   instructions: [
     {
       name: 'initialize';
-      docs: ['Create a new candy guard account.'];
+      docs: ['Create a new gumball guard account.'];
       accounts: [
         {
-          name: 'candyGuard';
+          name: 'gumballGuard';
           isMut: true;
           isSigner: false;
         },
@@ -41,25 +41,27 @@ export type CandyGuard = {
     },
     {
       name: 'draw';
-      docs: ['Mint an NFT from a candy machine wrapped in the candy guard.'];
+      docs: [
+        'Mint an NFT from a gumball machine wrapped in the gumball guard.'
+      ];
       accounts: [
         {
-          name: 'candyGuard';
+          name: 'gumballGuard';
           isMut: false;
           isSigner: false;
-          docs: ['Candy Guard account.'];
+          docs: ['Gumball Guard account.'];
         },
         {
-          name: 'candyMachineProgram';
+          name: 'gumballMachineProgram';
           isMut: false;
           isSigner: false;
-          docs: ['Candy Machine program account.', ''];
+          docs: ['Gumball Machine program account.', ''];
         },
         {
-          name: 'candyMachine';
+          name: 'gumballMachine';
           isMut: true;
           isSigner: false;
-          docs: ['Candy machine account.'];
+          docs: ['Gumball machine account.'];
         },
         {
           name: 'payer';
@@ -127,12 +129,12 @@ export type CandyGuard = {
       docs: ['Route the transaction to a guard instruction.'];
       accounts: [
         {
-          name: 'candyGuard';
+          name: 'gumballGuard';
           isMut: false;
           isSigner: false;
         },
         {
-          name: 'candyMachine';
+          name: 'gumballMachine';
           isMut: true;
           isSigner: false;
         },
@@ -159,10 +161,10 @@ export type CandyGuard = {
     },
     {
       name: 'setAuthority';
-      docs: ['Set a new authority of the candy guard.'];
+      docs: ['Set a new authority of the gumball guard.'];
       accounts: [
         {
-          name: 'candyGuard';
+          name: 'gumballGuard';
           isMut: true;
           isSigner: false;
         },
@@ -182,12 +184,12 @@ export type CandyGuard = {
     {
       name: 'unwrap';
       docs: [
-        'Remove a candy guard from a candy machine, setting the authority to the',
-        'candy guard authority.'
+        'Remove a gumball guard from a gumball machine, setting the authority to the',
+        'gumball guard authority.'
       ];
       accounts: [
         {
-          name: 'candyGuard';
+          name: 'gumballGuard';
           isMut: false;
           isSigner: false;
         },
@@ -197,17 +199,17 @@ export type CandyGuard = {
           isSigner: true;
         },
         {
-          name: 'candyMachine';
+          name: 'gumballMachine';
           isMut: true;
           isSigner: false;
         },
         {
-          name: 'candyMachineAuthority';
+          name: 'gumballMachineAuthority';
           isMut: false;
           isSigner: true;
         },
         {
-          name: 'candyMachineProgram';
+          name: 'gumballMachineProgram';
           isMut: false;
           isSigner: false;
         }
@@ -216,12 +218,18 @@ export type CandyGuard = {
     },
     {
       name: 'update';
-      docs: ['Update the candy guard configuration.'];
+      docs: ['Update the gumball guard configuration.'];
       accounts: [
         {
-          name: 'candyGuard';
+          name: 'gumballGuard';
           isMut: true;
           isSigner: false;
+        },
+        {
+          name: 'gumballMachine';
+          isMut: true;
+          isSigner: false;
+          docs: ['Gumball machine account.'];
         },
         {
           name: 'authority';
@@ -248,10 +256,10 @@ export type CandyGuard = {
     },
     {
       name: 'withdraw';
-      docs: ['Withdraw the rent SOL from the candy guard account.'];
+      docs: ['Withdraw the rent SOL from the gumball guard account.'];
       accounts: [
         {
-          name: 'candyGuard';
+          name: 'gumballGuard';
           isMut: true;
           isSigner: false;
         },
@@ -266,12 +274,12 @@ export type CandyGuard = {
     {
       name: 'wrap';
       docs: [
-        'Add a candy guard to a candy machine. After the guard is added, mint',
-        'is only allowed through the candy guard.'
+        'Add a gumball guard to a gumball machine. After the guard is added, mint',
+        'is only allowed through the gumball guard.'
       ];
       accounts: [
         {
-          name: 'candyGuard';
+          name: 'gumballGuard';
           isMut: false;
           isSigner: false;
         },
@@ -281,17 +289,17 @@ export type CandyGuard = {
           isSigner: true;
         },
         {
-          name: 'candyMachine';
+          name: 'gumballMachine';
           isMut: true;
           isSigner: false;
         },
         {
-          name: 'candyMachineProgram';
+          name: 'gumballMachineProgram';
           isMut: false;
           isSigner: false;
         },
         {
-          name: 'candyMachineAuthority';
+          name: 'gumballMachineAuthority';
           isMut: false;
           isSigner: true;
         }
@@ -301,7 +309,7 @@ export type CandyGuard = {
   ];
   accounts: [
     {
-      name: 'candyGuard';
+      name: 'gumballGuard';
       type: {
         kind: 'struct';
         fields: [
@@ -344,7 +352,7 @@ export type CandyGuard = {
         '',
         '0. `[writable]` Allocation tracker PDA. The PDA is derived',
         'using the seed `["allocation", allocation id,',
-        'candy guard pubkey, candy machine pubkey]`.'
+        'gumball guard pubkey, gumball machine pubkey]`.'
       ];
       type: {
         kind: 'struct';
@@ -383,7 +391,7 @@ export type CandyGuard = {
         'List of accounts required:',
         '',
         '0. `[]` Pda created by the merkle proof instruction (seeds `["allow_list", merke tree root,',
-        'payer key, candy guard pubkey, candy machine pubkey]`).'
+        'payer key, gumball guard pubkey, gumball machine pubkey]`).'
       ];
       type: {
         kind: 'struct';
@@ -489,7 +497,7 @@ export type CandyGuard = {
         '',
         '0. `[writable]` Mint counter PDA. The PDA is derived',
         'using the seed `["mint_limit", mint guard id, payer key,',
-        'candy guard pubkey, candy machine pubkey]`.'
+        'gumball guard pubkey, gumball machine pubkey]`.'
       ];
       type: {
         kind: 'struct';
@@ -807,7 +815,7 @@ export type CandyGuard = {
       };
     },
     {
-      name: 'CandyGuardData';
+      name: 'GumballGuardData';
       type: {
         kind: 'struct';
         fields: [
@@ -1179,8 +1187,8 @@ export type CandyGuard = {
     },
     {
       code: 6011;
-      name: 'CandyMachineEmpty';
-      msg: 'Candy machine is empty';
+      name: 'GumballMachineEmpty';
+      msg: 'Gumball machine is empty';
     },
     {
       code: 6012;
@@ -1370,7 +1378,7 @@ export type CandyGuard = {
     {
       code: 6049;
       name: 'InvalidMintAuthority';
-      msg: 'Candy machine has an invalid mint authority';
+      msg: 'Gumball machine has an invalid mint authority';
     },
     {
       code: 6050;
@@ -1391,6 +1399,11 @@ export type CandyGuard = {
       code: 6053;
       name: 'InvalidPaymentMint';
       msg: 'Invalid payment mint';
+    },
+    {
+      code: 6054;
+      name: 'InvalidGumballMachineState';
+      msg: 'Invalid gumball machine state';
     }
   ];
 };
@@ -1401,10 +1414,10 @@ export const IDL: CandyGuard = {
   instructions: [
     {
       name: 'initialize',
-      docs: ['Create a new candy guard account.'],
+      docs: ['Create a new gumball guard account.'],
       accounts: [
         {
-          name: 'candyGuard',
+          name: 'gumballGuard',
           isMut: true,
           isSigner: false,
         },
@@ -1438,25 +1451,27 @@ export const IDL: CandyGuard = {
     },
     {
       name: 'draw',
-      docs: ['Mint an NFT from a candy machine wrapped in the candy guard.'],
+      docs: [
+        'Mint an NFT from a gumball machine wrapped in the gumball guard.',
+      ],
       accounts: [
         {
-          name: 'candyGuard',
+          name: 'gumballGuard',
           isMut: false,
           isSigner: false,
-          docs: ['Candy Guard account.'],
+          docs: ['Gumball Guard account.'],
         },
         {
-          name: 'candyMachineProgram',
+          name: 'gumballMachineProgram',
           isMut: false,
           isSigner: false,
-          docs: ['Candy Machine program account.', ''],
+          docs: ['Gumball Machine program account.', ''],
         },
         {
-          name: 'candyMachine',
+          name: 'gumballMachine',
           isMut: true,
           isSigner: false,
-          docs: ['Candy machine account.'],
+          docs: ['Gumball machine account.'],
         },
         {
           name: 'payer',
@@ -1524,12 +1539,12 @@ export const IDL: CandyGuard = {
       docs: ['Route the transaction to a guard instruction.'],
       accounts: [
         {
-          name: 'candyGuard',
+          name: 'gumballGuard',
           isMut: false,
           isSigner: false,
         },
         {
-          name: 'candyMachine',
+          name: 'gumballMachine',
           isMut: true,
           isSigner: false,
         },
@@ -1556,10 +1571,10 @@ export const IDL: CandyGuard = {
     },
     {
       name: 'setAuthority',
-      docs: ['Set a new authority of the candy guard.'],
+      docs: ['Set a new authority of the gumball guard.'],
       accounts: [
         {
-          name: 'candyGuard',
+          name: 'gumballGuard',
           isMut: true,
           isSigner: false,
         },
@@ -1579,12 +1594,12 @@ export const IDL: CandyGuard = {
     {
       name: 'unwrap',
       docs: [
-        'Remove a candy guard from a candy machine, setting the authority to the',
-        'candy guard authority.',
+        'Remove a gumball guard from a gumball machine, setting the authority to the',
+        'gumball guard authority.',
       ],
       accounts: [
         {
-          name: 'candyGuard',
+          name: 'gumballGuard',
           isMut: false,
           isSigner: false,
         },
@@ -1594,17 +1609,17 @@ export const IDL: CandyGuard = {
           isSigner: true,
         },
         {
-          name: 'candyMachine',
+          name: 'gumballMachine',
           isMut: true,
           isSigner: false,
         },
         {
-          name: 'candyMachineAuthority',
+          name: 'gumballMachineAuthority',
           isMut: false,
           isSigner: true,
         },
         {
-          name: 'candyMachineProgram',
+          name: 'gumballMachineProgram',
           isMut: false,
           isSigner: false,
         },
@@ -1613,12 +1628,18 @@ export const IDL: CandyGuard = {
     },
     {
       name: 'update',
-      docs: ['Update the candy guard configuration.'],
+      docs: ['Update the gumball guard configuration.'],
       accounts: [
         {
-          name: 'candyGuard',
+          name: 'gumballGuard',
           isMut: true,
           isSigner: false,
+        },
+        {
+          name: 'gumballMachine',
+          isMut: true,
+          isSigner: false,
+          docs: ['Gumball machine account.'],
         },
         {
           name: 'authority',
@@ -1645,10 +1666,10 @@ export const IDL: CandyGuard = {
     },
     {
       name: 'withdraw',
-      docs: ['Withdraw the rent SOL from the candy guard account.'],
+      docs: ['Withdraw the rent SOL from the gumball guard account.'],
       accounts: [
         {
-          name: 'candyGuard',
+          name: 'gumballGuard',
           isMut: true,
           isSigner: false,
         },
@@ -1663,12 +1684,12 @@ export const IDL: CandyGuard = {
     {
       name: 'wrap',
       docs: [
-        'Add a candy guard to a candy machine. After the guard is added, mint',
-        'is only allowed through the candy guard.',
+        'Add a gumball guard to a gumball machine. After the guard is added, mint',
+        'is only allowed through the gumball guard.',
       ],
       accounts: [
         {
-          name: 'candyGuard',
+          name: 'gumballGuard',
           isMut: false,
           isSigner: false,
         },
@@ -1678,17 +1699,17 @@ export const IDL: CandyGuard = {
           isSigner: true,
         },
         {
-          name: 'candyMachine',
+          name: 'gumballMachine',
           isMut: true,
           isSigner: false,
         },
         {
-          name: 'candyMachineProgram',
+          name: 'gumballMachineProgram',
           isMut: false,
           isSigner: false,
         },
         {
-          name: 'candyMachineAuthority',
+          name: 'gumballMachineAuthority',
           isMut: false,
           isSigner: true,
         },
@@ -1698,7 +1719,7 @@ export const IDL: CandyGuard = {
   ],
   accounts: [
     {
-      name: 'candyGuard',
+      name: 'gumballGuard',
       type: {
         kind: 'struct',
         fields: [
@@ -1741,7 +1762,7 @@ export const IDL: CandyGuard = {
         '',
         '0. `[writable]` Allocation tracker PDA. The PDA is derived',
         'using the seed `["allocation", allocation id,',
-        'candy guard pubkey, candy machine pubkey]`.',
+        'gumball guard pubkey, gumball machine pubkey]`.',
       ],
       type: {
         kind: 'struct',
@@ -1780,7 +1801,7 @@ export const IDL: CandyGuard = {
         'List of accounts required:',
         '',
         '0. `[]` Pda created by the merkle proof instruction (seeds `["allow_list", merke tree root,',
-        'payer key, candy guard pubkey, candy machine pubkey]`).',
+        'payer key, gumball guard pubkey, gumball machine pubkey]`).',
       ],
       type: {
         kind: 'struct',
@@ -1886,7 +1907,7 @@ export const IDL: CandyGuard = {
         '',
         '0. `[writable]` Mint counter PDA. The PDA is derived',
         'using the seed `["mint_limit", mint guard id, payer key,',
-        'candy guard pubkey, candy machine pubkey]`.',
+        'gumball guard pubkey, gumball machine pubkey]`.',
       ],
       type: {
         kind: 'struct',
@@ -2204,7 +2225,7 @@ export const IDL: CandyGuard = {
       },
     },
     {
-      name: 'CandyGuardData',
+      name: 'GumballGuardData',
       type: {
         kind: 'struct',
         fields: [
@@ -2576,8 +2597,8 @@ export const IDL: CandyGuard = {
     },
     {
       code: 6011,
-      name: 'CandyMachineEmpty',
-      msg: 'Candy machine is empty',
+      name: 'GumballMachineEmpty',
+      msg: 'Gumball machine is empty',
     },
     {
       code: 6012,
@@ -2767,7 +2788,7 @@ export const IDL: CandyGuard = {
     {
       code: 6049,
       name: 'InvalidMintAuthority',
-      msg: 'Candy machine has an invalid mint authority',
+      msg: 'Gumball machine has an invalid mint authority',
     },
     {
       code: 6050,
@@ -2788,6 +2809,11 @@ export const IDL: CandyGuard = {
       code: 6053,
       name: 'InvalidPaymentMint',
       msg: 'Invalid payment mint',
+    },
+    {
+      code: 6054,
+      name: 'InvalidGumballMachineState',
+      msg: 'Invalid gumball machine state',
     },
   ],
 };

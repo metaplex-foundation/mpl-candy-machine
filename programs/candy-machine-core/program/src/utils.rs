@@ -9,8 +9,8 @@ use solana_program::{
 use utils::{assert_keys_equal, verify_proof};
 
 use crate::{
-    constants::{CANDY_MACHINE_SIZE, CONFIG_LINE_SIZE},
-    CandyError, CandyMachine, ConfigLine, SellerHistory,
+    constants::{CONFIG_LINE_SIZE, GUMBALL_MACHINE_SIZE},
+    ConfigLine, GumballError, GumballMachine, SellerHistory,
 };
 
 /// Anchor wrapper for Token program.
@@ -34,68 +34,68 @@ impl anchor_lang::Id for AssociatedToken {
 }
 
 pub fn assert_can_add_item(
-    candy_machine: &mut Box<Account<CandyMachine>>,
+    gumball_machine: &mut Box<Account<GumballMachine>>,
     seller_history: &mut Box<Account<SellerHistory>>,
     seller_proof_path: Option<Vec<[u8; 32]>>,
 ) -> Result<()> {
     let seller = seller_history.seller;
 
-    if seller == candy_machine.authority {
+    if seller == gumball_machine.authority {
         return Ok(());
     }
 
-    if seller_history.item_count >= candy_machine.settings.items_per_seller as u64 {
-        return err!(CandyError::SellerTooManyItems);
+    if seller_history.item_count >= gumball_machine.settings.items_per_seller as u64 {
+        return err!(GumballError::SellerTooManyItems);
     }
 
-    if seller_proof_path.is_none() || candy_machine.settings.sellers_merkle_root.is_none() {
-        return err!(CandyError::InvalidProofPath);
+    if seller_proof_path.is_none() || gumball_machine.settings.sellers_merkle_root.is_none() {
+        return err!(GumballError::InvalidProofPath);
     }
 
     let leaf = solana_program::keccak::hashv(&[seller.to_string().as_bytes()]);
     require!(
         verify_proof(
             &seller_proof_path.unwrap()[..],
-            &candy_machine.settings.sellers_merkle_root.unwrap(),
+            &gumball_machine.settings.sellers_merkle_root.unwrap(),
             &leaf.0,
         ),
-        CandyError::InvalidProofPath
+        GumballError::InvalidProofPath
     );
 
     Ok(())
 }
 
 pub fn assert_config_line(
-    candy_machine: &Box<Account<CandyMachine>>,
+    gumball_machine: &Box<Account<GumballMachine>>,
     index: u32,
     config_line: ConfigLine,
 ) -> Result<()> {
-    let account_info = candy_machine.to_account_info();
+    let account_info = gumball_machine.to_account_info();
     let data = account_info.data.borrow();
     let count = get_config_count(&data)?;
 
     if index >= count as u32 {
-        return err!(CandyError::IndexGreaterThanLength);
+        return err!(GumballError::IndexGreaterThanLength);
     }
 
-    let config_line_position = CANDY_MACHINE_SIZE + 4 + (index as usize) * CONFIG_LINE_SIZE;
+    let config_line_position = GUMBALL_MACHINE_SIZE + 4 + (index as usize) * CONFIG_LINE_SIZE;
 
     let mint = Pubkey::try_from(&data[config_line_position..config_line_position + 32]).unwrap();
-    require!(config_line.mint == mint, CandyError::InvalidMint);
+    require!(config_line.mint == mint, GumballError::InvalidMint);
 
     let seller =
         Pubkey::try_from(&data[config_line_position + 32..config_line_position + 64]).unwrap();
-    // Only the candy machine authority or the seller can remove a config line
-    require!(config_line.seller == seller, CandyError::InvalidSeller);
+    // Only the gumball machine authority or the seller can remove a config line
+    require!(config_line.seller == seller, GumballError::InvalidSeller);
 
     let buyer =
         Pubkey::try_from(&data[config_line_position + 64..config_line_position + 96]).unwrap();
-    require!(config_line.buyer == buyer, CandyError::InvalidBuyer);
+    require!(config_line.buyer == buyer, GumballError::InvalidBuyer);
 
     let token_standard = u8::from_le_bytes(*array_ref![data, config_line_position + 96, 1]);
     require!(
         config_line.token_standard as u8 == token_standard,
-        CandyError::InvalidTokenStandard
+        GumballError::InvalidTokenStandard
     );
 
     drop(data);
@@ -105,7 +105,7 @@ pub fn assert_config_line(
 
 /// Return the current number of lines written to the account.
 pub fn get_config_count(data: &[u8]) -> Result<usize> {
-    Ok(u32::from_le_bytes(*array_ref![data, CANDY_MACHINE_SIZE, 4]) as usize)
+    Ok(u32::from_le_bytes(*array_ref![data, GUMBALL_MACHINE_SIZE, 4]) as usize)
 }
 
 pub fn cmp_pubkeys(a: &Pubkey, b: &Pubkey) -> bool {

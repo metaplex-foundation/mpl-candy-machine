@@ -27,7 +27,7 @@ import {
   u32,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import { findCandyGuardPda } from '../../hooked';
+import { findGumballGuardPda } from '../../hooked';
 import {
   expectPublicKey,
   getAccountMetasAndSigners,
@@ -38,8 +38,8 @@ import { getGuardTypeSerializer, GuardType, GuardTypeArgs } from '../types';
 
 // Accounts.
 export type RouteInstructionAccounts = {
-  candyGuard?: PublicKey | Pda;
-  candyMachine: PublicKey | Pda;
+  gumballGuard?: PublicKey | Pda;
+  gumballMachine: PublicKey | Pda;
   payer?: Signer;
 };
 
@@ -98,15 +98,15 @@ export function route(
 
   // Accounts.
   const resolvedAccounts: ResolvedAccountsWithIndices = {
-    candyGuard: {
+    gumballGuard: {
       index: 0,
       isWritable: false,
-      value: input.candyGuard ?? null,
+      value: input.gumballGuard ?? null,
     },
-    candyMachine: {
+    gumballMachine: {
       index: 1,
       isWritable: true,
-      value: input.candyMachine ?? null,
+      value: input.gumballMachine ?? null,
     },
     payer: { index: 2, isWritable: true, value: input.payer ?? null },
   };
@@ -115,9 +115,9 @@ export function route(
   const resolvedArgs: RouteInstructionArgs = { ...input };
 
   // Default values.
-  if (!resolvedAccounts.candyGuard.value) {
-    resolvedAccounts.candyGuard.value = findCandyGuardPda(context, {
-      base: expectPublicKey(resolvedAccounts.candyMachine.value),
+  if (!resolvedAccounts.gumballGuard.value) {
+    resolvedAccounts.gumballGuard.value = findGumballGuardPda(context, {
+      base: expectPublicKey(resolvedAccounts.gumballMachine.value),
     });
   }
   if (!resolvedAccounts.payer.value) {

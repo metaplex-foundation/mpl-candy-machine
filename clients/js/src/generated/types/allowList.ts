@@ -18,7 +18,7 @@ import {
  * List of accounts required:
  *
  * 0. `[]` Pda created by the merkle proof instruction (seeds `["allow_list", merke tree root,
- * payer key, candy guard pubkey, candy machine pubkey]`).
+ * payer key, gumball guard pubkey, gumball machine pubkey]`).
  */
 
 export type AllowList = {

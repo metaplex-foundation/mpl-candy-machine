@@ -6,7 +6,7 @@ use super::{
     program_gate::{verify_programs, DEFAULT_PROGRAMS},
     *,
 };
-use crate::{errors::CandyGuardError, state::GuardType};
+use crate::{errors::GumballGuardError, state::GuardType};
 
 /// Guard is used to:
 /// * charge a penalty for invalid transactions
@@ -44,7 +44,7 @@ impl Condition for BotTax {
             // the next instruction after the mint
             if get_instruction_relative(1, ix_sysvar_account_info).is_ok() {
                 msg!("Failing and halting due to an extra unauthorized instruction");
-                return err!(CandyGuardError::MintNotLastTransaction);
+                return err!(GumballGuardError::MintNotLastTransaction);
             }
 
             // verifies that only authorized programs have instructions in the transaction
@@ -58,11 +58,11 @@ impl Condition for BotTax {
 impl BotTax {
     pub fn punish_bots(&self, ctx: &EvaluationContext, error: Error) -> Result<()> {
         let bot_account = ctx.accounts.payer.to_account_info();
-        let payment_account = ctx.accounts.candy_machine.to_account_info();
+        let payment_account = ctx.accounts.gumball_machine.to_account_info();
         let system_program = ctx.accounts.system_program.to_account_info();
 
         msg!(
-            "{}, Candy Guard Botting is taxed at {:?} lamports",
+            "{}, Gumball Guard Botting is taxed at {:?} lamports",
             error.to_string(),
             self.lamports
         );

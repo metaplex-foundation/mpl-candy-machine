@@ -1,20 +1,18 @@
-use anchor_lang::system_program;
-use solana_program::{program::invoke_signed, system_instruction};
-
+use super::*;
 use crate::{
     instructions::Route,
     state::GuardType,
     utils::{assert_keys_equal, assert_owned_by, cmp_pubkeys},
 };
-
-use super::*;
+use anchor_lang::system_program;
+use solana_program::{program::invoke_signed, system_instruction};
 
 /// Guard that uses a merkle tree to specify the addresses allowed to mint.
 ///
 /// List of accounts required:
 ///
 ///   0. `[]` Pda created by the merkle proof instruction (seeds `["allow_list", merke tree root,
-///           payer key, candy guard pubkey, candy machine pubkey]`).
+///           payer key, gumball guard pubkey, gumball machine pubkey]`).
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug)]
 pub struct AllowList {
     /// Merkle root of the addresses allowed to mint.
@@ -56,7 +54,7 @@ impl Guard for AllowList {
     /// List of accounts required:
     ///
     ///   0. `[writable]` Pda to represent the merkle proof (seeds `["allow_list", merke tree root,
-    ///                   payer/minter key, candy guard pubkey, candy machine pubkey]`).
+    ///                   payer/minter key, gumball guard pubkey, gumball machine pubkey]`).
     ///   1. `[]` System program account.
     ///   2. `[optional]` Minter account.
     fn instruction<'c: 'info, 'info>(
@@ -66,19 +64,19 @@ impl Guard for AllowList {
     ) -> Result<()> {
         msg!("AllowList: validate proof instruction");
 
-        let candy_guard = route_context
-            .candy_guard
+        let gumball_guard = route_context
+            .gumball_guard
             .as_ref()
-            .ok_or(CandyGuardError::Uninitialized)?;
+            .ok_or(GumballGuardError::Uninitialized)?;
 
-        let candy_machine = route_context
-            .candy_machine
+        let gumball_machine = route_context
+            .gumball_machine
             .as_ref()
-            .ok_or(CandyGuardError::Uninitialized)?;
+            .ok_or(GumballGuardError::Uninitialized)?;
 
-        // and the candy guard and candy machine must be linked
-        if !cmp_pubkeys(&candy_machine.mint_authority, &candy_guard.key()) {
-            return err!(CandyGuardError::InvalidMintAuthority);
+        // and the gumball guard and gumball machine must be linked
+        if !cmp_pubkeys(&gumball_machine.mint_authority, &gumball_guard.key()) {
+            return err!(GumballGuardError::InvalidMintAuthority);
         }
 
         let proof_pda = try_get_account_info(ctx.remaining_accounts, 0)?;
@@ -96,7 +94,7 @@ impl Guard for AllowList {
         let merkle_proof: Vec<[u8; 32]> = if let Ok(proof) = Vec::try_from_slice(&data[..]) {
             proof
         } else {
-            return err!(CandyGuardError::MissingAllowedListProof);
+            return err!(GumballGuardError::MissingAllowedListProof);
         };
 
         let leaf = solana_program::keccak::hashv(&[minter.to_string().as_bytes()]);
@@ -104,30 +102,30 @@ impl Guard for AllowList {
         let guard_set = if let Some(guard_set) = route_context.guard_set {
             guard_set
         } else {
-            return err!(CandyGuardError::AllowedListNotEnabled);
+            return err!(GumballGuardError::AllowedListNotEnabled);
         };
 
         let merkle_root = if let Some(allow_list) = &guard_set.allow_list {
             &allow_list.merkle_root
         } else {
-            return err!(CandyGuardError::AllowedListNotEnabled);
+            return err!(GumballGuardError::AllowedListNotEnabled);
         };
 
         if !Self::verify(&merkle_proof[..], merkle_root, &leaf.0) {
-            return err!(CandyGuardError::AddressNotFoundInAllowedList);
+            return err!(GumballGuardError::AddressNotFoundInAllowedList);
         }
 
         // creates the proof PDA
 
-        let candy_guard_key = &ctx.accounts.candy_guard.key();
-        let candy_machine_key = &ctx.accounts.candy_machine.key();
+        let gumball_guard_key = &ctx.accounts.gumball_guard.key();
+        let gumball_machine_key = &ctx.accounts.gumball_machine.key();
 
         let seeds = [
             AllowListProof::PREFIX_SEED,
             &merkle_root[..],
             minter.as_ref(),
-            candy_guard_key.as_ref(),
-            candy_machine_key.as_ref(),
+            gumball_guard_key.as_ref(),
+            gumball_machine_key.as_ref(),
         ];
         let (pda, bump) = Pubkey::find_program_address(&seeds, &crate::ID);
 
@@ -138,8 +136,8 @@ impl Guard for AllowList {
                 AllowListProof::PREFIX_SEED,
                 &merkle_root[..],
                 minter.as_ref(),
-                candy_guard_key.as_ref(),
-                candy_machine_key.as_ref(),
+                gumball_guard_key.as_ref(),
+                gumball_machine_key.as_ref(),
                 &[bump],
             ];
             let rent = Rent::get()?;
@@ -187,22 +185,22 @@ impl Condition for AllowList {
 
         // validates the pda
 
-        let candy_guard_key = &ctx.accounts.candy_guard.key();
-        let candy_machine_key = &ctx.accounts.candy_machine.key();
+        let gumball_guard_key = &ctx.accounts.gumball_guard.key();
+        let gumball_machine_key = &ctx.accounts.gumball_machine.key();
 
         let seeds = [
             AllowListProof::PREFIX_SEED,
             &self.merkle_root[..],
             minter.as_ref(),
-            candy_guard_key.as_ref(),
-            candy_machine_key.as_ref(),
+            gumball_guard_key.as_ref(),
+            gumball_machine_key.as_ref(),
         ];
         let (pda, _) = Pubkey::find_program_address(&seeds, &crate::ID);
 
         assert_keys_equal(proof_pda.key, &pda)?;
 
         if proof_pda.data_is_empty() {
-            return err!(CandyGuardError::MissingAllowedListProof);
+            return err!(GumballGuardError::MissingAllowedListProof);
         }
 
         assert_owned_by(proof_pda, &crate::ID)?;

@@ -135,10 +135,10 @@ export function findAllowListProofPda(
     merkleRoot: Uint8Array;
     /** The address of the wallet trying to mint */
     user: PublicKey;
-    /** The address of the Candy Guard account */
-    candyGuard: PublicKey;
-    /** The address of the Candy Machine account */
-    candyMachine: PublicKey;
+    /** The address of the Gumball Guard account */
+    gumballGuard: PublicKey;
+    /** The address of the Gumball Machine account */
+    gumballMachine: PublicKey;
   }
 ): Pda {
   const programId = context.programs.getPublicKey(
@@ -149,8 +149,8 @@ export function findAllowListProofPda(
     string({ size: 'variable' }).serialize('allow_list'),
     bytes({ size: 32 }).serialize(seeds.merkleRoot),
     publicKeySerializer().serialize(seeds.user),
-    publicKeySerializer().serialize(seeds.candyGuard),
-    publicKeySerializer().serialize(seeds.candyMachine),
+    publicKeySerializer().serialize(seeds.gumballGuard),
+    publicKeySerializer().serialize(seeds.gumballMachine),
   ]);
 }
 

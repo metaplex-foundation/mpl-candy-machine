@@ -8,7 +8,7 @@ import {
 import test from 'ava';
 import {
   findAllowListProofPda,
-  findCandyGuardPda,
+  findGumballGuardPda,
   getMerkleProof,
   getMerkleRoot,
   route,
@@ -16,7 +16,7 @@ import {
 import { create, createUmi } from './_setup';
 
 test('it can call the route instruction of a specific guard', async (t) => {
-  // Given a candy machine with an allow list guard.
+  // Given a gumball machine with an allow list guard.
   const umi = await createUmi();
   const buyer = generateSigner(umi).publicKey;
   const allowedWallets = [
@@ -26,7 +26,7 @@ test('it can call the route instruction of a specific guard', async (t) => {
     '2vjCrmEFiN9CLLhiqy8u1JPh48av8Zpzp3kNkdTtirYG',
   ];
   const merkleRoot = getMerkleRoot(allowedWallets);
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     guards: { allowList: some({ merkleRoot }) },
   });
 
@@ -35,7 +35,7 @@ test('it can call the route instruction of a specific guard', async (t) => {
   await transactionBuilder()
     .add(
       route(umi, {
-        candyMachine,
+        gumballMachine,
         guard: 'allowList',
         routeArgs: { path: 'proof', merkleRoot, merkleProof, buyer },
       })
@@ -46,14 +46,14 @@ test('it can call the route instruction of a specific guard', async (t) => {
   const [allowListProofPda] = findAllowListProofPda(umi, {
     merkleRoot,
     user: buyer,
-    candyMachine,
-    candyGuard: findCandyGuardPda(umi, { base: candyMachine })[0],
+    gumballMachine,
+    gumballGuard: findGumballGuardPda(umi, { base: gumballMachine })[0],
   });
   t.true(await umi.rpc.accountExists(allowListProofPda));
 });
 
 test('it can call the route instruction of a specific guard on a group', async (t) => {
-  // Given a Candy Machine with two allowList guards which supports the route instruction.
+  // Given a Gumball Machine with two allowList guards which supports the route instruction.
   const umi = await createUmi();
   const allowedWalletsA = [
     umi.identity.publicKey,
@@ -65,7 +65,7 @@ test('it can call the route instruction of a specific guard on a group', async (
   ];
   const merkleRootA = getMerkleRoot(allowedWalletsA);
   const merkleRootB = getMerkleRoot(allowedWalletsB);
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     groups: [
       {
         label: 'GROUP1',
@@ -83,7 +83,7 @@ test('it can call the route instruction of a specific guard on a group', async (
   await transactionBuilder()
     .add(
       route(umi, {
-        candyMachine,
+        gumballMachine,
         guard: 'allowList',
         group: some('GROUP1'),
         routeArgs: {
@@ -99,8 +99,8 @@ test('it can call the route instruction of a specific guard on a group', async (
   const [allowListProofPdaA] = findAllowListProofPda(umi, {
     merkleRoot: merkleRootA,
     user: umi.identity.publicKey,
-    candyMachine,
-    candyGuard: findCandyGuardPda(umi, { base: candyMachine })[0],
+    gumballMachine,
+    gumballGuard: findGumballGuardPda(umi, { base: gumballMachine })[0],
   });
   t.true(await umi.rpc.accountExists(allowListProofPdaA));
 
@@ -108,34 +108,34 @@ test('it can call the route instruction of a specific guard on a group', async (
   const [allowListProofPdaB] = findAllowListProofPda(umi, {
     merkleRoot: merkleRootB,
     user: umi.identity.publicKey,
-    candyMachine,
-    candyGuard: findCandyGuardPda(umi, { base: candyMachine })[0],
+    gumballMachine,
+    gumballGuard: findGumballGuardPda(umi, { base: gumballMachine })[0],
   });
   t.false(await umi.rpc.accountExists(allowListProofPdaB));
 });
 
 test('it cannot call the route instruction of a guard that does not support it', async (t) => {
-  // Given a candy machine with an bot tax guard which does not support the route instruction.
+  // Given a gumball machine with an bot tax guard which does not support the route instruction.
   const umi = await createUmi();
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     guards: { botTax: some({ lamports: sol(0.01), lastInstruction: true }) },
   });
 
   // When we try to call the route instruction of the bot tax guard.
   const promise = transactionBuilder()
-    .add(route(umi, { candyMachine, guard: 'botTax', routeArgs: {} }))
+    .add(route(umi, { gumballMachine, guard: 'botTax', routeArgs: {} }))
     .sendAndConfirm(umi);
 
   // Then we expect a program error.
   await t.throwsAsync(promise, { message: /InstructionNotFound/ });
 });
 
-test('it must provide a group label if the candy guard has groups', async (t) => {
-  // Given a candy machine with an allow list guard in a group.
+test('it must provide a group label if the gumball guard has groups', async (t) => {
+  // Given a gumball machine with an allow list guard in a group.
   const umi = await createUmi();
   const allowedWallets = [umi.identity.publicKey];
   const merkleRoot = getMerkleRoot(allowedWallets);
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     groups: [{ label: 'GROUP1', guards: { allowList: some({ merkleRoot }) } }],
   });
 
@@ -144,7 +144,7 @@ test('it must provide a group label if the candy guard has groups', async (t) =>
   const promise = transactionBuilder()
     .add(
       route(umi, {
-        candyMachine,
+        gumballMachine,
         guard: 'allowList',
         group: none(),
         routeArgs: { path: 'proof', merkleRoot, merkleProof },
@@ -156,12 +156,12 @@ test('it must provide a group label if the candy guard has groups', async (t) =>
   await t.throwsAsync(promise, { message: /RequiredGroupLabelNotFound/ });
 });
 
-test('it must not provide a group label if the candy guard does not have groups', async (t) => {
-  // Given a candy machine with an allow list guard and no groups.
+test('it must not provide a group label if the gumball guard does not have groups', async (t) => {
+  // Given a gumball machine with an allow list guard and no groups.
   const umi = await createUmi();
   const allowedWallets = [umi.identity.publicKey];
   const merkleRoot = getMerkleRoot(allowedWallets);
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     guards: { allowList: some({ merkleRoot }) },
   });
 
@@ -170,7 +170,7 @@ test('it must not provide a group label if the candy guard does not have groups'
   const promise = transactionBuilder()
     .add(
       route(umi, {
-        candyMachine,
+        gumballMachine,
         guard: 'allowList',
         group: some('GROUPX'),
         routeArgs: { path: 'proof', merkleRoot, merkleProof },

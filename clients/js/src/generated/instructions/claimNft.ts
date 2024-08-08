@@ -29,8 +29,8 @@ import {
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import {
-  findCandyMachineAuthorityPda,
   findEventAuthorityPda,
+  findGumballMachineAuthorityPda,
 } from '../../hooked';
 import {
   expectPublicKey,
@@ -43,8 +43,8 @@ import {
 export type ClaimNftInstructionAccounts = {
   /** Anyone can settle the sale */
   payer?: Signer;
-  /** Candy machine account. */
-  candyMachine: PublicKey | Pda;
+  /** Gumball machine account. */
+  gumballMachine: PublicKey | Pda;
   authorityPda?: PublicKey | Pda;
   /** Payment account for authority pda if using token payment */
   authorityPdaPaymentAccount?: PublicKey | Pda;
@@ -126,10 +126,10 @@ export function claimNft(
   // Accounts.
   const resolvedAccounts: ResolvedAccountsWithIndices = {
     payer: { index: 0, isWritable: true, value: input.payer ?? null },
-    candyMachine: {
+    gumballMachine: {
       index: 1,
       isWritable: true,
-      value: input.candyMachine ?? null,
+      value: input.gumballMachine ?? null,
     },
     authorityPda: {
       index: 2,
@@ -219,9 +219,9 @@ export function claimNft(
     resolvedAccounts.payer.value = context.payer;
   }
   if (!resolvedAccounts.authorityPda.value) {
-    resolvedAccounts.authorityPda.value = findCandyMachineAuthorityPda(
+    resolvedAccounts.authorityPda.value = findGumballMachineAuthorityPda(
       context,
-      { candyMachine: expectPublicKey(resolvedAccounts.candyMachine.value) }
+      { gumballMachine: expectPublicKey(resolvedAccounts.gumballMachine.value) }
     );
   }
   if (!resolvedAccounts.tokenProgram.value) {

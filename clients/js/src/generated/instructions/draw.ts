@@ -28,7 +28,7 @@ import {
   u32,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import { findCandyGuardPda, findEventAuthorityPda } from '../../hooked';
+import { findEventAuthorityPda, findGumballGuardPda } from '../../hooked';
 import {
   expectPublicKey,
   getAccountMetasAndSigners,
@@ -38,16 +38,16 @@ import {
 
 // Accounts.
 export type DrawInstructionAccounts = {
-  /** Candy Guard account. */
-  candyGuard?: PublicKey | Pda;
+  /** Gumball Guard account. */
+  gumballGuard?: PublicKey | Pda;
   /**
-   * Candy Machine program account.
+   * Gumball Machine program account.
    *
    */
 
-  candyMachineProgram?: PublicKey | Pda;
-  /** Candy machine account. */
-  candyMachine: PublicKey | Pda;
+  gumballMachineProgram?: PublicKey | Pda;
+  /** Gumball machine account. */
+  gumballMachine: PublicKey | Pda;
   /** Payer for the mint (SOL) fees. */
   payer?: Signer;
   /** Minter account for validation and non-SOL fees. */
@@ -125,20 +125,20 @@ export function draw(
 
   // Accounts.
   const resolvedAccounts: ResolvedAccountsWithIndices = {
-    candyGuard: {
+    gumballGuard: {
       index: 0,
       isWritable: false,
-      value: input.candyGuard ?? null,
+      value: input.gumballGuard ?? null,
     },
-    candyMachineProgram: {
+    gumballMachineProgram: {
       index: 1,
       isWritable: false,
-      value: input.candyMachineProgram ?? null,
+      value: input.gumballMachineProgram ?? null,
     },
-    candyMachine: {
+    gumballMachine: {
       index: 2,
       isWritable: true,
-      value: input.candyMachine ?? null,
+      value: input.gumballMachine ?? null,
     },
     payer: { index: 3, isWritable: true, value: input.payer ?? null },
     buyer: { index: 4, isWritable: true, value: input.buyer ?? null },
@@ -178,17 +178,18 @@ export function draw(
   const resolvedArgs: DrawInstructionArgs = { ...input };
 
   // Default values.
-  if (!resolvedAccounts.candyGuard.value) {
-    resolvedAccounts.candyGuard.value = findCandyGuardPda(context, {
-      base: expectPublicKey(resolvedAccounts.candyMachine.value),
+  if (!resolvedAccounts.gumballGuard.value) {
+    resolvedAccounts.gumballGuard.value = findGumballGuardPda(context, {
+      base: expectPublicKey(resolvedAccounts.gumballMachine.value),
     });
   }
-  if (!resolvedAccounts.candyMachineProgram.value) {
-    resolvedAccounts.candyMachineProgram.value = context.programs.getPublicKey(
-      'mplCandyMachine',
-      'CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR'
-    );
-    resolvedAccounts.candyMachineProgram.isWritable = false;
+  if (!resolvedAccounts.gumballMachineProgram.value) {
+    resolvedAccounts.gumballMachineProgram.value =
+      context.programs.getPublicKey(
+        'mplCandyMachine',
+        'MGUMqztv7MHgoHBYWbvMyL3E3NJ4UHfTwgLJUQAbKGa'
+      );
+    resolvedAccounts.gumballMachineProgram.isWritable = false;
   }
   if (!resolvedAccounts.payer.value) {
     resolvedAccounts.payer.value = context.payer;

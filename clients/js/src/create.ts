@@ -6,21 +6,21 @@ import {
 } from '@metaplex-foundation/umi';
 import { NATIVE_MINT } from './constants';
 import {
-  createCandyGuard,
-  CreateCandyGuardInstructionDataArgs,
-} from './createCandyGuard';
-import { createCandyMachine } from './createCandyMachine';
+  createGumballGuard,
+  CreateGumballGuardInstructionDataArgs,
+} from './createGumballGuard';
+import { createGumballMachine } from './createGumballMachine';
 import { DefaultGuardSetArgs } from './defaultGuards';
 import { TokenPaymentArgs, wrap } from './generated';
 import { GuardRepository, GuardSetArgs } from './guards';
-import { findCandyGuardPda } from './hooked';
+import { findGumballGuardPda } from './hooked';
 
 export type CreateInput<DA extends GuardSetArgs = DefaultGuardSetArgs> =
-  Parameters<typeof createCandyMachine>[1] &
-    CreateCandyGuardInstructionDataArgs<DA>;
+  Parameters<typeof createGumballMachine>[1] &
+    CreateGumballGuardInstructionDataArgs<DA>;
 
 export const create = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
-  context: Parameters<typeof createCandyMachine>[0] &
+  context: Parameters<typeof createGumballMachine>[0] &
     Pick<Context, 'eddsa'> & {
       guards: GuardRepository;
     },
@@ -30,23 +30,23 @@ export const create = async <DA extends GuardSetArgs = DefaultGuardSetArgs>(
   input.settings.paymentMint = getPaymentMint(input);
 
   const { guards, groups, ...rest } = input;
-  const candyGuard = findCandyGuardPda(context, {
-    base: input.candyMachine.publicKey,
+  const gumballGuard = findGumballGuardPda(context, {
+    base: input.gumballMachine.publicKey,
   });
 
   return transactionBuilder()
-    .add(await createCandyMachine(context, rest))
+    .add(await createGumballMachine(context, rest))
     .add(
-      createCandyGuard(context, {
-        base: input.candyMachine,
+      createGumballGuard(context, {
+        base: input.gumballMachine,
         guards,
         groups,
       })
     )
     .add(
       wrap(context, {
-        candyGuard,
-        candyMachine: input.candyMachine.publicKey,
+        gumballGuard,
+        gumballMachine: input.gumballMachine.publicKey,
       })
     );
 };

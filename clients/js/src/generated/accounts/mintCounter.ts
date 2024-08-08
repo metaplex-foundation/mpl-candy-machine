@@ -122,14 +122,14 @@ export function getMintCounterSize(): number {
 export function findMintCounterPda(
   context: Pick<Context, 'eddsa' | 'programs'>,
   seeds: {
-    /** A unique identifier in the context of a Candy Machine/Candy Guard combo */
+    /** A unique identifier in the context of a Gumball Machine/Gumball Guard combo */
     id: number;
     /** The address of the wallet trying to mint */
     user: PublicKey;
-    /** The address of the Candy Guard account */
-    candyGuard: PublicKey;
-    /** The address of the Candy Machine account */
-    candyMachine: PublicKey;
+    /** The address of the Gumball Guard account */
+    gumballGuard: PublicKey;
+    /** The address of the Gumball Machine account */
+    gumballMachine: PublicKey;
   }
 ): Pda {
   const programId = context.programs.getPublicKey(
@@ -140,8 +140,8 @@ export function findMintCounterPda(
     string({ size: 'variable' }).serialize('mint_limit'),
     u8().serialize(seeds.id),
     publicKeySerializer().serialize(seeds.user),
-    publicKeySerializer().serialize(seeds.candyGuard),
-    publicKeySerializer().serialize(seeds.candyMachine),
+    publicKeySerializer().serialize(seeds.gumballGuard),
+    publicKeySerializer().serialize(seeds.gumballMachine),
   ]);
 }
 

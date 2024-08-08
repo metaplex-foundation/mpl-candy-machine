@@ -4,7 +4,7 @@ import {
   SolPaymentArgs,
 } from '../generated';
 import { GuardManifest, noopParser } from '../guards';
-import { findCandyMachineAuthorityPda } from '../hooked';
+import { findGumballMachineAuthorityPda } from '../hooked';
 
 /**
  * The solPayment guard is used to charge an
@@ -20,8 +20,8 @@ export const solPaymentGuardManifest: GuardManifest<
     data: new Uint8Array(),
     remainingAccounts: [
       {
-        publicKey: findCandyMachineAuthorityPda(context, {
-          candyMachine: mintContext.candyMachine,
+        publicKey: findGumballMachineAuthorityPda(context, {
+          gumballMachine: mintContext.gumballMachine,
         })[0],
         isWritable: true,
       },

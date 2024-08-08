@@ -34,9 +34,9 @@ test('it burns a specific NFT to allow minting', async (t) => {
     collectionAuthority: requiredCollectionAuthority,
   });
 
-  // And a loaded Candy Machine with an nftBurn guard on that collection.
+  // And a loaded Gumball Machine with an nftBurn guard on that collection.
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -55,7 +55,7 @@ test('it burns a specific NFT to allow minting', async (t) => {
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         mintArgs: {
           nftBurn: some({
@@ -69,7 +69,7 @@ test('it burns a specific NFT to allow minting', async (t) => {
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertItemBought(t, umi, { candyMachine });
+  await assertItemBought(t, umi, { gumballMachine });
 
   // And the NFT was burned.
   await assertBurnedNft(t, umi, nftToBurn, umi.identity);
@@ -89,9 +89,9 @@ test('it allows minting even when the payer is different from the buyer', async 
     collectionAuthority: requiredCollectionAuthority,
   });
 
-  // And a loaded Candy Machine with an nftBurn guard on that collection.
+  // And a loaded Gumball Machine with an nftBurn guard on that collection.
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -110,7 +110,7 @@ test('it allows minting even when the payer is different from the buyer', async 
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         buyer,
 
@@ -126,18 +126,18 @@ test('it allows minting even when the payer is different from the buyer', async 
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertItemBought(t, umi, { candyMachine, buyer: publicKey(buyer) });
+  await assertItemBought(t, umi, { gumballMachine, buyer: publicKey(buyer) });
 
   // And the NFT was burned.
   await assertBurnedNft(t, umi, nftToBurn, buyer);
 });
 
 test('it fails if there is not valid NFT to burn', async (t) => {
-  // Given a loaded Candy Machine with an nftBurn guard on a specific collection.
+  // Given a loaded Gumball Machine with an nftBurn guard on a specific collection.
   const umi = await createUmi();
   const requiredCollection = (await createCollectionNft(umi)).publicKey;
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -157,7 +157,7 @@ test('it fails if there is not valid NFT to burn', async (t) => {
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         mintArgs: {
           nftBurn: some({
@@ -175,12 +175,12 @@ test('it fails if there is not valid NFT to burn', async (t) => {
 });
 
 test('it charges a bot tax when trying to mint using the wrong NFT', async (t) => {
-  // Given a loaded Candy Machine with a botTax guard and
+  // Given a loaded Gumball Machine with a botTax guard and
   // an nftBurn guard on a specific collection.
   const umi = await createUmi();
   const requiredCollection = (await createCollectionNft(umi)).publicKey;
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -201,7 +201,7 @@ test('it charges a bot tax when trying to mint using the wrong NFT', async (t) =
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         mintArgs: {
           nftBurn: some({
@@ -231,9 +231,9 @@ test('it burns a specific Programmable NFT to allow minting', async (t) => {
     collectionAuthority: requiredCollectionAuthority,
   });
 
-  // And a loaded Candy Machine with an nftBurn guard on that collection.
+  // And a loaded Gumball Machine with an nftBurn guard on that collection.
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -252,7 +252,7 @@ test('it burns a specific Programmable NFT to allow minting', async (t) => {
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         mintArgs: {
           nftBurn: some({
@@ -266,7 +266,7 @@ test('it burns a specific Programmable NFT to allow minting', async (t) => {
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertItemBought(t, umi, { candyMachine });
+  await assertItemBought(t, umi, { gumballMachine });
 
   // And the NFT was burned.
   await assertBurnedNft(t, umi, pnftToBurn, umi.identity);

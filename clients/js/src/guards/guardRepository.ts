@@ -1,5 +1,8 @@
 import { Program } from '@metaplex-foundation/umi';
-import { UnregisteredCandyGuardError, VariableSizeGuardError } from '../errors';
+import {
+  UnregisteredGumballGuardError,
+  VariableSizeGuardError,
+} from '../errors';
 import { GuardManifest } from './guardManifest';
 
 export type AnyGuardManifest = GuardManifest<any, any, any, any>;
@@ -19,7 +22,7 @@ export interface GuardRepository {
   all(): AnyGuardManifest[];
 
   /**
-   * Gets all guard manifests for a registered Candy Guard program.
+   * Gets all guard manifests for a registered Gumball Guard program.
    *
    * It fails if the manifest of any guard expected by the program
    * is not registered. Manifests are returned in the order in which
@@ -43,7 +46,7 @@ export class DefaultGuardRepository implements GuardRepository {
   get<T extends AnyGuardManifest = AnyGuardManifest>(name: string): T {
     const manifest = this.manifests.get(name);
     if (!manifest) {
-      throw new UnregisteredCandyGuardError(name);
+      throw new UnregisteredGumballGuardError(name);
     }
     return manifest as T;
   }

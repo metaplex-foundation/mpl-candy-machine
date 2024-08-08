@@ -138,10 +138,10 @@ export function findAllocationTrackerPda(
   seeds: {
     /** Unique identifier of the allocation */
     id: number;
-    /** The address of the Candy Guard account */
-    candyGuard: PublicKey;
-    /** The address of the Candy Machine account */
-    candyMachine: PublicKey;
+    /** The address of the Gumball Guard account */
+    gumballGuard: PublicKey;
+    /** The address of the Gumball Machine account */
+    gumballMachine: PublicKey;
   }
 ): Pda {
   const programId = context.programs.getPublicKey(
@@ -151,8 +151,8 @@ export function findAllocationTrackerPda(
   return context.eddsa.findPda(programId, [
     string({ size: 'variable' }).serialize('allocation'),
     u8().serialize(seeds.id),
-    publicKeySerializer().serialize(seeds.candyGuard),
-    publicKeySerializer().serialize(seeds.candyMachine),
+    publicKeySerializer().serialize(seeds.gumballGuard),
+    publicKeySerializer().serialize(seeds.gumballMachine),
   ]);
 }
 

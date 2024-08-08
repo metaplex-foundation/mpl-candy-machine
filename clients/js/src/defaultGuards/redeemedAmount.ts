@@ -7,7 +7,7 @@ import { GuardManifest, noopParser } from '../guards';
 
 /**
  * The redeemedAmount guard forbids minting when the
- * number of minted NFTs for the entire Candy Machine
+ * number of minted NFTs for the entire Gumball Machine
  * reaches the configured maximum amount.
  */
 export const redeemedAmountGuardManifest: GuardManifest<

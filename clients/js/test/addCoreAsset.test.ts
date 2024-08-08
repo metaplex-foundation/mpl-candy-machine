@@ -3,41 +3,41 @@ import { transactionBuilder } from '@metaplex-foundation/umi';
 import test from 'ava';
 import {
   addCoreAsset,
-  CandyMachine,
-  fetchCandyMachine,
+  fetchGumballMachine,
   fetchSellerHistory,
-  findCandyMachineAuthorityPda,
+  findGumballMachineAuthorityPda,
   findSellerHistoryPda,
   getMerkleProof,
   getMerkleRoot,
+  GumballMachine,
   SellerHistory,
   TokenStandard,
 } from '../src';
 import { create, createCoreAsset, createUmi } from './_setup';
 
-test('it can add core assets to a candy machine', async (t) => {
-  // Given a Candy Machine with 5 core assets.
+test('it can add core assets to a gumball machine', async (t) => {
+  // Given a Gumball Machine with 5 core assets.
   const umi = await createUmi();
-  const candyMachine = await create(umi, { settings: { itemCapacity: 5 } });
+  const gumballMachine = await create(umi, { settings: { itemCapacity: 5 } });
   const coreAsset = await createCoreAsset(umi);
 
-  // When we add an coreAsset to the Candy Machine.
+  // When we add an coreAsset to the Gumball Machine.
   await transactionBuilder()
     .add(
       addCoreAsset(umi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         asset: coreAsset.publicKey,
       })
     )
     .sendAndConfirm(umi);
 
-  // Then the Candy Machine has been updated properly.
-  const candyMachineAccount = await fetchCandyMachine(
+  // Then the Gumball Machine has been updated properly.
+  const gumballMachineAccount = await fetchGumballMachine(
     umi,
-    candyMachine.publicKey
+    gumballMachine.publicKey
   );
 
-  t.like(candyMachineAccount, <Pick<CandyMachine, 'itemsLoaded' | 'items'>>{
+  t.like(gumballMachineAccount, <Pick<GumballMachine, 'itemsLoaded' | 'items'>>{
     itemsLoaded: 1,
     items: [
       {
@@ -57,16 +57,16 @@ test('it can add core assets to a candy machine', async (t) => {
     transferDelegate: {
       authority: {
         type: 'Address',
-        address: findCandyMachineAuthorityPda(umi, {
-          candyMachine: candyMachine.publicKey,
+        address: findGumballMachineAuthorityPda(umi, {
+          gumballMachine: gumballMachine.publicKey,
         })[0],
       },
     },
     freezeDelegate: {
       authority: {
         type: 'Address',
-        address: findCandyMachineAuthorityPda(umi, {
-          candyMachine: candyMachine.publicKey,
+        address: findGumballMachineAuthorityPda(umi, {
+          gumballMachine: gumballMachine.publicKey,
         })[0],
       },
       frozen: true,
@@ -77,33 +77,33 @@ test('it can add core assets to a candy machine', async (t) => {
   const sellerHistoryAccount = await fetchSellerHistory(
     umi,
     findSellerHistoryPda(umi, {
-      candyMachine: candyMachine.publicKey,
+      gumballMachine: gumballMachine.publicKey,
       seller: umi.identity.publicKey,
     })[0]
   );
 
   t.like(sellerHistoryAccount, <SellerHistory>{
-    candyMachine: candyMachine.publicKey,
+    gumballMachine: gumballMachine.publicKey,
     seller: umi.identity.publicKey,
     itemCount: 1n,
   });
 });
 
 test('it can add core asset to a gumball machine as allowlisted seller', async (t) => {
-  // Given a Candy Machine with 5 core assets.
+  // Given a Gumball Machine with 5 core assets.
   const umi = await createUmi();
   const otherSellerUmi = await createUmi();
   const sellersMerkleRoot = getMerkleRoot([otherSellerUmi.identity.publicKey]);
-  const candyMachine = await create(umi, {
+  const gumballMachine = await create(umi, {
     settings: { itemCapacity: 5, sellersMerkleRoot },
   });
   const coreAsset = await createCoreAsset(otherSellerUmi);
 
-  // When we add an coreAsset to the Candy Machine.
+  // When we add an coreAsset to the Gumball Machine.
   await transactionBuilder()
     .add(
       addCoreAsset(otherSellerUmi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         asset: coreAsset.publicKey,
         sellerProofPath: getMerkleProof(
           [otherSellerUmi.identity.publicKey],
@@ -113,13 +113,13 @@ test('it can add core asset to a gumball machine as allowlisted seller', async (
     )
     .sendAndConfirm(otherSellerUmi);
 
-  // Then the Candy Machine has been updated properly.
-  const candyMachineAccount = await fetchCandyMachine(
+  // Then the Gumball Machine has been updated properly.
+  const gumballMachineAccount = await fetchGumballMachine(
     umi,
-    candyMachine.publicKey
+    gumballMachine.publicKey
   );
 
-  t.like(candyMachineAccount, <Pick<CandyMachine, 'itemsLoaded' | 'items'>>{
+  t.like(gumballMachineAccount, <Pick<GumballMachine, 'itemsLoaded' | 'items'>>{
     itemsLoaded: 1,
     items: [
       {
@@ -139,16 +139,16 @@ test('it can add core asset to a gumball machine as allowlisted seller', async (
     transferDelegate: {
       authority: {
         type: 'Address',
-        address: findCandyMachineAuthorityPda(umi, {
-          candyMachine: candyMachine.publicKey,
+        address: findGumballMachineAuthorityPda(umi, {
+          gumballMachine: gumballMachine.publicKey,
         })[0],
       },
     },
     freezeDelegate: {
       authority: {
         type: 'Address',
-        address: findCandyMachineAuthorityPda(umi, {
-          candyMachine: candyMachine.publicKey,
+        address: findGumballMachineAuthorityPda(umi, {
+          gumballMachine: gumballMachine.publicKey,
         })[0],
       },
       frozen: true,
@@ -157,17 +157,17 @@ test('it can add core asset to a gumball machine as allowlisted seller', async (
 });
 
 test('it cannot add core asset as non gumball authority when there is no seller allowlist set', async (t) => {
-  // Given a Candy Machine with 5 nfts.
+  // Given a Gumball Machine with 5 nfts.
   const umi = await createUmi();
   const otherSellerUmi = await createUmi();
-  const candyMachine = await create(umi, { settings: { itemCapacity: 5 } });
+  const gumballMachine = await create(umi, { settings: { itemCapacity: 5 } });
   const coreAsset = await createCoreAsset(otherSellerUmi);
 
-  // When we add an nft to the Candy Machine.
+  // When we add an nft to the Gumball Machine.
   const promise = transactionBuilder()
     .add(
       addCoreAsset(otherSellerUmi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         asset: coreAsset.publicKey,
         sellerProofPath: getMerkleProof(
           [otherSellerUmi.identity.publicKey],
@@ -181,10 +181,10 @@ test('it cannot add core asset as non gumball authority when there is no seller 
 });
 
 test('it cannot add core asset as non-allowlisted seller when there is a seller allowlist set', async (t) => {
-  // Given a Candy Machine with 5 nfts.
+  // Given a Gumball Machine with 5 nfts.
   const umi = await createUmi();
   const otherSellerUmi = await createUmi();
-  const candyMachine = await create(umi, {
+  const gumballMachine = await create(umi, {
     settings: {
       itemCapacity: 5,
       sellersMerkleRoot: getMerkleRoot([umi.identity.publicKey]),
@@ -192,11 +192,11 @@ test('it cannot add core asset as non-allowlisted seller when there is a seller 
   });
   const coreAsset = await createCoreAsset(otherSellerUmi);
 
-  // When we add an nft to the Candy Machine.
+  // When we add an nft to the Gumball Machine.
   const promise = transactionBuilder()
     .add(
       addCoreAsset(otherSellerUmi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         asset: coreAsset.publicKey,
         sellerProofPath: getMerkleProof(
           [otherSellerUmi.identity.publicKey],
@@ -209,10 +209,10 @@ test('it cannot add core asset as non-allowlisted seller when there is a seller 
   await t.throwsAsync(promise, { message: /InvalidProofPath/ });
 });
 
-test('it can append additional core assets to a candy machine', async (t) => {
-  // Given a Candy Machine with 5 core assets.
+test('it can append additional core assets to a gumball machine', async (t) => {
+  // Given a Gumball Machine with 5 core assets.
   const umi = await createUmi();
-  const candyMachine = await create(umi, { settings: { itemCapacity: 2 } });
+  const gumballMachine = await create(umi, { settings: { itemCapacity: 2 } });
   const coreAssets = await Promise.all([
     createCoreAsset(umi),
     createCoreAsset(umi),
@@ -221,29 +221,29 @@ test('it can append additional core assets to a candy machine', async (t) => {
   await transactionBuilder()
     .add(
       addCoreAsset(umi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         asset: coreAssets[0].publicKey,
       })
     )
     .sendAndConfirm(umi);
 
-  // When we add an additional item to the Candy Machine.
+  // When we add an additional item to the Gumball Machine.
   await transactionBuilder()
     .add(
       addCoreAsset(umi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         asset: coreAssets[1].publicKey,
       })
     )
     .sendAndConfirm(umi);
 
-  // Then the Candy Machine has been updated properly.
-  const candyMachineAccount = await fetchCandyMachine(
+  // Then the Gumball Machine has been updated properly.
+  const gumballMachineAccount = await fetchGumballMachine(
     umi,
-    candyMachine.publicKey
+    gumballMachine.publicKey
   );
 
-  t.like(candyMachineAccount, <Pick<CandyMachine, 'itemsLoaded' | 'items'>>{
+  t.like(gumballMachineAccount, <Pick<GumballMachine, 'itemsLoaded' | 'items'>>{
     itemsLoaded: 2,
     items: [
       {
@@ -266,26 +266,26 @@ test('it can append additional core assets to a candy machine', async (t) => {
   });
 });
 
-test('it cannot add core assets that would make the candy machine exceed the maximum capacity', async (t) => {
-  // Given an existing Candy Machine with a capacity of 1 item.
+test('it cannot add core assets that would make the gumball machine exceed the maximum capacity', async (t) => {
+  // Given an existing Gumball Machine with a capacity of 1 item.
   const umi = await createUmi();
-  const candyMachine = await create(umi, { settings: { itemCapacity: 1 } });
+  const gumballMachine = await create(umi, { settings: { itemCapacity: 1 } });
   const coreAssets = await Promise.all([
     createCoreAsset(umi),
     createCoreAsset(umi),
   ]);
 
-  // When we try to add 2 coreAssets to the Candy Machine.
+  // When we try to add 2 coreAssets to the Gumball Machine.
   const promise = transactionBuilder()
     .add(
       addCoreAsset(umi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         asset: coreAssets[0].publicKey,
       })
     )
     .add(
       addCoreAsset(umi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         asset: coreAssets[1].publicKey,
       })
     )
@@ -297,26 +297,26 @@ test('it cannot add core assets that would make the candy machine exceed the max
   });
 });
 
-test('it cannot add core assets once the candy machine is fully loaded', async (t) => {
-  // Given an existing Candy Machine with 2 core assets loaded and a capacity of 2 core assets.
+test('it cannot add core assets once the gumball machine is fully loaded', async (t) => {
+  // Given an existing Gumball Machine with 2 core assets loaded and a capacity of 2 core assets.
   const umi = await createUmi();
-  const candyMachine = await create(umi, { settings: { itemCapacity: 1 } });
+  const gumballMachine = await create(umi, { settings: { itemCapacity: 1 } });
   const coreAsset = await createCoreAsset(umi);
 
   await transactionBuilder()
     .add(
       addCoreAsset(umi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         asset: coreAsset.publicKey,
       })
     )
     .sendAndConfirm(umi);
 
-  // When we try to add one more item to the Candy Machine.
+  // When we try to add one more item to the Gumball Machine.
   const promise = transactionBuilder()
     .add(
       addCoreAsset(umi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         asset: (await createCoreAsset(umi)).publicKey,
       })
     )
@@ -329,22 +329,22 @@ test('it cannot add core assets once the candy machine is fully loaded', async (
 });
 
 test('it cannot add more core assets than allowed per seller', async (t) => {
-  // Given a Candy Machine with 5 core assets.
+  // Given a Gumball Machine with 5 core assets.
   const umi = await createUmi();
   const otherSellerUmi = await createUmi();
   const sellersMerkleRoot = getMerkleRoot([otherSellerUmi.identity.publicKey]);
-  const candyMachine = await create(umi, {
+  const gumballMachine = await create(umi, {
     settings: { itemCapacity: 2, itemsPerSeller: 1, sellersMerkleRoot },
   });
   const coreAssets = await Promise.all([
     createCoreAsset(otherSellerUmi),
     createCoreAsset(otherSellerUmi),
   ]);
-  // When we add an nft to the Candy Machine.
+  // When we add an nft to the Gumball Machine.
   await transactionBuilder()
     .add(
       addCoreAsset(otherSellerUmi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         asset: coreAssets[0].publicKey,
         sellerProofPath: getMerkleProof(
           [otherSellerUmi.identity.publicKey],
@@ -357,7 +357,7 @@ test('it cannot add more core assets than allowed per seller', async (t) => {
   const promise = transactionBuilder()
     .add(
       addCoreAsset(otherSellerUmi, {
-        candyMachine: candyMachine.publicKey,
+        gumballMachine: gumballMachine.publicKey,
         asset: coreAssets[1].publicKey,
         sellerProofPath: getMerkleProof(
           [otherSellerUmi.identity.publicKey],

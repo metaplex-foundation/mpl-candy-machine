@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use crate::{
-    assert_config_line, constants::AUTHORITY_SEED, events::ClaimItemEvent, processors, state::CandyMachine, CandyError, ConfigLine, GumballState, TokenStandard
+    assert_config_line, constants::AUTHORITY_SEED, events::ClaimItemEvent, processors, state::GumballMachine, GumballError, ConfigLine, GumballState, TokenStandard
 };
 
 #[event_cpi]
@@ -10,19 +10,19 @@ pub struct ClaimCoreAsset<'info> {
     #[account(mut)]
     payer: Signer<'info>,
 
-    /// Candy machine account.
+    /// Gumball machine account.
     #[account(
         mut,
-        constraint = candy_machine.state == GumballState::SaleLive || candy_machine.state == GumballState::SaleEnded @ CandyError::InvalidState
+        constraint = gumball_machine.state == GumballState::SaleLive || gumball_machine.state == GumballState::SaleEnded @ GumballError::InvalidState
     )]
-    candy_machine: Box<Account<'info, CandyMachine>>,
+    gumball_machine: Box<Account<'info, GumballMachine>>,
 
     /// CHECK: Safe due to seeds constraint
     #[account(
         mut,
         seeds = [
             AUTHORITY_SEED.as_bytes(), 
-            candy_machine.key().as_ref()
+            gumball_machine.key().as_ref()
         ],
         bump
     )]
@@ -76,7 +76,7 @@ pub struct ClaimCoreAsset<'info> {
 }
 
 pub fn claim_core_asset<'info>(ctx: Context<'_, '_, '_, 'info, ClaimCoreAsset<'info>>, index: u32) -> Result<()> {
-    let candy_machine = &mut ctx.accounts.candy_machine;
+    let gumball_machine = &mut ctx.accounts.gumball_machine;
     let payer = &ctx.accounts.payer.to_account_info();
     let buyer = &ctx.accounts.buyer.to_account_info();
     let authority_pda = &mut ctx.accounts.authority_pda.to_account_info();
@@ -88,7 +88,7 @@ pub fn claim_core_asset<'info>(ctx: Context<'_, '_, '_, 'info, ClaimCoreAsset<'i
     let collection = collection_info.as_ref();
 
     assert_config_line(
-        candy_machine,
+        gumball_machine,
         index,
         ConfigLine {
             mint: asset.key(),
@@ -100,7 +100,7 @@ pub fn claim_core_asset<'info>(ctx: Context<'_, '_, '_, 'info, ClaimCoreAsset<'i
 
     let auth_seeds = [
         AUTHORITY_SEED.as_bytes(),
-        candy_machine.to_account_info().key.as_ref(),
+        gumball_machine.to_account_info().key.as_ref(),
         &[ctx.bumps.authority_pda],
     ];
 
@@ -118,7 +118,7 @@ pub fn claim_core_asset<'info>(ctx: Context<'_, '_, '_, 'info, ClaimCoreAsset<'i
 
     emit_cpi!(ClaimItemEvent {
         mint: asset.key(),
-        authority: candy_machine.authority.key(),
+        authority: gumball_machine.authority.key(),
         seller: seller.key(),
         buyer: buyer.key(),
     });

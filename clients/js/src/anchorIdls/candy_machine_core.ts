@@ -5,21 +5,21 @@ export type CandyMachineCore = {
     {
       name: 'initialize';
       docs: [
-        'Initialize the candy machine account with the specified data.',
+        'Initialize the gumball machine account with the specified data.',
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account (must be pre-allocated but zero content)',
-        '2. `[]` Candy Machine authority',
+        '0. `[writable]` Gumball Machine account (must be pre-allocated but zero content)',
+        '2. `[]` Gumball Machine authority',
         '3. `[signer]` Payer'
       ];
       accounts: [
         {
-          name: 'candyMachine';
+          name: 'gumballMachine';
           isMut: true;
           isSigner: false;
           docs: [
-            'Candy Machine account. The account space must be allocated to allow accounts larger',
+            'Gumball Machine account. The account space must be allocated to allow accounts larger',
             'than 10kb.',
             ''
           ];
@@ -29,7 +29,7 @@ export type CandyMachineCore = {
           isMut: false;
           isSigner: false;
           docs: [
-            'Candy Machine authority. This is the address that controls the upate of the candy machine.',
+            'Gumball Machine authority. This is the address that controls the upate of the gumball machine.',
             ''
           ];
         },
@@ -74,22 +74,22 @@ export type CandyMachineCore = {
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account',
-        '1. `[signer]` Candy Machine authority'
+        '0. `[writable]` Gumball Machine account',
+        '1. `[signer]` Gumball Machine authority'
       ];
       accounts: [
         {
-          name: 'candyMachine';
+          name: 'gumballMachine';
           isMut: true;
           isSigner: false;
-          docs: ['Candy machine account.'];
+          docs: ['Gumball machine account.'];
         },
         {
           name: 'authority';
           isMut: true;
           isSigner: true;
           docs: [
-            'Candy Machine authority. This is the address that controls the upate of the candy machine.'
+            'Gumball Machine authority. This is the address that controls the upate of the gumball machine.'
           ];
         }
       ];
@@ -109,15 +109,15 @@ export type CandyMachineCore = {
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account',
-        '1. `[signer]` Candy Machine authority'
+        '0. `[writable]` Gumball Machine account',
+        '1. `[signer]` Gumball Machine authority'
       ];
       accounts: [
         {
-          name: 'candyMachine';
+          name: 'gumballMachine';
           isMut: true;
           isSigner: false;
-          docs: ['Candy Machine account.'];
+          docs: ['Gumball Machine account.'];
         },
         {
           name: 'sellerHistory';
@@ -192,15 +192,15 @@ export type CandyMachineCore = {
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account',
-        '1. `[signer]` Candy Machine authority'
+        '0. `[writable]` Gumball Machine account',
+        '1. `[signer]` Gumball Machine authority'
       ];
       accounts: [
         {
-          name: 'candyMachine';
+          name: 'gumballMachine';
           isMut: true;
           isSigner: false;
-          docs: ['Candy Machine account.'];
+          docs: ['Gumball Machine account.'];
         },
         {
           name: 'sellerHistory';
@@ -262,15 +262,15 @@ export type CandyMachineCore = {
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account',
-        '1. `[signer]` Candy Machine authority'
+        '0. `[writable]` Gumball Machine account',
+        '1. `[signer]` Gumball Machine authority'
       ];
       accounts: [
         {
-          name: 'candyMachine';
+          name: 'gumballMachine';
           isMut: true;
           isSigner: false;
-          docs: ['Candy Machine account.'];
+          docs: ['Gumball Machine account.'];
         },
         {
           name: 'sellerHistory';
@@ -288,7 +288,7 @@ export type CandyMachineCore = {
           isMut: false;
           isSigner: true;
           docs: [
-            'Authority allowed to remove the nft (must be the candy machine auth or the seller of the nft)'
+            'Authority allowed to remove the nft (must be the gumball machine auth or the seller of the nft)'
           ];
         },
         {
@@ -356,15 +356,15 @@ export type CandyMachineCore = {
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account',
-        '1. `[signer]` Candy Machine authority'
+        '0. `[writable]` Gumball Machine account',
+        '1. `[signer]` Gumball Machine authority'
       ];
       accounts: [
         {
-          name: 'candyMachine';
+          name: 'gumballMachine';
           isMut: true;
           isSigner: false;
-          docs: ['Candy Machine account.'];
+          docs: ['Gumball Machine account.'];
         },
         {
           name: 'sellerHistory';
@@ -425,22 +425,22 @@ export type CandyMachineCore = {
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account',
-        '1. `[signer]` Candy Machine authority'
+        '0. `[writable]` Gumball Machine account',
+        '1. `[signer]` Gumball Machine authority'
       ];
       accounts: [
         {
-          name: 'candyMachine';
+          name: 'gumballMachine';
           isMut: true;
           isSigner: false;
-          docs: ['Candy machine account.'];
+          docs: ['Gumball machine account.'];
         },
         {
           name: 'authority';
           isMut: true;
           isSigner: true;
           docs: [
-            'Candy Machine authority. This is the address that controls the upate of the candy machine.'
+            'Gumball Machine authority. This is the address that controls the upate of the gumball machine.'
           ];
         }
       ];
@@ -453,22 +453,22 @@ export type CandyMachineCore = {
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account',
-        '1. `[signer]` Candy Machine authority'
+        '0. `[writable]` Gumball Machine account',
+        '1. `[signer]` Gumball Machine authority'
       ];
       accounts: [
         {
-          name: 'candyMachine';
+          name: 'gumballMachine';
           isMut: true;
           isSigner: false;
-          docs: ['Candy machine account.'];
+          docs: ['Gumball machine account.'];
         },
         {
           name: 'authority';
           isMut: true;
           isSigner: true;
           docs: [
-            'Candy Machine authority. This is the address that controls the upate of the candy machine.'
+            'Gumball Machine authority. This is the address that controls the upate of the gumball machine.'
           ];
         }
       ];
@@ -479,13 +479,13 @@ export type CandyMachineCore = {
       docs: [
         'Mint an NFT.',
         '',
-        'Only the candy machine mint authority is allowed to mint. This handler mints both',
+        'Only the gumball machine mint authority is allowed to mint. This handler mints both',
         'NFTs and Programmable NFTs.',
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account (must be pre-allocated but zero content)',
-        '2. `[signer]` Candy Machine mint authority',
+        '0. `[writable]` Gumball Machine account (must be pre-allocated but zero content)',
+        '2. `[signer]` Gumball Machine mint authority',
         '3. `[signer]` Payer',
         '4. `[writable]` Mint account of the NFT',
         '18. `[]` System program',
@@ -493,17 +493,17 @@ export type CandyMachineCore = {
       ];
       accounts: [
         {
-          name: 'candyMachine';
+          name: 'gumballMachine';
           isMut: true;
           isSigner: false;
-          docs: ['Candy machine account.'];
+          docs: ['Gumball machine account.'];
         },
         {
           name: 'mintAuthority';
           isMut: false;
           isSigner: true;
           docs: [
-            'Candy machine mint authority (mint only allowed for the mint_authority).'
+            'Gumball machine mint authority (mint only allowed for the mint_authority).'
           ];
         },
         {
@@ -548,28 +548,28 @@ export type CandyMachineCore = {
       docs: [
         'Increments total revenue earned by the gumball machine.',
         '',
-        'Only the candy machine mint authority is allowed to increment revenue. This is',
+        'Only the gumball machine mint authority is allowed to increment revenue. This is',
         "required as token transfers don't occur in this program, but total is needed",
         'when settling.',
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account (must be pre-allocated but zero content)',
-        '2. `[signer]` Candy Machine mint authority'
+        '0. `[writable]` Gumball Machine account (must be pre-allocated but zero content)',
+        '2. `[signer]` Gumball Machine mint authority'
       ];
       accounts: [
         {
-          name: 'candyMachine';
+          name: 'gumballMachine';
           isMut: true;
           isSigner: false;
-          docs: ['Candy machine account.'];
+          docs: ['Gumball machine account.'];
         },
         {
           name: 'mintAuthority';
           isMut: false;
           isSigner: true;
           docs: [
-            'Candy machine mint authority (mint only allowed for the mint_authority).'
+            'Gumball machine mint authority (mint only allowed for the mint_authority).'
           ];
         }
       ];
@@ -587,8 +587,8 @@ export type CandyMachineCore = {
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account',
-        '1. `[signer]` Candy Machine authority'
+        '0. `[writable]` Gumball Machine account',
+        '1. `[signer]` Gumball Machine authority'
       ];
       accounts: [
         {
@@ -598,10 +598,10 @@ export type CandyMachineCore = {
           docs: ['Anyone can settle the sale'];
         },
         {
-          name: 'candyMachine';
+          name: 'gumballMachine';
           isMut: true;
           isSigner: false;
-          docs: ['Candy machine account.'];
+          docs: ['Gumball machine account.'];
         },
         {
           name: 'authorityPda';
@@ -713,8 +713,8 @@ export type CandyMachineCore = {
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account',
-        '1. `[signer]` Candy Machine authority'
+        '0. `[writable]` Gumball Machine account',
+        '1. `[signer]` Gumball Machine authority'
       ];
       accounts: [
         {
@@ -724,10 +724,10 @@ export type CandyMachineCore = {
           docs: ['Anyone can settle the sale'];
         },
         {
-          name: 'candyMachine';
+          name: 'gumballMachine';
           isMut: true;
           isSigner: false;
-          docs: ['Candy machine account.'];
+          docs: ['Gumball machine account.'];
         },
         {
           name: 'authorityPda';
@@ -869,8 +869,8 @@ export type CandyMachineCore = {
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account',
-        '1. `[signer]` Candy Machine authority'
+        '0. `[writable]` Gumball Machine account',
+        '1. `[signer]` Gumball Machine authority'
       ];
       accounts: [
         {
@@ -880,10 +880,10 @@ export type CandyMachineCore = {
           docs: ['Anyone can settle the sale'];
         },
         {
-          name: 'candyMachine';
+          name: 'gumballMachine';
           isMut: true;
           isSigner: false;
-          docs: ['Candy machine account.'];
+          docs: ['Gumball machine account.'];
         },
         {
           name: 'authorityPda';
@@ -1017,8 +1017,8 @@ export type CandyMachineCore = {
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account',
-        '1. `[signer]` Candy Machine authority'
+        '0. `[writable]` Gumball Machine account',
+        '1. `[signer]` Gumball Machine authority'
       ];
       accounts: [
         {
@@ -1028,10 +1028,10 @@ export type CandyMachineCore = {
           docs: ['Anyone can settle the sale'];
         },
         {
-          name: 'candyMachine';
+          name: 'gumballMachine';
           isMut: true;
           isSigner: false;
-          docs: ['Candy machine account.'];
+          docs: ['Gumball machine account.'];
         },
         {
           name: 'authorityPda';
@@ -1181,25 +1181,25 @@ export type CandyMachineCore = {
     {
       name: 'setAuthority';
       docs: [
-        'Set a new authority of the candy machine.',
+        'Set a new authority of the gumball machine.',
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account',
-        '1. `[signer]` Candy Machine authority'
+        '0. `[writable]` Gumball Machine account',
+        '1. `[signer]` Gumball Machine authority'
       ];
       accounts: [
         {
-          name: 'candyMachine';
+          name: 'gumballMachine';
           isMut: true;
           isSigner: false;
-          docs: ['Candy Machine account.'];
+          docs: ['Gumball Machine account.'];
         },
         {
           name: 'authority';
           isMut: false;
           isSigner: true;
-          docs: ['Autority of the candy machine.'];
+          docs: ['Autority of the gumball machine.'];
         }
       ];
       args: [
@@ -1212,32 +1212,32 @@ export type CandyMachineCore = {
     {
       name: 'setMintAuthority';
       docs: [
-        'Set a new mint authority of the candy machine.',
+        'Set a new mint authority of the gumball machine.',
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account',
-        '1. `[signer]` Candy Machine authority',
-        '1. `[signer]` New candy machine authority'
+        '0. `[writable]` Gumball Machine account',
+        '1. `[signer]` Gumball Machine authority',
+        '1. `[signer]` New gumball machine authority'
       ];
       accounts: [
         {
-          name: 'candyMachine';
+          name: 'gumballMachine';
           isMut: true;
           isSigner: false;
-          docs: ['Candy Machine account.'];
+          docs: ['Gumball Machine account.'];
         },
         {
           name: 'authority';
           isMut: false;
           isSigner: true;
-          docs: ['Candy Machine authority'];
+          docs: ['Gumball Machine authority'];
         },
         {
           name: 'mintAuthority';
           isMut: false;
           isSigner: true;
-          docs: ['New candy machine authority'];
+          docs: ['New gumball machine authority'];
         }
       ];
       args: [];
@@ -1249,21 +1249,21 @@ export type CandyMachineCore = {
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account',
-        '1. `[signer]` Candy Machine authority'
+        '0. `[writable]` Gumball Machine account',
+        '1. `[signer]` Gumball Machine authority'
       ];
       accounts: [
         {
-          name: 'candyMachine';
+          name: 'gumballMachine';
           isMut: true;
           isSigner: false;
-          docs: ['Candy Machine acccount.'];
+          docs: ['Gumball Machine acccount.'];
         },
         {
           name: 'authority';
           isMut: true;
           isSigner: true;
-          docs: ['Authority of the candy machine.'];
+          docs: ['Authority of the gumball machine.'];
         },
         {
           name: 'authorityPda';
@@ -1288,8 +1288,8 @@ export type CandyMachineCore = {
   ];
   accounts: [
     {
-      name: 'candyMachine';
-      docs: ['Candy machine state and config data.'];
+      name: 'gumballMachine';
+      docs: ['Gumball machine state and config data.'];
       type: {
         kind: 'struct';
         fields: [
@@ -1305,7 +1305,9 @@ export type CandyMachineCore = {
           },
           {
             name: 'mintAuthority';
-            docs: ['Authority address allowed to mint from the candy machine.'];
+            docs: [
+              'Authority address allowed to mint from the gumball machine.'
+            ];
             type: 'publicKey';
           },
           {
@@ -1359,14 +1361,14 @@ export type CandyMachineCore = {
     {
       name: 'sellerHistory';
       docs: [
-        'Seller history state to track count of items submitted to a candy machine.'
+        'Seller history state to track count of items submitted to a gumball machine.'
       ];
       type: {
         kind: 'struct';
         fields: [
           {
-            name: 'candyMachine';
-            docs: ["Candy machine we're tracking for"];
+            name: 'gumballMachine';
+            docs: ["Gumball machine we're tracking for"];
             type: 'publicKey';
           },
           {
@@ -1665,17 +1667,17 @@ export type CandyMachineCore = {
     {
       code: 6005;
       name: 'TooManyCreators';
-      msg: 'Can only provide up to 4 creators to candy machine (because candy machine is one)';
+      msg: 'Can only provide up to 4 creators to gumball machine (because gumball machine is one)';
     },
     {
       code: 6006;
-      name: 'CandyMachineEmpty';
-      msg: 'Candy machine is empty';
+      name: 'GumballMachineEmpty';
+      msg: 'Gumball machine is empty';
     },
     {
       code: 6007;
       name: 'HiddenSettingsDoNotHaveConfigLines';
-      msg: 'Candy machines using hidden uris do not have config lines, they have a single hash representing hashed order';
+      msg: 'Gumball machines using hidden uris do not have config lines, they have a single hash representing hashed order';
     },
     {
       code: 6008;
@@ -1740,7 +1742,7 @@ export type CandyMachineCore = {
     {
       code: 6020;
       name: 'NotFullyLoaded';
-      msg: 'Not all config lines were added to the candy machine';
+      msg: 'Not all config lines were added to the gumball machine';
     },
     {
       code: 6021;
@@ -1882,21 +1884,21 @@ export const IDL: CandyMachineCore = {
     {
       name: 'initialize',
       docs: [
-        'Initialize the candy machine account with the specified data.',
+        'Initialize the gumball machine account with the specified data.',
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account (must be pre-allocated but zero content)',
-        '2. `[]` Candy Machine authority',
+        '0. `[writable]` Gumball Machine account (must be pre-allocated but zero content)',
+        '2. `[]` Gumball Machine authority',
         '3. `[signer]` Payer',
       ],
       accounts: [
         {
-          name: 'candyMachine',
+          name: 'gumballMachine',
           isMut: true,
           isSigner: false,
           docs: [
-            'Candy Machine account. The account space must be allocated to allow accounts larger',
+            'Gumball Machine account. The account space must be allocated to allow accounts larger',
             'than 10kb.',
             '',
           ],
@@ -1906,7 +1908,7 @@ export const IDL: CandyMachineCore = {
           isMut: false,
           isSigner: false,
           docs: [
-            'Candy Machine authority. This is the address that controls the upate of the candy machine.',
+            'Gumball Machine authority. This is the address that controls the upate of the gumball machine.',
             '',
           ],
         },
@@ -1951,22 +1953,22 @@ export const IDL: CandyMachineCore = {
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account',
-        '1. `[signer]` Candy Machine authority',
+        '0. `[writable]` Gumball Machine account',
+        '1. `[signer]` Gumball Machine authority',
       ],
       accounts: [
         {
-          name: 'candyMachine',
+          name: 'gumballMachine',
           isMut: true,
           isSigner: false,
-          docs: ['Candy machine account.'],
+          docs: ['Gumball machine account.'],
         },
         {
           name: 'authority',
           isMut: true,
           isSigner: true,
           docs: [
-            'Candy Machine authority. This is the address that controls the upate of the candy machine.',
+            'Gumball Machine authority. This is the address that controls the upate of the gumball machine.',
           ],
         },
       ],
@@ -1986,15 +1988,15 @@ export const IDL: CandyMachineCore = {
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account',
-        '1. `[signer]` Candy Machine authority',
+        '0. `[writable]` Gumball Machine account',
+        '1. `[signer]` Gumball Machine authority',
       ],
       accounts: [
         {
-          name: 'candyMachine',
+          name: 'gumballMachine',
           isMut: true,
           isSigner: false,
-          docs: ['Candy Machine account.'],
+          docs: ['Gumball Machine account.'],
         },
         {
           name: 'sellerHistory',
@@ -2069,15 +2071,15 @@ export const IDL: CandyMachineCore = {
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account',
-        '1. `[signer]` Candy Machine authority',
+        '0. `[writable]` Gumball Machine account',
+        '1. `[signer]` Gumball Machine authority',
       ],
       accounts: [
         {
-          name: 'candyMachine',
+          name: 'gumballMachine',
           isMut: true,
           isSigner: false,
-          docs: ['Candy Machine account.'],
+          docs: ['Gumball Machine account.'],
         },
         {
           name: 'sellerHistory',
@@ -2139,15 +2141,15 @@ export const IDL: CandyMachineCore = {
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account',
-        '1. `[signer]` Candy Machine authority',
+        '0. `[writable]` Gumball Machine account',
+        '1. `[signer]` Gumball Machine authority',
       ],
       accounts: [
         {
-          name: 'candyMachine',
+          name: 'gumballMachine',
           isMut: true,
           isSigner: false,
-          docs: ['Candy Machine account.'],
+          docs: ['Gumball Machine account.'],
         },
         {
           name: 'sellerHistory',
@@ -2165,7 +2167,7 @@ export const IDL: CandyMachineCore = {
           isMut: false,
           isSigner: true,
           docs: [
-            'Authority allowed to remove the nft (must be the candy machine auth or the seller of the nft)',
+            'Authority allowed to remove the nft (must be the gumball machine auth or the seller of the nft)',
           ],
         },
         {
@@ -2233,15 +2235,15 @@ export const IDL: CandyMachineCore = {
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account',
-        '1. `[signer]` Candy Machine authority',
+        '0. `[writable]` Gumball Machine account',
+        '1. `[signer]` Gumball Machine authority',
       ],
       accounts: [
         {
-          name: 'candyMachine',
+          name: 'gumballMachine',
           isMut: true,
           isSigner: false,
-          docs: ['Candy Machine account.'],
+          docs: ['Gumball Machine account.'],
         },
         {
           name: 'sellerHistory',
@@ -2302,22 +2304,22 @@ export const IDL: CandyMachineCore = {
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account',
-        '1. `[signer]` Candy Machine authority',
+        '0. `[writable]` Gumball Machine account',
+        '1. `[signer]` Gumball Machine authority',
       ],
       accounts: [
         {
-          name: 'candyMachine',
+          name: 'gumballMachine',
           isMut: true,
           isSigner: false,
-          docs: ['Candy machine account.'],
+          docs: ['Gumball machine account.'],
         },
         {
           name: 'authority',
           isMut: true,
           isSigner: true,
           docs: [
-            'Candy Machine authority. This is the address that controls the upate of the candy machine.',
+            'Gumball Machine authority. This is the address that controls the upate of the gumball machine.',
           ],
         },
       ],
@@ -2330,22 +2332,22 @@ export const IDL: CandyMachineCore = {
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account',
-        '1. `[signer]` Candy Machine authority',
+        '0. `[writable]` Gumball Machine account',
+        '1. `[signer]` Gumball Machine authority',
       ],
       accounts: [
         {
-          name: 'candyMachine',
+          name: 'gumballMachine',
           isMut: true,
           isSigner: false,
-          docs: ['Candy machine account.'],
+          docs: ['Gumball machine account.'],
         },
         {
           name: 'authority',
           isMut: true,
           isSigner: true,
           docs: [
-            'Candy Machine authority. This is the address that controls the upate of the candy machine.',
+            'Gumball Machine authority. This is the address that controls the upate of the gumball machine.',
           ],
         },
       ],
@@ -2356,13 +2358,13 @@ export const IDL: CandyMachineCore = {
       docs: [
         'Mint an NFT.',
         '',
-        'Only the candy machine mint authority is allowed to mint. This handler mints both',
+        'Only the gumball machine mint authority is allowed to mint. This handler mints both',
         'NFTs and Programmable NFTs.',
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account (must be pre-allocated but zero content)',
-        '2. `[signer]` Candy Machine mint authority',
+        '0. `[writable]` Gumball Machine account (must be pre-allocated but zero content)',
+        '2. `[signer]` Gumball Machine mint authority',
         '3. `[signer]` Payer',
         '4. `[writable]` Mint account of the NFT',
         '18. `[]` System program',
@@ -2370,17 +2372,17 @@ export const IDL: CandyMachineCore = {
       ],
       accounts: [
         {
-          name: 'candyMachine',
+          name: 'gumballMachine',
           isMut: true,
           isSigner: false,
-          docs: ['Candy machine account.'],
+          docs: ['Gumball machine account.'],
         },
         {
           name: 'mintAuthority',
           isMut: false,
           isSigner: true,
           docs: [
-            'Candy machine mint authority (mint only allowed for the mint_authority).',
+            'Gumball machine mint authority (mint only allowed for the mint_authority).',
           ],
         },
         {
@@ -2425,28 +2427,28 @@ export const IDL: CandyMachineCore = {
       docs: [
         'Increments total revenue earned by the gumball machine.',
         '',
-        'Only the candy machine mint authority is allowed to increment revenue. This is',
+        'Only the gumball machine mint authority is allowed to increment revenue. This is',
         "required as token transfers don't occur in this program, but total is needed",
         'when settling.',
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account (must be pre-allocated but zero content)',
-        '2. `[signer]` Candy Machine mint authority',
+        '0. `[writable]` Gumball Machine account (must be pre-allocated but zero content)',
+        '2. `[signer]` Gumball Machine mint authority',
       ],
       accounts: [
         {
-          name: 'candyMachine',
+          name: 'gumballMachine',
           isMut: true,
           isSigner: false,
-          docs: ['Candy machine account.'],
+          docs: ['Gumball machine account.'],
         },
         {
           name: 'mintAuthority',
           isMut: false,
           isSigner: true,
           docs: [
-            'Candy machine mint authority (mint only allowed for the mint_authority).',
+            'Gumball machine mint authority (mint only allowed for the mint_authority).',
           ],
         },
       ],
@@ -2464,8 +2466,8 @@ export const IDL: CandyMachineCore = {
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account',
-        '1. `[signer]` Candy Machine authority',
+        '0. `[writable]` Gumball Machine account',
+        '1. `[signer]` Gumball Machine authority',
       ],
       accounts: [
         {
@@ -2475,10 +2477,10 @@ export const IDL: CandyMachineCore = {
           docs: ['Anyone can settle the sale'],
         },
         {
-          name: 'candyMachine',
+          name: 'gumballMachine',
           isMut: true,
           isSigner: false,
-          docs: ['Candy machine account.'],
+          docs: ['Gumball machine account.'],
         },
         {
           name: 'authorityPda',
@@ -2590,8 +2592,8 @@ export const IDL: CandyMachineCore = {
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account',
-        '1. `[signer]` Candy Machine authority',
+        '0. `[writable]` Gumball Machine account',
+        '1. `[signer]` Gumball Machine authority',
       ],
       accounts: [
         {
@@ -2601,10 +2603,10 @@ export const IDL: CandyMachineCore = {
           docs: ['Anyone can settle the sale'],
         },
         {
-          name: 'candyMachine',
+          name: 'gumballMachine',
           isMut: true,
           isSigner: false,
-          docs: ['Candy machine account.'],
+          docs: ['Gumball machine account.'],
         },
         {
           name: 'authorityPda',
@@ -2746,8 +2748,8 @@ export const IDL: CandyMachineCore = {
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account',
-        '1. `[signer]` Candy Machine authority',
+        '0. `[writable]` Gumball Machine account',
+        '1. `[signer]` Gumball Machine authority',
       ],
       accounts: [
         {
@@ -2757,10 +2759,10 @@ export const IDL: CandyMachineCore = {
           docs: ['Anyone can settle the sale'],
         },
         {
-          name: 'candyMachine',
+          name: 'gumballMachine',
           isMut: true,
           isSigner: false,
-          docs: ['Candy machine account.'],
+          docs: ['Gumball machine account.'],
         },
         {
           name: 'authorityPda',
@@ -2894,8 +2896,8 @@ export const IDL: CandyMachineCore = {
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account',
-        '1. `[signer]` Candy Machine authority',
+        '0. `[writable]` Gumball Machine account',
+        '1. `[signer]` Gumball Machine authority',
       ],
       accounts: [
         {
@@ -2905,10 +2907,10 @@ export const IDL: CandyMachineCore = {
           docs: ['Anyone can settle the sale'],
         },
         {
-          name: 'candyMachine',
+          name: 'gumballMachine',
           isMut: true,
           isSigner: false,
-          docs: ['Candy machine account.'],
+          docs: ['Gumball machine account.'],
         },
         {
           name: 'authorityPda',
@@ -3058,25 +3060,25 @@ export const IDL: CandyMachineCore = {
     {
       name: 'setAuthority',
       docs: [
-        'Set a new authority of the candy machine.',
+        'Set a new authority of the gumball machine.',
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account',
-        '1. `[signer]` Candy Machine authority',
+        '0. `[writable]` Gumball Machine account',
+        '1. `[signer]` Gumball Machine authority',
       ],
       accounts: [
         {
-          name: 'candyMachine',
+          name: 'gumballMachine',
           isMut: true,
           isSigner: false,
-          docs: ['Candy Machine account.'],
+          docs: ['Gumball Machine account.'],
         },
         {
           name: 'authority',
           isMut: false,
           isSigner: true,
-          docs: ['Autority of the candy machine.'],
+          docs: ['Autority of the gumball machine.'],
         },
       ],
       args: [
@@ -3089,32 +3091,32 @@ export const IDL: CandyMachineCore = {
     {
       name: 'setMintAuthority',
       docs: [
-        'Set a new mint authority of the candy machine.',
+        'Set a new mint authority of the gumball machine.',
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account',
-        '1. `[signer]` Candy Machine authority',
-        '1. `[signer]` New candy machine authority',
+        '0. `[writable]` Gumball Machine account',
+        '1. `[signer]` Gumball Machine authority',
+        '1. `[signer]` New gumball machine authority',
       ],
       accounts: [
         {
-          name: 'candyMachine',
+          name: 'gumballMachine',
           isMut: true,
           isSigner: false,
-          docs: ['Candy Machine account.'],
+          docs: ['Gumball Machine account.'],
         },
         {
           name: 'authority',
           isMut: false,
           isSigner: true,
-          docs: ['Candy Machine authority'],
+          docs: ['Gumball Machine authority'],
         },
         {
           name: 'mintAuthority',
           isMut: false,
           isSigner: true,
-          docs: ['New candy machine authority'],
+          docs: ['New gumball machine authority'],
         },
       ],
       args: [],
@@ -3126,21 +3128,21 @@ export const IDL: CandyMachineCore = {
         '',
         '# Accounts',
         '',
-        '0. `[writable]` Candy Machine account',
-        '1. `[signer]` Candy Machine authority',
+        '0. `[writable]` Gumball Machine account',
+        '1. `[signer]` Gumball Machine authority',
       ],
       accounts: [
         {
-          name: 'candyMachine',
+          name: 'gumballMachine',
           isMut: true,
           isSigner: false,
-          docs: ['Candy Machine acccount.'],
+          docs: ['Gumball Machine acccount.'],
         },
         {
           name: 'authority',
           isMut: true,
           isSigner: true,
-          docs: ['Authority of the candy machine.'],
+          docs: ['Authority of the gumball machine.'],
         },
         {
           name: 'authorityPda',
@@ -3165,8 +3167,8 @@ export const IDL: CandyMachineCore = {
   ],
   accounts: [
     {
-      name: 'candyMachine',
-      docs: ['Candy machine state and config data.'],
+      name: 'gumballMachine',
+      docs: ['Gumball machine state and config data.'],
       type: {
         kind: 'struct',
         fields: [
@@ -3182,7 +3184,9 @@ export const IDL: CandyMachineCore = {
           },
           {
             name: 'mintAuthority',
-            docs: ['Authority address allowed to mint from the candy machine.'],
+            docs: [
+              'Authority address allowed to mint from the gumball machine.',
+            ],
             type: 'publicKey',
           },
           {
@@ -3236,14 +3240,14 @@ export const IDL: CandyMachineCore = {
     {
       name: 'sellerHistory',
       docs: [
-        'Seller history state to track count of items submitted to a candy machine.',
+        'Seller history state to track count of items submitted to a gumball machine.',
       ],
       type: {
         kind: 'struct',
         fields: [
           {
-            name: 'candyMachine',
-            docs: ["Candy machine we're tracking for"],
+            name: 'gumballMachine',
+            docs: ["Gumball machine we're tracking for"],
             type: 'publicKey',
           },
           {
@@ -3542,17 +3546,17 @@ export const IDL: CandyMachineCore = {
     {
       code: 6005,
       name: 'TooManyCreators',
-      msg: 'Can only provide up to 4 creators to candy machine (because candy machine is one)',
+      msg: 'Can only provide up to 4 creators to gumball machine (because gumball machine is one)',
     },
     {
       code: 6006,
-      name: 'CandyMachineEmpty',
-      msg: 'Candy machine is empty',
+      name: 'GumballMachineEmpty',
+      msg: 'Gumball machine is empty',
     },
     {
       code: 6007,
       name: 'HiddenSettingsDoNotHaveConfigLines',
-      msg: 'Candy machines using hidden uris do not have config lines, they have a single hash representing hashed order',
+      msg: 'Gumball machines using hidden uris do not have config lines, they have a single hash representing hashed order',
     },
     {
       code: 6008,
@@ -3617,7 +3621,7 @@ export const IDL: CandyMachineCore = {
     {
       code: 6020,
       name: 'NotFullyLoaded',
-      msg: 'Not all config lines were added to the candy machine',
+      msg: 'Not all config lines were added to the gumball machine',
     },
     {
       code: 6021,

@@ -24,8 +24,8 @@ import {
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import {
-  findCandyMachineAuthorityPda,
   findEventAuthorityPda,
+  findGumballMachineAuthorityPda,
 } from '../../hooked';
 import { findSellerHistoryPda } from '../accounts';
 import {
@@ -39,8 +39,8 @@ import {
 export type BaseSettleCoreAssetSaleInstructionAccounts = {
   /** Anyone can settle the sale */
   payer?: Signer;
-  /** Candy machine account. */
-  candyMachine: PublicKey | Pda;
+  /** Gumball machine account. */
+  gumballMachine: PublicKey | Pda;
   authorityPda?: PublicKey | Pda;
   /** Payment account for authority pda if using token payment */
   authorityPdaPaymentAccount?: PublicKey | Pda;
@@ -123,10 +123,10 @@ export function baseSettleCoreAssetSale(
   // Accounts.
   const resolvedAccounts: ResolvedAccountsWithIndices = {
     payer: { index: 0, isWritable: true, value: input.payer ?? null },
-    candyMachine: {
+    gumballMachine: {
       index: 1,
       isWritable: true,
-      value: input.candyMachine ?? null,
+      value: input.gumballMachine ?? null,
     },
     authorityPda: {
       index: 2,
@@ -214,9 +214,9 @@ export function baseSettleCoreAssetSale(
     resolvedAccounts.payer.value = context.payer;
   }
   if (!resolvedAccounts.authorityPda.value) {
-    resolvedAccounts.authorityPda.value = findCandyMachineAuthorityPda(
+    resolvedAccounts.authorityPda.value = findGumballMachineAuthorityPda(
       context,
-      { candyMachine: expectPublicKey(resolvedAccounts.candyMachine.value) }
+      { gumballMachine: expectPublicKey(resolvedAccounts.gumballMachine.value) }
     );
   }
   if (!resolvedAccounts.authority.value) {
@@ -224,7 +224,7 @@ export function baseSettleCoreAssetSale(
   }
   if (!resolvedAccounts.sellerHistory.value) {
     resolvedAccounts.sellerHistory.value = findSellerHistoryPda(context, {
-      candyMachine: expectPublicKey(resolvedAccounts.candyMachine.value),
+      gumballMachine: expectPublicKey(resolvedAccounts.gumballMachine.value),
       seller: expectPublicKey(resolvedAccounts.seller.value),
     });
   }

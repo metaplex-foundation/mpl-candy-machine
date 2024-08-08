@@ -38,9 +38,9 @@ test('it allows minting when the payer owns an NFT from a certain collection', a
     collectionAuthority: requiredCollectionAuthority,
   });
 
-  // And a loaded Candy Machine with an nftGate guard.
+  // And a loaded Gumball Machine with an nftGate guard.
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -59,7 +59,7 @@ test('it allows minting when the payer owns an NFT from a certain collection', a
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         mintArgs: {
           nftGate: some({ mint: nftToVerify.publicKey }),
@@ -69,7 +69,7 @@ test('it allows minting when the payer owns an NFT from a certain collection', a
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertItemBought(t, umi, { candyMachine });
+  await assertItemBought(t, umi, { gumballMachine });
 });
 
 test('it allows minting even when the payer is different from the buyer', async (t) => {
@@ -86,9 +86,9 @@ test('it allows minting even when the payer is different from the buyer', async 
     collectionAuthority: requiredCollectionAuthority,
   });
 
-  // And a loaded Candy Machine with an nftGate guard.
+  // And a loaded Gumball Machine with an nftGate guard.
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -107,7 +107,7 @@ test('it allows minting even when the payer is different from the buyer', async 
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         buyer,
 
@@ -119,7 +119,7 @@ test('it allows minting even when the payer is different from the buyer', async 
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertItemBought(t, umi, { candyMachine, buyer: publicKey(buyer) });
+  await assertItemBought(t, umi, { gumballMachine, buyer: publicKey(buyer) });
 });
 
 test('it allows minting when the NFT is not on an associated token account', async (t) => {
@@ -149,9 +149,9 @@ test('it allows minting when the NFT is not on an associated token account', asy
     collectionAuthority: requiredCollectionAuthority,
   });
 
-  // And a loaded Candy Machine with an nftGate guard.
+  // And a loaded Gumball Machine with an nftGate guard.
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -170,7 +170,7 @@ test('it allows minting when the NFT is not on an associated token account', asy
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         mintArgs: {
           nftGate: some({
@@ -183,7 +183,7 @@ test('it allows minting when the NFT is not on an associated token account', asy
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertItemBought(t, umi, { candyMachine });
+  await assertItemBought(t, umi, { gumballMachine });
 });
 
 test('it forbids minting when the payer does not own an NFT from a certain collection', async (t) => {
@@ -219,9 +219,9 @@ test('it forbids minting when the payer does not own an NFT from a certain colle
     )
     .sendAndConfirm(umi);
 
-  // And a loaded Candy Machine with an nftGate guard on that collection.
+  // And a loaded Gumball Machine with an nftGate guard on that collection.
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -240,7 +240,7 @@ test('it forbids minting when the payer does not own an NFT from a certain colle
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         mintArgs: {
           nftGate: some({ mint: nftToVerify }),
@@ -266,13 +266,13 @@ test('it forbids minting when the payer tries to provide an NFT from the wrong c
     collectionAuthority: requiredCollectionAuthorityA,
   });
 
-  // And a loaded Candy Machine with an nftGate guard on a Collection B.
+  // And a loaded Gumball Machine with an nftGate guard on a Collection B.
   const requiredCollectionAuthorityB = generateSigner(umi);
   const { publicKey: requiredCollectionB } = await createCollectionNft(umi, {
     authority: requiredCollectionAuthorityB,
   });
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -291,7 +291,7 @@ test('it forbids minting when the payer tries to provide an NFT from the wrong c
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         mintArgs: {
           nftGate: some({ mint: nftToVerify }),
@@ -315,9 +315,9 @@ test('it forbids minting when the payer tries to provide an NFT from an unverifi
     tokenOwner: umi.identity.publicKey,
   });
 
-  // And a loaded Candy Machine with an nftGate guard.
+  // And a loaded Gumball Machine with an nftGate guard.
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -336,7 +336,7 @@ test('it forbids minting when the payer tries to provide an NFT from an unverifi
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         mintArgs: {
           nftGate: some({ mint: nftToVerify }),
@@ -350,11 +350,11 @@ test('it forbids minting when the payer tries to provide an NFT from an unverifi
 });
 
 test('it charges a bot tax when trying to mint without owning the right NFT', async (t) => {
-  // Given a loaded Candy Machine with an nftGate guard and a bot tax guard.
+  // Given a loaded Gumball Machine with an nftGate guard and a bot tax guard.
   const umi = await createUmi();
   const { publicKey: requiredCollection } = await createCollectionNft(umi);
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -375,7 +375,7 @@ test('it charges a bot tax when trying to mint without owning the right NFT', as
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         mintArgs: {
           nftGate: some({ mint: wrongNft.publicKey }),

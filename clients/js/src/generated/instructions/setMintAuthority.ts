@@ -29,11 +29,11 @@ import {
 
 // Accounts.
 export type SetMintAuthorityInstructionAccounts = {
-  /** Candy Machine account. */
-  candyMachine: PublicKey | Pda;
-  /** Candy Machine authority */
+  /** Gumball Machine account. */
+  gumballMachine: PublicKey | Pda;
+  /** Gumball Machine authority */
   authority?: Signer;
-  /** New candy machine authority */
+  /** New gumball machine authority */
   mintAuthority?: Signer;
 };
 
@@ -78,10 +78,10 @@ export function setMintAuthority(
 
   // Accounts.
   const resolvedAccounts: ResolvedAccountsWithIndices = {
-    candyMachine: {
+    gumballMachine: {
       index: 0,
       isWritable: true,
-      value: input.candyMachine ?? null,
+      value: input.gumballMachine ?? null,
     },
     authority: { index: 1, isWritable: false, value: input.authority ?? null },
     mintAuthority: {

@@ -26,8 +26,8 @@ export const allocationGuardManifest: GuardManifest<
       {
         publicKey: findAllocationTrackerPda(context, {
           id: args.id,
-          candyMachine: mintContext.candyMachine,
-          candyGuard: mintContext.candyGuard,
+          gumballMachine: mintContext.gumballMachine,
+          gumballGuard: mintContext.gumballGuard,
         })[0],
         isWritable: true,
       },
@@ -40,11 +40,11 @@ export const allocationGuardManifest: GuardManifest<
         isWritable: true,
         publicKey: findAllocationTrackerPda(context, {
           id: args.id,
-          candyMachine: routeContext.candyMachine,
-          candyGuard: routeContext.candyGuard,
+          gumballMachine: routeContext.gumballMachine,
+          gumballGuard: routeContext.gumballGuard,
         })[0],
       },
-      { isWritable: false, signer: args.candyGuardAuthority },
+      { isWritable: false, signer: args.gumballGuardAuthority },
       { isWritable: false, publicKey: getSplSystemProgramId(context) },
     ],
   }),
@@ -57,6 +57,6 @@ export type AllocationMintArgs = Omit<AllocationArgs, 'limit'>;
  * when accessing the guard's special "route" instruction.
  */
 export type AllocationRouteArgs = Omit<AllocationArgs, 'limit'> & {
-  /** The authority of the Candy Guard as a Signer. */
-  candyGuardAuthority: Signer;
+  /** The authority of the Gumball Guard as a Signer. */
+  gumballGuardAuthority: Signer;
 };

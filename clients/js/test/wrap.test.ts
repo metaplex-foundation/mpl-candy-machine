@@ -1,46 +1,46 @@
 import { publicKey, transactionBuilder } from '@metaplex-foundation/umi';
 import test from 'ava';
-import { CandyMachine, fetchCandyMachine, wrap } from '../src';
-import { create, createCandyGuard, createUmi } from './_setup';
+import { fetchGumballMachine, GumballMachine, wrap } from '../src';
+import { create, createGumballGuard, createUmi } from './_setup';
 
-test('it can wrap a candy machine v2 in a candy guard', async (t) => {
-  // Given an existing candy machine and candy guard.
+test('it can wrap a gumball machine v2 in a gumball guard', async (t) => {
+  // Given an existing gumball machine and gumball guard.
   const umi = await createUmi();
-  const candyMachine = (await create(umi)).publicKey;
-  const candyGuard = await createCandyGuard(umi);
+  const gumballMachine = (await create(umi)).publicKey;
+  const gumballGuard = await createGumballGuard(umi);
 
-  // When we wrap the candy machine in the candy guard.
+  // When we wrap the gumball machine in the gumball guard.
   await transactionBuilder()
-    .add(wrap(umi, { candyMachine, candyGuard }))
+    .add(wrap(umi, { gumballMachine, gumballGuard }))
     .sendAndConfirm(umi);
 
-  // Then the mint authority of the candy machine is the candy guard.
-  const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
-  t.like(candyMachineAccount, <CandyMachine>{
+  // Then the mint authority of the gumball machine is the gumball guard.
+  const gumballMachineAccount = await fetchGumballMachine(umi, gumballMachine);
+  t.like(gumballMachineAccount, <GumballMachine>{
     authority: publicKey(umi.identity),
-    mintAuthority: publicKey(candyGuard),
+    mintAuthority: publicKey(gumballGuard),
   });
 });
 
-test('it can update the candy guard associated with a candy machine', async (t) => {
-  // Given an existing candy machine and a candy guard associated with it.
+test('it can update the gumball guard associated with a gumball machine', async (t) => {
+  // Given an existing gumball machine and a gumball guard associated with it.
   const umi = await createUmi();
-  const candyMachine = (await create(umi)).publicKey;
-  const candyGuardA = await createCandyGuard(umi);
+  const gumballMachine = (await create(umi)).publicKey;
+  const gumballGuardA = await createGumballGuard(umi);
   await transactionBuilder()
-    .add(wrap(umi, { candyMachine, candyGuard: candyGuardA }))
+    .add(wrap(umi, { gumballMachine, gumballGuard: gumballGuardA }))
     .sendAndConfirm(umi);
 
-  // When we wrap the candy machine in a different candy guard.
-  const candyGuardB = await createCandyGuard(umi);
+  // When we wrap the gumball machine in a different gumball guard.
+  const gumballGuardB = await createGumballGuard(umi);
   await transactionBuilder()
-    .add(wrap(umi, { candyMachine, candyGuard: candyGuardB }))
+    .add(wrap(umi, { gumballMachine, gumballGuard: gumballGuardB }))
     .sendAndConfirm(umi);
 
-  // Then the mint authority of the candy machine was updated accordingly.
-  const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
-  t.like(candyMachineAccount, <CandyMachine>{
+  // Then the mint authority of the gumball machine was updated accordingly.
+  const gumballMachineAccount = await fetchGumballMachine(umi, gumballMachine);
+  t.like(gumballMachineAccount, <GumballMachine>{
     authority: publicKey(umi.identity),
-    mintAuthority: publicKey(candyGuardB),
+    mintAuthority: publicKey(gumballGuardB),
   });
 });

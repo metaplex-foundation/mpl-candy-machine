@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use utils::get_verified_royalty_info;
 use crate::{
-    assert_config_line, constants::{AUTHORITY_SEED, SELLER_HISTORY_SEED}, events::SettleItemSaleEvent, get_config_count, processors::{self, claim_proceeds, remove_from_loaded_bitmask}, state::CandyMachine, AssociatedToken, CandyError, ConfigLine, GumballState, SellerHistory, Token, TokenStandard
+    assert_config_line, constants::{AUTHORITY_SEED, SELLER_HISTORY_SEED}, events::SettleItemSaleEvent, get_config_count, processors::{self, claim_proceeds, remove_from_loaded_bitmask}, state::GumballMachine, AssociatedToken, GumballError, ConfigLine, GumballState, SellerHistory, Token, TokenStandard
 };
 
 /// Settles a legacy NFT sale
@@ -12,20 +12,20 @@ pub struct SettleNftSale<'info> {
     #[account(mut)]
     payer: Signer<'info>,
 
-    /// Candy machine account.
+    /// Gumball machine account.
     #[account(
         mut,
-        has_one = authority @ CandyError::InvalidAuthority,
-        constraint = candy_machine.state == GumballState::SaleEnded @ CandyError::InvalidState
+        has_one = authority @ GumballError::InvalidAuthority,
+        constraint = gumball_machine.state == GumballState::SaleEnded @ GumballError::InvalidState
     )]
-    candy_machine: Box<Account<'info, CandyMachine>>,
+    gumball_machine: Box<Account<'info, GumballMachine>>,
 
     /// CHECK: Safe due to seeds constraint
     #[account(
         mut,
         seeds = [
             AUTHORITY_SEED.as_bytes(), 
-            candy_machine.key().as_ref()
+            gumball_machine.key().as_ref()
         ],
         bump
     )]
@@ -36,7 +36,7 @@ pub struct SettleNftSale<'info> {
     authority_pda_payment_account: Option<UncheckedAccount<'info>>,
 
     /// Seller of the nft
-    /// CHECK: Safe due to candy machine constraint
+    /// CHECK: Safe due to gumball machine constraint
     #[account(mut)]
     authority: UncheckedAccount<'info>,
 
@@ -58,7 +58,7 @@ pub struct SettleNftSale<'info> {
         mut,
         seeds = [
             SELLER_HISTORY_SEED.as_bytes(),
-            candy_machine.key().as_ref(),
+            gumball_machine.key().as_ref(),
             seller.key().as_ref()
         ],
         bump
@@ -115,7 +115,7 @@ pub struct SettleNftSale<'info> {
 }
 
 pub fn settle_nft_sale<'info>(ctx: Context<'_, '_, '_, 'info, SettleNftSale<'info>>, index: u32) -> Result<()> {
-    let candy_machine = &mut ctx.accounts.candy_machine;
+    let gumball_machine = &mut ctx.accounts.gumball_machine;
     let seller_history = &mut ctx.accounts.seller_history;
     let payer = &ctx.accounts.payer.to_account_info();
     let buyer = &ctx.accounts.buyer.to_account_info();
@@ -135,7 +135,7 @@ pub fn settle_nft_sale<'info>(ctx: Context<'_, '_, '_, 'info, SettleNftSale<'inf
     let mint = &ctx.accounts.mint.to_account_info();
 
     assert_config_line(
-        candy_machine,
+        gumball_machine,
         index,
         ConfigLine {
             mint: mint.key(),
@@ -167,16 +167,16 @@ pub fn settle_nft_sale<'info>(ctx: Context<'_, '_, '_, 'info, SettleNftSale<'inf
 
     let auth_seeds = [
         AUTHORITY_SEED.as_bytes(),
-        candy_machine.to_account_info().key.as_ref(),
+        gumball_machine.to_account_info().key.as_ref(),
         &[ctx.bumps.authority_pda],
     ];
 
-    let account_info = candy_machine.to_account_info();
+    let account_info = gumball_machine.to_account_info();
     let mut data = account_info.data.borrow_mut();
     let count = get_config_count(&data)?;
     let last_index = count - 1;
 
-    if remove_from_loaded_bitmask(candy_machine.settings.item_capacity, last_index, *data)? {
+    if remove_from_loaded_bitmask(gumball_machine.settings.item_capacity, last_index, *data)? {
         processors::claim_nft(
             authority_pda,
             payer,
@@ -201,7 +201,7 @@ pub fn settle_nft_sale<'info>(ctx: Context<'_, '_, '_, 'info, SettleNftSale<'inf
     drop(data);
 
     let total_proceeds = claim_proceeds(
-        candy_machine, 
+        gumball_machine, 
         seller_history,
         payer,
         authority_pda,
@@ -224,13 +224,13 @@ pub fn settle_nft_sale<'info>(ctx: Context<'_, '_, '_, 'info, SettleNftSale<'inf
 
     emit_cpi!(SettleItemSaleEvent {
         mint: mint.key(),
-        authority: candy_machine.authority.key(),
+        authority: gumball_machine.authority.key(),
         seller: seller.key(),
         buyer: buyer.key(),
         total_proceeds,
-        payment_mint: candy_machine.settings.payment_mint,
-        fee_config: candy_machine.marketplace_fee_config,
-        curator_fee_bps: candy_machine.settings.curator_fee_bps
+        payment_mint: gumball_machine.settings.payment_mint,
+        fee_config: gumball_machine.marketplace_fee_config,
+        curator_fee_bps: gumball_machine.settings.curator_fee_bps
     });
 
     Ok(())

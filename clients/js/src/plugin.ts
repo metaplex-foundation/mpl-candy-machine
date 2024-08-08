@@ -5,7 +5,7 @@ import {
   allocationGuardManifest,
   allowListGuardManifest,
   botTaxGuardManifest,
-  defaultCandyGuardNames,
+  defaultGumballGuardNames,
   endDateGuardManifest,
   gatekeeperGuardManifest,
   mintLimitGuardManifest,
@@ -45,7 +45,7 @@ export const mplCandyMachine = (): UmiPlugin => ({
     umi.programs.add(
       {
         ...createMplCandyGuardProgram(),
-        availableGuards: defaultCandyGuardNames,
+        availableGuards: defaultGumballGuardNames,
       } as CandyGuardProgram,
       false
     );

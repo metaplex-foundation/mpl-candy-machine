@@ -20,7 +20,7 @@ import {
   parseGuardRemainingAccounts,
   parseMintArgs,
 } from './guards';
-import { findCandyGuardPda } from './hooked';
+import { findGumballGuardPda } from './hooked';
 
 export { DrawInstructionAccounts };
 
@@ -48,13 +48,14 @@ export function draw<MA extends GuardSetMintArgs = DefaultGuardSetMintArgs>(
 
   // Parsing mint data.
   const program = context.programs.get<CandyGuardProgram>('mplCandyGuard');
-  const candyMachine = publicKey(input.candyMachine, false);
+  const gumballMachine = publicKey(input.gumballMachine, false);
   const mintContext: MintContext = {
     buyer: input.buyer ?? context.identity,
     payer: input.payer ?? context.payer,
-    candyMachine,
-    candyGuard: publicKey(
-      input.candyGuard ?? findCandyGuardPda(context, { base: candyMachine }),
+    gumballMachine,
+    gumballGuard: publicKey(
+      input.gumballGuard ??
+        findGumballGuardPda(context, { base: gumballMachine }),
       false
     ),
   };

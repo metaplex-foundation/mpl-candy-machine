@@ -1,16 +1,16 @@
 use anchor_lang::prelude::*;
 
 use crate::{
-    constants::{CANDY_MACHINE_SIZE, CONFIG_LINE_SIZE},
-    get_config_count, CandyError, CandyMachine, ConfigLineInput, TokenStandard,
+    constants::{CONFIG_LINE_SIZE, GUMBALL_MACHINE_SIZE},
+    get_config_count, ConfigLineInput, GumballError, GumballMachine, TokenStandard,
 };
 
 pub fn add_item(
-    candy_machine: &mut Account<CandyMachine>,
+    gumball_machine: &mut Account<GumballMachine>,
     config_line: ConfigLineInput,
     token_standard: TokenStandard,
 ) -> Result<()> {
-    let account_info = candy_machine.to_account_info();
+    let account_info = gumball_machine.to_account_info();
     // mutable reference to the account data (config lines are written in the
     // 'hidden' section of the data array)
     let mut data = account_info.data.borrow_mut();
@@ -23,13 +23,13 @@ pub fn add_item(
     // going beyond u32 only happens with the hidden settings candies
     let total = index
         .checked_add(1)
-        .ok_or(CandyError::NumericalOverflowError)?;
+        .ok_or(GumballError::NumericalOverflowError)?;
 
-    if total > (candy_machine.settings.item_capacity as u32) {
-        return err!(CandyError::IndexGreaterThanLength);
+    if total > (gumball_machine.settings.item_capacity as u32) {
+        return err!(GumballError::IndexGreaterThanLength);
     }
 
-    let mut position = CANDY_MACHINE_SIZE + 4 + (index as usize) * CONFIG_LINE_SIZE;
+    let mut position = GUMBALL_MACHINE_SIZE + 4 + (index as usize) * CONFIG_LINE_SIZE;
 
     let mint_slice: &mut [u8] = &mut data[position..position + 32];
     mint_slice.copy_from_slice(&config_line.mint.to_bytes());
@@ -49,25 +49,25 @@ pub fn add_item(
     // line is added for the first time (when updating a config line, the index is not added again)
 
     // bit-mask
-    let bit_mask_start = candy_machine.get_loaded_items_bit_mask_position();
+    let bit_mask_start = gumball_machine.get_loaded_items_bit_mask_position();
     // (unordered) indices for the mint
     let indices_start = bit_mask_start
-        + (candy_machine
+        + (gumball_machine
             .settings
             .item_capacity
             .checked_div(8)
-            .ok_or(CandyError::NumericalOverflowError)?
+            .ok_or(GumballError::NumericalOverflowError)?
             + 1) as usize;
 
     let position = index as usize;
     let byte_position = bit_mask_start
         + position
             .checked_div(8)
-            .ok_or(CandyError::NumericalOverflowError)?;
+            .ok_or(GumballError::NumericalOverflowError)?;
     // bit index corresponding to the position of the line
     let bit = 7 - position
         .checked_rem(8)
-        .ok_or(CandyError::NumericalOverflowError)?;
+        .ok_or(GumballError::NumericalOverflowError)?;
     let mask = u8::pow(2, bit as u32);
 
     let current_value = data[byte_position];
@@ -88,7 +88,7 @@ pub fn add_item(
 
     count = count
         .checked_add(1)
-        .ok_or(CandyError::NumericalOverflowError)?;
+        .ok_or(GumballError::NumericalOverflowError)?;
 
     msg!(
         "New item added: position={}, new count={})",
@@ -97,7 +97,8 @@ pub fn add_item(
     );
 
     // updates the config lines count
-    data[CANDY_MACHINE_SIZE..CANDY_MACHINE_SIZE + 4].copy_from_slice(&(count as u32).to_le_bytes());
+    data[GUMBALL_MACHINE_SIZE..GUMBALL_MACHINE_SIZE + 4]
+        .copy_from_slice(&(count as u32).to_le_bytes());
 
     Ok(())
 }

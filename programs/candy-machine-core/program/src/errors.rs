@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 
 #[error_code]
-pub enum CandyError {
+pub enum GumballError {
     #[msg("Account does not have correct owner")]
     IncorrectOwner,
 
@@ -17,13 +17,13 @@ pub enum CandyError {
     #[msg("Numerical overflow error")]
     NumericalOverflowError,
 
-    #[msg("Can only provide up to 4 creators to candy machine (because candy machine is one)")]
+    #[msg("Can only provide up to 4 creators to gumball machine (because gumball machine is one)")]
     TooManyCreators,
 
-    #[msg("Candy machine is empty")]
-    CandyMachineEmpty,
+    #[msg("Gumball machine is empty")]
+    GumballMachineEmpty,
 
-    #[msg("Candy machines using hidden uris do not have config lines, they have a single hash representing hashed order")]
+    #[msg("Gumball machines using hidden uris do not have config lines, they have a single hash representing hashed order")]
     HiddenSettingsDoNotHaveConfigLines,
 
     #[msg("Cannot change number of lines unless is a hidden config")]
@@ -62,7 +62,7 @@ pub enum CandyError {
     #[msg("Could not retrive config line data")]
     CouldNotRetrieveConfigLineData,
 
-    #[msg("Not all config lines were added to the candy machine")]
+    #[msg("Not all config lines were added to the gumball machine")]
     NotFullyLoaded,
 
     #[msg("Instruction could not be created")]

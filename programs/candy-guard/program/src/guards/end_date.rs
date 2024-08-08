@@ -28,7 +28,7 @@ impl Condition for EndDate {
         let clock = Clock::get()?;
 
         if clock.unix_timestamp >= self.date {
-            return err!(CandyGuardError::AfterEndDate);
+            return err!(GumballGuardError::AfterEndDate);
         }
 
         Ok(())

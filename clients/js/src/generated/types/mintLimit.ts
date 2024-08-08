@@ -20,7 +20,7 @@ import {
  *
  * 0. `[writable]` Mint counter PDA. The PDA is derived
  * using the seed `["mint_limit", mint guard id, payer key,
- * candy guard pubkey, candy machine pubkey]`.
+ * gumball guard pubkey, gumball machine pubkey]`.
  */
 
 export type MintLimit = {

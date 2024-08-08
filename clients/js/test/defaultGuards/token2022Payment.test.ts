@@ -8,7 +8,7 @@ import {
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import test from 'ava';
-import { draw, fetchCandyMachine, TokenStandard } from '../../src';
+import { draw, fetchGumballMachine, TokenStandard } from '../../src';
 import {
   assertItemBought,
   create,
@@ -37,9 +37,9 @@ test('it transfers Token2022 tokens from the payer to the destination', async (t
     }
   );
 
-  // And a loaded Candy Machine with a token2022Payment guard that requires 5 tokens.
+  // And a loaded Gumball Machine with a token2022Payment guard that requires 5 tokens.
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -65,7 +65,7 @@ test('it transfers Token2022 tokens from the payer to the destination', async (t
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
         mintArgs: {
           token2022Payment: some({ mint: tokenMint.publicKey, destinationAta }),
         },
@@ -74,7 +74,7 @@ test('it transfers Token2022 tokens from the payer to the destination', async (t
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertItemBought(t, umi, { candyMachine });
+  await assertItemBought(t, umi, { gumballMachine });
 
   // And the treasury token received 5 tokens.
   const destinationTokenAccount = await fetchToken(umi, destinationAta);
@@ -85,6 +85,6 @@ test('it transfers Token2022 tokens from the payer to the destination', async (t
   t.is(payerTokenAccount.amount, 7n);
 
   // Total revenue is incremented
-  const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
-  t.is(candyMachineAccount.totalRevenue, 5n, 'total revenue is incremented');
+  const gumballMachineAccount = await fetchGumballMachine(umi, gumballMachine);
+  t.is(gumballMachineAccount.totalRevenue, 5n, 'total revenue is incremented');
 });

@@ -1,11 +1,11 @@
-use crate::{state::CandyMachine, CandyError, SellerHistory};
+use crate::{state::GumballMachine, GumballError, SellerHistory};
 use anchor_lang::prelude::*;
 use utils::{
     assert_keys_equal, get_bps_of, is_native_mint, transfer, transfer_from_pda, RoyaltyInfo,
 };
 
 pub fn claim_proceeds<'a, 'b>(
-    candy_machine: &mut Box<Account<'a, CandyMachine>>,
+    gumball_machine: &mut Box<Account<'a, GumballMachine>>,
     seller_history: &mut Box<Account<'a, SellerHistory>>,
     fee_payer: &AccountInfo<'a>,
     authority_pda: &mut AccountInfo<'a>,
@@ -25,26 +25,26 @@ pub fn claim_proceeds<'a, 'b>(
     rent: &AccountInfo<'a>,
     auth_seeds: &[&[u8]],
 ) -> Result<u64> {
-    candy_machine.items_settled += 1;
+    gumball_machine.items_settled += 1;
 
-    let is_native = is_native_mint(candy_machine.settings.payment_mint);
+    let is_native = is_native_mint(gumball_machine.settings.payment_mint);
 
     if !is_native {
         require!(
             payment_mint.is_some()
-                && payment_mint.unwrap().key() == candy_machine.settings.payment_mint,
-            CandyError::InvalidPaymentMint
+                && payment_mint.unwrap().key() == gumball_machine.settings.payment_mint,
+            GumballError::InvalidPaymentMint
         );
     }
 
     // Proceeds are calculated as total amount paid by buyers divided by total number of items in the gumball machine
-    let total_proceeds = candy_machine
+    let total_proceeds = gumball_machine
         .total_revenue
-        .checked_div(candy_machine.finalized_items_count)
-        .ok_or(CandyError::NumericalOverflowError)?;
+        .checked_div(gumball_machine.finalized_items_count)
+        .ok_or(GumballError::NumericalOverflowError)?;
     msg!("Proceeds: {}", total_proceeds);
 
-    let marketplace_fee_bps = if let Some(fee_confg) = candy_machine.marketplace_fee_config {
+    let marketplace_fee_bps = if let Some(fee_confg) = gumball_machine.marketplace_fee_config {
         fee_confg.fee_bps
     } else {
         0
@@ -71,7 +71,7 @@ pub fn claim_proceeds<'a, 'b>(
         )?;
     }
 
-    let curator_fee = get_bps_of(total_proceeds, candy_machine.settings.curator_fee_bps)?;
+    let curator_fee = get_bps_of(total_proceeds, gumball_machine.settings.curator_fee_bps)?;
     msg!("Curator fee: {}", curator_fee);
 
     if curator_fee > 0 {
@@ -94,9 +94,9 @@ pub fn claim_proceeds<'a, 'b>(
 
     let price_less_fees = total_proceeds
         .checked_sub(marketplace_fee)
-        .ok_or(CandyError::NumericalOverflowError)?
+        .ok_or(GumballError::NumericalOverflowError)?
         .checked_sub(curator_fee)
-        .ok_or(CandyError::NumericalOverflowError)?;
+        .ok_or(GumballError::NumericalOverflowError)?;
     msg!("Price less fees: {}", price_less_fees);
 
     let total_royalty = if royalty_info.is_primary_sale {
@@ -124,7 +124,7 @@ pub fn claim_proceeds<'a, 'b>(
 
     let seller_proceeds = price_less_fees
         .checked_sub(royalties_paid)
-        .ok_or(CandyError::NumericalOverflowError)?;
+        .ok_or(GumballError::NumericalOverflowError)?;
 
     msg!("Seller proceeds: {}", seller_proceeds);
 
@@ -190,9 +190,9 @@ pub fn pay_creator_royalties<'a, 'b>(
     for creator in creators {
         let creator_fee = (creator.share as u128)
             .checked_mul(total_royalty as u128)
-            .ok_or(CandyError::NumericalOverflowError)?
+            .ok_or(GumballError::NumericalOverflowError)?
             .checked_div(100)
-            .ok_or(CandyError::NumericalOverflowError)? as u64;
+            .ok_or(GumballError::NumericalOverflowError)? as u64;
 
         let current_creator_info = next_account_info(remaining_accounts_clone)?;
         assert_keys_equal(

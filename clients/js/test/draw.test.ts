@@ -17,10 +17,10 @@ import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
 import test from 'ava';
 import {
   addNft,
-  CandyMachine,
   draw,
-  fetchCandyMachine,
-  findCandyMachineAuthorityPda,
+  fetchGumballMachine,
+  findGumballMachineAuthorityPda,
+  GumballMachine,
   GumballState,
   startSale,
   TokenStandard,
@@ -35,11 +35,11 @@ import {
   yesterday,
 } from './_setup';
 
-test('it can mint from a candy guard with no guards', async (t) => {
-  // Given a candy machine with a candy guard that has no guards.
+test('it can mint from a gumball guard with no guards', async (t) => {
+  // Given a gumball machine with a gumball guard that has no guards.
   const umi = await createUmi();
 
-  const candyMachineSigner = await create(umi, {
+  const gumballMachineSigner = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -50,33 +50,33 @@ test('it can mint from a candy guard with no guards', async (t) => {
     guards: {},
     groups: [],
   });
-  const candyMachine = candyMachineSigner.publicKey;
+  const gumballMachine = gumballMachineSigner.publicKey;
 
-  // When we mint from the candy guard.
+  // When we mint from the gumball guard.
   const buyer = generateSigner(umi);
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
         buyer,
       })
     )
     .sendAndConfirm(umi);
 
   // Then the mint was successful.
-  await assertItemBought(t, umi, { candyMachine, buyer: buyer.publicKey });
+  await assertItemBought(t, umi, { gumballMachine, buyer: buyer.publicKey });
 
-  // And the candy machine was updated.
-  const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
-  t.like(candyMachineAccount, <CandyMachine>{ itemsRedeemed: 1n });
+  // And the gumball machine was updated.
+  const gumballMachineAccount = await fetchGumballMachine(umi, gumballMachine);
+  t.like(gumballMachineAccount, <GumballMachine>{ itemsRedeemed: 1n });
 });
 
 test('it sets state to SaleEnded on final draw', async (t) => {
-  // Given a candy machine with a candy guard that has no guards.
+  // Given a gumball machine with a gumball guard that has no guards.
   const umi = await createUmi();
 
-  const candyMachineSigner = await create(umi, {
+  const gumballMachineSigner = await create(umi, {
     settings: { itemCapacity: 1 },
     items: [
       {
@@ -88,37 +88,37 @@ test('it sets state to SaleEnded on final draw', async (t) => {
     guards: {},
     groups: [],
   });
-  const candyMachine = candyMachineSigner.publicKey;
+  const gumballMachine = gumballMachineSigner.publicKey;
 
-  // When we mint from the candy guard.
+  // When we mint from the gumball guard.
   const buyer = generateSigner(umi);
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
         buyer,
       })
     )
     .sendAndConfirm(umi);
 
   // Then the mint was successful.
-  await assertItemBought(t, umi, { candyMachine, buyer: buyer.publicKey });
+  await assertItemBought(t, umi, { gumballMachine, buyer: buyer.publicKey });
 
-  // And the candy machine was updated.
-  const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
-  t.like(candyMachineAccount, <CandyMachine>{
+  // And the gumball machine was updated.
+  const gumballMachineAccount = await fetchGumballMachine(umi, gumballMachine);
+  t.like(gumballMachineAccount, <GumballMachine>{
     itemsRedeemed: 1n,
     finalizedItemsCount: 1n,
     state: GumballState.SaleEnded,
   });
 });
 
-test('it can mint from a candy guard with guards', async (t) => {
-  // Given a candy machine with some guards.
+test('it can mint from a gumball guard with guards', async (t) => {
+  // Given a gumball machine with some guards.
   const umi = await createUmi();
 
-  const candyMachineSigner = await create(umi, {
+  const gumballMachineSigner = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -131,16 +131,16 @@ test('it can mint from a candy guard with guards', async (t) => {
       solPayment: { lamports: sol(2) },
     },
   });
-  const candyMachine = candyMachineSigner.publicKey;
+  const gumballMachine = gumballMachineSigner.publicKey;
 
-  // When we mint from the candy guard.
+  // When we mint from the gumball guard.
   const buyer = generateSigner(umi);
   const payer = await generateSignerWithSol(umi, sol(10));
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
         payer,
         buyer,
         mintArgs: {
@@ -151,24 +151,26 @@ test('it can mint from a candy guard with guards', async (t) => {
     .sendAndConfirm(umi);
 
   // Then the mint was successful.
-  await assertItemBought(t, umi, { candyMachine, buyer: buyer.publicKey });
+  await assertItemBought(t, umi, { gumballMachine, buyer: buyer.publicKey });
 
   // And the payer was charged.
   const payerBalance = await umi.rpc.getBalance(payer.publicKey);
   t.true(isEqualToAmount(payerBalance, sol(8), sol(0.1)));
 
-  // And the candy machine was updated.
-  const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
-  t.like(candyMachineAccount, <CandyMachine>{ itemsRedeemed: 1n });
+  // And the gumball machine was updated.
+  const gumballMachineAccount = await fetchGumballMachine(umi, gumballMachine);
+  t.like(gumballMachineAccount, <GumballMachine>{ itemsRedeemed: 1n });
 });
 
-test('it can mint from a candy guard with token payment guard', async (t) => {
-  // Given a candy machine with some guards.
+test('it can mint from a gumball guard with token payment guard', async (t) => {
+  // Given a gumball machine with some guards.
   const umi = await createUmi();
   const buyerUmi = await createUmi();
-  const candyMachineSigner = generateSigner(umi);
-  const candyMachine = candyMachineSigner.publicKey;
-  const destination = findCandyMachineAuthorityPda(umi, { candyMachine })[0];
+  const gumballMachineSigner = generateSigner(umi);
+  const gumballMachine = gumballMachineSigner.publicKey;
+  const destination = findGumballMachineAuthorityPda(umi, {
+    gumballMachine: gumballMachine,
+  })[0];
   const [tokenMint, destinationAta, identityAta] = await createMintWithHolders(
     umi,
     {
@@ -180,7 +182,7 @@ test('it can mint from a candy guard with token payment guard', async (t) => {
   );
 
   await create(umi, {
-    candyMachine: candyMachineSigner,
+    gumballMachine: gumballMachineSigner,
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -196,12 +198,12 @@ test('it can mint from a candy guard with token payment guard', async (t) => {
     },
   });
 
-  // When we mint from the candy guard.
+  // When we mint from the gumball guard.
   await transactionBuilder()
     .add(setComputeUnitLimit(buyerUmi, { units: 600_000 }))
     .add(
       draw(buyerUmi, {
-        candyMachine,
+        gumballMachine,
         mintArgs: {
           tokenPayment: { mint: tokenMint.publicKey },
         },
@@ -211,7 +213,7 @@ test('it can mint from a candy guard with token payment guard', async (t) => {
 
   // Then the mint was successful.
   await assertItemBought(t, umi, {
-    candyMachine,
+    gumballMachine,
     buyer: buyerUmi.identity.publicKey,
   });
 
@@ -224,11 +226,11 @@ test('it can mint from a candy guard with token payment guard', async (t) => {
   t.is(payerTokenAccount.amount, 7n);
 });
 
-test('it can mint from a candy guard with groups', async (t) => {
-  // Given a candy machine with guard groups.
+test('it can mint from a gumball guard with groups', async (t) => {
+  // Given a gumball machine with guard groups.
   const umi = await createUmi();
 
-  const candyMachineSigner = await create(umi, {
+  const gumballMachineSigner = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -245,7 +247,7 @@ test('it can mint from a candy guard with groups', async (t) => {
       { label: 'GROUP2', guards: { startDate: { date: tomorrow() } } },
     ],
   });
-  const candyMachine = candyMachineSigner.publicKey;
+  const gumballMachine = gumballMachineSigner.publicKey;
 
   // When we mint from it using GROUP1.
   const buyer = generateSigner(umi);
@@ -253,7 +255,7 @@ test('it can mint from a candy guard with groups', async (t) => {
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
         buyer,
         mintArgs: { solPayment: some(true) },
         group: 'GROUP1',
@@ -262,14 +264,14 @@ test('it can mint from a candy guard with groups', async (t) => {
     .sendAndConfirm(umi);
 
   // Then the mint was successful.
-  await assertItemBought(t, umi, { candyMachine, buyer: buyer.publicKey });
+  await assertItemBought(t, umi, { gumballMachine, buyer: buyer.publicKey });
 });
 
-test('it cannot mint using the default guards if the candy guard has groups', async (t) => {
-  // Given a candy machine with guard groups.
+test('it cannot mint using the default guards if the gumball guard has groups', async (t) => {
+  // Given a gumball machine with guard groups.
   const umi = await createUmi();
 
-  const candyMachineSigner = await create(umi, {
+  const gumballMachineSigner = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -283,7 +285,7 @@ test('it cannot mint using the default guards if the candy guard has groups', as
       { label: 'GROUP2', guards: { startDate: { date: tomorrow() } } },
     ],
   });
-  const candyMachine = candyMachineSigner.publicKey;
+  const gumballMachine = gumballMachineSigner.publicKey;
 
   // When we try to mint using the default guards.
   const buyer = generateSigner(umi);
@@ -291,7 +293,7 @@ test('it cannot mint using the default guards if the candy guard has groups', as
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
         buyer,
         mintArgs: { solPayment: some(true) },
         group: none(),
@@ -304,10 +306,10 @@ test('it cannot mint using the default guards if the candy guard has groups', as
 });
 
 test('it cannot mint from a group if the provided group label does not exist', async (t) => {
-  // Given a candy machine with no guard groups.
+  // Given a gumball machine with no guard groups.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -325,7 +327,7 @@ test('it cannot mint from a group if the provided group label does not exist', a
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
         buyer,
         mintArgs: { solPayment: some(true) },
         group: 'GROUPX',
@@ -338,10 +340,10 @@ test('it cannot mint from a group if the provided group label does not exist', a
 });
 
 test('it can mint using an explicit payer', async (t) => {
-  // Given a candy machine with guards.
+  // Given a gumball machine with guards.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -361,7 +363,7 @@ test('it can mint using an explicit payer', async (t) => {
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
         buyer,
         payer,
         mintArgs: { solPayment: some(true) },
@@ -370,18 +372,18 @@ test('it can mint using an explicit payer', async (t) => {
     .sendAndConfirm(umi);
 
   // Then the mint was successful.
-  await assertItemBought(t, umi, { candyMachine, buyer: buyer.publicKey });
+  await assertItemBought(t, umi, { gumballMachine, buyer: buyer.publicKey });
 
   // And the payer was charged.
   const payerBalance = await umi.rpc.getBalance(payer.publicKey);
   t.true(isEqualToAmount(payerBalance, sol(8), sol(0.1)));
 });
 
-test('it cannot mint from a candy machine not in sale started state', async (t) => {
-  // Given an empty candy machine.
+test('it cannot mint from a gumball machine not in sale started state', async (t) => {
+  // Given an empty gumball machine.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -397,7 +399,7 @@ test('it cannot mint from a candy machine not in sale started state', async (t) 
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
         buyer,
       })
     )
@@ -407,11 +409,11 @@ test('it cannot mint from a candy machine not in sale started state', async (t) 
   await t.throwsAsync(promise, { message: /InvalidState/ });
 });
 
-test('it cannot mint from a candy machine that has been fully minted', async (t) => {
-  // Given a candy machine that has been fully minted.
+test('it cannot mint from a gumball machine that has been fully minted', async (t) => {
+  // Given a gumball machine that has been fully minted.
   const umi = await createUmi();
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -427,18 +429,18 @@ test('it cannot mint from a candy machine that has been fully minted', async (t)
     .add(
       draw(umi, {
         buyer: umi.identity,
-        candyMachine,
+        gumballMachine,
       })
     )
     .sendAndConfirm(umi);
-  await assertItemBought(t, umi, { candyMachine });
+  await assertItemBought(t, umi, { gumballMachine });
 
   // When we try to mint from it again.
   const promise = transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
       })
     )
     .sendAndConfirm(umi);
@@ -447,8 +449,8 @@ test('it cannot mint from a candy machine that has been fully minted', async (t)
   await t.throwsAsync(promise, { message: /InvalidState/ });
 });
 
-test('it can mint from a candy machine in a random order', async (t) => {
-  // Given a candy machine with non-sequential config line settings.
+test('it can mint from a gumball machine in a random order', async (t) => {
+  // Given a gumball machine with non-sequential config line settings.
   const umi = await createUmi();
 
   const indices = Array.from({ length: 5 }, (x, i) => i);
@@ -456,7 +458,7 @@ test('it can mint from a candy machine in a random order', async (t) => {
     (item) => ({ id: item.publicKey, tokenStandard: TokenStandard.NonFungible })
   );
 
-  const { publicKey: candyMachine } = await create(umi, {
+  const { publicKey: gumballMachine } = await create(umi, {
     guards: {},
   });
 
@@ -465,7 +467,7 @@ test('it can mint from a candy machine in a random order', async (t) => {
       transactionBuilder()
         .add(
           addNft(umi, {
-            candyMachine,
+            gumballMachine,
             mint: item.id,
           })
         )
@@ -476,13 +478,13 @@ test('it can mint from a candy machine in a random order', async (t) => {
   await transactionBuilder()
     .add(
       startSale(umi, {
-        candyMachine,
+        gumballMachine,
       })
     )
     .sendAndConfirm(umi);
 
   // When we mint from it.
-  const minted = await drain(umi, candyMachine, indices.length);
+  const minted = await drain(umi, gumballMachine, indices.length);
 
   // Then the mints are not sequential.
   t.notDeepEqual(indices, minted);
@@ -492,7 +494,11 @@ test('it can mint from a candy machine in a random order', async (t) => {
   t.deepEqual(indices, minted);
 });
 
-const drain = async (umi: Umi, candyMachine: PublicKey, available: number) => {
+const drain = async (
+  umi: Umi,
+  gumballMachine: PublicKey,
+  available: number
+) => {
   const indices: number[] = [];
 
   for (let i = 0; i < available; i += 1) {
@@ -501,14 +507,17 @@ const drain = async (umi: Umi, candyMachine: PublicKey, available: number) => {
       .add(setComputeUnitLimit(umi, { units: 600_000 }))
       .add(
         draw(umi, {
-          candyMachine,
+          gumballMachine,
           buyer,
         })
       )
       .sendAndConfirm(umi);
 
-    const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
-    const buyerItem = candyMachineAccount.items.find(
+    const gumballMachineAccount = await fetchGumballMachine(
+      umi,
+      gumballMachine
+    );
+    const buyerItem = gumballMachineAccount.items.find(
       (item) => item.buyer === buyer.publicKey
     );
     indices.push(buyerItem?.index ?? -1);

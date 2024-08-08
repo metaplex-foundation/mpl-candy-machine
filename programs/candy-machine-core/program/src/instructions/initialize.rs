@@ -1,26 +1,26 @@
 use crate::{
-    constants::{AUTHORITY_SEED, CANDY_MACHINE_SIZE}, state::CandyMachine, CandyError, FeeConfig, GumballSettings,
+    constants::{AUTHORITY_SEED, GUMBALL_MACHINE_SIZE}, state::GumballMachine, GumballError, FeeConfig, GumballSettings,
     GumballState,
 };
 use anchor_lang::{prelude::*, Discriminator};
 use mpl_token_metadata::MAX_URI_LENGTH;
 
-/// Initializes a new candy machine.
+/// Initializes a new gumball machine.
 #[derive(Accounts)]
 #[instruction(settings: GumballSettings)]
 pub struct Initialize<'info> {
-    /// Candy Machine account. The account space must be allocated to allow accounts larger
+    /// Gumball Machine account. The account space must be allocated to allow accounts larger
     /// than 10kb.
     ///
     /// CHECK: account constraints checked in account trait
     #[account(
         zero,
         rent_exempt = skip,
-        constraint = candy_machine.to_account_info().owner == __program_id && candy_machine.to_account_info().data_len() >= CandyMachine::get_size(settings.item_capacity)
+        constraint = gumball_machine.to_account_info().owner == __program_id && gumball_machine.to_account_info().data_len() >= GumballMachine::get_size(settings.item_capacity)
     )]
-    candy_machine: UncheckedAccount<'info>,
+    gumball_machine: UncheckedAccount<'info>,
 
-    /// Candy Machine authority. This is the address that controls the upate of the candy machine.
+    /// Gumball Machine authority. This is the address that controls the upate of the gumball machine.
     ///
     /// CHECK: authority can be any account and is not written to or read
     authority: UncheckedAccount<'info>,
@@ -32,7 +32,7 @@ pub struct Initialize<'info> {
         space = 0,
         seeds = [
             AUTHORITY_SEED.as_bytes(), 
-            candy_machine.key().as_ref()
+            gumball_machine.key().as_ref()
         ],
         bump
     )]
@@ -50,10 +50,10 @@ pub fn initialize(
     settings: GumballSettings,
     fee_config: Option<FeeConfig>,
 ) -> Result<()> {
-    let candy_machine_account = &mut ctx.accounts.candy_machine;
+    let gumball_machine_account = &mut ctx.accounts.gumball_machine;
 
     if settings.uri.len() >= MAX_URI_LENGTH - 4 {
-        return err!(CandyError::UriTooLong);
+        return err!(GumballError::UriTooLong);
     }
 
     // Details are considered finalized once sellers are invited
@@ -63,7 +63,7 @@ pub fn initialize(
         GumballState::None
     };
 
-    let candy_machine = CandyMachine {
+    let gumball_machine = GumballMachine {
         version: 0,
         authority: ctx.accounts.authority.key(),
         mint_authority: ctx.accounts.authority.key(),
@@ -76,13 +76,13 @@ pub fn initialize(
         settings,
     };
 
-    let mut struct_data = CandyMachine::discriminator().try_to_vec().unwrap();
-    struct_data.append(&mut candy_machine.try_to_vec().unwrap());
+    let mut struct_data = GumballMachine::discriminator().try_to_vec().unwrap();
+    struct_data.append(&mut gumball_machine.try_to_vec().unwrap());
 
-    let mut account_data = candy_machine_account.data.borrow_mut();
+    let mut account_data = gumball_machine_account.data.borrow_mut();
     account_data[0..struct_data.len()].copy_from_slice(&struct_data);
     // set the initial number of config lines
-    account_data[CANDY_MACHINE_SIZE..CANDY_MACHINE_SIZE + 4]
+    account_data[GUMBALL_MACHINE_SIZE..GUMBALL_MACHINE_SIZE + 4]
         .copy_from_slice(&u32::MIN.to_le_bytes());
 
     Ok(())

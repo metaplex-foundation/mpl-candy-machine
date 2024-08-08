@@ -2,7 +2,7 @@ use mpl_token_metadata::accounts::Metadata;
 
 use super::*;
 use crate::{
-    errors::CandyGuardError,
+    errors::GumballGuardError,
     state::GuardType,
     utils::{assert_is_token_account, assert_keys_equal},
 };
@@ -63,13 +63,13 @@ impl NftGate {
 
         match metadata.collection {
             Some(c) if c.verified && c.key == *collection => Ok(()),
-            _ => Err(CandyGuardError::InvalidNftCollection),
+            _ => Err(GumballGuardError::InvalidNftCollection),
         }?;
 
         let account = assert_is_token_account(nft_account, owner, &metadata.mint)?;
 
         if account.amount < 1 {
-            return err!(CandyGuardError::MissingNft);
+            return err!(GumballGuardError::MissingNft);
         }
 
         Ok(())

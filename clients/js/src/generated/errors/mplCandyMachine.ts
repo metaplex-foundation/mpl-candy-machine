@@ -80,7 +80,7 @@ export class CmNumericalOverflowErrorError extends ProgramError {
 codeToErrorMap.set(0x1774, CmNumericalOverflowErrorError);
 nameToErrorMap.set('NumericalOverflowError', CmNumericalOverflowErrorError);
 
-/** TooManyCreators: Can only provide up to 4 creators to candy machine (because candy machine is one) */
+/** TooManyCreators: Can only provide up to 4 creators to gumball machine (because gumball machine is one) */
 export class CmTooManyCreatorsError extends ProgramError {
   readonly name: string = 'TooManyCreators';
 
@@ -88,7 +88,7 @@ export class CmTooManyCreatorsError extends ProgramError {
 
   constructor(program: Program, cause?: Error) {
     super(
-      'Can only provide up to 4 creators to candy machine (because candy machine is one)',
+      'Can only provide up to 4 creators to gumball machine (because gumball machine is one)',
       program,
       cause
     );
@@ -97,20 +97,20 @@ export class CmTooManyCreatorsError extends ProgramError {
 codeToErrorMap.set(0x1775, CmTooManyCreatorsError);
 nameToErrorMap.set('TooManyCreators', CmTooManyCreatorsError);
 
-/** CandyMachineEmpty: Candy machine is empty */
-export class CmCandyMachineEmptyError extends ProgramError {
-  readonly name: string = 'CandyMachineEmpty';
+/** GumballMachineEmpty: Gumball machine is empty */
+export class CmGumballMachineEmptyError extends ProgramError {
+  readonly name: string = 'GumballMachineEmpty';
 
   readonly code: number = 0x1776; // 6006
 
   constructor(program: Program, cause?: Error) {
-    super('Candy machine is empty', program, cause);
+    super('Gumball machine is empty', program, cause);
   }
 }
-codeToErrorMap.set(0x1776, CmCandyMachineEmptyError);
-nameToErrorMap.set('CandyMachineEmpty', CmCandyMachineEmptyError);
+codeToErrorMap.set(0x1776, CmGumballMachineEmptyError);
+nameToErrorMap.set('GumballMachineEmpty', CmGumballMachineEmptyError);
 
-/** HiddenSettingsDoNotHaveConfigLines: Candy machines using hidden uris do not have config lines, they have a single hash representing hashed order */
+/** HiddenSettingsDoNotHaveConfigLines: Gumball machines using hidden uris do not have config lines, they have a single hash representing hashed order */
 export class CmHiddenSettingsDoNotHaveConfigLinesError extends ProgramError {
   readonly name: string = 'HiddenSettingsDoNotHaveConfigLines';
 
@@ -118,7 +118,7 @@ export class CmHiddenSettingsDoNotHaveConfigLinesError extends ProgramError {
 
   constructor(program: Program, cause?: Error) {
     super(
-      'Candy machines using hidden uris do not have config lines, they have a single hash representing hashed order',
+      'Gumball machines using hidden uris do not have config lines, they have a single hash representing hashed order',
       program,
       cause
     );
@@ -337,7 +337,7 @@ nameToErrorMap.set(
   CmCouldNotRetrieveConfigLineDataError
 );
 
-/** NotFullyLoaded: Not all config lines were added to the candy machine */
+/** NotFullyLoaded: Not all config lines were added to the gumball machine */
 export class CmNotFullyLoadedError extends ProgramError {
   readonly name: string = 'NotFullyLoaded';
 
@@ -345,7 +345,7 @@ export class CmNotFullyLoadedError extends ProgramError {
 
   constructor(program: Program, cause?: Error) {
     super(
-      'Not all config lines were added to the candy machine',
+      'Not all config lines were added to the gumball machine',
       program,
       cause
     );

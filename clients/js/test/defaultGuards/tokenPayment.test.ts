@@ -12,8 +12,8 @@ import {
 import test from 'ava';
 import {
   draw,
-  fetchCandyMachine,
-  findCandyMachineAuthorityPda,
+  fetchGumballMachine,
+  findGumballMachineAuthorityPda,
   TokenStandard,
 } from '../../src';
 import {
@@ -30,9 +30,11 @@ test('it transfers tokens from the payer to the destination', async (t) => {
   // - The destination treasury has 100 tokens.
   // - The payer has 12 tokens.
   const umi = await createUmi();
-  const candyMachineSigner = generateSigner(umi);
-  const candyMachine = candyMachineSigner.publicKey;
-  const destination = findCandyMachineAuthorityPda(umi, { candyMachine })[0];
+  const gumballMachineSigner = generateSigner(umi);
+  const gumballMachine = gumballMachineSigner.publicKey;
+  const destination = findGumballMachineAuthorityPda(umi, {
+    gumballMachine: gumballMachine,
+  })[0];
   const [tokenMint, destinationAta, identityAta] = await createMintWithHolders(
     umi,
     {
@@ -43,10 +45,10 @@ test('it transfers tokens from the payer to the destination', async (t) => {
     }
   );
 
-  // And a loaded Candy Machine with a tokenPayment guard that requires 5 tokens.
+  // And a loaded Gumball Machine with a tokenPayment guard that requires 5 tokens.
 
   await create(umi, {
-    candyMachine: candyMachineSigner,
+    gumballMachine: gumballMachineSigner,
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -71,7 +73,7 @@ test('it transfers tokens from the payer to the destination', async (t) => {
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
         mintArgs: {
           tokenPayment: some({ mint: tokenMint.publicKey }),
         },
@@ -80,7 +82,7 @@ test('it transfers tokens from the payer to the destination', async (t) => {
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertItemBought(t, umi, { candyMachine });
+  await assertItemBought(t, umi, { gumballMachine });
 
   // And the treasury token received 5 tokens.
   const destinationTokenAccount = await fetchToken(umi, destinationAta);
@@ -91,8 +93,8 @@ test('it transfers tokens from the payer to the destination', async (t) => {
   t.is(payerTokenAccount.amount, 7n);
 
   // Total revenue is incremented
-  const candyMachineAccount = await fetchCandyMachine(umi, candyMachine);
-  t.is(candyMachineAccount.totalRevenue, 5n, 'total revenue is incremented');
+  const gumballMachineAccount = await fetchGumballMachine(umi, gumballMachine);
+  t.is(gumballMachineAccount.totalRevenue, 5n, 'total revenue is incremented');
 });
 
 test('it allows minting even when the payer is different from the buyer', async (t) => {
@@ -101,9 +103,11 @@ test('it allows minting even when the payer is different from the buyer', async 
   // - An explicit buyer has 12 tokens.
   const umi = await createUmi();
   const buyer = generateSigner(umi);
-  const candyMachineSigner = generateSigner(umi);
-  const candyMachine = candyMachineSigner.publicKey;
-  const destination = findCandyMachineAuthorityPda(umi, { candyMachine })[0];
+  const gumballMachineSigner = generateSigner(umi);
+  const gumballMachine = gumballMachineSigner.publicKey;
+  const destination = findGumballMachineAuthorityPda(umi, {
+    gumballMachine: gumballMachine,
+  })[0];
   const [tokenMint, destinationAta, buyerAta] = await createMintWithHolders(
     umi,
     {
@@ -114,10 +118,10 @@ test('it allows minting even when the payer is different from the buyer', async 
     }
   );
 
-  // And a loaded Candy Machine with a tokenPayment guard that requires 5 tokens.
+  // And a loaded Gumball Machine with a tokenPayment guard that requires 5 tokens.
 
   await create(umi, {
-    candyMachine: candyMachineSigner,
+    gumballMachine: gumballMachineSigner,
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -142,7 +146,7 @@ test('it allows minting even when the payer is different from the buyer', async 
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         buyer,
 
@@ -154,7 +158,7 @@ test('it allows minting even when the payer is different from the buyer', async 
     .sendAndConfirm(umi);
 
   // Then minting was successful.
-  await assertItemBought(t, umi, { candyMachine, buyer: publicKey(buyer) });
+  await assertItemBought(t, umi, { gumballMachine, buyer: publicKey(buyer) });
 
   // And the treasury token received 5 tokens.
   const destinationTokenAccount = await fetchToken(umi, destinationAta);
@@ -168,9 +172,11 @@ test('it allows minting even when the payer is different from the buyer', async 
 test('it fails if the payer does not have enough tokens', async (t) => {
   // Given a mint account such that the payer has 4 tokens.
   const umi = await createUmi();
-  const candyMachineSigner = generateSigner(umi);
-  const candyMachine = candyMachineSigner.publicKey;
-  const destination = findCandyMachineAuthorityPda(umi, { candyMachine })[0];
+  const gumballMachineSigner = generateSigner(umi);
+  const gumballMachine = gumballMachineSigner.publicKey;
+  const destination = findGumballMachineAuthorityPda(umi, {
+    gumballMachine: gumballMachine,
+  })[0];
   const [tokenMint, identityAta] = await createMintWithHolders(umi, {
     holders: [
       { owner: umi.identity, amount: 4 },
@@ -178,10 +184,10 @@ test('it fails if the payer does not have enough tokens', async (t) => {
     ],
   });
 
-  // And a loaded Candy Machine with a tokenPayment guard that requires 5 tokens.
+  // And a loaded Gumball Machine with a tokenPayment guard that requires 5 tokens.
 
   await create(umi, {
-    candyMachine: candyMachineSigner,
+    gumballMachine: gumballMachineSigner,
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -206,7 +212,7 @@ test('it fails if the payer does not have enough tokens', async (t) => {
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         mintArgs: {
           tokenPayment: some({ mint: tokenMint.publicKey }),
@@ -226,9 +232,11 @@ test('it fails if the payer does not have enough tokens', async (t) => {
 test('it charges a bot tax if the payer does not have enough tokens', async (t) => {
   // Given a mint account such that the payer has 4 tokens.
   const umi = await createUmi();
-  const candyMachineSigner = generateSigner(umi);
-  const candyMachine = candyMachineSigner.publicKey;
-  const destination = findCandyMachineAuthorityPda(umi, { candyMachine })[0];
+  const gumballMachineSigner = generateSigner(umi);
+  const gumballMachine = gumballMachineSigner.publicKey;
+  const destination = findGumballMachineAuthorityPda(umi, {
+    gumballMachine: gumballMachine,
+  })[0];
   const [tokenMint, identityAta] = await createMintWithHolders(umi, {
     holders: [
       { owner: umi.identity, amount: 4 },
@@ -236,10 +244,10 @@ test('it charges a bot tax if the payer does not have enough tokens', async (t) 
     ],
   });
 
-  // And a loaded Candy Machine with a bot tax guard and a tokenPayment guard that requires 5 tokens.
+  // And a loaded Gumball Machine with a bot tax guard and a tokenPayment guard that requires 5 tokens.
 
   await create(umi, {
-    candyMachine: candyMachineSigner,
+    gumballMachine: gumballMachineSigner,
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -265,7 +273,7 @@ test('it charges a bot tax if the payer does not have enough tokens', async (t) 
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
 
         mintArgs: {
           tokenPayment: some({ mint: tokenMint.publicKey }),
@@ -285,9 +293,11 @@ test('it charges a bot tax if the payer does not have enough tokens', async (t) 
 test('it fails if a different mint is provided in draw', async (t) => {
   // Given a mint account such that the payer has 4 tokens.
   const umi = await createUmi();
-  const candyMachineSigner = generateSigner(umi);
-  const candyMachine = candyMachineSigner.publicKey;
-  const destination = findCandyMachineAuthorityPda(umi, { candyMachine })[0];
+  const gumballMachineSigner = generateSigner(umi);
+  const gumballMachine = gumballMachineSigner.publicKey;
+  const destination = findGumballMachineAuthorityPda(umi, {
+    gumballMachine: gumballMachine,
+  })[0];
   const [tokenMint] = await createMintWithHolders(umi, {
     holders: [
       { owner: destination, amount: 0 },
@@ -302,9 +312,9 @@ test('it fails if a different mint is provided in draw', async (t) => {
     ],
   });
 
-  // And a loaded Candy Machine with a tokenPayment guard that requires 5 tokens.
+  // And a loaded Gumball Machine with a tokenPayment guard that requires 5 tokens.
   await create(umi, {
-    candyMachine: candyMachineSigner,
+    gumballMachine: gumballMachineSigner,
     items: [
       {
         id: (await createNft(umi)).publicKey,
@@ -328,7 +338,7 @@ test('it fails if a different mint is provided in draw', async (t) => {
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
-        candyMachine,
+        gumballMachine,
         mintArgs: {
           tokenPayment: some({ mint: otherTokenMint.publicKey }),
         },

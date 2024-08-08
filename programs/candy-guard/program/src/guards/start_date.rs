@@ -28,7 +28,7 @@ impl Condition for StartDate {
         let clock = Clock::get()?;
 
         if clock.unix_timestamp < self.date {
-            return err!(CandyGuardError::MintNotLive);
+            return err!(GumballGuardError::MintNotLive);
         }
 
         Ok(())

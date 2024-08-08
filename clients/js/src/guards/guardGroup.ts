@@ -4,7 +4,7 @@ import {
   string,
   struct,
 } from '@metaplex-foundation/umi/serializers';
-import { CANDY_GUARD_LABEL_SIZE } from '../constants';
+import { GUMBALL_GUARD_LABEL_SIZE } from '../constants';
 import { GuardGroupLabelTooLongError } from '../errors';
 import { CandyGuardProgram, GuardRepository } from './guardRepository';
 import { getGuardSetSerializer, GuardSet, GuardSetArgs } from './guardSet';
@@ -35,9 +35,9 @@ export function getGuardGroupSerializer<
       [
         'label',
         mapSerializer(
-          string({ size: CANDY_GUARD_LABEL_SIZE }),
+          string({ size: GUMBALL_GUARD_LABEL_SIZE }),
           (label: string): string => {
-            if (label.length > CANDY_GUARD_LABEL_SIZE) {
+            if (label.length > GUMBALL_GUARD_LABEL_SIZE) {
               throw new GuardGroupLabelTooLongError(label);
             }
             return label;

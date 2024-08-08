@@ -1,7 +1,7 @@
 use anchor_lang::error_code;
 
 #[error_code]
-pub enum CandyGuardError {
+pub enum GumballGuardError {
     #[msg("Could not save guard to account")]
     InvalidAccountSize,
 
@@ -35,8 +35,8 @@ pub enum CandyGuardError {
     #[msg("Value exceeded maximum length")]
     ExceededLength,
 
-    #[msg("Candy machine is empty")]
-    CandyMachineEmpty,
+    #[msg("Gumball machine is empty")]
+    GumballMachineEmpty,
 
     #[msg("No instruction was found")]
     InstructionNotFound,
@@ -149,7 +149,7 @@ pub enum CandyGuardError {
     #[msg("Allocation guard must be enabled")]
     AllocationGuardNotEnabled,
 
-    #[msg("Candy machine has an invalid mint authority")]
+    #[msg("Gumball machine has an invalid mint authority")]
     InvalidMintAuthority,
 
     #[msg("Instruction could not be created")]
@@ -163,4 +163,7 @@ pub enum CandyGuardError {
 
     #[msg("Invalid payment mint")]
     InvalidPaymentMint,
+
+    #[msg("Invalid gumball machine state")]
+    InvalidGumballMachineState,
 }

@@ -30,13 +30,13 @@ import {
   u8,
 } from '@metaplex-foundation/umi/serializers';
 
-/** Seller history state to track count of items submitted to a candy machine. */
+/** Seller history state to track count of items submitted to a gumball machine. */
 export type SellerHistory = Account<SellerHistoryAccountData>;
 
 export type SellerHistoryAccountData = {
   discriminator: Array<number>;
-  /** Candy machine we're tracking for */
-  candyMachine: PublicKey;
+  /** Gumball machine we're tracking for */
+  gumballMachine: PublicKey;
   /** Seller address */
   seller: PublicKey;
   /** Item count submitted by this seller */
@@ -44,8 +44,8 @@ export type SellerHistoryAccountData = {
 };
 
 export type SellerHistoryAccountDataArgs = {
-  /** Candy machine we're tracking for */
-  candyMachine: PublicKey;
+  /** Gumball machine we're tracking for */
+  gumballMachine: PublicKey;
   /** Seller address */
   seller: PublicKey;
   /** Item count submitted by this seller */
@@ -64,7 +64,7 @@ export function getSellerHistoryAccountDataSerializer(): Serializer<
     struct<SellerHistoryAccountData>(
       [
         ['discriminator', array(u8(), { size: 8 })],
-        ['candyMachine', publicKeySerializer()],
+        ['gumballMachine', publicKeySerializer()],
         ['seller', publicKeySerializer()],
         ['itemCount', u64()],
       ],
@@ -152,12 +152,12 @@ export function getSellerHistoryGpaBuilder(
   return gpaBuilder(context, programId)
     .registerFields<{
       discriminator: Array<number>;
-      candyMachine: PublicKey;
+      gumballMachine: PublicKey;
       seller: PublicKey;
       itemCount: number | bigint;
     }>({
       discriminator: [0, array(u8(), { size: 8 })],
-      candyMachine: [8, publicKeySerializer()],
+      gumballMachine: [8, publicKeySerializer()],
       seller: [40, publicKeySerializer()],
       itemCount: [72, u64()],
     })
@@ -174,8 +174,8 @@ export function getSellerHistorySize(): number {
 export function findSellerHistoryPda(
   context: Pick<Context, 'eddsa' | 'programs'>,
   seeds: {
-    /** The address of the Candy Machine account */
-    candyMachine: PublicKey;
+    /** The address of the Gumball Machine account */
+    gumballMachine: PublicKey;
     /** The seller this history is tracking */
     seller: PublicKey;
   }
@@ -186,7 +186,7 @@ export function findSellerHistoryPda(
   );
   return context.eddsa.findPda(programId, [
     string({ size: 'variable' }).serialize('seller_history'),
-    publicKeySerializer().serialize(seeds.candyMachine),
+    publicKeySerializer().serialize(seeds.gumballMachine),
     publicKeySerializer().serialize(seeds.seller),
   ]);
 }

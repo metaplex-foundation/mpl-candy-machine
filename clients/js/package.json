@@ -2,11 +2,18 @@
   "name": "@mallow-labs/mallow-gumball",
   "version": "0.1.0",
   "description": "Client library for Gumball Machine related programs",
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
+  "main": "dist/src/cjs/index.js",
+  "module": "dist/src/esm/index.js",
+  "exports": {
+    ".": {
+        "import": "./dist/src/esm/index.js",
+        "require": "./dist/src/cjs/index.js"
+    }
+  },
+  "types": "dist/src/esm/index.d.ts",
   "scripts": {
-    "dev": "tsc --watch",
-    "build": "rimraf dist && tsc -p tsconfig.json",
+    "dev": "concurrently \"tsc --watch\" \"tsc -p tsconfig-cjs.json --watch\" \"tsc -p tsconfig-test.json --watch\" \"tsc -p tsconfig-test-cjs.json --watch\"",
+    "build": "rimraf dist/* && concurrently \"tsc\" \"tsc -p tsconfig-cjs.json\" \"tsc -p tsconfig-test.json\" \"tsc -p tsconfig-test-cjs.json\" && ./fixup.sh",
     "build:server": "rimraf dist/ && tsc",
     "build:docs": "typedoc",
     "test": "ava",
@@ -15,9 +22,6 @@
     "format": "prettier --check src test",
     "format:fix": "prettier --write src test"
   },
-  "files": [
-    "/dist/src"
-  ],
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
@@ -64,11 +68,14 @@
     "vercel": "^28.16.0"
   },
   "ava": {
+    "files": [
+      "dist/test/cjs/**/*.test.js"
+    ],
     "typescript": {
       "compile": false,
       "rewritePaths": {
-        "src/": "dist/src/",
-        "test/": "dist/test/"
+        "src/": "dist/test/esm/src/",
+        "test/": "dist/test/esm/test/"
       }
     }
   },

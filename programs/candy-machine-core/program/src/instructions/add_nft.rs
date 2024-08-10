@@ -19,7 +19,7 @@ pub struct AddNft<'info> {
     /// Gumball Machine account.
     #[account(
         mut,
-        constraint = gumball_machine.state != GumballState::SaleLive @ GumballError::InvalidState,
+        constraint = gumball_machine.state == GumballState::None || gumball_machine.state == GumballState::DetailsFinalized @ GumballError::InvalidState,
     )]
     gumball_machine: Box<Account<'info, GumballMachine>>,
 

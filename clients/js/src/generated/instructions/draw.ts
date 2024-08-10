@@ -186,7 +186,7 @@ export function draw(
   if (!resolvedAccounts.gumballMachineProgram.value) {
     resolvedAccounts.gumballMachineProgram.value =
       context.programs.getPublicKey(
-        'mplCandyMachine',
+        'mallowGumball',
         'MGUMqztv7MHgoHBYWbvMyL3E3NJ4UHfTwgLJUQAbKGa'
       );
     resolvedAccounts.gumballMachineProgram.isWritable = false;

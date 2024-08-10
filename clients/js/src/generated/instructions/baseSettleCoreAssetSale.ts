@@ -116,7 +116,7 @@ export function baseSettleCoreAssetSale(
 ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey(
-    'mplCandyMachine',
+    'mallowGumball',
     'MGUMqztv7MHgoHBYWbvMyL3E3NJ4UHfTwgLJUQAbKGa'
   );
 
@@ -270,7 +270,7 @@ export function baseSettleCoreAssetSale(
   }
   if (!resolvedAccounts.program.value) {
     resolvedAccounts.program.value = context.programs.getPublicKey(
-      'mplCandyMachine',
+      'mallowGumball',
       'MGUMqztv7MHgoHBYWbvMyL3E3NJ4UHfTwgLJUQAbKGa'
     );
     resolvedAccounts.program.isWritable = false;

@@ -1,4 +1,4 @@
-use mpl_candy_machine_core::constants::MPL_TOKEN_AUTH_RULES_PROGRAM;
+use mallow_gumball::constants::MPL_TOKEN_AUTH_RULES_PROGRAM;
 use mpl_token_metadata::{
     accounts::{MasterEdition, Metadata, TokenRecord},
     instructions::TransferV1CpiBuilder,

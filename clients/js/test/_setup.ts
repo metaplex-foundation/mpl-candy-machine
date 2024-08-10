@@ -50,7 +50,7 @@ import {
   GumballSettings,
   GumballSettingsArgs,
   InitializeGumballGuardInstructionAccounts,
-  mplCandyMachine,
+  mallowGumball,
   startSale,
   TokenStandard,
   wrap,
@@ -61,7 +61,7 @@ export const METAPLEX_DEFAULT_RULESET = publicKey(
 );
 
 export const createUmi = async () =>
-  (await basecreateUmi()).use(mplCandyMachine());
+  (await basecreateUmi()).use(mallowGumball());
 
 export const createNft = async (
   umi: Umi,

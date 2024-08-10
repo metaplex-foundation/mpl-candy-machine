@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use anchor_lang::{prelude::*, solana_program::sysvar, Discriminator};
-use mpl_candy_machine_core::GumballMachine;
+use mallow_gumball::GumballMachine;
 use solana_program::{instruction::Instruction, program::invoke_signed};
 
 use crate::{
@@ -101,7 +101,7 @@ fn cpi_draw(ctx: &EvaluationContext) -> Result<()> {
     let gumball_guard = &ctx.accounts.gumball_guard;
 
     // gumball machine mint instruction accounts
-    let mint_accounts = Box::new(mpl_candy_machine_core::cpi::accounts::Draw {
+    let mint_accounts = Box::new(mallow_gumball::cpi::accounts::Draw {
         gumball_machine: ctx.accounts.gumball_machine.to_account_info(),
         mint_authority: gumball_guard.to_account_info(),
         payer: ctx.accounts.payer.clone(),
@@ -116,9 +116,9 @@ fn cpi_draw(ctx: &EvaluationContext) -> Result<()> {
     let mint_metas = mint_accounts.to_account_metas(None);
 
     let mint_ix = Instruction {
-        program_id: mpl_candy_machine_core::ID,
+        program_id: mallow_gumball::ID,
         accounts: mint_metas,
-        data: mpl_candy_machine_core::instruction::Draw::DISCRIMINATOR.to_vec(),
+        data: mallow_gumball::instruction::Draw::DISCRIMINATOR.to_vec(),
     };
 
     // PDA signer for the transaction
@@ -140,7 +140,7 @@ pub struct Draw<'info> {
     /// Gumball Machine program account.
     ///
     /// CHECK: account constraints checked in account trait
-    #[account(address = mpl_candy_machine_core::id())]
+    #[account(address = mallow_gumball::id())]
     gumball_machine_program: AccountInfo<'info>,
 
     /// Gumball machine account.

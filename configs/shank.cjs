@@ -7,11 +7,11 @@ const programDir = path.join(__dirname, "..", "programs");
 
 generateIdl({
 	generator: "anchor",
-	programName: "candy_machine_core",
+	programName: "mallow_gumball",
 	programId: "MGUMqztv7MHgoHBYWbvMyL3E3NJ4UHfTwgLJUQAbKGa",
 	idlDir,
 	binaryInstallDir,
-	programDir: path.join(programDir, "candy-machine-core", "program"),
+	programDir: path.join(programDir, "mallow-gumball", "program"),
 	rustbin: {
 		locked: true,
 		versionRangeFallback: "0.27.0",

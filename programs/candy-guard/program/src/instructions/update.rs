@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use mpl_candy_machine_core::{GumballMachine, GumballState};
+use mallow_gumball::{GumballMachine, GumballState};
 use solana_program::{
     entrypoint::MAX_PERMITTED_DATA_INCREASE, program::invoke, system_instruction,
 };

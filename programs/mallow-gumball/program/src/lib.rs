@@ -18,7 +18,7 @@ mod utils;
 declare_id!("MGUMqztv7MHgoHBYWbvMyL3E3NJ4UHfTwgLJUQAbKGa");
 
 #[program]
-pub mod candy_machine_core {
+pub mod mallow_gumball {
     use super::*;
 
     /// Initialize the gumball machine account with the specified data.

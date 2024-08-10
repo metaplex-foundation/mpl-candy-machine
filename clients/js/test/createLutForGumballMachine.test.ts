@@ -12,7 +12,7 @@ import {
   createLutForGumballMachine,
   draw,
   findGumballGuardPda,
-  getMplCandyMachineProgramId,
+  getMallowGumballProgramId,
   setMintAuthority,
   TokenStandard,
 } from '../src';
@@ -61,7 +61,7 @@ test('it can create a LUT for a gumball machine v2', async (t) => {
       getSplTokenProgramId(umi),
       getSplAssociatedTokenProgramId(umi),
       getMplTokenMetadataProgramId(umi),
-      getMplCandyMachineProgramId(umi),
+      getMallowGumballProgramId(umi),
     ].sort()
   );
 

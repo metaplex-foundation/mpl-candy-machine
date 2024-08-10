@@ -194,21 +194,18 @@ fn cpi_increment_total_revenue(ctx: &EvaluationContext, revenue: u64) -> Result<
     let gumball_guard = &ctx.accounts.gumball_guard;
 
     // gumball machine mint instruction accounts
-    let accounts = Box::new(
-        mpl_candy_machine_core::cpi::accounts::IncrementTotalRevenue {
-            gumball_machine: ctx.accounts.gumball_machine.to_account_info(),
-            mint_authority: gumball_guard.to_account_info(),
-        },
-    );
+    let accounts = Box::new(mallow_gumball::cpi::accounts::IncrementTotalRevenue {
+        gumball_machine: ctx.accounts.gumball_machine.to_account_info(),
+        mint_authority: gumball_guard.to_account_info(),
+    });
 
     let ix_infos = accounts.to_account_infos();
     let ix_metas = accounts.to_account_metas(None);
-    let mut ix_data =
-        mpl_candy_machine_core::instruction::IncrementTotalRevenue::DISCRIMINATOR.to_vec();
+    let mut ix_data = mallow_gumball::instruction::IncrementTotalRevenue::DISCRIMINATOR.to_vec();
     ix_data.extend(&revenue.to_le_bytes());
 
     let ix = Instruction {
-        program_id: mpl_candy_machine_core::ID,
+        program_id: mallow_gumball::ID,
         accounts: ix_metas,
         data: ix_data,
     };

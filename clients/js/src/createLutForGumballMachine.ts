@@ -13,7 +13,7 @@ import {
   TransactionBuilder,
   uniquePublicKeys,
 } from '@metaplex-foundation/umi';
-import { fetchGumballMachine, getMplCandyMachineProgramId } from './generated';
+import { fetchGumballMachine, getMallowGumballProgramId } from './generated';
 import { findGumballGuardPda } from './hooked';
 
 export const createLutForGumballMachine = async (
@@ -58,6 +58,6 @@ export const getLutAddressesForGumballMachine = async (
     getSplTokenProgramId(context),
     getSplAssociatedTokenProgramId(context),
     getMplTokenMetadataProgramId(context),
-    getMplCandyMachineProgramId(context),
+    getMallowGumballProgramId(context),
   ]);
 };

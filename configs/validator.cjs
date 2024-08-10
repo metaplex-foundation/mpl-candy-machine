@@ -14,7 +14,7 @@ module.exports = {
 			{
 				label: "Mallow Gumball",
 				programId: "MGUMqztv7MHgoHBYWbvMyL3E3NJ4UHfTwgLJUQAbKGa",
-				deployPath: getProgram("mpl_candy_machine_core.so"),
+				deployPath: getProgram("mallow_gumball.so"),
 			},
 			{
 				label: "Gumball Guard",

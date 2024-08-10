@@ -1,6 +1,6 @@
 use crate::state::{GumballGuard, SEED};
 use anchor_lang::prelude::*;
-use mpl_candy_machine_core::{
+use mallow_gumball::{
     cpi::{accounts::SetMintAuthority, set_mint_authority},
     GumballMachine,
 };
@@ -34,11 +34,11 @@ pub struct Wrap<'info> {
     #[account(
         mut,
         constraint = gumball_machine.authority == gumball_machine_authority.key(),
-        owner = mpl_candy_machine_core::id()
+        owner = mallow_gumball::id()
     )]
     pub gumball_machine: Account<'info, GumballMachine>,
     /// CHECK: account constraints checked in account trait
-    #[account(address = mpl_candy_machine_core::id())]
+    #[account(address = mallow_gumball::id())]
     pub gumball_machine_program: AccountInfo<'info>,
     // gumball machine authority
     pub gumball_machine_authority: Signer<'info>,

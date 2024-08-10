@@ -23,8 +23,8 @@ import {
   tokenPaymentGuardManifest,
 } from './defaultGuards';
 import {
+  createMallowGumballProgram,
   createMplCandyGuardProgram,
-  createMplCandyMachineProgram,
 } from './generated';
 import {
   CandyGuardProgram,
@@ -36,12 +36,12 @@ import {
   createMplTokenAuthRulesProgram,
 } from './programs';
 
-export const mplCandyMachine = (): UmiPlugin => ({
+export const mallowGumball = (): UmiPlugin => ({
   install(umi) {
     umi.use(mplTokenMetadata());
 
     // Programs.
-    umi.programs.add(createMplCandyMachineProgram(), false);
+    umi.programs.add(createMallowGumballProgram(), false);
     umi.programs.add(
       {
         ...createMplCandyGuardProgram(),

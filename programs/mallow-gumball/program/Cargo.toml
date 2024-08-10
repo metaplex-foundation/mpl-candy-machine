@@ -1,5 +1,5 @@
 [package]
-name = "mpl-candy-machine-core"
+name = "mallow-gumball"
 version = "3.0.1"
 description = "NFT Gumball Machine Core: programmatic and trustless NFT drops."
 authors = ["Metaplex Developers <dev@metaplex.com>"]

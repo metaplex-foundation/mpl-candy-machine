@@ -95,7 +95,7 @@ export function addCoreAsset(
 ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey(
-    'mplCandyMachine',
+    'mallowGumball',
     'MGUMqztv7MHgoHBYWbvMyL3E3NJ4UHfTwgLJUQAbKGa'
   );
 

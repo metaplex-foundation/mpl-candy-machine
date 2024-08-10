@@ -1,4 +1,4 @@
-use mpl_candy_machine_core::constants::AUTHORITY_SEED;
+use mallow_gumball::constants::AUTHORITY_SEED;
 
 use super::*;
 
@@ -54,7 +54,7 @@ impl Condition for TokenPayment {
             AUTHORITY_SEED.as_bytes(),
             ctx.accounts.gumball_machine.to_account_info().key.as_ref(),
         ];
-        let (authority_pda, _) = Pubkey::find_program_address(&seeds, &mpl_candy_machine_core::ID);
+        let (authority_pda, _) = Pubkey::find_program_address(&seeds, &mallow_gumball::ID);
         assert_is_token_account(destination_ata, &authority_pda, &self.mint)?;
 
         let token_account =

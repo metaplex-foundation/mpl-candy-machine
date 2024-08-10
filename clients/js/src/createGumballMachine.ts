@@ -28,7 +28,7 @@ export const createGumballMachine = async (
         newAccount: input.gumballMachine,
         lamports,
         space,
-        programId: context.programs.get('mplCandyMachine').publicKey,
+        programId: context.programs.get('mallowGumball').publicKey,
       })
     )
     .add(

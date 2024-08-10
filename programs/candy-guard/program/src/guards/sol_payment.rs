@@ -1,6 +1,6 @@
 use super::*;
 
-use mpl_candy_machine_core::constants::AUTHORITY_SEED;
+use mallow_gumball::constants::AUTHORITY_SEED;
 use solana_program::{program::invoke, system_instruction};
 
 use crate::{errors::GumballGuardError, state::GuardType, utils::assert_derivation};
@@ -45,7 +45,7 @@ impl Condition for SolPayment {
             AUTHORITY_SEED.as_bytes(),
             ctx.accounts.gumball_machine.to_account_info().key.as_ref(),
         ];
-        assert_derivation(&mpl_candy_machine_core::ID, destination, &seeds)?;
+        assert_derivation(&mallow_gumball::ID, destination, &seeds)?;
 
         ctx.account_cursor += 1;
 

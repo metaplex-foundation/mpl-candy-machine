@@ -25,7 +25,7 @@ import { GuardManifest } from '../guards';
  * Here is an example.
  *
  * ```ts
- * import { getMerkleProof, getMerkleRoot } from '@metaplex-foundation/mpl-gumball-machine';
+ * import { getMerkleProof, getMerkleRoot } from '@metaplex-foundation/mallow-gumball';
  * const allowList = [
  *   'Ur1CbWSGsXCdedknRbJsEk7urwAvu1uddmQv51nAnXB',
  *   'GjwcWFQYzemBtpUoN5fMAP2FZviTtMRWCmrppGuTthJS',

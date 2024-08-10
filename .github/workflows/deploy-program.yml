@@ -10,7 +10,7 @@ on:
         type: choice
         options:
           - candy-guard
-          - candy-machine-core
+          - mallow-gumball
       cluster:
         description: Cluster environment
         required: true
@@ -102,7 +102,7 @@ jobs:
           else
             echo ${{ secrets.CANDY_MACHINE_CORE_DEPLOY_KEY }} > ./deploy-key.json
             echo ${{ secrets.CANDY_MACHINE_CORE_ID }} > ./program-id.json
-            echo PROGRAM_NAME="mpl_candy_machine_core" >> $GITHUB_ENV
+            echo PROGRAM_NAME="mallow_gumball" >> $GITHUB_ENV
           fi
 
       - name: Bump Program Version

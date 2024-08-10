@@ -7,7 +7,7 @@ const idlDir = path.join(__dirname, "..", "idls");
 
 // Instanciate Kinobi.
 const kinobi = k.createFromIdls([
-	path.join(idlDir, "candy_machine_core.json"),
+	path.join(idlDir, "mallow_gumball.json"),
 	path.join(idlDir, "candy_guard.json"),
 ]);
 
@@ -15,7 +15,7 @@ const kinobi = k.createFromIdls([
 kinobi.update(
 	new k.UpdateProgramsVisitor({
 		candyGuard: { name: "mplCandyGuard", prefix: "Cg" },
-		candyMachineCore: { name: "mplCandyMachine", prefix: "Cm" },
+		gumballMachineCore: { name: "mallowGumball", prefix: "Cm" },
 	})
 );
 
@@ -170,7 +170,7 @@ const defaultsToSplAssociatedTokenProgram = () =>
 const defaultsToMplCoreProgram = () =>
 	k.programDefault("mplCoreProgram", "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d");
 const defaultsToProgram = () =>
-	k.programDefault("mplCandyMachine", "MGUMqztv7MHgoHBYWbvMyL3E3NJ4UHfTwgLJUQAbKGa");
+	k.programDefault("mallowGumball", "MGUMqztv7MHgoHBYWbvMyL3E3NJ4UHfTwgLJUQAbKGa");
 
 // Automatically recognize account default values.
 kinobi.update(
@@ -275,14 +275,14 @@ kinobi.update(
 				},
 			},
 		},
-		"mplCandyMachine.initialize": { name: "initializeGumballMachine" },
-		"mplCandyMachine.addNft": {
+		"mallowGumball.initialize": { name: "initializeGumballMachine" },
+		"mallowGumball.addNft": {
 			name: "addNft",
 			accounts: {
 				seller: { defaultsTo: k.identityDefault() },
 			},
 		},
-		"mplCandyMachine.removeNft": {
+		"mallowGumball.removeNft": {
 			name: "removeNft",
 			accounts: {
 				authority: { defaultsTo: k.identityDefault() },
@@ -292,20 +292,20 @@ kinobi.update(
 				},
 			},
 		},
-		"mplCandyMachine.addCoreAsset": {
+		"mallowGumball.addCoreAsset": {
 			name: "addCoreAsset",
 			accounts: {
 				seller: { defaultsTo: k.identityDefault() },
 			},
 		},
-		"mplCandyMachine.removeCoreAsset": {
+		"mallowGumball.removeCoreAsset": {
 			name: "removeCoreAsset",
 			accounts: {
 				authority: { defaultsTo: k.identityDefault() },
 				seller: { defaultsTo: k.identityDefault() },
 			},
 		},
-		"mplCandyMachine.draw": {
+		"mallowGumball.draw": {
 			name: "drawFromGumballMachine",
 			accounts: {
 				buyer: { defaultsTo: k.identityDefault() },
@@ -330,7 +330,7 @@ kinobi.update(
 				gumballGuard: { defaultsTo: defaultsToGumballGuardPda("gumballMachine") },
 			},
 		},
-		"mplCandyMachine.settleNftSale": {
+		"mallowGumball.settleNftSale": {
 			name: "baseSettleNftSale",
 			accounts: {
 				buyer: { defaultsTo: k.identityDefault() },
@@ -352,16 +352,16 @@ kinobi.update(
 				},
 			},
 		},
-		"mplCandyMachine.settleCoreAssetSale": {
+		"mallowGumball.settleCoreAssetSale": {
 			name: "baseSettleCoreAssetSale",
 			accounts: {
 				buyer: { defaultsTo: k.identityDefault() },
 			},
 		},
-		"mplCandyMachine.SetAuthority": { name: "SetGumballMachineAuthority" },
+		"mallowGumball.SetAuthority": { name: "SetGumballMachineAuthority" },
 		"mplCandyGuard.SetAuthority": { name: "SetGumballGuardAuthority" },
 		"mplCandyGuard.update": { name: "updateGumballGuard", internal: true },
-		"mplCandyMachine.withdraw": { name: "deleteGumballMachine" },
+		"mallowGumball.withdraw": { name: "deleteGumballMachine" },
 		"mplCandyGuard.withdraw": { name: "deleteGumballGuard" },
 	})
 );

@@ -13,22 +13,22 @@ import {
   PublicKey,
 } from '@metaplex-foundation/umi';
 import {
-  getMplCandyMachineErrorFromCode,
-  getMplCandyMachineErrorFromName,
+  getMallowGumballErrorFromCode,
+  getMallowGumballErrorFromName,
 } from '../errors';
 
-export const MPL_CANDY_MACHINE_PROGRAM_ID =
+export const MALLOW_GUMBALL_PROGRAM_ID =
   'MGUMqztv7MHgoHBYWbvMyL3E3NJ4UHfTwgLJUQAbKGa' as PublicKey<'MGUMqztv7MHgoHBYWbvMyL3E3NJ4UHfTwgLJUQAbKGa'>;
 
-export function createMplCandyMachineProgram(): Program {
+export function createMallowGumballProgram(): Program {
   return {
-    name: 'mplCandyMachine',
-    publicKey: MPL_CANDY_MACHINE_PROGRAM_ID,
+    name: 'mallowGumball',
+    publicKey: MALLOW_GUMBALL_PROGRAM_ID,
     getErrorFromCode(code: number, cause?: Error) {
-      return getMplCandyMachineErrorFromCode(code, this, cause);
+      return getMallowGumballErrorFromCode(code, this, cause);
     },
     getErrorFromName(name: string, cause?: Error) {
-      return getMplCandyMachineErrorFromName(name, this, cause);
+      return getMallowGumballErrorFromName(name, this, cause);
     },
     isOnCluster() {
       return true;
@@ -36,20 +36,20 @@ export function createMplCandyMachineProgram(): Program {
   };
 }
 
-export function getMplCandyMachineProgram<T extends Program = Program>(
+export function getMallowGumballProgram<T extends Program = Program>(
   context: Pick<Context, 'programs'>,
   clusterFilter?: ClusterFilter
 ): T {
-  return context.programs.get<T>('mplCandyMachine', clusterFilter);
+  return context.programs.get<T>('mallowGumball', clusterFilter);
 }
 
-export function getMplCandyMachineProgramId(
+export function getMallowGumballProgramId(
   context: Pick<Context, 'programs'>,
   clusterFilter?: ClusterFilter
 ): PublicKey {
   return context.programs.getPublicKey(
-    'mplCandyMachine',
-    MPL_CANDY_MACHINE_PROGRAM_ID,
+    'mallowGumball',
+    MALLOW_GUMBALL_PROGRAM_ID,
     clusterFilter
   );
 }

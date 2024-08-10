@@ -2,7 +2,7 @@ use crate::state::GumballGuard;
 use anchor_lang::prelude::*;
 pub use draw::*;
 pub use initialize::*;
-use mpl_candy_machine_core::GumballMachine;
+use mallow_gumball::GumballMachine;
 pub use route::*;
 pub use set_authority::*;
 pub use unwrap::*;

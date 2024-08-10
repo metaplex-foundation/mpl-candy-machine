@@ -29,7 +29,7 @@ test('it can initialize a new gumball machine account', async (t) => {
       createAccountWithRent(umi, {
         newAccount: gumballMachine,
         space: 5000,
-        programId: umi.programs.get('mplCandyMachine').publicKey,
+        programId: umi.programs.get('mallowGumball').publicKey,
       })
     )
     .sendAndConfirm(umi);

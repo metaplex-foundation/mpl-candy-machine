@@ -16,7 +16,7 @@ const codeToErrorMap: Map<number, ProgramErrorConstructor> = new Map();
 const nameToErrorMap: Map<string, ProgramErrorConstructor> = new Map();
 
 /** IncorrectOwner: Account does not have correct owner */
-export class CmIncorrectOwnerError extends ProgramError {
+export class IncorrectOwnerError extends ProgramError {
   readonly name: string = 'IncorrectOwner';
 
   readonly code: number = 0x1770; // 6000
@@ -25,11 +25,11 @@ export class CmIncorrectOwnerError extends ProgramError {
     super('Account does not have correct owner', program, cause);
   }
 }
-codeToErrorMap.set(0x1770, CmIncorrectOwnerError);
-nameToErrorMap.set('IncorrectOwner', CmIncorrectOwnerError);
+codeToErrorMap.set(0x1770, IncorrectOwnerError);
+nameToErrorMap.set('IncorrectOwner', IncorrectOwnerError);
 
 /** Uninitialized: Account is not initialized */
-export class CmUninitializedError extends ProgramError {
+export class UninitializedError extends ProgramError {
   readonly name: string = 'Uninitialized';
 
   readonly code: number = 0x1771; // 6001
@@ -38,11 +38,11 @@ export class CmUninitializedError extends ProgramError {
     super('Account is not initialized', program, cause);
   }
 }
-codeToErrorMap.set(0x1771, CmUninitializedError);
-nameToErrorMap.set('Uninitialized', CmUninitializedError);
+codeToErrorMap.set(0x1771, UninitializedError);
+nameToErrorMap.set('Uninitialized', UninitializedError);
 
 /** MintMismatch: Mint Mismatch */
-export class CmMintMismatchError extends ProgramError {
+export class MintMismatchError extends ProgramError {
   readonly name: string = 'MintMismatch';
 
   readonly code: number = 0x1772; // 6002
@@ -51,11 +51,11 @@ export class CmMintMismatchError extends ProgramError {
     super('Mint Mismatch', program, cause);
   }
 }
-codeToErrorMap.set(0x1772, CmMintMismatchError);
-nameToErrorMap.set('MintMismatch', CmMintMismatchError);
+codeToErrorMap.set(0x1772, MintMismatchError);
+nameToErrorMap.set('MintMismatch', MintMismatchError);
 
 /** IndexGreaterThanLength: Index greater than length */
-export class CmIndexGreaterThanLengthError extends ProgramError {
+export class IndexGreaterThanLengthError extends ProgramError {
   readonly name: string = 'IndexGreaterThanLength';
 
   readonly code: number = 0x1773; // 6003
@@ -64,11 +64,11 @@ export class CmIndexGreaterThanLengthError extends ProgramError {
     super('Index greater than length', program, cause);
   }
 }
-codeToErrorMap.set(0x1773, CmIndexGreaterThanLengthError);
-nameToErrorMap.set('IndexGreaterThanLength', CmIndexGreaterThanLengthError);
+codeToErrorMap.set(0x1773, IndexGreaterThanLengthError);
+nameToErrorMap.set('IndexGreaterThanLength', IndexGreaterThanLengthError);
 
 /** NumericalOverflowError: Numerical overflow error */
-export class CmNumericalOverflowErrorError extends ProgramError {
+export class NumericalOverflowErrorError extends ProgramError {
   readonly name: string = 'NumericalOverflowError';
 
   readonly code: number = 0x1774; // 6004
@@ -77,11 +77,11 @@ export class CmNumericalOverflowErrorError extends ProgramError {
     super('Numerical overflow error', program, cause);
   }
 }
-codeToErrorMap.set(0x1774, CmNumericalOverflowErrorError);
-nameToErrorMap.set('NumericalOverflowError', CmNumericalOverflowErrorError);
+codeToErrorMap.set(0x1774, NumericalOverflowErrorError);
+nameToErrorMap.set('NumericalOverflowError', NumericalOverflowErrorError);
 
 /** TooManyCreators: Can only provide up to 4 creators to gumball machine (because gumball machine is one) */
-export class CmTooManyCreatorsError extends ProgramError {
+export class TooManyCreatorsError extends ProgramError {
   readonly name: string = 'TooManyCreators';
 
   readonly code: number = 0x1775; // 6005
@@ -94,11 +94,11 @@ export class CmTooManyCreatorsError extends ProgramError {
     );
   }
 }
-codeToErrorMap.set(0x1775, CmTooManyCreatorsError);
-nameToErrorMap.set('TooManyCreators', CmTooManyCreatorsError);
+codeToErrorMap.set(0x1775, TooManyCreatorsError);
+nameToErrorMap.set('TooManyCreators', TooManyCreatorsError);
 
 /** GumballMachineEmpty: Gumball machine is empty */
-export class CmGumballMachineEmptyError extends ProgramError {
+export class GumballMachineEmptyError extends ProgramError {
   readonly name: string = 'GumballMachineEmpty';
 
   readonly code: number = 0x1776; // 6006
@@ -107,11 +107,11 @@ export class CmGumballMachineEmptyError extends ProgramError {
     super('Gumball machine is empty', program, cause);
   }
 }
-codeToErrorMap.set(0x1776, CmGumballMachineEmptyError);
-nameToErrorMap.set('GumballMachineEmpty', CmGumballMachineEmptyError);
+codeToErrorMap.set(0x1776, GumballMachineEmptyError);
+nameToErrorMap.set('GumballMachineEmpty', GumballMachineEmptyError);
 
 /** HiddenSettingsDoNotHaveConfigLines: Gumball machines using hidden uris do not have config lines, they have a single hash representing hashed order */
-export class CmHiddenSettingsDoNotHaveConfigLinesError extends ProgramError {
+export class HiddenSettingsDoNotHaveConfigLinesError extends ProgramError {
   readonly name: string = 'HiddenSettingsDoNotHaveConfigLines';
 
   readonly code: number = 0x1777; // 6007
@@ -124,14 +124,14 @@ export class CmHiddenSettingsDoNotHaveConfigLinesError extends ProgramError {
     );
   }
 }
-codeToErrorMap.set(0x1777, CmHiddenSettingsDoNotHaveConfigLinesError);
+codeToErrorMap.set(0x1777, HiddenSettingsDoNotHaveConfigLinesError);
 nameToErrorMap.set(
   'HiddenSettingsDoNotHaveConfigLines',
-  CmHiddenSettingsDoNotHaveConfigLinesError
+  HiddenSettingsDoNotHaveConfigLinesError
 );
 
 /** CannotChangeNumberOfLines: Cannot change number of lines unless is a hidden config */
-export class CmCannotChangeNumberOfLinesError extends ProgramError {
+export class CannotChangeNumberOfLinesError extends ProgramError {
   readonly name: string = 'CannotChangeNumberOfLines';
 
   readonly code: number = 0x1778; // 6008
@@ -144,14 +144,11 @@ export class CmCannotChangeNumberOfLinesError extends ProgramError {
     );
   }
 }
-codeToErrorMap.set(0x1778, CmCannotChangeNumberOfLinesError);
-nameToErrorMap.set(
-  'CannotChangeNumberOfLines',
-  CmCannotChangeNumberOfLinesError
-);
+codeToErrorMap.set(0x1778, CannotChangeNumberOfLinesError);
+nameToErrorMap.set('CannotChangeNumberOfLines', CannotChangeNumberOfLinesError);
 
 /** CannotSwitchToHiddenSettings: Cannot switch to hidden settings after items available is greater than 0 */
-export class CmCannotSwitchToHiddenSettingsError extends ProgramError {
+export class CannotSwitchToHiddenSettingsError extends ProgramError {
   readonly name: string = 'CannotSwitchToHiddenSettings';
 
   readonly code: number = 0x1779; // 6009
@@ -164,14 +161,14 @@ export class CmCannotSwitchToHiddenSettingsError extends ProgramError {
     );
   }
 }
-codeToErrorMap.set(0x1779, CmCannotSwitchToHiddenSettingsError);
+codeToErrorMap.set(0x1779, CannotSwitchToHiddenSettingsError);
 nameToErrorMap.set(
   'CannotSwitchToHiddenSettings',
-  CmCannotSwitchToHiddenSettingsError
+  CannotSwitchToHiddenSettingsError
 );
 
 /** IncorrectCollectionAuthority: Incorrect collection NFT authority */
-export class CmIncorrectCollectionAuthorityError extends ProgramError {
+export class IncorrectCollectionAuthorityError extends ProgramError {
   readonly name: string = 'IncorrectCollectionAuthority';
 
   readonly code: number = 0x177a; // 6010
@@ -180,14 +177,14 @@ export class CmIncorrectCollectionAuthorityError extends ProgramError {
     super('Incorrect collection NFT authority', program, cause);
   }
 }
-codeToErrorMap.set(0x177a, CmIncorrectCollectionAuthorityError);
+codeToErrorMap.set(0x177a, IncorrectCollectionAuthorityError);
 nameToErrorMap.set(
   'IncorrectCollectionAuthority',
-  CmIncorrectCollectionAuthorityError
+  IncorrectCollectionAuthorityError
 );
 
 /** MetadataAccountMustBeEmpty: The metadata account has data in it, and this must be empty to mint a new NFT */
-export class CmMetadataAccountMustBeEmptyError extends ProgramError {
+export class MetadataAccountMustBeEmptyError extends ProgramError {
   readonly name: string = 'MetadataAccountMustBeEmpty';
 
   readonly code: number = 0x177b; // 6011
@@ -200,14 +197,14 @@ export class CmMetadataAccountMustBeEmptyError extends ProgramError {
     );
   }
 }
-codeToErrorMap.set(0x177b, CmMetadataAccountMustBeEmptyError);
+codeToErrorMap.set(0x177b, MetadataAccountMustBeEmptyError);
 nameToErrorMap.set(
   'MetadataAccountMustBeEmpty',
-  CmMetadataAccountMustBeEmptyError
+  MetadataAccountMustBeEmptyError
 );
 
 /** NoChangingCollectionDuringMint: Can't change collection settings after items have begun to be minted */
-export class CmNoChangingCollectionDuringMintError extends ProgramError {
+export class NoChangingCollectionDuringMintError extends ProgramError {
   readonly name: string = 'NoChangingCollectionDuringMint';
 
   readonly code: number = 0x177c; // 6012
@@ -220,14 +217,14 @@ export class CmNoChangingCollectionDuringMintError extends ProgramError {
     );
   }
 }
-codeToErrorMap.set(0x177c, CmNoChangingCollectionDuringMintError);
+codeToErrorMap.set(0x177c, NoChangingCollectionDuringMintError);
 nameToErrorMap.set(
   'NoChangingCollectionDuringMint',
-  CmNoChangingCollectionDuringMintError
+  NoChangingCollectionDuringMintError
 );
 
 /** ExceededLengthError: Value longer than expected maximum value */
-export class CmExceededLengthErrorError extends ProgramError {
+export class ExceededLengthErrorError extends ProgramError {
   readonly name: string = 'ExceededLengthError';
 
   readonly code: number = 0x177d; // 6013
@@ -236,11 +233,11 @@ export class CmExceededLengthErrorError extends ProgramError {
     super('Value longer than expected maximum value', program, cause);
   }
 }
-codeToErrorMap.set(0x177d, CmExceededLengthErrorError);
-nameToErrorMap.set('ExceededLengthError', CmExceededLengthErrorError);
+codeToErrorMap.set(0x177d, ExceededLengthErrorError);
+nameToErrorMap.set('ExceededLengthError', ExceededLengthErrorError);
 
 /** MissingConfigLinesSettings: Missing config lines settings */
-export class CmMissingConfigLinesSettingsError extends ProgramError {
+export class MissingConfigLinesSettingsError extends ProgramError {
   readonly name: string = 'MissingConfigLinesSettings';
 
   readonly code: number = 0x177e; // 6014
@@ -249,14 +246,14 @@ export class CmMissingConfigLinesSettingsError extends ProgramError {
     super('Missing config lines settings', program, cause);
   }
 }
-codeToErrorMap.set(0x177e, CmMissingConfigLinesSettingsError);
+codeToErrorMap.set(0x177e, MissingConfigLinesSettingsError);
 nameToErrorMap.set(
   'MissingConfigLinesSettings',
-  CmMissingConfigLinesSettingsError
+  MissingConfigLinesSettingsError
 );
 
 /** CannotIncreaseLength: Cannot increase the length in config lines settings */
-export class CmCannotIncreaseLengthError extends ProgramError {
+export class CannotIncreaseLengthError extends ProgramError {
   readonly name: string = 'CannotIncreaseLength';
 
   readonly code: number = 0x177f; // 6015
@@ -269,11 +266,11 @@ export class CmCannotIncreaseLengthError extends ProgramError {
     );
   }
 }
-codeToErrorMap.set(0x177f, CmCannotIncreaseLengthError);
-nameToErrorMap.set('CannotIncreaseLength', CmCannotIncreaseLengthError);
+codeToErrorMap.set(0x177f, CannotIncreaseLengthError);
+nameToErrorMap.set('CannotIncreaseLength', CannotIncreaseLengthError);
 
 /** CannotSwitchFromHiddenSettings: Cannot switch from hidden settings */
-export class CmCannotSwitchFromHiddenSettingsError extends ProgramError {
+export class CannotSwitchFromHiddenSettingsError extends ProgramError {
   readonly name: string = 'CannotSwitchFromHiddenSettings';
 
   readonly code: number = 0x1780; // 6016
@@ -282,14 +279,14 @@ export class CmCannotSwitchFromHiddenSettingsError extends ProgramError {
     super('Cannot switch from hidden settings', program, cause);
   }
 }
-codeToErrorMap.set(0x1780, CmCannotSwitchFromHiddenSettingsError);
+codeToErrorMap.set(0x1780, CannotSwitchFromHiddenSettingsError);
 nameToErrorMap.set(
   'CannotSwitchFromHiddenSettings',
-  CmCannotSwitchFromHiddenSettingsError
+  CannotSwitchFromHiddenSettingsError
 );
 
 /** CannotChangeSequentialIndexGeneration: Cannot change sequential index generation after items have begun to be minted */
-export class CmCannotChangeSequentialIndexGenerationError extends ProgramError {
+export class CannotChangeSequentialIndexGenerationError extends ProgramError {
   readonly name: string = 'CannotChangeSequentialIndexGeneration';
 
   readonly code: number = 0x1781; // 6017
@@ -302,14 +299,14 @@ export class CmCannotChangeSequentialIndexGenerationError extends ProgramError {
     );
   }
 }
-codeToErrorMap.set(0x1781, CmCannotChangeSequentialIndexGenerationError);
+codeToErrorMap.set(0x1781, CannotChangeSequentialIndexGenerationError);
 nameToErrorMap.set(
   'CannotChangeSequentialIndexGeneration',
-  CmCannotChangeSequentialIndexGenerationError
+  CannotChangeSequentialIndexGenerationError
 );
 
 /** CollectionKeyMismatch: Collection public key mismatch */
-export class CmCollectionKeyMismatchError extends ProgramError {
+export class CollectionKeyMismatchError extends ProgramError {
   readonly name: string = 'CollectionKeyMismatch';
 
   readonly code: number = 0x1782; // 6018
@@ -318,11 +315,11 @@ export class CmCollectionKeyMismatchError extends ProgramError {
     super('Collection public key mismatch', program, cause);
   }
 }
-codeToErrorMap.set(0x1782, CmCollectionKeyMismatchError);
-nameToErrorMap.set('CollectionKeyMismatch', CmCollectionKeyMismatchError);
+codeToErrorMap.set(0x1782, CollectionKeyMismatchError);
+nameToErrorMap.set('CollectionKeyMismatch', CollectionKeyMismatchError);
 
 /** CouldNotRetrieveConfigLineData: Could not retrive config line data */
-export class CmCouldNotRetrieveConfigLineDataError extends ProgramError {
+export class CouldNotRetrieveConfigLineDataError extends ProgramError {
   readonly name: string = 'CouldNotRetrieveConfigLineData';
 
   readonly code: number = 0x1783; // 6019
@@ -331,14 +328,14 @@ export class CmCouldNotRetrieveConfigLineDataError extends ProgramError {
     super('Could not retrive config line data', program, cause);
   }
 }
-codeToErrorMap.set(0x1783, CmCouldNotRetrieveConfigLineDataError);
+codeToErrorMap.set(0x1783, CouldNotRetrieveConfigLineDataError);
 nameToErrorMap.set(
   'CouldNotRetrieveConfigLineData',
-  CmCouldNotRetrieveConfigLineDataError
+  CouldNotRetrieveConfigLineDataError
 );
 
 /** NotFullyLoaded: Not all config lines were added to the gumball machine */
-export class CmNotFullyLoadedError extends ProgramError {
+export class NotFullyLoadedError extends ProgramError {
   readonly name: string = 'NotFullyLoaded';
 
   readonly code: number = 0x1784; // 6020
@@ -351,11 +348,11 @@ export class CmNotFullyLoadedError extends ProgramError {
     );
   }
 }
-codeToErrorMap.set(0x1784, CmNotFullyLoadedError);
-nameToErrorMap.set('NotFullyLoaded', CmNotFullyLoadedError);
+codeToErrorMap.set(0x1784, NotFullyLoadedError);
+nameToErrorMap.set('NotFullyLoaded', NotFullyLoadedError);
 
 /** InstructionBuilderFailed: Instruction could not be created */
-export class CmInstructionBuilderFailedError extends ProgramError {
+export class InstructionBuilderFailedError extends ProgramError {
   readonly name: string = 'InstructionBuilderFailed';
 
   readonly code: number = 0x1785; // 6021
@@ -364,11 +361,11 @@ export class CmInstructionBuilderFailedError extends ProgramError {
     super('Instruction could not be created', program, cause);
   }
 }
-codeToErrorMap.set(0x1785, CmInstructionBuilderFailedError);
-nameToErrorMap.set('InstructionBuilderFailed', CmInstructionBuilderFailedError);
+codeToErrorMap.set(0x1785, InstructionBuilderFailedError);
+nameToErrorMap.set('InstructionBuilderFailed', InstructionBuilderFailedError);
 
 /** MissingCollectionAuthorityRecord: Missing collection authority record */
-export class CmMissingCollectionAuthorityRecordError extends ProgramError {
+export class MissingCollectionAuthorityRecordError extends ProgramError {
   readonly name: string = 'MissingCollectionAuthorityRecord';
 
   readonly code: number = 0x1786; // 6022
@@ -377,14 +374,14 @@ export class CmMissingCollectionAuthorityRecordError extends ProgramError {
     super('Missing collection authority record', program, cause);
   }
 }
-codeToErrorMap.set(0x1786, CmMissingCollectionAuthorityRecordError);
+codeToErrorMap.set(0x1786, MissingCollectionAuthorityRecordError);
 nameToErrorMap.set(
   'MissingCollectionAuthorityRecord',
-  CmMissingCollectionAuthorityRecordError
+  MissingCollectionAuthorityRecordError
 );
 
 /** MissingMetadataDelegateRecord: Missing metadata delegate record */
-export class CmMissingMetadataDelegateRecordError extends ProgramError {
+export class MissingMetadataDelegateRecordError extends ProgramError {
   readonly name: string = 'MissingMetadataDelegateRecord';
 
   readonly code: number = 0x1787; // 6023
@@ -393,14 +390,14 @@ export class CmMissingMetadataDelegateRecordError extends ProgramError {
     super('Missing metadata delegate record', program, cause);
   }
 }
-codeToErrorMap.set(0x1787, CmMissingMetadataDelegateRecordError);
+codeToErrorMap.set(0x1787, MissingMetadataDelegateRecordError);
 nameToErrorMap.set(
   'MissingMetadataDelegateRecord',
-  CmMissingMetadataDelegateRecordError
+  MissingMetadataDelegateRecordError
 );
 
 /** InvalidTokenStandard: Invalid token standard */
-export class CmInvalidTokenStandardError extends ProgramError {
+export class InvalidTokenStandardError extends ProgramError {
   readonly name: string = 'InvalidTokenStandard';
 
   readonly code: number = 0x1788; // 6024
@@ -409,11 +406,11 @@ export class CmInvalidTokenStandardError extends ProgramError {
     super('Invalid token standard', program, cause);
   }
 }
-codeToErrorMap.set(0x1788, CmInvalidTokenStandardError);
-nameToErrorMap.set('InvalidTokenStandard', CmInvalidTokenStandardError);
+codeToErrorMap.set(0x1788, InvalidTokenStandardError);
+nameToErrorMap.set('InvalidTokenStandard', InvalidTokenStandardError);
 
 /** MissingTokenAccount: Missing token account */
-export class CmMissingTokenAccountError extends ProgramError {
+export class MissingTokenAccountError extends ProgramError {
   readonly name: string = 'MissingTokenAccount';
 
   readonly code: number = 0x1789; // 6025
@@ -422,11 +419,11 @@ export class CmMissingTokenAccountError extends ProgramError {
     super('Missing token account', program, cause);
   }
 }
-codeToErrorMap.set(0x1789, CmMissingTokenAccountError);
-nameToErrorMap.set('MissingTokenAccount', CmMissingTokenAccountError);
+codeToErrorMap.set(0x1789, MissingTokenAccountError);
+nameToErrorMap.set('MissingTokenAccount', MissingTokenAccountError);
 
 /** MissingTokenRecord: Missing token record */
-export class CmMissingTokenRecordError extends ProgramError {
+export class MissingTokenRecordError extends ProgramError {
   readonly name: string = 'MissingTokenRecord';
 
   readonly code: number = 0x178a; // 6026
@@ -435,11 +432,11 @@ export class CmMissingTokenRecordError extends ProgramError {
     super('Missing token record', program, cause);
   }
 }
-codeToErrorMap.set(0x178a, CmMissingTokenRecordError);
-nameToErrorMap.set('MissingTokenRecord', CmMissingTokenRecordError);
+codeToErrorMap.set(0x178a, MissingTokenRecordError);
+nameToErrorMap.set('MissingTokenRecord', MissingTokenRecordError);
 
 /** MissingInstructionsSysvar: Missing instructions sysvar account */
-export class CmMissingInstructionsSysvarError extends ProgramError {
+export class MissingInstructionsSysvarError extends ProgramError {
   readonly name: string = 'MissingInstructionsSysvar';
 
   readonly code: number = 0x178b; // 6027
@@ -448,14 +445,11 @@ export class CmMissingInstructionsSysvarError extends ProgramError {
     super('Missing instructions sysvar account', program, cause);
   }
 }
-codeToErrorMap.set(0x178b, CmMissingInstructionsSysvarError);
-nameToErrorMap.set(
-  'MissingInstructionsSysvar',
-  CmMissingInstructionsSysvarError
-);
+codeToErrorMap.set(0x178b, MissingInstructionsSysvarError);
+nameToErrorMap.set('MissingInstructionsSysvar', MissingInstructionsSysvarError);
 
 /** MissingSplAtaProgram: Missing SPL ATA program */
-export class CmMissingSplAtaProgramError extends ProgramError {
+export class MissingSplAtaProgramError extends ProgramError {
   readonly name: string = 'MissingSplAtaProgram';
 
   readonly code: number = 0x178c; // 6028
@@ -464,11 +458,11 @@ export class CmMissingSplAtaProgramError extends ProgramError {
     super('Missing SPL ATA program', program, cause);
   }
 }
-codeToErrorMap.set(0x178c, CmMissingSplAtaProgramError);
-nameToErrorMap.set('MissingSplAtaProgram', CmMissingSplAtaProgramError);
+codeToErrorMap.set(0x178c, MissingSplAtaProgramError);
+nameToErrorMap.set('MissingSplAtaProgram', MissingSplAtaProgramError);
 
 /** InvalidAccountVersion: Invalid account version */
-export class CmInvalidAccountVersionError extends ProgramError {
+export class InvalidAccountVersionError extends ProgramError {
   readonly name: string = 'InvalidAccountVersion';
 
   readonly code: number = 0x178d; // 6029
@@ -477,11 +471,11 @@ export class CmInvalidAccountVersionError extends ProgramError {
     super('Invalid account version', program, cause);
   }
 }
-codeToErrorMap.set(0x178d, CmInvalidAccountVersionError);
-nameToErrorMap.set('InvalidAccountVersion', CmInvalidAccountVersionError);
+codeToErrorMap.set(0x178d, InvalidAccountVersionError);
+nameToErrorMap.set('InvalidAccountVersion', InvalidAccountVersionError);
 
 /** NotPrimarySale: Not a primary sale asset */
-export class CmNotPrimarySaleError extends ProgramError {
+export class NotPrimarySaleError extends ProgramError {
   readonly name: string = 'NotPrimarySale';
 
   readonly code: number = 0x178e; // 6030
@@ -490,11 +484,11 @@ export class CmNotPrimarySaleError extends ProgramError {
     super('Not a primary sale asset', program, cause);
   }
 }
-codeToErrorMap.set(0x178e, CmNotPrimarySaleError);
-nameToErrorMap.set('NotPrimarySale', CmNotPrimarySaleError);
+codeToErrorMap.set(0x178e, NotPrimarySaleError);
+nameToErrorMap.set('NotPrimarySale', NotPrimarySaleError);
 
 /** InvalidEditionAccount: Invalid edition account */
-export class CmInvalidEditionAccountError extends ProgramError {
+export class InvalidEditionAccountError extends ProgramError {
   readonly name: string = 'InvalidEditionAccount';
 
   readonly code: number = 0x178f; // 6031
@@ -503,11 +497,11 @@ export class CmInvalidEditionAccountError extends ProgramError {
     super('Invalid edition account', program, cause);
   }
 }
-codeToErrorMap.set(0x178f, CmInvalidEditionAccountError);
-nameToErrorMap.set('InvalidEditionAccount', CmInvalidEditionAccountError);
+codeToErrorMap.set(0x178f, InvalidEditionAccountError);
+nameToErrorMap.set('InvalidEditionAccount', InvalidEditionAccountError);
 
 /** InvalidMasterEditionSupply: Invalid master edition supply */
-export class CmInvalidMasterEditionSupplyError extends ProgramError {
+export class InvalidMasterEditionSupplyError extends ProgramError {
   readonly name: string = 'InvalidMasterEditionSupply';
 
   readonly code: number = 0x1790; // 6032
@@ -516,14 +510,14 @@ export class CmInvalidMasterEditionSupplyError extends ProgramError {
     super('Invalid master edition supply', program, cause);
   }
 }
-codeToErrorMap.set(0x1790, CmInvalidMasterEditionSupplyError);
+codeToErrorMap.set(0x1790, InvalidMasterEditionSupplyError);
 nameToErrorMap.set(
   'InvalidMasterEditionSupply',
-  CmInvalidMasterEditionSupplyError
+  InvalidMasterEditionSupplyError
 );
 
 /** PublicKeyMismatch: Public key mismatch */
-export class CmPublicKeyMismatchError extends ProgramError {
+export class PublicKeyMismatchError extends ProgramError {
   readonly name: string = 'PublicKeyMismatch';
 
   readonly code: number = 0x1791; // 6033
@@ -532,11 +526,11 @@ export class CmPublicKeyMismatchError extends ProgramError {
     super('Public key mismatch', program, cause);
   }
 }
-codeToErrorMap.set(0x1791, CmPublicKeyMismatchError);
-nameToErrorMap.set('PublicKeyMismatch', CmPublicKeyMismatchError);
+codeToErrorMap.set(0x1791, PublicKeyMismatchError);
+nameToErrorMap.set('PublicKeyMismatch', PublicKeyMismatchError);
 
 /** InvalidCollection: Invalid collection */
-export class CmInvalidCollectionError extends ProgramError {
+export class InvalidCollectionError extends ProgramError {
   readonly name: string = 'InvalidCollection';
 
   readonly code: number = 0x1792; // 6034
@@ -545,11 +539,11 @@ export class CmInvalidCollectionError extends ProgramError {
     super('Invalid collection', program, cause);
   }
 }
-codeToErrorMap.set(0x1792, CmInvalidCollectionError);
-nameToErrorMap.set('InvalidCollection', CmInvalidCollectionError);
+codeToErrorMap.set(0x1792, InvalidCollectionError);
+nameToErrorMap.set('InvalidCollection', InvalidCollectionError);
 
 /** GumballMachineDetailsFinalized: Gumball machine detailed finalized */
-export class CmGumballMachineDetailsFinalizedError extends ProgramError {
+export class GumballMachineDetailsFinalizedError extends ProgramError {
   readonly name: string = 'GumballMachineDetailsFinalized';
 
   readonly code: number = 0x1793; // 6035
@@ -558,14 +552,14 @@ export class CmGumballMachineDetailsFinalizedError extends ProgramError {
     super('Gumball machine detailed finalized', program, cause);
   }
 }
-codeToErrorMap.set(0x1793, CmGumballMachineDetailsFinalizedError);
+codeToErrorMap.set(0x1793, GumballMachineDetailsFinalizedError);
 nameToErrorMap.set(
   'GumballMachineDetailsFinalized',
-  CmGumballMachineDetailsFinalizedError
+  GumballMachineDetailsFinalizedError
 );
 
 /** InvalidState: Invalid state */
-export class CmInvalidStateError extends ProgramError {
+export class InvalidStateError extends ProgramError {
   readonly name: string = 'InvalidState';
 
   readonly code: number = 0x1794; // 6036
@@ -574,11 +568,11 @@ export class CmInvalidStateError extends ProgramError {
     super('Invalid state', program, cause);
   }
 }
-codeToErrorMap.set(0x1794, CmInvalidStateError);
-nameToErrorMap.set('InvalidState', CmInvalidStateError);
+codeToErrorMap.set(0x1794, InvalidStateError);
+nameToErrorMap.set('InvalidState', InvalidStateError);
 
 /** InvalidAuthority: Invalid authority */
-export class CmInvalidAuthorityError extends ProgramError {
+export class InvalidAuthorityError extends ProgramError {
   readonly name: string = 'InvalidAuthority';
 
   readonly code: number = 0x1795; // 6037
@@ -587,11 +581,11 @@ export class CmInvalidAuthorityError extends ProgramError {
     super('Invalid authority', program, cause);
   }
 }
-codeToErrorMap.set(0x1795, CmInvalidAuthorityError);
-nameToErrorMap.set('InvalidAuthority', CmInvalidAuthorityError);
+codeToErrorMap.set(0x1795, InvalidAuthorityError);
+nameToErrorMap.set('InvalidAuthority', InvalidAuthorityError);
 
 /** InvalidMint: Invalid mint */
-export class CmInvalidMintError extends ProgramError {
+export class InvalidMintError extends ProgramError {
   readonly name: string = 'InvalidMint';
 
   readonly code: number = 0x1796; // 6038
@@ -600,11 +594,11 @@ export class CmInvalidMintError extends ProgramError {
     super('Invalid mint', program, cause);
   }
 }
-codeToErrorMap.set(0x1796, CmInvalidMintError);
-nameToErrorMap.set('InvalidMint', CmInvalidMintError);
+codeToErrorMap.set(0x1796, InvalidMintError);
+nameToErrorMap.set('InvalidMint', InvalidMintError);
 
 /** InvalidPaymentMint: Invalid payment mint */
-export class CmInvalidPaymentMintError extends ProgramError {
+export class InvalidPaymentMintError extends ProgramError {
   readonly name: string = 'InvalidPaymentMint';
 
   readonly code: number = 0x1797; // 6039
@@ -613,11 +607,11 @@ export class CmInvalidPaymentMintError extends ProgramError {
     super('Invalid payment mint', program, cause);
   }
 }
-codeToErrorMap.set(0x1797, CmInvalidPaymentMintError);
-nameToErrorMap.set('InvalidPaymentMint', CmInvalidPaymentMintError);
+codeToErrorMap.set(0x1797, InvalidPaymentMintError);
+nameToErrorMap.set('InvalidPaymentMint', InvalidPaymentMintError);
 
 /** InvalidSeller: Invalid seller */
-export class CmInvalidSellerError extends ProgramError {
+export class InvalidSellerError extends ProgramError {
   readonly name: string = 'InvalidSeller';
 
   readonly code: number = 0x1798; // 6040
@@ -626,11 +620,11 @@ export class CmInvalidSellerError extends ProgramError {
     super('Invalid seller', program, cause);
   }
 }
-codeToErrorMap.set(0x1798, CmInvalidSellerError);
-nameToErrorMap.set('InvalidSeller', CmInvalidSellerError);
+codeToErrorMap.set(0x1798, InvalidSellerError);
+nameToErrorMap.set('InvalidSeller', InvalidSellerError);
 
 /** InvalidBuyer: Invalid buyer */
-export class CmInvalidBuyerError extends ProgramError {
+export class InvalidBuyerError extends ProgramError {
   readonly name: string = 'InvalidBuyer';
 
   readonly code: number = 0x1799; // 6041
@@ -639,11 +633,11 @@ export class CmInvalidBuyerError extends ProgramError {
     super('Invalid buyer', program, cause);
   }
 }
-codeToErrorMap.set(0x1799, CmInvalidBuyerError);
-nameToErrorMap.set('InvalidBuyer', CmInvalidBuyerError);
+codeToErrorMap.set(0x1799, InvalidBuyerError);
+nameToErrorMap.set('InvalidBuyer', InvalidBuyerError);
 
 /** UriTooLong: URI too long */
-export class CmUriTooLongError extends ProgramError {
+export class UriTooLongError extends ProgramError {
   readonly name: string = 'UriTooLong';
 
   readonly code: number = 0x179a; // 6042
@@ -652,11 +646,11 @@ export class CmUriTooLongError extends ProgramError {
     super('URI too long', program, cause);
   }
 }
-codeToErrorMap.set(0x179a, CmUriTooLongError);
-nameToErrorMap.set('UriTooLong', CmUriTooLongError);
+codeToErrorMap.set(0x179a, UriTooLongError);
+nameToErrorMap.set('UriTooLong', UriTooLongError);
 
 /** InvalidProofPath: Invalid proof path */
-export class CmInvalidProofPathError extends ProgramError {
+export class InvalidProofPathError extends ProgramError {
   readonly name: string = 'InvalidProofPath';
 
   readonly code: number = 0x179b; // 6043
@@ -665,11 +659,11 @@ export class CmInvalidProofPathError extends ProgramError {
     super('Invalid proof path', program, cause);
   }
 }
-codeToErrorMap.set(0x179b, CmInvalidProofPathError);
-nameToErrorMap.set('InvalidProofPath', CmInvalidProofPathError);
+codeToErrorMap.set(0x179b, InvalidProofPathError);
+nameToErrorMap.set('InvalidProofPath', InvalidProofPathError);
 
 /** InvalidSettingUpdate: Invalid setting update */
-export class CmInvalidSettingUpdateError extends ProgramError {
+export class InvalidSettingUpdateError extends ProgramError {
   readonly name: string = 'InvalidSettingUpdate';
 
   readonly code: number = 0x179c; // 6044
@@ -678,11 +672,11 @@ export class CmInvalidSettingUpdateError extends ProgramError {
     super('Invalid setting update', program, cause);
   }
 }
-codeToErrorMap.set(0x179c, CmInvalidSettingUpdateError);
-nameToErrorMap.set('InvalidSettingUpdate', CmInvalidSettingUpdateError);
+codeToErrorMap.set(0x179c, InvalidSettingUpdateError);
+nameToErrorMap.set('InvalidSettingUpdate', InvalidSettingUpdateError);
 
 /** SellerTooManyItems: Seller has too many items */
-export class CmSellerTooManyItemsError extends ProgramError {
+export class SellerTooManyItemsError extends ProgramError {
   readonly name: string = 'SellerTooManyItems';
 
   readonly code: number = 0x179d; // 6045
@@ -691,11 +685,11 @@ export class CmSellerTooManyItemsError extends ProgramError {
     super('Seller has too many items', program, cause);
   }
 }
-codeToErrorMap.set(0x179d, CmSellerTooManyItemsError);
-nameToErrorMap.set('SellerTooManyItems', CmSellerTooManyItemsError);
+codeToErrorMap.set(0x179d, SellerTooManyItemsError);
+nameToErrorMap.set('SellerTooManyItems', SellerTooManyItemsError);
 
 /** NotAllSettled: Not all items have been settled */
-export class CmNotAllSettledError extends ProgramError {
+export class NotAllSettledError extends ProgramError {
   readonly name: string = 'NotAllSettled';
 
   readonly code: number = 0x179e; // 6046
@@ -704,14 +698,14 @@ export class CmNotAllSettledError extends ProgramError {
     super('Not all items have been settled', program, cause);
   }
 }
-codeToErrorMap.set(0x179e, CmNotAllSettledError);
-nameToErrorMap.set('NotAllSettled', CmNotAllSettledError);
+codeToErrorMap.set(0x179e, NotAllSettledError);
+nameToErrorMap.set('NotAllSettled', NotAllSettledError);
 
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors
  */
-export function getMplCandyMachineErrorFromCode(
+export function getMallowGumballErrorFromCode(
   code: number,
   program: Program,
   cause?: Error
@@ -724,7 +718,7 @@ export function getMplCandyMachineErrorFromCode(
  * Attempts to resolve a custom program error from the provided error name, i.e. 'Unauthorized'.
  * @category Errors
  */
-export function getMplCandyMachineErrorFromName(
+export function getMallowGumballErrorFromName(
   name: string,
   program: Program,
   cause?: Error

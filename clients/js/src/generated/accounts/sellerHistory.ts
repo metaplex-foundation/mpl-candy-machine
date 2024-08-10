@@ -146,7 +146,7 @@ export function getSellerHistoryGpaBuilder(
   context: Pick<Context, 'rpc' | 'programs'>
 ) {
   const programId = context.programs.getPublicKey(
-    'mplCandyMachine',
+    'mallowGumball',
     'MGUMqztv7MHgoHBYWbvMyL3E3NJ4UHfTwgLJUQAbKGa'
   );
   return gpaBuilder(context, programId)
@@ -181,7 +181,7 @@ export function findSellerHistoryPda(
   }
 ): Pda {
   const programId = context.programs.getPublicKey(
-    'mplCandyMachine',
+    'mallowGumball',
     'MGUMqztv7MHgoHBYWbvMyL3E3NJ4UHfTwgLJUQAbKGa'
   );
   return context.eddsa.findPda(programId, [

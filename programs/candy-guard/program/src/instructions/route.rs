@@ -3,7 +3,7 @@ use crate::{
     try_from,
 };
 use anchor_lang::prelude::*;
-use mpl_candy_machine_core::GumballMachine;
+use mallow_gumball::GumballMachine;
 
 /// Route the transaction to the specified guard. This instruction allows the use of
 /// empty gumball guard and gumball machine accounts and it is up to individual guard

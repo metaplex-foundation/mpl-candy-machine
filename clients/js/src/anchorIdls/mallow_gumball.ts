@@ -1,6 +1,6 @@
-export type CandyMachineCore = {
+export type MallowGumball = {
   version: '3.0.1';
-  name: 'candy_machine_core';
+  name: 'mallow_gumball';
   instructions: [
     {
       name: 'initialize';
@@ -1877,9 +1877,9 @@ export type CandyMachineCore = {
   ];
 };
 
-export const IDL: CandyMachineCore = {
+export const IDL: MallowGumball = {
   version: '3.0.1',
-  name: 'candy_machine_core',
+  name: 'mallow_gumball',
   instructions: [
     {
       name: 'initialize',

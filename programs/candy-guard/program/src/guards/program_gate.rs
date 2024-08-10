@@ -10,7 +10,7 @@ use crate::{errors::GumballGuardError, state::GuardType, utils::cmp_pubkeys};
 // Default list of authorized programs.
 pub static DEFAULT_PROGRAMS: &[Pubkey] = &[
     crate::ID,
-    mpl_candy_machine_core::ID,
+    mallow_gumball::ID,
     system_program::ID,
     spl_token::ID,
     spl_associated_token_account::ID,

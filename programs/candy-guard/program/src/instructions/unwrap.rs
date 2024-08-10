@@ -1,6 +1,6 @@
 use crate::state::GumballGuard;
 use anchor_lang::prelude::*;
-use mpl_candy_machine_core::{
+use mallow_gumball::{
     cpi::{accounts::SetMintAuthority, set_mint_authority},
     GumballMachine,
 };
@@ -38,6 +38,6 @@ pub struct Unwrap<'info> {
     // gumball machine authority
     pub gumball_machine_authority: Signer<'info>,
     /// CHECK: account constraints checked in account trait
-    #[account(address = mpl_candy_machine_core::id())]
+    #[account(address = mallow_gumball::id())]
     pub gumball_machine_program: AccountInfo<'info>,
 }

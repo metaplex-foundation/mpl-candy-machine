@@ -529,16 +529,6 @@ export type MallowGumball = {
           isMut: false;
           isSigner: false;
           docs: ['SlotHashes sysvar cluster data.', ''];
-        },
-        {
-          name: 'eventAuthority';
-          isMut: false;
-          isSigner: false;
-        },
-        {
-          name: 'program';
-          isMut: false;
-          isSigner: false;
         }
       ];
       args: [];
@@ -687,16 +677,6 @@ export type MallowGumball = {
           name: 'mplCoreProgram';
           isMut: false;
           isSigner: false;
-        },
-        {
-          name: 'eventAuthority';
-          isMut: false;
-          isSigner: false;
-        },
-        {
-          name: 'program';
-          isMut: false;
-          isSigner: false;
         }
       ];
       args: [
@@ -843,16 +823,6 @@ export type MallowGumball = {
           name: 'tokenMetadataProgram';
           isMut: false;
           isSigner: false;
-        },
-        {
-          name: 'eventAuthority';
-          isMut: false;
-          isSigner: false;
-        },
-        {
-          name: 'program';
-          isMut: false;
-          isSigner: false;
         }
       ];
       args: [
@@ -989,16 +959,6 @@ export type MallowGumball = {
         },
         {
           name: 'mplCoreProgram';
-          isMut: false;
-          isSigner: false;
-        },
-        {
-          name: 'eventAuthority';
-          isMut: false;
-          isSigner: false;
-        },
-        {
-          name: 'program';
           isMut: false;
           isSigner: false;
         }
@@ -1157,16 +1117,6 @@ export type MallowGumball = {
         },
         {
           name: 'tokenMetadataProgram';
-          isMut: false;
-          isSigner: false;
-        },
-        {
-          name: 'eventAuthority';
-          isMut: false;
-          isSigner: false;
-        },
-        {
-          name: 'program';
           isMut: false;
           isSigner: false;
         }
@@ -2409,16 +2359,6 @@ export const IDL: MallowGumball = {
           isSigner: false,
           docs: ['SlotHashes sysvar cluster data.', ''],
         },
-        {
-          name: 'eventAuthority',
-          isMut: false,
-          isSigner: false,
-        },
-        {
-          name: 'program',
-          isMut: false,
-          isSigner: false,
-        },
       ],
       args: [],
     },
@@ -2564,16 +2504,6 @@ export const IDL: MallowGumball = {
         },
         {
           name: 'mplCoreProgram',
-          isMut: false,
-          isSigner: false,
-        },
-        {
-          name: 'eventAuthority',
-          isMut: false,
-          isSigner: false,
-        },
-        {
-          name: 'program',
           isMut: false,
           isSigner: false,
         },
@@ -2723,16 +2653,6 @@ export const IDL: MallowGumball = {
           isMut: false,
           isSigner: false,
         },
-        {
-          name: 'eventAuthority',
-          isMut: false,
-          isSigner: false,
-        },
-        {
-          name: 'program',
-          isMut: false,
-          isSigner: false,
-        },
       ],
       args: [
         {
@@ -2868,16 +2788,6 @@ export const IDL: MallowGumball = {
         },
         {
           name: 'mplCoreProgram',
-          isMut: false,
-          isSigner: false,
-        },
-        {
-          name: 'eventAuthority',
-          isMut: false,
-          isSigner: false,
-        },
-        {
-          name: 'program',
           isMut: false,
           isSigner: false,
         },
@@ -3036,16 +2946,6 @@ export const IDL: MallowGumball = {
         },
         {
           name: 'tokenMetadataProgram',
-          isMut: false,
-          isSigner: false,
-        },
-        {
-          name: 'eventAuthority',
-          isMut: false,
-          isSigner: false,
-        },
-        {
-          name: 'program',
           isMut: false,
           isSigner: false,
         },

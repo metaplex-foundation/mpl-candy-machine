@@ -55,7 +55,7 @@ export type ClaimNftInstructionAccounts = {
   /** Payment account for seller if using token payment */
   sellerPaymentAccount?: PublicKey | Pda;
   /** buyer of the nft */
-  buyer: PublicKey | Pda;
+  buyer?: PublicKey | Pda;
   /** Fee account for marketplace fee if using fee config */
   feeAccount?: PublicKey | Pda;
   /** Payment account for marketplace fee if using token payment */
@@ -69,7 +69,7 @@ export type ClaimNftInstructionAccounts = {
   mint: PublicKey | Pda;
   tokenAccount?: PublicKey | Pda;
   /** Nft token account for buyer */
-  buyerTokenAccount: PublicKey | Pda;
+  buyerTokenAccount?: PublicKey | Pda;
   tmpTokenAccount?: PublicKey | Pda;
   metadata?: PublicKey | Pda;
   edition?: PublicKey | Pda;
@@ -114,7 +114,7 @@ export type ClaimNftInstructionArgs = ClaimNftInstructionDataArgs;
 
 // Instruction.
 export function claimNft(
-  context: Pick<Context, 'eddsa' | 'payer' | 'programs'>,
+  context: Pick<Context, 'eddsa' | 'identity' | 'payer' | 'programs'>,
   input: ClaimNftInstructionAccounts & ClaimNftInstructionArgs
 ): TransactionBuilder {
   // Program ID.
@@ -224,6 +224,9 @@ export function claimNft(
       { gumballMachine: expectPublicKey(resolvedAccounts.gumballMachine.value) }
     );
   }
+  if (!resolvedAccounts.buyer.value) {
+    resolvedAccounts.buyer.value = context.identity.publicKey;
+  }
   if (!resolvedAccounts.tokenProgram.value) {
     resolvedAccounts.tokenProgram.value = context.programs.getPublicKey(
       'splToken',
@@ -255,6 +258,12 @@ export function claimNft(
     resolvedAccounts.tokenAccount.value = findAssociatedTokenPda(context, {
       mint: expectPublicKey(resolvedAccounts.mint.value),
       owner: expectPublicKey(resolvedAccounts.seller.value),
+    });
+  }
+  if (!resolvedAccounts.buyerTokenAccount.value) {
+    resolvedAccounts.buyerTokenAccount.value = findAssociatedTokenPda(context, {
+      mint: expectPublicKey(resolvedAccounts.mint.value),
+      owner: expectPublicKey(resolvedAccounts.buyer.value),
     });
   }
   if (!resolvedAccounts.tmpTokenAccount.value) {

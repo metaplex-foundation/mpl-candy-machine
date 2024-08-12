@@ -321,6 +321,21 @@ kinobi.update(
 				buyer: { defaultsTo: k.identityDefault() },
 			},
 		},
+		"mallowGumball.claimNft": {
+			name: "claimNft",
+			accounts: {
+				buyer: { defaultsTo: k.identityDefault() },
+				buyerTokenAccount: {
+					defaultsTo: defaultsToAssociatedTokenPda("mint", "buyer"),
+				},
+			},
+		},
+		"mallowGumball.claimCoreAsset": {
+			name: "claimCoreAsset",
+			accounts: {
+				buyer: { defaultsTo: k.identityDefault() },
+			},
+		},
 		"mplCandyGuard.route": {
 			internal: true,
 			args: {

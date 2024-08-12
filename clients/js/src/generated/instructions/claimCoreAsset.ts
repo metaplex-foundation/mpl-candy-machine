@@ -50,7 +50,7 @@ export type ClaimCoreAssetInstructionAccounts = {
   /** Payment account for seller if using token payment */
   sellerPaymentAccount?: PublicKey | Pda;
   /** buyer of the nft */
-  buyer: PublicKey | Pda;
+  buyer?: PublicKey | Pda;
   /** Fee account for marketplace fee if using fee config */
   feeAccount?: PublicKey | Pda;
   /** Payment account for marketplace fee if using token payment */
@@ -105,7 +105,7 @@ export type ClaimCoreAssetInstructionArgs = ClaimCoreAssetInstructionDataArgs;
 
 // Instruction.
 export function claimCoreAsset(
-  context: Pick<Context, 'eddsa' | 'payer' | 'programs'>,
+  context: Pick<Context, 'eddsa' | 'identity' | 'payer' | 'programs'>,
   input: ClaimCoreAssetInstructionAccounts & ClaimCoreAssetInstructionArgs
 ): TransactionBuilder {
   // Program ID.
@@ -192,6 +192,9 @@ export function claimCoreAsset(
       context,
       { gumballMachine: expectPublicKey(resolvedAccounts.gumballMachine.value) }
     );
+  }
+  if (!resolvedAccounts.buyer.value) {
+    resolvedAccounts.buyer.value = context.identity.publicKey;
   }
   if (!resolvedAccounts.systemProgram.value) {
     resolvedAccounts.systemProgram.value = context.programs.getPublicKey(

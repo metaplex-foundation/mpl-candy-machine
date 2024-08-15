@@ -180,8 +180,8 @@ pub fn settle_nft_sale<'info>(ctx: Context<'_, '_, '_, 'info, SettleNftSale<'inf
         processors::claim_nft(
             authority_pda,
             payer,
-            buyer,
-            buyer_token_account,
+            if buyer.key() == Pubkey::default() { seller } else { buyer },
+            if buyer.key() == Pubkey::default() { token_account } else { buyer_token_account },
             seller,
             token_account,
             tmp_token_account,

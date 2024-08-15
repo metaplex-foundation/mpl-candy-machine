@@ -44,106 +44,108 @@ pub fn claim_proceeds<'a, 'b>(
         .ok_or(GumballError::NumericalOverflowError)?;
     msg!("Proceeds: {}", total_proceeds);
 
-    let marketplace_fee_bps = if let Some(fee_confg) = gumball_machine.marketplace_fee_config {
-        fee_confg.fee_bps
-    } else {
-        0
-    };
+    if total_proceeds > 0 {
+        let marketplace_fee_bps = if let Some(fee_confg) = gumball_machine.marketplace_fee_config {
+            fee_confg.fee_bps
+        } else {
+            0
+        };
 
-    let marketplace_fee = get_bps_of(total_proceeds, marketplace_fee_bps)?;
-    msg!("Marketplace fee: {}", marketplace_fee);
+        let marketplace_fee = get_bps_of(total_proceeds, marketplace_fee_bps)?;
+        msg!("Marketplace fee: {}", marketplace_fee);
 
-    if marketplace_fee > 0 {
-        transfer_from_pda(
+        if marketplace_fee > 0 {
+            transfer_from_pda(
+                authority_pda,
+                fee_account.unwrap(),
+                authority_pda_payment_account,
+                fee_payment_account,
+                payment_mint,
+                Some(fee_payer),
+                associated_token_program,
+                token_program,
+                system_program,
+                rent,
+                &auth_seeds,
+                None,
+                marketplace_fee,
+            )?;
+        }
+
+        let curator_fee = get_bps_of(total_proceeds, gumball_machine.settings.curator_fee_bps)?;
+        msg!("Curator fee: {}", curator_fee);
+
+        if curator_fee > 0 {
+            transfer_from_pda(
+                authority_pda,
+                authority,
+                authority_pda_payment_account,
+                authority_payment_account,
+                payment_mint,
+                Some(fee_payer),
+                associated_token_program,
+                token_program,
+                system_program,
+                rent,
+                &auth_seeds,
+                None,
+                curator_fee,
+            )?;
+        }
+
+        let price_less_fees = total_proceeds
+            .checked_sub(marketplace_fee)
+            .ok_or(GumballError::NumericalOverflowError)?
+            .checked_sub(curator_fee)
+            .ok_or(GumballError::NumericalOverflowError)?;
+        msg!("Price less fees: {}", price_less_fees);
+
+        let total_royalty = if royalty_info.is_primary_sale {
+            price_less_fees
+        } else {
+            get_bps_of(price_less_fees, royalty_info.seller_fee_basis_points)?
+        };
+
+        msg!("Total royalty: {}", total_royalty);
+
+        let royalties_paid = pay_creator_royalties(
             authority_pda,
-            fee_account.unwrap(),
-            authority_pda_payment_account,
-            fee_payment_account,
             payment_mint,
+            authority_pda_payment_account,
             Some(fee_payer),
+            royalty_info,
+            remaining_accounts,
             associated_token_program,
             token_program,
             system_program,
             rent,
-            &auth_seeds,
-            None,
-            marketplace_fee,
+            Some(&auth_seeds),
+            total_royalty,
         )?;
-    }
 
-    let curator_fee = get_bps_of(total_proceeds, gumball_machine.settings.curator_fee_bps)?;
-    msg!("Curator fee: {}", curator_fee);
+        let seller_proceeds = price_less_fees
+            .checked_sub(royalties_paid)
+            .ok_or(GumballError::NumericalOverflowError)?;
 
-    if curator_fee > 0 {
-        transfer_from_pda(
-            authority_pda,
-            authority,
-            authority_pda_payment_account,
-            authority_payment_account,
-            payment_mint,
-            Some(fee_payer),
-            associated_token_program,
-            token_program,
-            system_program,
-            rent,
-            &auth_seeds,
-            None,
-            curator_fee,
-        )?;
-    }
+        msg!("Seller proceeds: {}", seller_proceeds);
 
-    let price_less_fees = total_proceeds
-        .checked_sub(marketplace_fee)
-        .ok_or(GumballError::NumericalOverflowError)?
-        .checked_sub(curator_fee)
-        .ok_or(GumballError::NumericalOverflowError)?;
-    msg!("Price less fees: {}", price_less_fees);
-
-    let total_royalty = if royalty_info.is_primary_sale {
-        price_less_fees
-    } else {
-        get_bps_of(price_less_fees, royalty_info.seller_fee_basis_points)?
-    };
-
-    msg!("Total royalty: {}", total_royalty);
-
-    let royalties_paid = pay_creator_royalties(
-        authority_pda,
-        payment_mint,
-        authority_pda_payment_account,
-        Some(fee_payer),
-        royalty_info,
-        remaining_accounts,
-        associated_token_program,
-        token_program,
-        system_program,
-        rent,
-        Some(&auth_seeds),
-        total_royalty,
-    )?;
-
-    let seller_proceeds = price_less_fees
-        .checked_sub(royalties_paid)
-        .ok_or(GumballError::NumericalOverflowError)?;
-
-    msg!("Seller proceeds: {}", seller_proceeds);
-
-    if seller_proceeds > 0 {
-        transfer_from_pda(
-            authority_pda,
-            seller,
-            authority_pda_payment_account,
-            seller_payment_account,
-            payment_mint,
-            Some(fee_payer),
-            associated_token_program,
-            token_program,
-            system_program,
-            rent,
-            &auth_seeds,
-            None,
-            seller_proceeds,
-        )?;
+        if seller_proceeds > 0 {
+            transfer_from_pda(
+                authority_pda,
+                seller,
+                authority_pda_payment_account,
+                seller_payment_account,
+                payment_mint,
+                Some(fee_payer),
+                associated_token_program,
+                token_program,
+                system_program,
+                rent,
+                &auth_seeds,
+                None,
+                seller_proceeds,
+            )?;
+        }
     }
 
     seller_history.item_count -= 1;

@@ -158,7 +158,7 @@ pub fn settle_core_asset_sale<'info>(ctx: Context<'_, '_, '_, 'info, SettleCoreA
         processors::claim_core_asset(
             authority_pda,
             payer,
-            buyer,
+            if buyer.key() == Pubkey::default() { seller } else { buyer },
             seller,
             asset,
             collection,

@@ -1,5 +1,5 @@
 export type CandyGuard = {
-  version: '3.0.0';
+  version: '0.1.0';
   name: 'candy_guard';
   instructions: [
     {
@@ -1409,7 +1409,7 @@ export type CandyGuard = {
 };
 
 export const IDL: CandyGuard = {
-  version: '3.0.0',
+  version: '0.1.0',
   name: 'candy_guard',
   instructions: [
     {

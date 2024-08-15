@@ -1,9 +1,9 @@
 [package]
 name = "mallow-gumball"
-version = "3.0.1"
-description = "NFT Gumball Machine Core: programmatic and trustless NFT drops."
-authors = ["Metaplex Developers <dev@metaplex.com>"]
-repository = "https://github.com/metaplex-foundation/mpl-candy-machine"
+version = "0.1.0"
+description = "mallow Gumball: collaborative random sales of existing NFTs."
+authors = ["Mallow Developers <dev@mallow.art>"]
+repository = "https://github.com/mallow-labs/mallow-gumball"
 license-file = "../../../LICENSE"
 edition = "2021"
 readme = "../README.md"

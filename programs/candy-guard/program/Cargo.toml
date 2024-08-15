@@ -1,9 +1,9 @@
 [package]
 name = "mpl-candy-guard"
-version = "3.0.0"
-description = "Metaplex Gumball Guard: programmatic access control for Gumball Machine."
-authors = ["Metaplex Developers <dev@metaplex.com>"]
-repository = "https://github.com/metaplex-foundation/mallow-gumball"
+version = "0.1.0"
+description = "mallow Gumball Guard: programmatic access control for mallow Gumball."
+authors = ["mallow Developers <dev@mallow.art>"]
+repository = "https://github.com/mallow-labs/mallow-gumball"
 license-file = "../../../LICENSE"
 edition = "2021"
 readme = "../README.md"
@@ -21,7 +21,7 @@ default = []
 anchor-lang = "0.29.0"
 arrayref = ">=0.3.6"
 mpl-candy-guard-derive = { path = "../macro", version = "0.2.0" }
-mallow-gumball = { path = "../../mallow-gumball/program", version = "3.0.0", features = ["cpi"] }
+mallow-gumball = { path = "../../mallow-gumball/program", features = ["cpi"] }
 mpl-token-metadata = "3.2.1"
 solana-program = ">=1.18.2"
 spl-token = ">=3.5.0"

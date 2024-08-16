@@ -105,6 +105,8 @@ pub fn claim_core_asset<'info>(ctx: Context<'_, '_, '_, 'info, ClaimCoreAsset<'i
     ];
 
     processors::claim_core_asset(
+        gumball_machine,
+        index,
         authority_pda,
         payer,
         buyer,

@@ -15,6 +15,7 @@ import {
 import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
 import test from 'ava';
 import {
+  claimCoreAsset,
   draw,
   endSale,
   fetchGumballMachine,
@@ -114,9 +115,20 @@ test('it can settle a core asset sale', async (t) => {
 
   // And the gumball machine was updated.
   const gumballMachineAccount = await fetchGumballMachine(umi, gumballMachine);
-  t.like(gumballMachineAccount, <GumballMachine>{
+  t.like(gumballMachineAccount, <Partial<GumballMachine>>{
     itemsRedeemed: 1n,
     itemsSettled: 1n,
+    items: [
+      {
+        index: 0,
+        isDrawn: true,
+        isClaimed: true,
+        mint: asset.publicKey,
+        seller: umi.identity.publicKey,
+        buyer: buyerUmi.identity.publicKey,
+        tokenStandard: TokenStandard.Core,
+      },
+    ],
   });
 
   // Seller history should be closed
@@ -506,5 +518,135 @@ test('it can settle a core asset sale where buyer is the seller', async (t) => {
     freezeDelegate: undefined,
     transferDelegate: undefined,
     owner: umi.identity.publicKey,
+  });
+});
+
+test('it can settle a core asset sale for claimed core asset', async (t) => {
+  // Given a gumball machine with some guards.
+  const umi = await createUmi();
+  const asset = await createCoreAsset(umi);
+
+  const gumballMachineSigner = generateSigner(umi);
+  const gumballMachine = gumballMachineSigner.publicKey;
+
+  await create(umi, {
+    gumballMachine: gumballMachineSigner,
+    items: [
+      {
+        id: asset.publicKey,
+        tokenStandard: TokenStandard.Core,
+      },
+    ],
+    startSale: true,
+    guards: {
+      botTax: { lamports: sol(0.01), lastInstruction: true },
+      solPayment: { lamports: sol(1) },
+    },
+  });
+
+  // When we mint from the gumball guard.
+  const buyerUmi = await createUmi();
+  const buyer = buyerUmi.identity;
+  const payer = await generateSignerWithSol(umi, sol(10));
+  await transactionBuilder()
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      draw(umi, {
+        gumballMachine,
+        payer,
+        buyer,
+        mintArgs: {
+          solPayment: some(true),
+        },
+      })
+    )
+    .sendAndConfirm(umi);
+
+  const sellerPreBalance = await umi.rpc.getBalance(umi.identity.publicKey);
+  const authorityPdaPreBalance = await umi.rpc.getBalance(
+    findGumballMachineAuthorityPda(umi, { gumballMachine: gumballMachine })[0]
+  );
+
+  await claimCoreAsset(buyerUmi, {
+    gumballMachine,
+    index: 0,
+    asset: asset.publicKey,
+    seller: umi.identity.publicKey,
+  }).sendAndConfirm(buyerUmi);
+
+  // Then settle the sale
+  await transactionBuilder()
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      settleCoreAssetSale(umi, {
+        index: 0,
+        gumballMachine,
+        authority: umi.identity.publicKey,
+        seller: umi.identity.publicKey,
+        buyer: buyer.publicKey,
+        asset: asset.publicKey,
+        creators: [umi.identity.publicKey],
+      })
+    )
+    .sendAndConfirm(umi);
+
+  const payerBalance = await umi.rpc.getBalance(payer.publicKey);
+  t.true(isEqualToAmount(payerBalance, sol(9), sol(0.1)));
+
+  const sellerPostBalance = await umi.rpc.getBalance(umi.identity.publicKey);
+  const authorityPdaPostBalance = await umi.rpc.getBalance(
+    findGumballMachineAuthorityPda(umi, { gumballMachine: gumballMachine })[0]
+  );
+
+  t.true(
+    isEqualToAmount(
+      sellerPostBalance,
+      addAmounts(sellerPreBalance, sol(1)),
+      sol(0.01)
+    )
+  );
+
+  t.true(
+    isEqualToAmount(
+      authorityPdaPostBalance,
+      subtractAmounts(authorityPdaPreBalance, sol(1)),
+      sol(0.01)
+    )
+  );
+
+  // And the gumball machine was updated.
+  const gumballMachineAccount = await fetchGumballMachine(umi, gumballMachine);
+  t.like(gumballMachineAccount, <Partial<GumballMachine>>{
+    itemsRedeemed: 1n,
+    itemsSettled: 1n,
+    items: [
+      {
+        index: 0,
+        isDrawn: true,
+        isClaimed: true,
+        mint: asset.publicKey,
+        seller: umi.identity.publicKey,
+        buyer: buyerUmi.identity.publicKey,
+        tokenStandard: TokenStandard.Core,
+      },
+    ],
+  });
+
+  // Seller history should be closed
+  const sellerHistoryAccount = await safeFetchSellerHistory(
+    umi,
+    findSellerHistoryPda(umi, {
+      gumballMachine,
+      seller: umi.identity.publicKey,
+    })
+  );
+  t.falsy(sellerHistoryAccount);
+
+  // Buyer should be the owner
+  const coreAsset = await fetchAssetV1(umi, asset.publicKey);
+  t.like(coreAsset, <AssetV1>{
+    freezeDelegate: undefined,
+    transferDelegate: undefined,
+    owner: buyer.publicKey,
   });
 });

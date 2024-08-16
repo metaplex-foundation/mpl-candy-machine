@@ -14,7 +14,12 @@ import {
   GumballMachine,
   TokenStandard,
 } from '../src';
-import { assertItemBought, create, createNft, createUmi } from './_setup';
+import {
+  assertItemBought as assertItemDrawn,
+  create,
+  createNft,
+  createUmi,
+} from './_setup';
 
 test('it can claim an nft item', async (t) => {
   // Given a gumball machine with a gumball guard that has no guards.
@@ -45,7 +50,7 @@ test('it can claim an nft item', async (t) => {
     .sendAndConfirm(buyerUmi);
 
   // Then the mint was successful.
-  await assertItemBought(t, umi, {
+  await assertItemDrawn(t, umi, {
     gumballMachine,
     buyer: buyerUmi.identity.publicKey,
   });
@@ -63,9 +68,20 @@ test('it can claim an nft item', async (t) => {
 
   // And the gumball machine was updated.
   const gumballMachineAccount = await fetchGumballMachine(umi, gumballMachine);
-  t.like(gumballMachineAccount, <GumballMachine>{
+  t.like(gumballMachineAccount, <Partial<GumballMachine>>{
     itemsRedeemed: 1n,
     itemsSettled: 0n,
+    items: [
+      {
+        index: 0,
+        isDrawn: true,
+        isClaimed: true,
+        mint: nft.publicKey,
+        seller: umi.identity.publicKey,
+        buyer: buyerUmi.identity.publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
   });
 
   // Buyer should be the owner

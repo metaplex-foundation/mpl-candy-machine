@@ -43,13 +43,8 @@ pub fn add_item(
     let token_standard_slice: &mut [u8] = &mut data[position..position + 1];
     token_standard_slice.copy_from_slice(&u8::to_be_bytes(token_standard as u8));
 
-    // after adding the config lines, we need to update the mint indices - there are two arrays
-    // controlling this process: (1) a bit-mask array to keep track which config lines are already
-    // present on the data; (2) an array with mint indices, where indices are added when the config
-    // line is added for the first time (when updating a config line, the index is not added again)
-
     // bit-mask
-    let bit_mask_start = gumball_machine.get_loaded_items_bit_mask_position();
+    let bit_mask_start = gumball_machine.get_claimed_items_bit_mask_position();
     // (unordered) indices for the mint
     let indices_start = bit_mask_start
         + (gumball_machine
@@ -59,32 +54,9 @@ pub fn add_item(
             .ok_or(GumballError::NumericalOverflowError)?
             + 1) as usize;
 
-    let position = index as usize;
-    let byte_position = bit_mask_start
-        + position
-            .checked_div(8)
-            .ok_or(GumballError::NumericalOverflowError)?;
-    // bit index corresponding to the position of the line
-    let bit = 7 - position
-        .checked_rem(8)
-        .ok_or(GumballError::NumericalOverflowError)?;
-    let mask = u8::pow(2, bit as u32);
-
-    let current_value = data[byte_position];
-    data[byte_position] |= mask;
-
-    msg!(
-        "Item processed: byte position={}, mask={}, current value={}, new value={}, bit position={}",
-        byte_position - bit_mask_start,
-        mask,
-        current_value,
-        data[byte_position],
-        bit
-    );
-
     // add the new index to the mint indices vec
-    let index_position = indices_start + position * 4;
-    data[index_position..index_position + 4].copy_from_slice(&u32::to_le_bytes(position as u32));
+    let index_position = indices_start + (index as usize) * 4;
+    data[index_position..index_position + 4].copy_from_slice(&u32::to_le_bytes(index));
 
     count = count
         .checked_add(1)

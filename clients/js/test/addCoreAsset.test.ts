@@ -42,7 +42,8 @@ test('it can add core assets to a gumball machine', async (t) => {
     items: [
       {
         index: 0,
-        minted: false,
+        isDrawn: false,
+        isClaimed: false,
         mint: coreAsset.publicKey,
         seller: umi.identity.publicKey,
         buyer: undefined,
@@ -124,7 +125,8 @@ test('it can add core asset to a gumball machine as allowlisted seller', async (
     items: [
       {
         index: 0,
-        minted: false,
+        isDrawn: false,
+        isClaimed: false,
         mint: coreAsset.publicKey,
         seller: otherSellerUmi.identity.publicKey,
         buyer: undefined,
@@ -248,7 +250,8 @@ test('it can append additional core assets to a gumball machine', async (t) => {
     items: [
       {
         index: 0,
-        minted: false,
+        isDrawn: false,
+        isClaimed: false,
         mint: coreAssets[0].publicKey,
         seller: umi.identity.publicKey,
         buyer: undefined,
@@ -256,7 +259,8 @@ test('it can append additional core assets to a gumball machine', async (t) => {
       },
       {
         index: 1,
-        minted: false,
+        isDrawn: false,
+        isClaimed: false,
         mint: coreAssets[1].publicKey,
         seller: umi.identity.publicKey,
         buyer: undefined,

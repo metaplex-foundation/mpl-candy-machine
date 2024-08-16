@@ -132,7 +132,8 @@ test('it can remove nfts at a lower index than last from a gumball machine', asy
     items: [
       {
         index: 0,
-        minted: false,
+        isDrawn: false,
+        isClaimed: false,
         mint: nfts[1].publicKey,
         seller: umi.identity.publicKey,
         buyer: undefined,

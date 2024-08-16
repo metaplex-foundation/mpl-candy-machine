@@ -6,6 +6,7 @@ import {
   transactionBuilder,
   TransactionBuilder,
 } from '@metaplex-foundation/umi';
+import { NATIVE_MINT } from './constants';
 import { baseSettleNftSale } from './generated';
 
 export type SettleNftSaleInput = Parameters<typeof baseSettleNftSale>[1] & {
@@ -25,7 +26,7 @@ export const settleNftSale = (
           {
             pubkey: creator,
             isSigner: false,
-            isWritable: false,
+            isWritable: input.paymentMint === NATIVE_MINT,
           },
         ];
         if (input.paymentMint) {

@@ -6,6 +6,7 @@ import {
   transactionBuilder,
   TransactionBuilder,
 } from '@metaplex-foundation/umi';
+import { NATIVE_MINT } from './constants';
 import { baseSettleCoreAssetSale } from './generated';
 
 export type SettleCoreAssetSaleInput = Parameters<
@@ -27,7 +28,7 @@ export const settleCoreAssetSale = (
           {
             pubkey: creator,
             isSigner: false,
-            isWritable: false,
+            isWritable: input.paymentMint === NATIVE_MINT,
           },
         ];
         if (input.paymentMint) {

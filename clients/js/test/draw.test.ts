@@ -38,11 +38,12 @@ import {
 test('it can mint from a gumball guard with no guards', async (t) => {
   // Given a gumball machine with a gumball guard that has no guards.
   const umi = await createUmi();
+  const nft = await createNft(umi);
 
   const gumballMachineSigner = await create(umi, {
     items: [
       {
-        id: (await createNft(umi)).publicKey,
+        id: nft.publicKey,
         tokenStandard: TokenStandard.NonFungible,
       },
     ],
@@ -69,7 +70,20 @@ test('it can mint from a gumball guard with no guards', async (t) => {
 
   // And the gumball machine was updated.
   const gumballMachineAccount = await fetchGumballMachine(umi, gumballMachine);
-  t.like(gumballMachineAccount, <GumballMachine>{ itemsRedeemed: 1n });
+  t.like(gumballMachineAccount, <Partial<GumballMachine>>{
+    itemsRedeemed: 1n,
+    items: [
+      {
+        index: 0,
+        isDrawn: true,
+        isClaimed: false,
+        mint: nft.publicKey,
+        seller: umi.identity.publicKey,
+        buyer: buyer.publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+  });
 });
 
 test('it sets state to SaleEnded on final draw', async (t) => {

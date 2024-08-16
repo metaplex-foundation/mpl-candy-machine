@@ -34,8 +34,7 @@ pub struct GumballMachine {
     // - (u32) how many actual lines of data there are currently (eventually
     //   equals item_capacity)
     // - (CONFIG_LINE_SIZE * item_capacity)
-    // - (item_capacity / 8) + 1 bit mask to keep track of which ConfigLines
-    //   have been added
+    // - (item_capacity / 8) + 1 bit mask to keep track of which items have been claimed
     // - (u32 * item_capacity) mint indices
 }
 
@@ -49,12 +48,12 @@ impl GumballMachine {
             + 4 + (4 * item_count as usize) // mint indices
     }
 
-    pub fn get_loaded_items_bit_mask_position(&self) -> usize {
+    pub fn get_claimed_items_bit_mask_position(&self) -> usize {
         GUMBALL_MACHINE_SIZE + 4 + (self.settings.item_capacity as usize) * CONFIG_LINE_SIZE
     }
 
     pub fn get_mint_indices_position(&self) -> Result<usize> {
-        let position = self.get_loaded_items_bit_mask_position()
+        let position = self.get_claimed_items_bit_mask_position()
             + (self
                 .settings
                 .item_capacity

@@ -6,7 +6,11 @@ use mpl_token_metadata::instructions::{
 use solana_program::program::invoke_signed;
 use utils::{transfer_spl, RoyaltyInfo};
 
+use crate::{processors::claim_item, GumballMachine};
+
 pub fn claim_nft<'a, 'b>(
+    gumball_machine: &mut Box<Account<'a, GumballMachine>>,
+    index: u32,
     authority_pda: &AccountInfo<'a>,
     payer: &AccountInfo<'a>,
     to: &AccountInfo<'a>,
@@ -25,6 +29,8 @@ pub fn claim_nft<'a, 'b>(
     royalty_info: &RoyaltyInfo,
     auth_seeds: &[&[u8]],
 ) -> Result<()> {
+    claim_item(gumball_machine, index)?;
+
     msg!("thawing delegated account");
     ThawDelegatedAccountCpi::new(
         token_metadata_program,

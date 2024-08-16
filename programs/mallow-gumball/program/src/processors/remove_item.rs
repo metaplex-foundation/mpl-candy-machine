@@ -59,13 +59,6 @@ pub fn remove_item(
             .for_each(|x| *x = 0);
     }
 
-    // after removing the config line, we need to update the mint indices - there are two arrays
-    // controlling this process: (1) a bit-mask array to keep track which config lines are already
-    // present on the data; (2) an array with mint indices, where indices are added when the config
-    // line is added
-
-    remove_from_loaded_bitmask(gumball_machine.settings.item_capacity, last_index, *data)?;
-
     let bit_mask_start = GUMBALL_MACHINE_SIZE
         + 4
         + (gumball_machine.settings.item_capacity as usize) * CONFIG_LINE_SIZE;
@@ -93,38 +86,4 @@ pub fn remove_item(
         .copy_from_slice(&(count as u32).to_le_bytes());
 
     Ok(())
-}
-
-pub fn remove_from_loaded_bitmask(
-    item_capacity: u64,
-    last_index: usize,
-    data: &mut [u8],
-) -> Result<bool> {
-    // bit-mask
-    let bit_mask_start = GUMBALL_MACHINE_SIZE + 4 + (item_capacity as usize) * CONFIG_LINE_SIZE;
-
-    let position = last_index as usize;
-    let byte_position = bit_mask_start
-        + position
-            .checked_div(8)
-            .ok_or(GumballError::NumericalOverflowError)?;
-    // bit index corresponding to the position of the line
-    let bit = 7 - position
-        .checked_rem(8)
-        .ok_or(GumballError::NumericalOverflowError)?;
-    let mask = u8::pow(2, bit as u32);
-
-    let current_value = data[byte_position];
-    data[byte_position] &= !mask;
-
-    msg!(
-        "Item processed: byte position={}, mask={}, current value={}, new value={}, bit position={}",
-        byte_position - bit_mask_start,
-        mask,
-        current_value,
-        data[byte_position],
-        bit
-    );
-
-    Ok(current_value != data[byte_position])
 }

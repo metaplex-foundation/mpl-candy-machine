@@ -36,8 +36,11 @@ export type GumballMachineItem = {
   /** The index of the config line. */
   readonly index: number;
 
-  /** Whether the item has been minted or not. */
-  readonly minted: boolean;
+  /** Whether the item has been drawn or not. */
+  readonly isDrawn: boolean;
+
+  /** Whether the item has been claimed or not. */
+  readonly isClaimed: boolean;
 
   /** The name of the NFT to be. */
   readonly mint: string;
@@ -58,7 +61,7 @@ type GumballMachineHiddenSection = {
     buyer: PublicKey;
     tokenStandard: TokenStandard;
   }[];
-  itemsLoadedMap: boolean[];
+  itemsClaimedMap: boolean[];
   itemsLeftToMint: number[];
 };
 
@@ -76,10 +79,7 @@ export function getGumballMachineAccountDataSerializer(): Serializer<
     (args) => args,
     (base, bytes, offset) => {
       const slice = bytes.slice(offset + GUMBALL_MACHINE_HIDDEN_SECTION);
-
-      const itemsAvailable = Number(base.settings.itemCapacity);
-      const itemsMinted = Number(base.itemsRedeemed);
-      const itemsRemaining = itemsAvailable - itemsMinted;
+      const itemCapacity = Number(base.settings.itemCapacity);
 
       const hiddenSectionSerializer: Serializer<GumballMachineHiddenSection> =
         struct<GumballMachineHiddenSection>([
@@ -98,26 +98,34 @@ export function getGumballMachineAccountDataSerializer(): Serializer<
                 ['buyer', publicKey()],
                 ['tokenStandard', u8()],
               ]),
-              { size: itemsAvailable }
+              { size: itemCapacity }
             ),
           ],
-          ['itemsLoadedMap', bitArray(Math.floor(itemsAvailable / 8) + 1)],
-          ['itemsLeftToMint', array(u32(), { size: itemsAvailable })],
+          ['itemsClaimedMap', bitArray(Math.floor(itemCapacity / 8) + 1)],
+          ['itemsLeftToMint', array(u32(), { size: itemCapacity })],
         ]);
 
       const [hiddenSection] = hiddenSectionSerializer.deserialize(slice);
+
+      const itemsMinted = Number(base.itemsRedeemed);
+      const itemsRemaining = hiddenSection.itemsLoaded - itemsMinted;
 
       const itemsLeftToMint = hiddenSection.itemsLeftToMint.slice(
         0,
         itemsRemaining
       );
+
       const items: GumballMachineItem[] = [];
-      hiddenSection.itemsLoadedMap.forEach((loaded, index) => {
-        if (!loaded) return;
+      hiddenSection.itemsClaimedMap.forEach((isClaimed, index) => {
+        if (index >= hiddenSection.itemsLoaded) {
+          return;
+        }
+
         const rawItem = hiddenSection.rawConfigLines[index];
         const item = {
           index,
-          minted: !itemsLeftToMint.includes(index),
+          isDrawn: !itemsLeftToMint.includes(index),
+          isClaimed,
           mint: rawItem.mint,
           seller: rawItem.seller,
           buyer:

@@ -50,7 +50,8 @@ test('it can add nft to a gumball machine as the authority', async (t) => {
     items: [
       {
         index: 0,
-        minted: false,
+        isDrawn: false,
+        isClaimed: false,
         mint: nft.publicKey,
         seller: umi.identity.publicKey,
         buyer: undefined,
@@ -128,7 +129,8 @@ test('it can add nft to a gumball machine as allowlisted seller', async (t) => {
     items: [
       {
         index: 0,
-        minted: false,
+        isDrawn: false,
+        isClaimed: false,
         mint: nft.publicKey,
         seller: otherSellerUmi.identity.publicKey,
         buyer: undefined,
@@ -196,7 +198,8 @@ test('it can add nft to a gumball machine as allowlisted seller on allowlist of 
     items: [
       {
         index: 0,
-        minted: false,
+        isDrawn: false,
+        isClaimed: false,
         mint: nft.publicKey,
         seller: otherSellerUmi.identity.publicKey,
         buyer: undefined,
@@ -305,7 +308,8 @@ test('it can append additional nfts to a gumball machine', async (t) => {
     items: [
       {
         index: 0,
-        minted: false,
+        isDrawn: false,
+        isClaimed: false,
         mint: nfts[0].publicKey,
         seller: umi.identity.publicKey,
         buyer: undefined,
@@ -313,7 +317,8 @@ test('it can append additional nfts to a gumball machine', async (t) => {
       },
       {
         index: 1,
-        minted: false,
+        isDrawn: false,
+        isClaimed: false,
         mint: nfts[1].publicKey,
         seller: umi.identity.publicKey,
         buyer: undefined,

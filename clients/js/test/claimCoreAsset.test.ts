@@ -59,9 +59,20 @@ test('it can claim a core asset item', async (t) => {
 
   // And the gumball machine was updated.
   const gumballMachineAccount = await fetchGumballMachine(umi, gumballMachine);
-  t.like(gumballMachineAccount, <GumballMachine>{
+  t.like(gumballMachineAccount, <Partial<GumballMachine>>{
     itemsRedeemed: 1n,
     itemsSettled: 0n,
+    items: [
+      {
+        index: 0,
+        isDrawn: true,
+        isClaimed: true,
+        mint: asset.publicKey,
+        seller: umi.identity.publicKey,
+        buyer: buyerUmi.identity.publicKey,
+        tokenStandard: TokenStandard.Core,
+      },
+    ],
   });
 
   // Buyer should be the owner

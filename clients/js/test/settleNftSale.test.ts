@@ -20,6 +20,7 @@ import {
 import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
 import test from 'ava';
 import {
+  claimNft,
   draw,
   endSale,
   fetchGumballMachine,
@@ -119,9 +120,20 @@ test('it can settle an nft sale', async (t) => {
 
   // And the gumball machine was updated.
   const gumballMachineAccount = await fetchGumballMachine(umi, gumballMachine);
-  t.like(gumballMachineAccount, <GumballMachine>{
+  t.like(gumballMachineAccount, <Partial<GumballMachine>>{
     itemsRedeemed: 1n,
     itemsSettled: 1n,
+    items: [
+      {
+        index: 0,
+        isDrawn: true,
+        isClaimed: true,
+        mint: nft.publicKey,
+        seller: umi.identity.publicKey,
+        buyer: buyerUmi.identity.publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
   });
 
   // Seller history should be closed
@@ -543,4 +555,237 @@ test('it can settle an nft sale where buyer is the seller', async (t) => {
     delegate: none(),
     amount: 1n,
   });
+});
+
+test('it can settle an nft sale for claimed nft', async (t) => {
+  // Given a gumball machine with some guards.
+  const umi = await createUmi();
+  const nft = await createNft(umi);
+
+  const gumballMachineSigner = generateSigner(umi);
+  const gumballMachine = gumballMachineSigner.publicKey;
+
+  await create(umi, {
+    gumballMachine: gumballMachineSigner,
+    items: [
+      {
+        id: nft.publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    startSale: true,
+    guards: {
+      botTax: { lamports: sol(0.01), lastInstruction: true },
+      solPayment: { lamports: sol(1) },
+    },
+  });
+
+  // When we mint from the gumball guard.
+  const buyerUmi = await createUmi();
+  const buyer = buyerUmi.identity;
+  const payer = await generateSignerWithSol(umi, sol(10));
+  await transactionBuilder()
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      draw(umi, {
+        gumballMachine,
+        payer,
+        buyer,
+        mintArgs: {
+          solPayment: some(true),
+        },
+      })
+    )
+    .sendAndConfirm(umi);
+
+  const sellerPreBalance = await umi.rpc.getBalance(umi.identity.publicKey);
+  const authorityPdaPreBalance = await umi.rpc.getBalance(
+    findGumballMachineAuthorityPda(umi, { gumballMachine: gumballMachine })[0]
+  );
+
+  await claimNft(buyerUmi, {
+    gumballMachine,
+    index: 0,
+    mint: nft.publicKey,
+    seller: umi.identity.publicKey,
+  }).sendAndConfirm(buyerUmi);
+
+  // Then settle the sale
+  await transactionBuilder()
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      settleNftSale(umi, {
+        index: 0,
+        gumballMachine,
+        authority: umi.identity.publicKey,
+        seller: umi.identity.publicKey,
+        buyer: buyer.publicKey,
+        mint: nft.publicKey,
+        creators: [umi.identity.publicKey],
+      })
+    )
+    .sendAndConfirm(umi);
+
+  const payerBalance = await umi.rpc.getBalance(payer.publicKey);
+  t.true(isEqualToAmount(payerBalance, sol(9), sol(0.1)));
+
+  const sellerPostBalance = await umi.rpc.getBalance(umi.identity.publicKey);
+  const authorityPdaPostBalance = await umi.rpc.getBalance(
+    findGumballMachineAuthorityPda(umi, { gumballMachine: gumballMachine })[0]
+  );
+
+  t.true(
+    isEqualToAmount(
+      sellerPostBalance,
+      addAmounts(sellerPreBalance, sol(1)),
+      sol(0.01)
+    )
+  );
+
+  t.true(
+    isEqualToAmount(
+      authorityPdaPostBalance,
+      subtractAmounts(authorityPdaPreBalance, sol(1)),
+      sol(0.01)
+    )
+  );
+
+  // And the gumball machine was updated.
+  const gumballMachineAccount = await fetchGumballMachine(umi, gumballMachine);
+  t.like(gumballMachineAccount, <Partial<GumballMachine>>{
+    itemsRedeemed: 1n,
+    itemsSettled: 1n,
+    items: [
+      {
+        index: 0,
+        isDrawn: true,
+        isClaimed: true,
+        mint: nft.publicKey,
+        seller: umi.identity.publicKey,
+        buyer: buyerUmi.identity.publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+  });
+
+  // Seller history should be closed
+  const sellerHistoryAccount = await safeFetchSellerHistory(
+    umi,
+    findSellerHistoryPda(umi, {
+      gumballMachine,
+      seller: umi.identity.publicKey,
+    })
+  );
+  t.falsy(sellerHistoryAccount);
+
+  // Buyer should be the owner
+  // Then nft is unfrozen and revoked
+  const tokenAccount = await fetchToken(
+    umi,
+    findAssociatedTokenPda(umi, {
+      mint: nft.publicKey,
+      owner: buyer.publicKey,
+    })[0]
+  );
+
+  t.like(tokenAccount, {
+    state: TokenState.Initialized,
+    owner: buyer.publicKey,
+    delegate: none(),
+    amount: 1n,
+  });
+});
+
+test('it can settle an nft sale with a marketplace config', async (t) => {
+  // Given a gumball machine with some guards.
+  const umi = await createUmi();
+  const nft = await createNft(umi);
+
+  const gumballMachineSigner = generateSigner(umi);
+  const gumballMachine = gumballMachineSigner.publicKey;
+  const feeAccount = generateSigner(umi).publicKey;
+
+  await create(umi, {
+    gumballMachine: gumballMachineSigner,
+    items: [
+      {
+        id: nft.publicKey,
+        tokenStandard: TokenStandard.NonFungible,
+      },
+    ],
+    feeConfig: {
+      feeAccount,
+      feeBps: 500,
+    },
+    startSale: true,
+    guards: {
+      botTax: { lamports: sol(0.01), lastInstruction: true },
+      solPayment: { lamports: sol(1) },
+    },
+  });
+
+  // When we mint from the gumball guard.
+  const buyerUmi = await createUmi();
+  const buyer = buyerUmi.identity;
+  const payer = await generateSignerWithSol(umi, sol(10));
+  await transactionBuilder()
+    .add(setComputeUnitLimit(umi, { units: 600_000 }))
+    .add(
+      draw(umi, {
+        gumballMachine,
+        payer,
+        buyer,
+        mintArgs: {
+          solPayment: some(true),
+        },
+      })
+    )
+    .sendAndConfirm(umi);
+
+  const sellerPreBalance = await umi.rpc.getBalance(umi.identity.publicKey);
+  const authorityPdaPreBalance = await umi.rpc.getBalance(
+    findGumballMachineAuthorityPda(umi, { gumballMachine: gumballMachine })[0]
+  );
+
+  // Then settle the sale
+  await transactionBuilder()
+    .add(setComputeUnitLimit(buyerUmi, { units: 600_000 }))
+    .add(
+      settleNftSale(buyerUmi, {
+        index: 0,
+        gumballMachine,
+        authority: umi.identity.publicKey,
+        seller: umi.identity.publicKey,
+        mint: nft.publicKey,
+        creators: [umi.identity.publicKey],
+        feeAccount,
+      })
+    )
+    .sendAndConfirm(buyerUmi);
+
+  const payerBalance = await umi.rpc.getBalance(payer.publicKey);
+  t.true(isEqualToAmount(payerBalance, sol(9), sol(0.1)));
+
+  const feeAccountBalance = await umi.rpc.getBalance(feeAccount);
+  t.true(isEqualToAmount(feeAccountBalance, sol(0.05)));
+
+  const sellerPostBalance = await umi.rpc.getBalance(umi.identity.publicKey);
+  const authorityPdaPostBalance = await umi.rpc.getBalance(
+    findGumballMachineAuthorityPda(umi, { gumballMachine: gumballMachine })[0]
+  );
+
+  t.true(
+    isEqualToAmount(
+      sellerPostBalance,
+      addAmounts(sellerPreBalance, sol(0.95)),
+      sol(0.01)
+    )
+  );
+
+  t.true(
+    isEqualToAmount(
+      authorityPdaPostBalance,
+      subtractAmounts(authorityPdaPreBalance, sol(1))
+    )
+  );
 });

@@ -5,7 +5,13 @@ use mpl_core::{
 };
 use utils::transfer_sol;
 
+use crate::GumballMachine;
+
+use super::claim_item;
+
 pub fn claim_core_asset<'a, 'b>(
+    gumball_machine: &mut Box<Account<'a, GumballMachine>>,
+    index: u32,
     authority_pda: &AccountInfo<'a>,
     payer: &AccountInfo<'a>,
     to: &AccountInfo<'a>,
@@ -16,6 +22,8 @@ pub fn claim_core_asset<'a, 'b>(
     system_program: &AccountInfo<'a>,
     auth_seeds: &[&[u8]],
 ) -> Result<()> {
+    claim_item(gumball_machine, index)?;
+
     UpdatePluginV1CpiBuilder::new(mpl_core_program)
         .asset(asset)
         .collection(collection)

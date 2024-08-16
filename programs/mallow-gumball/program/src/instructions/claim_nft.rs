@@ -134,6 +134,8 @@ pub fn claim_nft<'info>(ctx: Context<'_, '_, '_, 'info, ClaimNft<'info>>, index:
     ];
 
     processors::claim_nft(
+        gumball_machine,
+        index,
         authority_pda,
         payer,
         buyer,

@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use utils::get_verified_royalty_info;
 use crate::{
-    assert_config_line, constants::{AUTHORITY_SEED, SELLER_HISTORY_SEED}, events::SettleItemSaleEvent, get_config_count, processors::{self, claim_proceeds, remove_from_loaded_bitmask}, state::GumballMachine, AssociatedToken, GumballError, ConfigLine, GumballState, SellerHistory, Token, TokenStandard
+    assert_config_line, constants::{AUTHORITY_SEED, SELLER_HISTORY_SEED}, events::SettleItemSaleEvent, processors::{self, claim_proceeds, is_item_claimed}, state::GumballMachine, AssociatedToken, ConfigLine, GumballError, GumballState, SellerHistory, Token, TokenStandard
 };
 
 /// Settles a legacy NFT sale
@@ -171,13 +171,10 @@ pub fn settle_nft_sale<'info>(ctx: Context<'_, '_, '_, 'info, SettleNftSale<'inf
         &[ctx.bumps.authority_pda],
     ];
 
-    let account_info = gumball_machine.to_account_info();
-    let mut data = account_info.data.borrow_mut();
-    let count = get_config_count(&data)?;
-    let last_index = count - 1;
-
-    if remove_from_loaded_bitmask(gumball_machine.settings.item_capacity, last_index, *data)? {
+    if !is_item_claimed(gumball_machine, index)? {
         processors::claim_nft(
+            gumball_machine,
+            index,
             authority_pda,
             payer,
             if buyer.key() == Pubkey::default() { seller } else { buyer },
@@ -197,8 +194,6 @@ pub fn settle_nft_sale<'info>(ctx: Context<'_, '_, '_, 'info, SettleNftSale<'inf
             &auth_seeds,
         )?;
     }
-
-    drop(data);
 
     let total_proceeds = claim_proceeds(
         gumball_machine, 

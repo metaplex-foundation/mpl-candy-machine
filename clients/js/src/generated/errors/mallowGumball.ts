@@ -584,121 +584,134 @@ export class InvalidAuthorityError extends ProgramError {
 codeToErrorMap.set(0x1795, InvalidAuthorityError);
 nameToErrorMap.set('InvalidAuthority', InvalidAuthorityError);
 
+/** InvalidMintAuthority: Invalid mint authority */
+export class InvalidMintAuthorityError extends ProgramError {
+  readonly name: string = 'InvalidMintAuthority';
+
+  readonly code: number = 0x1796; // 6038
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid mint authority', program, cause);
+  }
+}
+codeToErrorMap.set(0x1796, InvalidMintAuthorityError);
+nameToErrorMap.set('InvalidMintAuthority', InvalidMintAuthorityError);
+
 /** InvalidMint: Invalid mint */
 export class InvalidMintError extends ProgramError {
   readonly name: string = 'InvalidMint';
 
-  readonly code: number = 0x1796; // 6038
+  readonly code: number = 0x1797; // 6039
 
   constructor(program: Program, cause?: Error) {
     super('Invalid mint', program, cause);
   }
 }
-codeToErrorMap.set(0x1796, InvalidMintError);
+codeToErrorMap.set(0x1797, InvalidMintError);
 nameToErrorMap.set('InvalidMint', InvalidMintError);
 
 /** InvalidPaymentMint: Invalid payment mint */
 export class InvalidPaymentMintError extends ProgramError {
   readonly name: string = 'InvalidPaymentMint';
 
-  readonly code: number = 0x1797; // 6039
+  readonly code: number = 0x1798; // 6040
 
   constructor(program: Program, cause?: Error) {
     super('Invalid payment mint', program, cause);
   }
 }
-codeToErrorMap.set(0x1797, InvalidPaymentMintError);
+codeToErrorMap.set(0x1798, InvalidPaymentMintError);
 nameToErrorMap.set('InvalidPaymentMint', InvalidPaymentMintError);
 
 /** InvalidSeller: Invalid seller */
 export class InvalidSellerError extends ProgramError {
   readonly name: string = 'InvalidSeller';
 
-  readonly code: number = 0x1798; // 6040
+  readonly code: number = 0x1799; // 6041
 
   constructor(program: Program, cause?: Error) {
     super('Invalid seller', program, cause);
   }
 }
-codeToErrorMap.set(0x1798, InvalidSellerError);
+codeToErrorMap.set(0x1799, InvalidSellerError);
 nameToErrorMap.set('InvalidSeller', InvalidSellerError);
 
 /** InvalidBuyer: Invalid buyer */
 export class InvalidBuyerError extends ProgramError {
   readonly name: string = 'InvalidBuyer';
 
-  readonly code: number = 0x1799; // 6041
+  readonly code: number = 0x179a; // 6042
 
   constructor(program: Program, cause?: Error) {
     super('Invalid buyer', program, cause);
   }
 }
-codeToErrorMap.set(0x1799, InvalidBuyerError);
+codeToErrorMap.set(0x179a, InvalidBuyerError);
 nameToErrorMap.set('InvalidBuyer', InvalidBuyerError);
 
 /** UriTooLong: URI too long */
 export class UriTooLongError extends ProgramError {
   readonly name: string = 'UriTooLong';
 
-  readonly code: number = 0x179a; // 6042
+  readonly code: number = 0x179b; // 6043
 
   constructor(program: Program, cause?: Error) {
     super('URI too long', program, cause);
   }
 }
-codeToErrorMap.set(0x179a, UriTooLongError);
+codeToErrorMap.set(0x179b, UriTooLongError);
 nameToErrorMap.set('UriTooLong', UriTooLongError);
 
 /** InvalidProofPath: Invalid proof path */
 export class InvalidProofPathError extends ProgramError {
   readonly name: string = 'InvalidProofPath';
 
-  readonly code: number = 0x179b; // 6043
+  readonly code: number = 0x179c; // 6044
 
   constructor(program: Program, cause?: Error) {
     super('Invalid proof path', program, cause);
   }
 }
-codeToErrorMap.set(0x179b, InvalidProofPathError);
+codeToErrorMap.set(0x179c, InvalidProofPathError);
 nameToErrorMap.set('InvalidProofPath', InvalidProofPathError);
 
 /** InvalidSettingUpdate: Invalid setting update */
 export class InvalidSettingUpdateError extends ProgramError {
   readonly name: string = 'InvalidSettingUpdate';
 
-  readonly code: number = 0x179c; // 6044
+  readonly code: number = 0x179d; // 6045
 
   constructor(program: Program, cause?: Error) {
     super('Invalid setting update', program, cause);
   }
 }
-codeToErrorMap.set(0x179c, InvalidSettingUpdateError);
+codeToErrorMap.set(0x179d, InvalidSettingUpdateError);
 nameToErrorMap.set('InvalidSettingUpdate', InvalidSettingUpdateError);
 
 /** SellerTooManyItems: Seller has too many items */
 export class SellerTooManyItemsError extends ProgramError {
   readonly name: string = 'SellerTooManyItems';
 
-  readonly code: number = 0x179d; // 6045
+  readonly code: number = 0x179e; // 6046
 
   constructor(program: Program, cause?: Error) {
     super('Seller has too many items', program, cause);
   }
 }
-codeToErrorMap.set(0x179d, SellerTooManyItemsError);
+codeToErrorMap.set(0x179e, SellerTooManyItemsError);
 nameToErrorMap.set('SellerTooManyItems', SellerTooManyItemsError);
 
 /** NotAllSettled: Not all items have been settled */
 export class NotAllSettledError extends ProgramError {
   readonly name: string = 'NotAllSettled';
 
-  readonly code: number = 0x179e; // 6046
+  readonly code: number = 0x179f; // 6047
 
   constructor(program: Program, cause?: Error) {
     super('Not all items have been settled', program, cause);
   }
 }
-codeToErrorMap.set(0x179e, NotAllSettledError);
+codeToErrorMap.set(0x179f, NotAllSettledError);
 nameToErrorMap.set('NotAllSettled', NotAllSettledError);
 
 /**

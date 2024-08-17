@@ -267,6 +267,33 @@ export type CandyGuard = {
           name: 'authority';
           isMut: true;
           isSigner: true;
+        },
+        {
+          name: 'gumballMachine';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'authorityPda';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'authorityPdaPaymentAccount';
+          isMut: true;
+          isSigner: false;
+          isOptional: true;
+          docs: ['Payment account for authority pda if using token payment'];
+        },
+        {
+          name: 'gumballMachineProgram';
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: 'tokenProgram';
+          isMut: false;
+          isSigner: false;
         }
       ];
       args: [];
@@ -1677,6 +1704,33 @@ export const IDL: CandyGuard = {
           name: 'authority',
           isMut: true,
           isSigner: true,
+        },
+        {
+          name: 'gumballMachine',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'authorityPda',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'authorityPdaPaymentAccount',
+          isMut: true,
+          isSigner: false,
+          isOptional: true,
+          docs: ['Payment account for authority pda if using token payment'],
+        },
+        {
+          name: 'gumballMachineProgram',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'tokenProgram',
+          isMut: false,
+          isSigner: false,
         },
       ],
       args: [],

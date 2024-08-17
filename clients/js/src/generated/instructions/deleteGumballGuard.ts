@@ -21,7 +21,9 @@ import {
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
+import { findGumballMachineAuthorityPda } from '../../hooked';
 import {
+  expectPublicKey,
   getAccountMetasAndSigners,
   ResolvedAccount,
   ResolvedAccountsWithIndices,
@@ -31,6 +33,12 @@ import {
 export type DeleteGumballGuardInstructionAccounts = {
   gumballGuard: PublicKey | Pda;
   authority?: Signer;
+  gumballMachine: PublicKey | Pda;
+  authorityPda?: PublicKey | Pda;
+  /** Payment account for authority pda if using token payment */
+  authorityPdaPaymentAccount?: PublicKey | Pda;
+  gumballMachineProgram?: PublicKey | Pda;
+  tokenProgram?: PublicKey | Pda;
 };
 
 // Data.
@@ -65,7 +73,7 @@ export function getDeleteGumballGuardInstructionDataSerializer(): Serializer<
 
 // Instruction.
 export function deleteGumballGuard(
-  context: Pick<Context, 'identity' | 'programs'>,
+  context: Pick<Context, 'eddsa' | 'identity' | 'programs'>,
   input: DeleteGumballGuardInstructionAccounts
 ): TransactionBuilder {
   // Program ID.
@@ -82,11 +90,57 @@ export function deleteGumballGuard(
       value: input.gumballGuard ?? null,
     },
     authority: { index: 1, isWritable: true, value: input.authority ?? null },
+    gumballMachine: {
+      index: 2,
+      isWritable: true,
+      value: input.gumballMachine ?? null,
+    },
+    authorityPda: {
+      index: 3,
+      isWritable: true,
+      value: input.authorityPda ?? null,
+    },
+    authorityPdaPaymentAccount: {
+      index: 4,
+      isWritable: true,
+      value: input.authorityPdaPaymentAccount ?? null,
+    },
+    gumballMachineProgram: {
+      index: 5,
+      isWritable: false,
+      value: input.gumballMachineProgram ?? null,
+    },
+    tokenProgram: {
+      index: 6,
+      isWritable: false,
+      value: input.tokenProgram ?? null,
+    },
   };
 
   // Default values.
   if (!resolvedAccounts.authority.value) {
     resolvedAccounts.authority.value = context.identity;
+  }
+  if (!resolvedAccounts.authorityPda.value) {
+    resolvedAccounts.authorityPda.value = findGumballMachineAuthorityPda(
+      context,
+      { gumballMachine: expectPublicKey(resolvedAccounts.gumballMachine.value) }
+    );
+  }
+  if (!resolvedAccounts.gumballMachineProgram.value) {
+    resolvedAccounts.gumballMachineProgram.value =
+      context.programs.getPublicKey(
+        'mallowGumball',
+        'MGUMqztv7MHgoHBYWbvMyL3E3NJ4UHfTwgLJUQAbKGa'
+      );
+    resolvedAccounts.gumballMachineProgram.isWritable = false;
+  }
+  if (!resolvedAccounts.tokenProgram.value) {
+    resolvedAccounts.tokenProgram.value = context.programs.getPublicKey(
+      'splToken',
+      'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
+    );
+    resolvedAccounts.tokenProgram.isWritable = false;
   }
 
   // Accounts in order.

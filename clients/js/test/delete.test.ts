@@ -12,8 +12,10 @@ import {
 import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
 import test from 'ava';
 import {
+  deleteGumballGuard,
   deleteGumballMachine,
   draw,
+  findGumballGuardPda,
   findGumballMachineAuthorityPda,
   settleNftSale,
   TokenStandard,
@@ -40,6 +42,30 @@ test('it can delete an empty gumball machine', async (t) => {
 
   // Then the gumball machine account no longer exists.
   t.false(await umi.rpc.accountExists(gumballMachine.publicKey));
+});
+
+test('it can delete an empty gumball machine with guard', async (t) => {
+  // Given an existing gumball machine.
+  const umi = await createUmi();
+  const gumballMachine = await create(umi, { guards: {} });
+  const gumballGuard = findGumballGuardPda(umi, {
+    base: gumballMachine.publicKey,
+  })[0];
+
+  // When we delete it.
+  await transactionBuilder()
+    .add(
+      deleteGumballGuard(umi, {
+        gumballGuard,
+        gumballMachine: gumballMachine.publicKey,
+      })
+    )
+    .sendAndConfirm(umi);
+
+  // Then the gumball machine account no longer exists.
+  t.false(await umi.rpc.accountExists(gumballMachine.publicKey));
+  // Then the gumball guard account no longer exists.
+  t.false(await umi.rpc.accountExists(gumballGuard));
 });
 
 test('it can delete a settled gumball machine with native token', async (t) => {
@@ -96,9 +122,10 @@ test('it can delete a settled gumball machine with native token', async (t) => {
     .prepend(setComputeUnitLimit(umi, { units: 600_000 }))
     .sendAndConfirm(umi);
 
+  const gumballGuard = findGumballGuardPda(umi, { base: gumballMachine })[0];
   // When we delete it.
   await transactionBuilder()
-    .add(deleteGumballMachine(umi, { gumballMachine }))
+    .add(deleteGumballGuard(umi, { gumballMachine, gumballGuard }))
     .sendAndConfirm(umi);
 
   // Then the gumball machine account no longer exists.
@@ -180,10 +207,15 @@ test('it can delete a settled gumball machine with payment token', async (t) => 
     )
     .sendAndConfirm(umi);
 
+  const gumballGuard = findGumballGuardPda(umi, { base: gumballMachine })[0];
   // When we delete it.
   await transactionBuilder()
     .add(
-      deleteGumballMachine(umi, { gumballMachine, authorityPdaPaymentAccount })
+      deleteGumballGuard(umi, {
+        gumballGuard,
+        gumballMachine,
+        authorityPdaPaymentAccount,
+      })
     )
     .sendAndConfirm(umi);
 

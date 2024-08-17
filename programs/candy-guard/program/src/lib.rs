@@ -56,7 +56,7 @@ pub mod candy_guard {
     }
 
     /// Withdraw the rent SOL from the gumball guard account.
-    pub fn withdraw(ctx: Context<Withdraw>) -> Result<()> {
+    pub fn withdraw<'info>(ctx: Context<'_, '_, '_, 'info, Withdraw<'info>>) -> Result<()> {
         instructions::withdraw(ctx)
     }
 

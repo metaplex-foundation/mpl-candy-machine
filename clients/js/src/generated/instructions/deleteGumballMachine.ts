@@ -35,6 +35,8 @@ export type DeleteGumballMachineInstructionAccounts = {
   gumballMachine: PublicKey | Pda;
   /** Authority of the gumball machine. */
   authority?: Signer;
+  /** Mint authority of the gumball machine. */
+  mintAuthority?: Signer;
   authorityPda?: PublicKey | Pda;
   /** Payment account for authority pda if using token payment */
   authorityPdaPaymentAccount?: PublicKey | Pda;
@@ -90,18 +92,23 @@ export function deleteGumballMachine(
       value: input.gumballMachine ?? null,
     },
     authority: { index: 1, isWritable: true, value: input.authority ?? null },
-    authorityPda: {
+    mintAuthority: {
       index: 2,
+      isWritable: true,
+      value: input.mintAuthority ?? null,
+    },
+    authorityPda: {
+      index: 3,
       isWritable: true,
       value: input.authorityPda ?? null,
     },
     authorityPdaPaymentAccount: {
-      index: 3,
+      index: 4,
       isWritable: true,
       value: input.authorityPdaPaymentAccount ?? null,
     },
     tokenProgram: {
-      index: 4,
+      index: 5,
       isWritable: false,
       value: input.tokenProgram ?? null,
     },
@@ -110,6 +117,9 @@ export function deleteGumballMachine(
   // Default values.
   if (!resolvedAccounts.authority.value) {
     resolvedAccounts.authority.value = context.identity;
+  }
+  if (!resolvedAccounts.mintAuthority.value) {
+    resolvedAccounts.mintAuthority.value = context.identity;
   }
   if (!resolvedAccounts.authorityPda.value) {
     resolvedAccounts.authorityPda.value = findGumballMachineAuthorityPda(

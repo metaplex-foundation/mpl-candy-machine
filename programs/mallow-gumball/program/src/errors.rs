@@ -116,6 +116,9 @@ pub enum GumballError {
     #[msg("Invalid authority")]
     InvalidAuthority,
 
+    #[msg("Invalid mint authority")]
+    InvalidMintAuthority,
+
     #[msg("Invalid mint")]
     InvalidMint,
 

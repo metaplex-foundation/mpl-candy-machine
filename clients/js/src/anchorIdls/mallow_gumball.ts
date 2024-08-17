@@ -1266,6 +1266,12 @@ export type MallowGumball = {
           docs: ['Authority of the gumball machine.'];
         },
         {
+          name: 'mintAuthority';
+          isMut: true;
+          isSigner: true;
+          docs: ['Mint authority of the gumball machine.'];
+        },
+        {
           name: 'authorityPda';
           isMut: true;
           isSigner: false;
@@ -1831,46 +1837,51 @@ export type MallowGumball = {
     },
     {
       code: 6038;
+      name: 'InvalidMintAuthority';
+      msg: 'Invalid mint authority';
+    },
+    {
+      code: 6039;
       name: 'InvalidMint';
       msg: 'Invalid mint';
     },
     {
-      code: 6039;
+      code: 6040;
       name: 'InvalidPaymentMint';
       msg: 'Invalid payment mint';
     },
     {
-      code: 6040;
+      code: 6041;
       name: 'InvalidSeller';
       msg: 'Invalid seller';
     },
     {
-      code: 6041;
+      code: 6042;
       name: 'InvalidBuyer';
       msg: 'Invalid buyer';
     },
     {
-      code: 6042;
+      code: 6043;
       name: 'UriTooLong';
       msg: 'URI too long';
     },
     {
-      code: 6043;
+      code: 6044;
       name: 'InvalidProofPath';
       msg: 'Invalid proof path';
     },
     {
-      code: 6044;
+      code: 6045;
       name: 'InvalidSettingUpdate';
       msg: 'Invalid setting update';
     },
     {
-      code: 6045;
+      code: 6046;
       name: 'SellerTooManyItems';
       msg: 'Seller has too many items';
     },
     {
-      code: 6046;
+      code: 6047;
       name: 'NotAllSettled';
       msg: 'Not all items have been settled';
     }
@@ -3145,6 +3156,12 @@ export const IDL: MallowGumball = {
           docs: ['Authority of the gumball machine.'],
         },
         {
+          name: 'mintAuthority',
+          isMut: true,
+          isSigner: true,
+          docs: ['Mint authority of the gumball machine.'],
+        },
+        {
           name: 'authorityPda',
           isMut: true,
           isSigner: false,
@@ -3710,46 +3727,51 @@ export const IDL: MallowGumball = {
     },
     {
       code: 6038,
+      name: 'InvalidMintAuthority',
+      msg: 'Invalid mint authority',
+    },
+    {
+      code: 6039,
       name: 'InvalidMint',
       msg: 'Invalid mint',
     },
     {
-      code: 6039,
+      code: 6040,
       name: 'InvalidPaymentMint',
       msg: 'Invalid payment mint',
     },
     {
-      code: 6040,
+      code: 6041,
       name: 'InvalidSeller',
       msg: 'Invalid seller',
     },
     {
-      code: 6041,
+      code: 6042,
       name: 'InvalidBuyer',
       msg: 'Invalid buyer',
     },
     {
-      code: 6042,
+      code: 6043,
       name: 'UriTooLong',
       msg: 'URI too long',
     },
     {
-      code: 6043,
+      code: 6044,
       name: 'InvalidProofPath',
       msg: 'Invalid proof path',
     },
     {
-      code: 6044,
+      code: 6045,
       name: 'InvalidSettingUpdate',
       msg: 'Invalid setting update',
     },
     {
-      code: 6045,
+      code: 6046,
       name: 'SellerTooManyItems',
       msg: 'Seller has too many items',
     },
     {
-      code: 6046,
+      code: 6047,
       name: 'NotAllSettled',
       msg: 'Not all items have been settled',
     },

@@ -1,5 +1,6 @@
 use crate::state::GumballGuard;
 use anchor_lang::prelude::*;
+pub use close_gumball_machine::*;
 pub use draw::*;
 pub use initialize::*;
 use mallow_gumball::GumballMachine;
@@ -7,16 +8,15 @@ pub use route::*;
 pub use set_authority::*;
 pub use unwrap::*;
 pub use update::*;
-pub use withdraw::*;
 pub use wrap::*;
 
+pub mod close_gumball_machine;
 pub mod draw;
 pub mod initialize;
 pub mod route;
 pub mod set_authority;
 pub mod unwrap;
 pub mod update;
-pub mod withdraw;
 pub mod wrap;
 
 /// Accounts to mint an NFT.

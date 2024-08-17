@@ -11,13 +11,18 @@ pub struct CloseGumballMachine<'info> {
     #[account(
         mut, 
         close = authority, 
-        has_one = authority, 
+        has_one = authority @ GumballError::InvalidAuthority,
+        has_one = mint_authority @ GumballError::InvalidMintAuthority
     )]
     gumball_machine: Account<'info, GumballMachine>,
 
     /// Authority of the gumball machine.
     #[account(mut)]
     authority: Signer<'info>,
+
+    /// Mint authority of the gumball machine.
+    #[account(mut)]
+    mint_authority: Signer<'info>,
 
     /// CHECK: Safe due to seeds constraint
     #[account(

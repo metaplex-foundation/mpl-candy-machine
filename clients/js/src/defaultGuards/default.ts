@@ -161,9 +161,9 @@ export type DefaultGuardSetRouteArgs = GuardSetRouteArgs & {
 /** @internal */
 export const defaultGumballGuardNames: string[] = [
   'botTax',
+  'startDate',
   'solPayment',
   'tokenPayment',
-  'startDate',
   'thirdPartySigner',
   'tokenGate',
   'gatekeeper',

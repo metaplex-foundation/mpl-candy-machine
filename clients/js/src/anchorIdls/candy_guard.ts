@@ -905,6 +905,15 @@ export type CandyGuard = {
             };
           },
           {
+            name: 'startDate';
+            docs: ['Start data guard (controls when minting is allowed).'];
+            type: {
+              option: {
+                defined: 'StartDate';
+              };
+            };
+          },
+          {
             name: 'solPayment';
             docs: [
               'Sol payment guard (set the price for the mint in lamports).'
@@ -923,15 +932,6 @@ export type CandyGuard = {
             type: {
               option: {
                 defined: 'TokenPayment';
-              };
-            };
-          },
-          {
-            name: 'startDate';
-            docs: ['Start data guard (controls when minting is allowed).'];
-            type: {
-              option: {
-                defined: 'StartDate';
               };
             };
           },
@@ -1099,13 +1099,13 @@ export type CandyGuard = {
             name: 'BotTax';
           },
           {
+            name: 'StartDate';
+          },
+          {
             name: 'SolPayment';
           },
           {
             name: 'TokenPayment';
-          },
-          {
-            name: 'StartDate';
           },
           {
             name: 'ThirdPartySigner';
@@ -2342,6 +2342,15 @@ export const IDL: CandyGuard = {
             },
           },
           {
+            name: 'startDate',
+            docs: ['Start data guard (controls when minting is allowed).'],
+            type: {
+              option: {
+                defined: 'StartDate',
+              },
+            },
+          },
+          {
             name: 'solPayment',
             docs: [
               'Sol payment guard (set the price for the mint in lamports).',
@@ -2360,15 +2369,6 @@ export const IDL: CandyGuard = {
             type: {
               option: {
                 defined: 'TokenPayment',
-              },
-            },
-          },
-          {
-            name: 'startDate',
-            docs: ['Start data guard (controls when minting is allowed).'],
-            type: {
-              option: {
-                defined: 'StartDate',
               },
             },
           },
@@ -2536,13 +2536,13 @@ export const IDL: CandyGuard = {
             name: 'BotTax',
           },
           {
+            name: 'StartDate',
+          },
+          {
             name: 'SolPayment',
           },
           {
             name: 'TokenPayment',
-          },
-          {
-            name: 'StartDate',
           },
           {
             name: 'ThirdPartySigner',

@@ -11,9 +11,9 @@ import { scalarEnum, Serializer } from '@metaplex-foundation/umi/serializers';
 /** Available guard types. */
 export enum GuardType {
   BotTax,
+  StartDate,
   SolPayment,
   TokenPayment,
-  StartDate,
   ThirdPartySigner,
   TokenGate,
   Gatekeeper,

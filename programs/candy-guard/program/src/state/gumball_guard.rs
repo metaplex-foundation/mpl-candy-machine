@@ -76,12 +76,12 @@ pub struct Group {
 pub struct GuardSet {
     /// Last instruction check and bot tax (penalty for invalid transactions).
     pub bot_tax: Option<BotTax>,
+    /// Start data guard (controls when minting is allowed).
+    pub start_date: Option<StartDate>,
     /// Sol payment guard (set the price for the mint in lamports).
     pub sol_payment: Option<SolPayment>,
     /// Token payment guard (set the price for the mint in spl-token amount).
     pub token_payment: Option<TokenPayment>,
-    /// Start data guard (controls when minting is allowed).
-    pub start_date: Option<StartDate>,
     /// Third party signer guard (requires an extra signer for the transaction).
     pub third_party_signer: Option<ThirdPartySigner>,
     /// Token gate guard (restrict access to holders of a specific token).
@@ -118,9 +118,9 @@ pub struct GuardSet {
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug)]
 pub enum GuardType {
     BotTax,
+    StartDate,
     SolPayment,
     TokenPayment,
-    StartDate,
     ThirdPartySigner,
     TokenGate,
     Gatekeeper,

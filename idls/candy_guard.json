@@ -978,6 +978,17 @@
             }
           },
           {
+            "name": "startDate",
+            "docs": [
+              "Start data guard (controls when minting is allowed)."
+            ],
+            "type": {
+              "option": {
+                "defined": "StartDate"
+              }
+            }
+          },
+          {
             "name": "solPayment",
             "docs": [
               "Sol payment guard (set the price for the mint in lamports)."
@@ -996,17 +1007,6 @@
             "type": {
               "option": {
                 "defined": "TokenPayment"
-              }
-            }
-          },
-          {
-            "name": "startDate",
-            "docs": [
-              "Start data guard (controls when minting is allowed)."
-            ],
-            "type": {
-              "option": {
-                "defined": "StartDate"
               }
             }
           },
@@ -1190,13 +1190,13 @@
             "name": "BotTax"
           },
           {
+            "name": "StartDate"
+          },
+          {
             "name": "SolPayment"
           },
           {
             "name": "TokenPayment"
-          },
-          {
-            "name": "StartDate"
           },
           {
             "name": "ThirdPartySigner"

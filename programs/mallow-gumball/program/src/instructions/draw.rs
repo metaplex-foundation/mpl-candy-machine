@@ -76,8 +76,13 @@ pub(crate) fn process_draw(
     gumball_machine: &mut Box<Account<'_, GumballMachine>>,
     accounts: DrawAccounts,
 ) -> Result<u64> {
+    let account_info = gumball_machine.to_account_info();
+    let account_data = account_info.data.borrow();
+    let config_count = get_config_count(&account_data)? as u64;
+    drop(account_data);
+
     // are there items to be minted?
-    if gumball_machine.items_redeemed >= gumball_machine.finalized_items_count {
+    if gumball_machine.items_redeemed >= config_count {
         return err!(GumballError::GumballMachineEmpty);
     }
 
@@ -91,7 +96,7 @@ pub(crate) fn process_draw(
     let seed = u64::from_le_bytes(*most_recent).saturating_sub(clock.unix_timestamp as u64);
 
     let index: usize = seed
-        .checked_rem(gumball_machine.finalized_items_count - gumball_machine.items_redeemed)
+        .checked_rem(config_count - gumball_machine.items_redeemed)
         .ok_or(GumballError::NumericalOverflowError)? as usize;
 
     set_config_line_buyer(
@@ -107,7 +112,7 @@ pub(crate) fn process_draw(
         .ok_or(GumballError::NumericalOverflowError)?;
 
     // Sale has ended if this is the last item to be redeemed
-    if gumball_machine.items_redeemed == gumball_machine.finalized_items_count {
+    if gumball_machine.items_redeemed == config_count {
         gumball_machine.state = GumballState::SaleEnded;
     }
 
@@ -128,12 +133,7 @@ pub fn set_config_line_buyer(
 ) -> Result<()> {
     let account_info = gumball_machine.to_account_info();
     let mut account_data = account_info.data.borrow_mut();
-
-    // validates that all config lines were added to the gumball machine
     let config_count = get_config_count(&account_data)? as u64;
-    if config_count != gumball_machine.finalized_items_count {
-        return err!(GumballError::NotFullyLoaded);
-    }
 
     // (1) determine the mint index (index is a random index on the available indices array)
     let indices_start = gumball_machine.get_mint_indices_position()?;
@@ -141,7 +141,7 @@ pub fn set_config_line_buyer(
     let mint_index = indices_start + index * 4;
     let value_to_use = u32::from_le_bytes(*array_ref![account_data, mint_index, 4]) as usize;
     // calculates the last available index and retrieves the value at that position
-    let last_index = indices_start + ((gumball_machine.finalized_items_count - mint_number - 1) * 4) as usize;
+    let last_index = indices_start + ((config_count - mint_number - 1) * 4) as usize;
     let last_value = u32::from_le_bytes(*array_ref![account_data, last_index, 4]);
     // swap-remove: this guarantees that we remove the used mint index from the available array
     // in a constant time O(1) no matter how big the indices array is

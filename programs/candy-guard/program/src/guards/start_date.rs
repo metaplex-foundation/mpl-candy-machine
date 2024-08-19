@@ -1,3 +1,5 @@
+use mallow_gumball::GumballState;
+
 use crate::state::GuardType;
 
 use super::*;
@@ -29,6 +31,21 @@ impl Condition for StartDate {
 
         if clock.unix_timestamp < self.date {
             return err!(GumballGuardError::MintNotLive);
+        }
+
+        Ok(())
+    }
+
+    fn pre_actions<'info>(
+        &self,
+        ctx: &mut EvaluationContext,
+        _guard_set: &GuardSet,
+        _mint_args: &[u8],
+    ) -> Result<()> {
+        if ctx.accounts.gumball_machine.state != GumballState::SaleLive
+            && ctx.accounts.gumball_machine.state != GumballState::SaleEnded
+        {
+            cpi_start_sale(ctx)?;
         }
 
         Ok(())

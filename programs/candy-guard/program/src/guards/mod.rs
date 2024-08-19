@@ -218,3 +218,30 @@ fn cpi_increment_total_revenue(ctx: &EvaluationContext, revenue: u64) -> Result<
 
     Ok(())
 }
+
+fn cpi_start_sale(ctx: &EvaluationContext) -> Result<()> {
+    let gumball_guard = &ctx.accounts.gumball_guard;
+
+    // gumball machine mint instruction accounts
+    let accounts = Box::new(mallow_gumball::cpi::accounts::StartSale {
+        gumball_machine: ctx.accounts.gumball_machine.to_account_info(),
+        authority: gumball_guard.to_account_info(),
+    });
+
+    let ix_infos = accounts.to_account_infos();
+    let ix_metas = accounts.to_account_metas(None);
+
+    let ix = Instruction {
+        program_id: mallow_gumball::ID,
+        accounts: ix_metas,
+        data: mallow_gumball::instruction::StartSale::DISCRIMINATOR.to_vec(),
+    };
+
+    // PDA signer for the transaction
+    let seeds = [SEED, &gumball_guard.base.to_bytes(), &[gumball_guard.bump]];
+    let signer = [&seeds[..]];
+
+    invoke_signed(&ix, &ix_infos, &signer)?;
+
+    Ok(())
+}

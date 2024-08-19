@@ -8,12 +8,12 @@ pub struct StartSale<'info> {
     /// Gumball machine account.
     #[account(
         mut, 
-        has_one = authority,
-        constraint = gumball_machine.state != GumballState::SaleLive @ GumballError::InvalidState
+        constraint = authority.key() == gumball_machine.authority || authority.key() == gumball_machine.mint_authority @ GumballError::InvalidAuthority,
+        constraint = gumball_machine.state != GumballState::SaleLive && gumball_machine.state != GumballState::SaleEnded @ GumballError::InvalidState
     )]
     gumball_machine: Box<Account<'info, GumballMachine>>,
 
-    /// Gumball Machine authority. This is the address that controls the upate of the gumball machine.
+    /// Gumball Machine authority. This can be the mint authority or the authority.
     #[account(mut)]
     authority: Signer<'info>,
 }
@@ -27,7 +27,6 @@ pub fn start_sale(ctx: Context<StartSale>) -> Result<()> {
     require!(count > 0, GumballError::GumballMachineEmpty);
 
     gumball_machine.state = GumballState::SaleLive;
-    gumball_machine.finalized_items_count = count as u64;
 
     Ok(())
 }

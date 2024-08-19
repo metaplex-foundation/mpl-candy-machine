@@ -19,8 +19,6 @@ pub struct GumballMachine {
     pub marketplace_fee_config: Option<FeeConfig>,
     /// Number of assets redeemed.
     pub items_redeemed: u64,
-    /// Number of assets loaded at the time the sale started.
-    pub finalized_items_count: u64,
     /// Number of assets settled after sale.
     pub items_settled: u64,
     /// Amount of lamports/tokens received from purchases.

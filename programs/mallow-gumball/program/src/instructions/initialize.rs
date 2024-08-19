@@ -69,7 +69,6 @@ pub fn initialize(
         mint_authority: ctx.accounts.authority.key(),
         marketplace_fee_config: fee_config,
         items_redeemed: 0,
-        finalized_items_count: 0,
         items_settled: 0,
         total_revenue: 0,
         state,

@@ -1,4 +1,4 @@
-use crate::{state::GumballMachine, GumballError, SellerHistory};
+use crate::{get_config_count, state::GumballMachine, GumballError, SellerHistory};
 use anchor_lang::prelude::*;
 use utils::{
     assert_keys_equal, get_bps_of, is_native_mint, transfer, transfer_from_pda, RoyaltyInfo,
@@ -37,10 +37,15 @@ pub fn claim_proceeds<'a, 'b>(
         );
     }
 
+    let account_info = gumball_machine.to_account_info();
+    let account_data = account_info.data.borrow();
+    let config_count = get_config_count(&account_data)? as u64;
+    drop(account_data);
+
     // Proceeds are calculated as total amount paid by buyers divided by total number of items in the gumball machine
     let total_proceeds = gumball_machine
         .total_revenue
-        .checked_div(gumball_machine.finalized_items_count)
+        .checked_div(config_count)
         .ok_or(GumballError::NumericalOverflowError)?;
     msg!("Proceeds: {}", total_proceeds);
 

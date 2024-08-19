@@ -123,7 +123,7 @@ test('it sets state to SaleEnded on final draw', async (t) => {
   const gumballMachineAccount = await fetchGumballMachine(umi, gumballMachine);
   t.like(gumballMachineAccount, <GumballMachine>{
     itemsRedeemed: 1n,
-    finalizedItemsCount: 1n,
+    itemsLoaded: 1,
     state: GumballState.SaleEnded,
   });
 });

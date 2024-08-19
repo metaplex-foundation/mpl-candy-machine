@@ -43,7 +43,6 @@ test('it can create a gumball machine using config line settings', async (t) => 
     mintAuthority: publicKey(umi.identity),
     version: 0,
     itemsRedeemed: 0n,
-    finalizedItemsCount: 0n,
     settings,
     state: GumballState.None,
     itemsLoaded: 0,

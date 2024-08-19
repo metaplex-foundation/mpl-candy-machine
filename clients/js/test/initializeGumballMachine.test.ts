@@ -68,7 +68,7 @@ test('it can initialize a new gumball machine account', async (t) => {
     mintAuthority: publicKey(umi.identity),
     version: 0,
     itemsRedeemed: 0n,
-    finalizedItemsCount: 0n,
+    itemsLoaded: 0,
     state: GumballState.None,
     settings,
   });

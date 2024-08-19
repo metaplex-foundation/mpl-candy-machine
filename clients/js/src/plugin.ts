@@ -56,9 +56,9 @@ export const mallowGumball = (): UmiPlugin => ({
     umi.guards = new DefaultGuardRepository();
     umi.guards.add(
       botTaxGuardManifest,
+      startDateGuardManifest,
       solPaymentGuardManifest,
       tokenPaymentGuardManifest,
-      startDateGuardManifest,
       thirdPartySignerGuardManifest,
       tokenGateGuardManifest,
       gatekeeperGuardManifest,

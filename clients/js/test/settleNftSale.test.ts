@@ -353,7 +353,7 @@ test('it can settle an nft that was not sold with proceeds from another sale', a
   t.like(gumballMachineAccount, <GumballMachine>{
     itemsRedeemed: 1n,
     itemsSettled: 1n,
-    finalizedItemsCount: 2n,
+    itemsLoaded: 2,
   });
 
   // Seller history should not be closed

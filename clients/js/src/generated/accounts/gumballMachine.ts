@@ -123,7 +123,6 @@ export function getGumballMachineGpaBuilder(
       mintAuthority: PublicKey;
       marketplaceFeeConfig: OptionOrNullable<FeeConfigArgs>;
       itemsRedeemed: number | bigint;
-      finalizedItemsCount: number | bigint;
       itemsSettled: number | bigint;
       totalRevenue: number | bigint;
       state: GumballStateArgs;
@@ -135,7 +134,6 @@ export function getGumballMachineGpaBuilder(
       mintAuthority: [41, publicKeySerializer()],
       marketplaceFeeConfig: [73, option(getFeeConfigSerializer())],
       itemsRedeemed: [null, u64()],
-      finalizedItemsCount: [null, u64()],
       itemsSettled: [null, u64()],
       totalRevenue: [null, u64()],
       state: [null, getGumballStateSerializer()],

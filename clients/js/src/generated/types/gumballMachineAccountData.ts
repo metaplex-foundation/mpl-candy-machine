@@ -42,8 +42,6 @@ export type GumballMachineAccountData = {
   marketplaceFeeConfig: Option<FeeConfig>;
   /** Number of assets redeemed. */
   itemsRedeemed: bigint;
-  /** Number of assets loaded at the time the sale started. */
-  finalizedItemsCount: bigint;
   /** Number of assets settled after sale. */
   itemsSettled: bigint;
   /** Amount of lamports/tokens received from purchases. */
@@ -65,8 +63,6 @@ export type GumballMachineAccountDataArgs = {
   marketplaceFeeConfig: OptionOrNullable<FeeConfigArgs>;
   /** Number of assets redeemed. */
   itemsRedeemed: number | bigint;
-  /** Number of assets loaded at the time the sale started. */
-  finalizedItemsCount: number | bigint;
   /** Number of assets settled after sale. */
   itemsSettled: number | bigint;
   /** Amount of lamports/tokens received from purchases. */
@@ -94,7 +90,6 @@ export function getGumballMachineAccountDataSerializer(): Serializer<
         ['mintAuthority', publicKeySerializer()],
         ['marketplaceFeeConfig', option(getFeeConfigSerializer())],
         ['itemsRedeemed', u64()],
-        ['finalizedItemsCount', u64()],
         ['itemsSettled', u64()],
         ['totalRevenue', u64()],
         ['state', getGumballStateSerializer()],

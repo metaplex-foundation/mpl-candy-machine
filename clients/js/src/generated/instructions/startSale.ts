@@ -31,7 +31,7 @@ import {
 export type StartSaleInstructionAccounts = {
   /** Gumball machine account. */
   gumballMachine: PublicKey | Pda;
-  /** Gumball Machine authority. This is the address that controls the upate of the gumball machine. */
+  /** Gumball Machine authority. This can be the mint authority or the authority. */
   authority?: Signer;
 };
 

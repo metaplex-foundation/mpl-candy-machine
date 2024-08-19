@@ -440,7 +440,7 @@ export type MallowGumball = {
           isMut: true;
           isSigner: true;
           docs: [
-            'Gumball Machine authority. This is the address that controls the upate of the gumball machine.'
+            'Gumball Machine authority. This can be the mint authority or the authority.'
           ];
         }
       ];
@@ -1328,11 +1328,6 @@ export type MallowGumball = {
           {
             name: 'itemsRedeemed';
             docs: ['Number of assets redeemed.'];
-            type: 'u64';
-          },
-          {
-            name: 'finalizedItemsCount';
-            docs: ['Number of assets loaded at the time the sale started.'];
             type: 'u64';
           },
           {
@@ -2330,7 +2325,7 @@ export const IDL: MallowGumball = {
           isMut: true,
           isSigner: true,
           docs: [
-            'Gumball Machine authority. This is the address that controls the upate of the gumball machine.',
+            'Gumball Machine authority. This can be the mint authority or the authority.',
           ],
         },
       ],
@@ -3218,11 +3213,6 @@ export const IDL: MallowGumball = {
           {
             name: 'itemsRedeemed',
             docs: ['Number of assets redeemed.'],
-            type: 'u64',
-          },
-          {
-            name: 'finalizedItemsCount',
-            docs: ['Number of assets loaded at the time the sale started.'],
             type: 'u64',
           },
           {

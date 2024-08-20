@@ -190,7 +190,7 @@ export function baseSettleCoreAssetSale(
     asset: { index: 17, isWritable: true, value: input.asset ?? null },
     collection: {
       index: 18,
-      isWritable: false,
+      isWritable: true,
       value: input.collection ?? null,
     },
     mplCoreProgram: {

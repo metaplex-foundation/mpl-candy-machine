@@ -164,7 +164,7 @@ export function claimCoreAsset(
     asset: { index: 13, isWritable: true, value: input.asset ?? null },
     collection: {
       index: 14,
-      isWritable: false,
+      isWritable: true,
       value: input.collection ?? null,
     },
     mplCoreProgram: {

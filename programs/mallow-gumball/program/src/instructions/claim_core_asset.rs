@@ -68,6 +68,7 @@ pub struct ClaimCoreAsset<'info> {
     asset: UncheckedAccount<'info>,
 
     /// CHECK: Safe due to item check
+    #[account(mut)]
     collection: Option<UncheckedAccount<'info>>,
 
     /// CHECK: Safe due to constraint

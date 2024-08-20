@@ -679,7 +679,7 @@ export type MallowGumball = {
         },
         {
           name: 'collection';
-          isMut: false;
+          isMut: true;
           isSigner: false;
           isOptional: true;
         },
@@ -983,7 +983,7 @@ export type MallowGumball = {
         },
         {
           name: 'collection';
-          isMut: false;
+          isMut: true;
           isSigner: false;
           isOptional: true;
         },
@@ -2579,7 +2579,7 @@ export const IDL: MallowGumball = {
         },
         {
           name: 'collection',
-          isMut: false,
+          isMut: true,
           isSigner: false,
           isOptional: true,
         },
@@ -2883,7 +2883,7 @@ export const IDL: MallowGumball = {
         },
         {
           name: 'collection',
-          isMut: false,
+          isMut: true,
           isSigner: false,
           isOptional: true,
         },

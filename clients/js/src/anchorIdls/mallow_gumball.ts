@@ -437,7 +437,7 @@ export type MallowGumball = {
         },
         {
           name: 'authority';
-          isMut: true;
+          isMut: false;
           isSigner: true;
           docs: [
             'Gumball Machine authority. This can be the mint authority or the authority.'
@@ -2322,7 +2322,7 @@ export const IDL: MallowGumball = {
         },
         {
           name: 'authority',
-          isMut: true,
+          isMut: false,
           isSigner: true,
           docs: [
             'Gumball Machine authority. This can be the mint authority or the authority.',

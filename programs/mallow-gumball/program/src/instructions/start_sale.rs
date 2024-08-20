@@ -14,7 +14,6 @@ pub struct StartSale<'info> {
     gumball_machine: Box<Account<'info, GumballMachine>>,
 
     /// Gumball Machine authority. This can be the mint authority or the authority.
-    #[account(mut)]
     authority: Signer<'info>,
 }
 

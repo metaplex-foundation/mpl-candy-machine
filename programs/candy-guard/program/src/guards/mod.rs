@@ -191,7 +191,7 @@ pub fn get_account_info<T>(remaining_accounts: &[T], index: usize) -> Option<&T>
 }
 
 fn cpi_increment_total_revenue(ctx: &EvaluationContext, revenue: u64) -> Result<()> {
-    let gumball_guard = &ctx.accounts.gumball_guard;
+    let gumball_guard = ctx.accounts.gumball_guard;
 
     // gumball machine mint instruction accounts
     let accounts = Box::new(mallow_gumball::cpi::accounts::IncrementTotalRevenue {
@@ -220,7 +220,7 @@ fn cpi_increment_total_revenue(ctx: &EvaluationContext, revenue: u64) -> Result<
 }
 
 fn cpi_start_sale(ctx: &EvaluationContext) -> Result<()> {
-    let gumball_guard = &ctx.accounts.gumball_guard;
+    let gumball_guard = ctx.accounts.gumball_guard;
 
     // gumball machine mint instruction accounts
     let accounts = Box::new(mallow_gumball::cpi::accounts::StartSale {

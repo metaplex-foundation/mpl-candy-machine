@@ -59,6 +59,7 @@ pub fn process_draw(
             return process_error(ctx, &guard_set.default, error);
         }
     };
+    drop(account_data);
 
     let conditions = guard_set.enabled_conditions();
 

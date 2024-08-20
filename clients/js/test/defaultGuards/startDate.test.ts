@@ -1,5 +1,11 @@
 import { setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
-import { sol, some, transactionBuilder } from '@metaplex-foundation/umi';
+import {
+  generateSigner,
+  sol,
+  some,
+  transactionBuilder,
+} from '@metaplex-foundation/umi';
+import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
 import test from 'ava';
 import { draw, TokenStandard } from '../../src';
 import {
@@ -23,25 +29,32 @@ test('it allows minting after the start date', async (t) => {
         tokenStandard: TokenStandard.NonFungible,
       },
     ],
-    startSale: true,
     guards: {
+      solPayment: some({ lamports: sol(1) }),
       startDate: some({ date: yesterday() }),
     },
   });
 
   // When we mint from it.
 
+  // When we mint for another owner using an explicit payer.
+  const payer = await generateSignerWithSol(umi, sol(10));
+  const buyer = generateSigner(umi);
+
   await transactionBuilder()
     .add(setComputeUnitLimit(umi, { units: 600_000 }))
     .add(
       draw(umi, {
         gumballMachine,
+        buyer,
+        payer,
+        mintArgs: { solPayment: some(true) },
       })
     )
     .sendAndConfirm(umi);
 
   // Then the mint was successful.
-  await assertItemBought(t, umi, { gumballMachine });
+  await assertItemBought(t, umi, { gumballMachine, buyer: buyer.publicKey });
 });
 
 test('it forbids minting before the start date', async (t) => {

@@ -78,7 +78,7 @@ export function startSale(
       isWritable: true,
       value: input.gumballMachine ?? null,
     },
-    authority: { index: 1, isWritable: true, value: input.authority ?? null },
+    authority: { index: 1, isWritable: false, value: input.authority ?? null },
   };
 
   // Default values.

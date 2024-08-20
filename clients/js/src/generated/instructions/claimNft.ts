@@ -46,22 +46,10 @@ export type ClaimNftInstructionAccounts = {
   /** Gumball machine account. */
   gumballMachine: PublicKey | Pda;
   authorityPda?: PublicKey | Pda;
-  /** Payment account for authority pda if using token payment */
-  authorityPdaPaymentAccount?: PublicKey | Pda;
-  /** Payment account for authority if using token payment */
-  authorityPaymentAccount?: PublicKey | Pda;
   /** Seller of the nft */
   seller: PublicKey | Pda;
-  /** Payment account for seller if using token payment */
-  sellerPaymentAccount?: PublicKey | Pda;
   /** buyer of the nft */
   buyer?: PublicKey | Pda;
-  /** Fee account for marketplace fee if using fee config */
-  feeAccount?: PublicKey | Pda;
-  /** Payment account for marketplace fee if using token payment */
-  feePaymentAccount?: PublicKey | Pda;
-  /** Payment mint if using non-native payment token */
-  paymentMint?: PublicKey | Pda;
   tokenProgram?: PublicKey | Pda;
   associatedTokenProgram?: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
@@ -136,79 +124,53 @@ export function claimNft(
       isWritable: true,
       value: input.authorityPda ?? null,
     },
-    authorityPdaPaymentAccount: {
-      index: 3,
-      isWritable: true,
-      value: input.authorityPdaPaymentAccount ?? null,
-    },
-    authorityPaymentAccount: {
-      index: 4,
-      isWritable: true,
-      value: input.authorityPaymentAccount ?? null,
-    },
-    seller: { index: 5, isWritable: true, value: input.seller ?? null },
-    sellerPaymentAccount: {
-      index: 6,
-      isWritable: true,
-      value: input.sellerPaymentAccount ?? null,
-    },
-    buyer: { index: 7, isWritable: false, value: input.buyer ?? null },
-    feeAccount: { index: 8, isWritable: true, value: input.feeAccount ?? null },
-    feePaymentAccount: {
-      index: 9,
-      isWritable: true,
-      value: input.feePaymentAccount ?? null,
-    },
-    paymentMint: {
-      index: 10,
-      isWritable: false,
-      value: input.paymentMint ?? null,
-    },
+    seller: { index: 3, isWritable: true, value: input.seller ?? null },
+    buyer: { index: 4, isWritable: false, value: input.buyer ?? null },
     tokenProgram: {
-      index: 11,
+      index: 5,
       isWritable: false,
       value: input.tokenProgram ?? null,
     },
     associatedTokenProgram: {
-      index: 12,
+      index: 6,
       isWritable: false,
       value: input.associatedTokenProgram ?? null,
     },
     systemProgram: {
-      index: 13,
+      index: 7,
       isWritable: false,
       value: input.systemProgram ?? null,
     },
-    rent: { index: 14, isWritable: false, value: input.rent ?? null },
-    mint: { index: 15, isWritable: false, value: input.mint ?? null },
+    rent: { index: 8, isWritable: false, value: input.rent ?? null },
+    mint: { index: 9, isWritable: false, value: input.mint ?? null },
     tokenAccount: {
-      index: 16,
+      index: 10,
       isWritable: true,
       value: input.tokenAccount ?? null,
     },
     buyerTokenAccount: {
-      index: 17,
+      index: 11,
       isWritable: true,
       value: input.buyerTokenAccount ?? null,
     },
     tmpTokenAccount: {
-      index: 18,
+      index: 12,
       isWritable: true,
       value: input.tmpTokenAccount ?? null,
     },
-    metadata: { index: 19, isWritable: true, value: input.metadata ?? null },
-    edition: { index: 20, isWritable: true, value: input.edition ?? null },
+    metadata: { index: 13, isWritable: true, value: input.metadata ?? null },
+    edition: { index: 14, isWritable: true, value: input.edition ?? null },
     tokenMetadataProgram: {
-      index: 21,
+      index: 15,
       isWritable: false,
       value: input.tokenMetadataProgram ?? null,
     },
     eventAuthority: {
-      index: 22,
+      index: 16,
       isWritable: false,
       value: input.eventAuthority ?? null,
     },
-    program: { index: 23, isWritable: false, value: input.program ?? null },
+    program: { index: 17, isWritable: false, value: input.program ?? null },
   };
 
   // Arguments.

@@ -10,7 +10,6 @@ import {
   Context,
   Pda,
   PublicKey,
-  publicKey,
   Signer,
   TransactionBuilder,
   transactionBuilder,
@@ -41,24 +40,11 @@ export type ClaimCoreAssetInstructionAccounts = {
   /** Gumball machine account. */
   gumballMachine: PublicKey | Pda;
   authorityPda?: PublicKey | Pda;
-  /** Payment account for authority pda if using token payment */
-  authorityPdaPaymentAccount?: PublicKey | Pda;
-  /** Payment account for authority if using token payment */
-  authorityPaymentAccount?: PublicKey | Pda;
   /** Seller of the nft */
   seller: PublicKey | Pda;
-  /** Payment account for seller if using token payment */
-  sellerPaymentAccount?: PublicKey | Pda;
   /** buyer of the nft */
   buyer?: PublicKey | Pda;
-  /** Fee account for marketplace fee if using fee config */
-  feeAccount?: PublicKey | Pda;
-  /** Payment account for marketplace fee if using token payment */
-  feePaymentAccount?: PublicKey | Pda;
-  /** Payment mint if using non-native payment token */
-  paymentMint?: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
-  rent?: PublicKey | Pda;
   asset: PublicKey | Pda;
   collection?: PublicKey | Pda;
   mplCoreProgram?: PublicKey | Pda;
@@ -127,57 +113,26 @@ export function claimCoreAsset(
       isWritable: true,
       value: input.authorityPda ?? null,
     },
-    authorityPdaPaymentAccount: {
-      index: 3,
-      isWritable: true,
-      value: input.authorityPdaPaymentAccount ?? null,
-    },
-    authorityPaymentAccount: {
-      index: 4,
-      isWritable: true,
-      value: input.authorityPaymentAccount ?? null,
-    },
-    seller: { index: 5, isWritable: true, value: input.seller ?? null },
-    sellerPaymentAccount: {
-      index: 6,
-      isWritable: true,
-      value: input.sellerPaymentAccount ?? null,
-    },
-    buyer: { index: 7, isWritable: false, value: input.buyer ?? null },
-    feeAccount: { index: 8, isWritable: true, value: input.feeAccount ?? null },
-    feePaymentAccount: {
-      index: 9,
-      isWritable: true,
-      value: input.feePaymentAccount ?? null,
-    },
-    paymentMint: {
-      index: 10,
-      isWritable: false,
-      value: input.paymentMint ?? null,
-    },
+    seller: { index: 3, isWritable: true, value: input.seller ?? null },
+    buyer: { index: 4, isWritable: false, value: input.buyer ?? null },
     systemProgram: {
-      index: 11,
+      index: 5,
       isWritable: false,
       value: input.systemProgram ?? null,
     },
-    rent: { index: 12, isWritable: false, value: input.rent ?? null },
-    asset: { index: 13, isWritable: true, value: input.asset ?? null },
-    collection: {
-      index: 14,
-      isWritable: true,
-      value: input.collection ?? null,
-    },
+    asset: { index: 6, isWritable: true, value: input.asset ?? null },
+    collection: { index: 7, isWritable: true, value: input.collection ?? null },
     mplCoreProgram: {
-      index: 15,
+      index: 8,
       isWritable: false,
       value: input.mplCoreProgram ?? null,
     },
     eventAuthority: {
-      index: 16,
+      index: 9,
       isWritable: false,
       value: input.eventAuthority ?? null,
     },
-    program: { index: 17, isWritable: false, value: input.program ?? null },
+    program: { index: 10, isWritable: false, value: input.program ?? null },
   };
 
   // Arguments.
@@ -202,11 +157,6 @@ export function claimCoreAsset(
       '11111111111111111111111111111111'
     );
     resolvedAccounts.systemProgram.isWritable = false;
-  }
-  if (!resolvedAccounts.rent.value) {
-    resolvedAccounts.rent.value = publicKey(
-      'SysvarRent111111111111111111111111111111111'
-    );
   }
   if (!resolvedAccounts.mplCoreProgram.value) {
     resolvedAccounts.mplCoreProgram.value = context.programs.getPublicKey(

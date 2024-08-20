@@ -30,37 +30,14 @@ pub struct ClaimNft<'info> {
     )]
     authority_pda: UncheckedAccount<'info>,
 
-    /// Payment account for authority pda if using token payment
-    #[account(mut)]
-    authority_pda_payment_account: Option<UncheckedAccount<'info>>,
-
-    /// Payment account for authority if using token payment
-    #[account(mut)]
-    authority_payment_account: Option<UncheckedAccount<'info>>,
-
     /// Seller of the nft
     /// CHECK: Safe due to item check
     #[account(mut)]
     seller: UncheckedAccount<'info>,
 
-    /// Payment account for seller if using token payment
-    #[account(mut)]
-    seller_payment_account: Option<UncheckedAccount<'info>>,
-
     /// buyer of the nft
     /// CHECK: Safe due to item check
     buyer: UncheckedAccount<'info>,
-
-    /// Fee account for marketplace fee if using fee config
-    #[account(mut)]
-    fee_account: Option<UncheckedAccount<'info>>,
-
-    /// Payment account for marketplace fee if using token payment
-    #[account(mut)]
-    fee_payment_account: Option<UncheckedAccount<'info>>,
-
-    /// Payment mint if using non-native payment token
-    payment_mint: Option<UncheckedAccount<'info>>,
 
     token_program: Program<'info, Token>,
     associated_token_program: Program<'info, AssociatedToken>,

@@ -609,31 +609,10 @@ export type MallowGumball = {
           isSigner: false;
         },
         {
-          name: 'authorityPdaPaymentAccount';
-          isMut: true;
-          isSigner: false;
-          isOptional: true;
-          docs: ['Payment account for authority pda if using token payment'];
-        },
-        {
-          name: 'authorityPaymentAccount';
-          isMut: true;
-          isSigner: false;
-          isOptional: true;
-          docs: ['Payment account for authority if using token payment'];
-        },
-        {
           name: 'seller';
           isMut: true;
           isSigner: false;
           docs: ['Seller of the nft'];
-        },
-        {
-          name: 'sellerPaymentAccount';
-          isMut: true;
-          isSigner: false;
-          isOptional: true;
-          docs: ['Payment account for seller if using token payment'];
         },
         {
           name: 'buyer';
@@ -642,33 +621,7 @@ export type MallowGumball = {
           docs: ['buyer of the nft'];
         },
         {
-          name: 'feeAccount';
-          isMut: true;
-          isSigner: false;
-          isOptional: true;
-          docs: ['Fee account for marketplace fee if using fee config'];
-        },
-        {
-          name: 'feePaymentAccount';
-          isMut: true;
-          isSigner: false;
-          isOptional: true;
-          docs: ['Payment account for marketplace fee if using token payment'];
-        },
-        {
-          name: 'paymentMint';
-          isMut: false;
-          isSigner: false;
-          isOptional: true;
-          docs: ['Payment mint if using non-native payment token'];
-        },
-        {
           name: 'systemProgram';
-          isMut: false;
-          isSigner: false;
-        },
-        {
-          name: 'rent';
           isMut: false;
           isSigner: false;
         },
@@ -735,58 +688,16 @@ export type MallowGumball = {
           isSigner: false;
         },
         {
-          name: 'authorityPdaPaymentAccount';
-          isMut: true;
-          isSigner: false;
-          isOptional: true;
-          docs: ['Payment account for authority pda if using token payment'];
-        },
-        {
-          name: 'authorityPaymentAccount';
-          isMut: true;
-          isSigner: false;
-          isOptional: true;
-          docs: ['Payment account for authority if using token payment'];
-        },
-        {
           name: 'seller';
           isMut: true;
           isSigner: false;
           docs: ['Seller of the nft'];
         },
         {
-          name: 'sellerPaymentAccount';
-          isMut: true;
-          isSigner: false;
-          isOptional: true;
-          docs: ['Payment account for seller if using token payment'];
-        },
-        {
           name: 'buyer';
           isMut: false;
           isSigner: false;
           docs: ['buyer of the nft'];
-        },
-        {
-          name: 'feeAccount';
-          isMut: true;
-          isSigner: false;
-          isOptional: true;
-          docs: ['Fee account for marketplace fee if using fee config'];
-        },
-        {
-          name: 'feePaymentAccount';
-          isMut: true;
-          isSigner: false;
-          isOptional: true;
-          docs: ['Payment account for marketplace fee if using token payment'];
-        },
-        {
-          name: 'paymentMint';
-          isMut: false;
-          isSigner: false;
-          isOptional: true;
-          docs: ['Payment mint if using non-native payment token'];
         },
         {
           name: 'tokenProgram';
@@ -2509,31 +2420,10 @@ export const IDL: MallowGumball = {
           isSigner: false,
         },
         {
-          name: 'authorityPdaPaymentAccount',
-          isMut: true,
-          isSigner: false,
-          isOptional: true,
-          docs: ['Payment account for authority pda if using token payment'],
-        },
-        {
-          name: 'authorityPaymentAccount',
-          isMut: true,
-          isSigner: false,
-          isOptional: true,
-          docs: ['Payment account for authority if using token payment'],
-        },
-        {
           name: 'seller',
           isMut: true,
           isSigner: false,
           docs: ['Seller of the nft'],
-        },
-        {
-          name: 'sellerPaymentAccount',
-          isMut: true,
-          isSigner: false,
-          isOptional: true,
-          docs: ['Payment account for seller if using token payment'],
         },
         {
           name: 'buyer',
@@ -2542,33 +2432,7 @@ export const IDL: MallowGumball = {
           docs: ['buyer of the nft'],
         },
         {
-          name: 'feeAccount',
-          isMut: true,
-          isSigner: false,
-          isOptional: true,
-          docs: ['Fee account for marketplace fee if using fee config'],
-        },
-        {
-          name: 'feePaymentAccount',
-          isMut: true,
-          isSigner: false,
-          isOptional: true,
-          docs: ['Payment account for marketplace fee if using token payment'],
-        },
-        {
-          name: 'paymentMint',
-          isMut: false,
-          isSigner: false,
-          isOptional: true,
-          docs: ['Payment mint if using non-native payment token'],
-        },
-        {
           name: 'systemProgram',
-          isMut: false,
-          isSigner: false,
-        },
-        {
-          name: 'rent',
           isMut: false,
           isSigner: false,
         },
@@ -2635,58 +2499,16 @@ export const IDL: MallowGumball = {
           isSigner: false,
         },
         {
-          name: 'authorityPdaPaymentAccount',
-          isMut: true,
-          isSigner: false,
-          isOptional: true,
-          docs: ['Payment account for authority pda if using token payment'],
-        },
-        {
-          name: 'authorityPaymentAccount',
-          isMut: true,
-          isSigner: false,
-          isOptional: true,
-          docs: ['Payment account for authority if using token payment'],
-        },
-        {
           name: 'seller',
           isMut: true,
           isSigner: false,
           docs: ['Seller of the nft'],
         },
         {
-          name: 'sellerPaymentAccount',
-          isMut: true,
-          isSigner: false,
-          isOptional: true,
-          docs: ['Payment account for seller if using token payment'],
-        },
-        {
           name: 'buyer',
           isMut: false,
           isSigner: false,
           docs: ['buyer of the nft'],
-        },
-        {
-          name: 'feeAccount',
-          isMut: true,
-          isSigner: false,
-          isOptional: true,
-          docs: ['Fee account for marketplace fee if using fee config'],
-        },
-        {
-          name: 'feePaymentAccount',
-          isMut: true,
-          isSigner: false,
-          isOptional: true,
-          docs: ['Payment account for marketplace fee if using token payment'],
-        },
-        {
-          name: 'paymentMint',
-          isMut: false,
-          isSigner: false,
-          isOptional: true,
-          docs: ['Payment mint if using non-native payment token'],
         },
         {
           name: 'tokenProgram',

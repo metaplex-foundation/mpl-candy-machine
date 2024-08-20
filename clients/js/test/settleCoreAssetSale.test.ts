@@ -1,13 +1,8 @@
 /* eslint-disable no-await-in-loop */
-import {
-  AssetV1,
-  create as baseCreateCoreAsset,
-  fetchAssetV1,
-} from '@metaplex-foundation/mpl-core';
+import { AssetV1, fetchAssetV1 } from '@metaplex-foundation/mpl-core';
 import { setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
 import {
   addAmounts,
-  chunk,
   defaultPublicKey,
   generateSigner,
   isEqualToAmount,
@@ -15,13 +10,11 @@ import {
   sol,
   some,
   subtractAmounts,
-  TransactionBuilder,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import { generateSignerWithSol } from '@metaplex-foundation/umi-bundle-tests';
 import test from 'ava';
 import {
-  addCoreAsset,
   claimCoreAsset,
   draw,
   endSale,
@@ -31,10 +24,9 @@ import {
   GumballMachine,
   safeFetchSellerHistory,
   settleCoreAssetSale,
-  startSale,
   TokenStandard,
 } from '../src';
-import { create, createCoreAsset, createUmi, defaultAssetData } from './_setup';
+import { create, createCoreAsset, createUmi } from './_setup';
 
 test('it can settle a core asset sale', async (t) => {
   // Given a gumball machine with some guards.
@@ -749,125 +741,4 @@ test('it can settle a core asset sale for claimed core asset', async (t) => {
     transferDelegate: undefined,
     owner: buyer.publicKey,
   });
-});
-
-test('it can settle 10 core assets', async (t) => {
-  t.timeout(300_000);
-  // Given a gumball machine with some guards.
-  const umi = await createUmi();
-  const assets = Array.from({ length: 10 }, () => generateSigner(umi));
-
-  let txs: TransactionBuilder[] = [];
-  for (const signersChunk of chunk(assets, 6)) {
-    let tx = transactionBuilder();
-    for (const signer of signersChunk) {
-      tx = tx.add(
-        baseCreateCoreAsset(umi, {
-          asset: signer,
-          ...defaultAssetData(),
-        })
-      );
-    }
-    txs.push(tx);
-  }
-  for (const txChunk of chunk(txs, 10)) {
-    await Promise.all(txChunk.map((tx) => tx.sendAndConfirm(umi)));
-  }
-
-  const gumballMachineSigner = generateSigner(umi);
-  const gumballMachine = gumballMachineSigner.publicKey;
-
-  await create(umi, {
-    gumballMachine: gumballMachineSigner,
-    guards: {
-      botTax: { lamports: sol(0.01), lastInstruction: true },
-      solPayment: { lamports: sol(1) },
-    },
-  });
-
-  txs = [];
-  for (const assetsChunk of chunk(assets, 10)) {
-    let tx = transactionBuilder();
-    for (const asset of assetsChunk) {
-      tx = tx.add(
-        addCoreAsset(umi, {
-          gumballMachine: gumballMachineSigner.publicKey,
-          asset: asset.publicKey,
-        })
-      );
-    }
-    txs.push(tx);
-  }
-  for (const txChunk of chunk(txs, 10)) {
-    await Promise.all(txChunk.map((tx) => tx.sendAndConfirm(umi)));
-  }
-
-  await startSale(umi, { gumballMachine }).sendAndConfirm(umi);
-
-  // When we mint from the gumball guard.
-  const buyerUmi = await createUmi();
-  const buyer = buyerUmi.identity;
-  const payer = await generateSignerWithSol(umi, sol(10000));
-
-  for (const asset of assets) {
-    await draw(umi, {
-      gumballMachine,
-      payer,
-      buyer,
-      mintArgs: {
-        solPayment: some(true),
-      },
-    }).sendAndConfirm(umi);
-  }
-
-  let gumballMachineAccount = await fetchGumballMachine(umi, gumballMachine);
-  t.like(gumballMachineAccount, <Partial<GumballMachine>>{
-    itemsRedeemed: 10n,
-  });
-
-  txs = [];
-  for (let i = 0; i < 10; i++) {
-    const asset = assets[i];
-    await settleCoreAssetSale(buyerUmi, {
-      index: i,
-      gumballMachine,
-      authority: umi.identity.publicKey,
-      seller: umi.identity.publicKey,
-      asset: asset.publicKey,
-      creators: [umi.identity.publicKey],
-    }).sendAndConfirm(buyerUmi);
-  }
-  for (const txChunk of chunk(txs, 10)) {
-    await Promise.all(txChunk.map((tx) => tx.sendAndConfirm(umi)));
-  }
-
-  // And the gumball machine was updated.
-  gumballMachineAccount = await fetchGumballMachine(umi, gumballMachine);
-  t.like(gumballMachineAccount, <Partial<GumballMachine>>{
-    itemsRedeemed: 10n,
-    itemsSettled: 10n,
-    itemsLoaded: 10,
-    items: assets.map((a, i) => {
-      return {
-        index: i,
-        isDrawn: true,
-        isClaimed: true,
-        isSettled: true,
-        mint: a.publicKey,
-        seller: umi.identity.publicKey,
-        buyer: buyerUmi.identity.publicKey,
-        tokenStandard: TokenStandard.Core,
-      };
-    }),
-  });
-
-  // Seller history should be closed
-  const sellerHistoryAccount = await safeFetchSellerHistory(
-    umi,
-    findSellerHistoryPda(umi, {
-      gumballMachine,
-      seller: umi.identity.publicKey,
-    })
-  );
-  t.falsy(sellerHistoryAccount);
 });

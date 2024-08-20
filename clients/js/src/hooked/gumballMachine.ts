@@ -11,7 +11,9 @@ export function getGumballMachineSizeForItemCount(
       4 +
       // Config line data.
       items * CONFIG_LINE_SIZE +
-      // Bit mask to keep track of which ConfigLines have been added.
+      // Bit mask to keep track of which items have been claimed.
+      (4 + Math.floor(items / 8) + 1) +
+      // Bit mask to keep track of which items have been settled.
       (4 + Math.floor(items / 8) + 1) +
       // Mint indices.
       (4 + items * 4)

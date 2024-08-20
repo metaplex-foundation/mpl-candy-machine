@@ -42,6 +42,9 @@ export type GumballMachineItem = {
   /** Whether the item has been claimed or not. */
   readonly isClaimed: boolean;
 
+  /** Whether the item has been settled or not. */
+  readonly isSettled: boolean;
+
   /** The name of the NFT to be. */
   readonly mint: string;
 
@@ -62,6 +65,7 @@ type GumballMachineHiddenSection = {
     tokenStandard: TokenStandard;
   }[];
   itemsClaimedMap: boolean[];
+  itemsSettledMap: boolean[];
   itemsLeftToMint: number[];
 };
 
@@ -102,6 +106,7 @@ export function getGumballMachineAccountDataSerializer(): Serializer<
             ),
           ],
           ['itemsClaimedMap', bitArray(Math.floor(itemCapacity / 8) + 1)],
+          ['itemsSettledMap', bitArray(Math.floor(itemCapacity / 8) + 1)],
           ['itemsLeftToMint', array(u32(), { size: itemCapacity })],
         ]);
 
@@ -126,6 +131,7 @@ export function getGumballMachineAccountDataSerializer(): Serializer<
           index,
           isDrawn: !itemsLeftToMint.includes(index),
           isClaimed,
+          isSettled: hiddenSection.itemsSettledMap[index],
           mint: rawItem.mint,
           seller: rawItem.seller,
           buyer:

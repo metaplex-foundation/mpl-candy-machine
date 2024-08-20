@@ -59,17 +59,8 @@ pub fn remove_item(
             .for_each(|x| *x = 0);
     }
 
-    let bit_mask_start = GUMBALL_MACHINE_SIZE
-        + 4
-        + (gumball_machine.settings.item_capacity as usize) * CONFIG_LINE_SIZE;
     // (unordered) indices for the mint
-    let indices_start = bit_mask_start
-        + (gumball_machine
-            .settings
-            .item_capacity
-            .checked_div(8)
-            .ok_or(GumballError::NumericalOverflowError)?
-            + 1) as usize;
+    let indices_start = gumball_machine.get_mint_indices_position()?;
 
     // remove the last index from the mint indices vec
     let index_position = indices_start + last_index * 4;

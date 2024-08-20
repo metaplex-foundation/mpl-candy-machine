@@ -145,4 +145,13 @@ pub enum GumballError {
 
     #[msg("Not all items have been settled")]
     NotAllSettled,
+
+    #[msg("Item already settled")]
+    ItemAlreadySettled,
+
+    #[msg("Item already claimed")]
+    ItemAlreadyClaimed,
+
+    #[msg("Item already drawn")]
+    ItemAlreadyDrawn,
 }

@@ -43,16 +43,8 @@ pub fn add_item(
     let token_standard_slice: &mut [u8] = &mut data[position..position + 1];
     token_standard_slice.copy_from_slice(&u8::to_be_bytes(token_standard as u8));
 
-    // bit-mask
-    let bit_mask_start = gumball_machine.get_claimed_items_bit_mask_position();
     // (unordered) indices for the mint
-    let indices_start = bit_mask_start
-        + (gumball_machine
-            .settings
-            .item_capacity
-            .checked_div(8)
-            .ok_or(GumballError::NumericalOverflowError)?
-            + 1) as usize;
+    let indices_start = gumball_machine.get_mint_indices_position()?;
 
     // add the new index to the mint indices vec
     let index_position = indices_start + (index as usize) * 4;

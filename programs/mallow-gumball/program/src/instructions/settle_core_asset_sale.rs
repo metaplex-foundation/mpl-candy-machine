@@ -166,7 +166,8 @@ pub fn settle_core_asset_sale<'info>(ctx: Context<'_, '_, '_, 'info, SettleCoreA
     }
 
     let total_proceeds = claim_proceeds(
-        gumball_machine, 
+        gumball_machine,
+        index,
         seller_history,
         payer,
         authority_pda,

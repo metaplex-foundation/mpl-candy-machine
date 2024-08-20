@@ -153,6 +153,8 @@ pub fn set_config_line_buyer(
         + 32; // seller
 
     // Set the buyer on the config line
+    let current_buyer = Pubkey::try_from(&account_data[buyer_position..buyer_position + 32]).unwrap();
+    require!(current_buyer == Pubkey::default(), GumballError::ItemAlreadyDrawn);
     account_data[buyer_position..buyer_position + 32].copy_from_slice(&buyer.to_bytes());
 
     Ok(())

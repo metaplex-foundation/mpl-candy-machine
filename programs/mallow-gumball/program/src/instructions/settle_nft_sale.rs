@@ -197,6 +197,7 @@ pub fn settle_nft_sale<'info>(ctx: Context<'_, '_, '_, 'info, SettleNftSale<'inf
 
     let total_proceeds = claim_proceeds(
         gumball_machine, 
+        index,
         seller_history,
         payer,
         authority_pda,

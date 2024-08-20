@@ -139,6 +139,20 @@ pub fn get_core_asset_update_authority<'info>(
     }
 }
 
+pub fn get_bit_byte_info(base_position: usize, position: usize) -> Result<(usize, usize, u8)> {
+    let byte_position = base_position
+        + position
+            .checked_div(8)
+            .ok_or(GumballError::NumericalOverflowError)?;
+    // bit index corresponding to the position of the line
+    let bit = 7 - position
+        .checked_rem(8)
+        .ok_or(GumballError::NumericalOverflowError)?;
+    let mask = u8::pow(2, bit as u32);
+
+    return Ok((byte_position, bit, mask));
+}
+
 #[cfg(test)]
 pub mod tests {
     use super::*;

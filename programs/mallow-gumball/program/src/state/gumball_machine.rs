@@ -33,6 +33,7 @@ pub struct GumballMachine {
     //   equals item_capacity)
     // - (CONFIG_LINE_SIZE * item_capacity)
     // - (item_capacity / 8) + 1 bit mask to keep track of which items have been claimed
+    // - (item_capacity / 8) + 1 bit mask to keep track of which items have been settled
     // - (u32 * item_capacity) mint indices
 }
 
@@ -42,7 +43,8 @@ impl GumballMachine {
         GUMBALL_MACHINE_SIZE
             + 4 // number of items inserted
             + (CONFIG_LINE_SIZE * item_count as usize) // config lines
-            + (item_count as usize / 8) + 1 // bit mask tracking added lines
+            + (item_count as usize / 8) + 1 // bit mask tracking claimed items
+            + (item_count as usize / 8) + 1 // bit mask tracking settled items
             + 4 + (4 * item_count as usize) // mint indices
     }
 
@@ -50,15 +52,19 @@ impl GumballMachine {
         GUMBALL_MACHINE_SIZE + 4 + (self.settings.item_capacity as usize) * CONFIG_LINE_SIZE
     }
 
-    pub fn get_mint_indices_position(&self) -> Result<usize> {
-        let position = self.get_claimed_items_bit_mask_position()
-            + (self
-                .settings
-                .item_capacity
-                .checked_div(8)
-                .ok_or(GumballError::NumericalOverflowError)?
-                + 1) as usize;
+    pub fn get_settled_items_bit_mask_position(&self) -> Result<usize> {
+        let mask_size = (self.settings.item_capacity)
+            .checked_div(8)
+            .ok_or(GumballError::NumericalOverflowError)? as usize;
+        let position = self.get_claimed_items_bit_mask_position() + mask_size + 1;
+        Ok(position)
+    }
 
+    pub fn get_mint_indices_position(&self) -> Result<usize> {
+        let mask_size = (self.settings.item_capacity)
+            .checked_div(8)
+            .ok_or(GumballError::NumericalOverflowError)? as usize;
+        let position = self.get_settled_items_bit_mask_position()? + mask_size + 1;
         Ok(position)
     }
 }

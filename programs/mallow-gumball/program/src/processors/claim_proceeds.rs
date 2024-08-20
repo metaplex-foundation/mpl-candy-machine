@@ -1,4 +1,6 @@
-use crate::{get_config_count, state::GumballMachine, GumballError, SellerHistory};
+use crate::{
+    get_bit_byte_info, get_config_count, state::GumballMachine, GumballError, SellerHistory,
+};
 use anchor_lang::prelude::*;
 use utils::{
     assert_keys_equal, get_bps_of, is_native_mint, transfer, transfer_from_pda, RoyaltyInfo,
@@ -6,6 +8,7 @@ use utils::{
 
 pub fn claim_proceeds<'a, 'b>(
     gumball_machine: &mut Box<Account<'a, GumballMachine>>,
+    index: u32,
     seller_history: &mut Box<Account<'a, SellerHistory>>,
     fee_payer: &AccountInfo<'a>,
     authority_pda: &mut AccountInfo<'a>,
@@ -38,8 +41,27 @@ pub fn claim_proceeds<'a, 'b>(
     }
 
     let account_info = gumball_machine.to_account_info();
-    let account_data = account_info.data.borrow();
+    let mut account_data = account_info.data.borrow_mut();
     let config_count = get_config_count(&account_data)? as u64;
+
+    // bit-mask
+    let bit_mask_start = gumball_machine.get_settled_items_bit_mask_position()?;
+    let (byte_position, bit, mask) = get_bit_byte_info(bit_mask_start, index as usize)?;
+    let current_value = account_data[byte_position];
+    let is_settled = current_value & mask == mask;
+    require!(!is_settled, GumballError::ItemAlreadySettled);
+
+    account_data[byte_position] |= mask;
+
+    msg!(
+        "Item processed: byte position={}, mask={}, current value={}, new value={}, bit position={}",
+        byte_position - bit_mask_start,
+        mask,
+        current_value,
+        account_data[byte_position],
+        bit
+    );
+
     drop(account_data);
 
     // Proceeds are calculated as total amount paid by buyers divided by total number of items in the gumball machine

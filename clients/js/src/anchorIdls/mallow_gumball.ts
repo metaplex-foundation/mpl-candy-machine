@@ -1879,6 +1879,21 @@ export type MallowGumball = {
       code: 6047;
       name: 'NotAllSettled';
       msg: 'Not all items have been settled';
+    },
+    {
+      code: 6048;
+      name: 'ItemAlreadySettled';
+      msg: 'Item already settled';
+    },
+    {
+      code: 6049;
+      name: 'ItemAlreadyClaimed';
+      msg: 'Item already claimed';
+    },
+    {
+      code: 6050;
+      name: 'ItemAlreadyDrawn';
+      msg: 'Item already drawn';
     }
   ];
 };
@@ -3764,6 +3779,21 @@ export const IDL: MallowGumball = {
       code: 6047,
       name: 'NotAllSettled',
       msg: 'Not all items have been settled',
+    },
+    {
+      code: 6048,
+      name: 'ItemAlreadySettled',
+      msg: 'Item already settled',
+    },
+    {
+      code: 6049,
+      name: 'ItemAlreadyClaimed',
+      msg: 'Item already claimed',
+    },
+    {
+      code: 6050,
+      name: 'ItemAlreadyDrawn',
+      msg: 'Item already drawn',
     },
   ],
 };

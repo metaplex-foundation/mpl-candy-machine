@@ -714,6 +714,45 @@ export class NotAllSettledError extends ProgramError {
 codeToErrorMap.set(0x179f, NotAllSettledError);
 nameToErrorMap.set('NotAllSettled', NotAllSettledError);
 
+/** ItemAlreadySettled: Item already settled */
+export class ItemAlreadySettledError extends ProgramError {
+  readonly name: string = 'ItemAlreadySettled';
+
+  readonly code: number = 0x17a0; // 6048
+
+  constructor(program: Program, cause?: Error) {
+    super('Item already settled', program, cause);
+  }
+}
+codeToErrorMap.set(0x17a0, ItemAlreadySettledError);
+nameToErrorMap.set('ItemAlreadySettled', ItemAlreadySettledError);
+
+/** ItemAlreadyClaimed: Item already claimed */
+export class ItemAlreadyClaimedError extends ProgramError {
+  readonly name: string = 'ItemAlreadyClaimed';
+
+  readonly code: number = 0x17a1; // 6049
+
+  constructor(program: Program, cause?: Error) {
+    super('Item already claimed', program, cause);
+  }
+}
+codeToErrorMap.set(0x17a1, ItemAlreadyClaimedError);
+nameToErrorMap.set('ItemAlreadyClaimed', ItemAlreadyClaimedError);
+
+/** ItemAlreadyDrawn: Item already drawn */
+export class ItemAlreadyDrawnError extends ProgramError {
+  readonly name: string = 'ItemAlreadyDrawn';
+
+  readonly code: number = 0x17a2; // 6050
+
+  constructor(program: Program, cause?: Error) {
+    super('Item already drawn', program, cause);
+  }
+}
+codeToErrorMap.set(0x17a2, ItemAlreadyDrawnError);
+nameToErrorMap.set('ItemAlreadyDrawn', ItemAlreadyDrawnError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

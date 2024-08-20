@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::{GumballError, GumballMachine};
+use crate::{get_bit_byte_info, GumballError, GumballMachine};
 
 pub fn is_item_claimed(gumball_machine: &Box<Account<GumballMachine>>, index: u32) -> Result<bool> {
     let account_info = gumball_machine.to_account_info();
@@ -8,17 +8,7 @@ pub fn is_item_claimed(gumball_machine: &Box<Account<GumballMachine>>, index: u3
 
     // bit-mask
     let bit_mask_start = gumball_machine.get_claimed_items_bit_mask_position();
-    let position = index as usize;
-    let byte_position = bit_mask_start
-        + position
-            .checked_div(8)
-            .ok_or(GumballError::NumericalOverflowError)?;
-    // bit index corresponding to the position of the line
-    let bit = 7 - position
-        .checked_rem(8)
-        .ok_or(GumballError::NumericalOverflowError)?;
-    let mask = u8::pow(2, bit as u32);
-
+    let (byte_position, bit, mask) = get_bit_byte_info(bit_mask_start, index as usize)?;
     let current_value = data[byte_position];
     let is_claimed = current_value & mask == mask;
 
@@ -42,18 +32,11 @@ pub fn claim_item(gumball_machine: &mut Box<Account<GumballMachine>>, index: u32
 
     // bit-mask
     let bit_mask_start = gumball_machine.get_claimed_items_bit_mask_position();
-    let position = index as usize;
-    let byte_position = bit_mask_start
-        + position
-            .checked_div(8)
-            .ok_or(GumballError::NumericalOverflowError)?;
-    // bit index corresponding to the position of the line
-    let bit = 7 - position
-        .checked_rem(8)
-        .ok_or(GumballError::NumericalOverflowError)?;
-    let mask = u8::pow(2, bit as u32);
-
+    let (byte_position, bit, mask) = get_bit_byte_info(bit_mask_start, index as usize)?;
     let current_value = data[byte_position];
+    let is_claimed = current_value & mask == mask;
+    require!(!is_claimed, GumballError::ItemAlreadyClaimed);
+
     data[byte_position] |= mask;
 
     msg!(

@@ -1495,7 +1495,7 @@ export type MallowGumball = {
         },
         {
           name: 'index';
-          type: 'u64';
+          type: 'u32';
           index: false;
         }
       ];
@@ -3306,7 +3306,7 @@ export const IDL: MallowGumball = {
         },
         {
           name: 'index',
-          type: 'u64',
+          type: 'u32',
           index: false,
         },
       ],

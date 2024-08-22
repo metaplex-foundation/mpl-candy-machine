@@ -58,10 +58,12 @@ pub fn draw<'info>(ctx: Context<'_, '_, '_, 'info, Draw<'info>>) -> Result<()> {
         accounts
     )?;
 
+    msg!("Drew item at index: {}", index);
+
     emit_cpi!(DrawItemEvent {
         authority: ctx.accounts.gumball_machine.authority.key(),
         buyer: ctx.accounts.buyer.key(),
-        index: index as u64,
+        index,
     });
 
     Ok(())
@@ -75,7 +77,7 @@ pub fn draw<'info>(ctx: Context<'_, '_, '_, 'info, Draw<'info>>) -> Result<()> {
 pub(crate) fn process_draw(
     gumball_machine: &mut Box<Account<'_, GumballMachine>>,
     accounts: DrawAccounts,
-) -> Result<u64> {
+) -> Result<u32> {
     let account_info = gumball_machine.to_account_info();
     let account_data = account_info.data.borrow();
     let config_count = get_config_count(&account_data)? as u64;
@@ -99,7 +101,7 @@ pub(crate) fn process_draw(
         .checked_rem(config_count - gumball_machine.items_redeemed)
         .ok_or(GumballError::NumericalOverflowError)? as usize;
 
-    set_config_line_buyer(
+    let mint_index = set_config_line_buyer(
         gumball_machine,
         accounts.buyer.key(),
         index,
@@ -119,7 +121,7 @@ pub(crate) fn process_draw(
     // release the data borrow
     drop(data);
 
-    Ok(index as u64)
+    Ok(mint_index)
 }
 
 /// Selects and returns the information of a config line.
@@ -130,7 +132,7 @@ pub fn set_config_line_buyer(
     buyer: Pubkey,
     index: usize,
     mint_number: u64,
-) -> Result<()> {
+) -> Result<u32> {
     let account_info = gumball_machine.to_account_info();
     let mut account_data = account_info.data.borrow_mut();
     let config_count = get_config_count(&account_data)? as u64;
@@ -138,17 +140,17 @@ pub fn set_config_line_buyer(
     // (1) determine the mint index (index is a random index on the available indices array)
     let indices_start = gumball_machine.get_mint_indices_position()?;
     // calculates the mint index and retrieves the value at that position
-    let mint_index = indices_start + index * 4;
-    let value_to_use = u32::from_le_bytes(*array_ref![account_data, mint_index, 4]) as usize;
+    let mint_byte_position = indices_start + index * 4;
+    let mint_index = u32::from_le_bytes(*array_ref![account_data, mint_byte_position, 4]) as usize;
     // calculates the last available index and retrieves the value at that position
     let last_index = indices_start + ((config_count - mint_number - 1) * 4) as usize;
     let last_value = u32::from_le_bytes(*array_ref![account_data, last_index, 4]);
     // swap-remove: this guarantees that we remove the used mint index from the available array
     // in a constant time O(1) no matter how big the indices array is
-    account_data[mint_index..mint_index + 4].copy_from_slice(&u32::to_le_bytes(last_value));
+    account_data[mint_byte_position..mint_byte_position + 4].copy_from_slice(&u32::to_le_bytes(last_value));
 
     // (2) retrieve the config line at the mint_index position
-    let buyer_position = GUMBALL_MACHINE_SIZE + 4 + value_to_use * CONFIG_LINE_SIZE 
+    let buyer_position = GUMBALL_MACHINE_SIZE + 4 + mint_index * CONFIG_LINE_SIZE 
         + 32 // mint
         + 32; // seller
 
@@ -157,5 +159,5 @@ pub fn set_config_line_buyer(
     require!(current_buyer == Pubkey::default(), GumballError::ItemAlreadyDrawn);
     account_data[buyer_position..buyer_position + 32].copy_from_slice(&buyer.to_bytes());
 
-    Ok(())
+    Ok(mint_index as u32)
 }

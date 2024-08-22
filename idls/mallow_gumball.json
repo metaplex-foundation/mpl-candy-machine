@@ -1688,7 +1688,7 @@
         },
         {
           "name": "index",
-          "type": "u64",
+          "type": "u32",
           "index": false
         }
       ]

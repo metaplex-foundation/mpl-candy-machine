@@ -14,10 +14,11 @@ use super::attributes::{get_update_authority, is_primary_sale};
 pub fn get_verified_royalty_info<'a>(
     asset: &AccountInfo<'a>,
     collection: Option<&AccountInfo<'a>>,
+    seller: Pubkey,
 ) -> Result<RoyaltyInfo> {
     let update_authority = get_update_authority(asset, collection)?;
     // TODO: Update this when there's a proper primary sale check
-    let is_primary_sale = is_primary_sale(asset, update_authority)?;
+    let is_primary_sale = is_primary_sale(seller, update_authority)?;
 
     if let Ok(asset_royalties) =
         fetch_plugin::<BaseAssetV1, Royalties>(asset, PluginType::Royalties)

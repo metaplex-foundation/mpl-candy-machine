@@ -124,7 +124,7 @@ pub fn settle_core_asset_sale<'info>(ctx: Context<'_, '_, '_, 'info, SettleCoreA
         },
     )?;
 
-    let royalty_info = utils::core::royalties::get_verified_royalty_info(asset, collection)?;
+    let royalty_info = utils::core::royalties::get_verified_royalty_info(asset, collection, seller.key())?;
 
     let payment_mint_info = ctx.accounts.payment_mint.as_ref().map(|mint| mint.to_account_info());
     let payment_mint = payment_mint_info.as_ref();

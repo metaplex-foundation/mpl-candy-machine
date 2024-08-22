@@ -3,17 +3,13 @@ use anchor_lang::prelude::*;
 use mpl_core::types::UpdateAuthority;
 use mpl_core::{Asset, Collection};
 
-pub fn is_primary_sale<'info>(
-    asset_info: &AccountInfo<'info>,
-    update_authority: Option<Pubkey>,
-) -> Result<bool> {
+pub fn is_primary_sale<'info>(seller: Pubkey, update_authority: Option<Pubkey>) -> Result<bool> {
     if update_authority.is_none() {
         return Ok(false);
     }
 
-    // Considered a primary sale if owner is the update authority (most likely creator)
-    let asset = Box::<Asset>::try_from(asset_info)?;
-    Ok(asset.base.owner == update_authority.unwrap())
+    // Considered a primary sale if seller is the update authority (most likely creator)
+    Ok(seller == update_authority.unwrap())
 }
 
 pub fn get_update_authority<'info>(

@@ -371,6 +371,21 @@ kinobi.update(
 			name: "baseSettleCoreAssetSale",
 			accounts: {
 				buyer: { defaultsTo: k.identityDefault() },
+				authorityPdaPaymentAccount: {
+					defaultsTo: k.conditionalDefault("account", "paymentMint", {
+						ifTrue: defaultsToAssociatedTokenPda("paymentMint", "authorityPda"),
+					}),
+				},
+				authorityPaymentAccount: {
+					defaultsTo: k.conditionalDefault("account", "paymentMint", {
+						ifTrue: defaultsToAssociatedTokenPda("paymentMint", "authority"),
+					}),
+				},
+				sellerPaymentAccount: {
+					defaultsTo: k.conditionalDefault("account", "paymentMint", {
+						ifTrue: defaultsToAssociatedTokenPda("paymentMint", "seller"),
+					}),
+				},
 			},
 		},
 		"mallowGumball.SetAuthority": { name: "SetGumballMachineAuthority" },

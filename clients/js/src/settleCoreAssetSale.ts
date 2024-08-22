@@ -28,10 +28,11 @@ export const settleCoreAssetSale = (
           {
             pubkey: creator,
             isSigner: false,
-            isWritable: input.paymentMint === NATIVE_MINT,
+            isWritable:
+              input.paymentMint == null || input.paymentMint === NATIVE_MINT,
           },
         ];
-        if (input.paymentMint) {
+        if (input.paymentMint != null && input.paymentMint !== NATIVE_MINT) {
           accounts.push({
             pubkey: findAssociatedTokenPda(context, {
               mint: publicKey(input.paymentMint),

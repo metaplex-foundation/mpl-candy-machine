@@ -29,6 +29,7 @@ pub use token2022_payment::Token2022Payment;
 pub use token_burn::TokenBurn;
 pub use token_gate::TokenGate;
 pub use token_payment::TokenPayment;
+pub use peer_guard::PeerGuard;
 
 mod address_gate;
 mod allocation;
@@ -51,6 +52,8 @@ mod token2022_payment;
 mod token_burn;
 mod token_gate;
 mod token_payment;
+mod peer_guard;
+
 
 pub trait Condition {
     /// Validate the condition of the guard. When the guard condition is

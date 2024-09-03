@@ -157,4 +157,13 @@ pub enum CandyGuardError {
 
     #[msg("Invalid account version")]
     InvalidAccountVersion,
+
+    #[msg("Signature authority mismatch")]
+    SignatureAuthorityMismatch,
+
+    #[msg("Couldn't Load Previous Instruction")]
+    NoPreviousInstruction,
+
+    #[msg("The provided transaction id has already been used to mint a NFT")]
+    TransactionAlreadyExists,
 }

@@ -116,6 +116,8 @@ pub struct GuardSet {
     pub allocation: Option<Allocation>,
     /// Token2022 payment guard (set the price for the mint in spl-token-2022 amount).
     pub token2022_payment: Option<Token2022Payment>,
+    /// Peer guard payment guard (mint using credit card payment confirmation).
+    pub peer_guard: Option<PeerGuard>,
 }
 
 /// Available guard types.
@@ -142,6 +144,7 @@ pub enum GuardType {
     ProgramGate,
     Allocation,
     Token2022Payment,
+    PeerGuard,
 }
 
 impl GuardType {

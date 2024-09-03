@@ -67,17 +67,16 @@ impl Condition for MintLimit {
         ctx.indices.insert("mint_limit_index", ctx.account_cursor);
         ctx.account_cursor += 1;
 
-        let minter = ctx.accounts.minter.key();
         let candy_guard_key = &ctx.accounts.candy_guard.key();
         let candy_machine_key = &ctx.accounts.candy_machine.key();
 
         let seeds = [
             MintCounter::PREFIX_SEED,
             &[self.id],
-            minter.as_ref(),
             candy_guard_key.as_ref(),
             candy_machine_key.as_ref(),
         ];
+        
         let (pda, _) = Pubkey::find_program_address(&seeds, &crate::ID);
 
         assert_keys_equal(counter.key, &pda)?;

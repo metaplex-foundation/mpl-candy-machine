@@ -42,6 +42,8 @@ import {
   TokenGateArgs,
   TokenPayment,
   TokenPaymentArgs,
+  PeerGuard,
+  PeerGuardArgs,
 } from '../generated';
 import {
   GuardSet,
@@ -64,6 +66,7 @@ import { MintLimitMintArgs } from './mintLimit';
 import { NftBurnMintArgs } from './nftBurn';
 import { NftGateMintArgs } from './nftGate';
 import { NftPaymentMintArgs } from './nftPayment';
+import { PeerGuardMintArgs } from './peerGuard';
 import { SolPaymentMintArgs } from './solPayment';
 import { ThirdPartySignerMintArgs } from './thirdPartySigner';
 import { Token2022PaymentMintArgs } from './token2022Payment';
@@ -96,6 +99,7 @@ export type DefaultGuardSetArgs = GuardSetArgs & {
   programGate: OptionOrNullable<ProgramGateArgs>;
   allocation: OptionOrNullable<AllocationArgs>;
   token2022Payment: OptionOrNullable<Token2022PaymentArgs>;
+  peerGuard: OptionOrNullable<PeerGuardArgs>
 };
 
 /**
@@ -123,6 +127,7 @@ export type DefaultGuardSet = GuardSet & {
   programGate: Option<ProgramGate>;
   allocation: Option<Allocation>;
   token2022Payment: Option<Token2022Payment>;
+  peerGuard: Option<PeerGuard>
 };
 
 /**
@@ -150,6 +155,8 @@ export type DefaultGuardSetMintArgs = GuardSetMintArgs & {
   // programGate: no mint settings
   allocation: OptionOrNullable<AllocationMintArgs>;
   token2022Payment: OptionOrNullable<Token2022PaymentMintArgs>;
+  peerGuard: OptionOrNullable<PeerGuardMintArgs>;
+
 };
 
 /**
@@ -202,6 +209,7 @@ export const defaultCandyGuardNames: string[] = [
   'programGate',
   'allocation',
   'token2022Payment',
+  'peerGuard'
 ];
 
 /** @internal */

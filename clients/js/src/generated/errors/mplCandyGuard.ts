@@ -731,6 +731,52 @@ export class CgInvalidAccountVersionError extends ProgramError {
 codeToErrorMap.set(0x17a3, CgInvalidAccountVersionError);
 nameToErrorMap.set('InvalidAccountVersion', CgInvalidAccountVersionError);
 
+/** SignatureAuthorityMismatch: Signature authority mismatch */
+export class CgSignatureAuthorityMismatchError extends ProgramError {
+  readonly name: string = 'SignatureAuthorityMismatch';
+
+  readonly code: number = 0x17a4; // 6052
+
+  constructor(program: Program, cause?: Error) {
+    super('Signature authority mismatch', program, cause);
+  }
+}
+codeToErrorMap.set(0x17a4, CgSignatureAuthorityMismatchError);
+nameToErrorMap.set(
+  'SignatureAuthorityMismatch',
+  CgSignatureAuthorityMismatchError
+);
+
+/** NoPreviousInstruction: Couldn't Load Previous Instruction */
+export class CgNoPreviousInstructionError extends ProgramError {
+  readonly name: string = 'NoPreviousInstruction';
+
+  readonly code: number = 0x17a5; // 6053
+
+  constructor(program: Program, cause?: Error) {
+    super("Couldn't Load Previous Instruction", program, cause);
+  }
+}
+codeToErrorMap.set(0x17a5, CgNoPreviousInstructionError);
+nameToErrorMap.set('NoPreviousInstruction', CgNoPreviousInstructionError);
+
+/** TransactionAlreadyExists: The provided transaction id has already been used to mint a NFT */
+export class CgTransactionAlreadyExistsError extends ProgramError {
+  readonly name: string = 'TransactionAlreadyExists';
+
+  readonly code: number = 0x17a6; // 6054
+
+  constructor(program: Program, cause?: Error) {
+    super(
+      'The provided transaction id has already been used to mint a NFT',
+      program,
+      cause
+    );
+  }
+}
+codeToErrorMap.set(0x17a6, CgTransactionAlreadyExistsError);
+nameToErrorMap.set('TransactionAlreadyExists', CgTransactionAlreadyExistsError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

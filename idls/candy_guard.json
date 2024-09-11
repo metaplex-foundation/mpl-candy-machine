@@ -1041,6 +1041,27 @@
       }
     },
     {
+      "name": "PeerGuard",
+      "docs": [
+        "Gaurd to validate transactions using PeerPay",
+        "",
+        "List of accounts required:",
+        "",
+        "0. `[writable]` Transaction ID PDA. The PDA is derived",
+        "using the seed `[transaction_id,candy guard pubkey,",
+        "candy machine pubkey]`."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
       "name": "ProgramGate",
       "docs": [
         "Guard that restricts the programs that can be in a mint transaction. The guard allows the",
@@ -1548,6 +1569,17 @@
                 "defined": "Token2022Payment"
               }
             }
+          },
+          {
+            "name": "peerGuard",
+            "docs": [
+              "Peer guard payment guard (mint using credit card payment confirmation)."
+            ],
+            "type": {
+              "option": {
+                "defined": "PeerGuard"
+              }
+            }
           }
         ]
       }
@@ -1639,6 +1671,9 @@
           },
           {
             "name": "Token2022Payment"
+          },
+          {
+            "name": "PeerGuard"
           }
         ]
       }
@@ -1904,10 +1939,25 @@
       "code": 6051,
       "name": "InvalidAccountVersion",
       "msg": "Invalid account version"
+    },
+    {
+      "code": 6052,
+      "name": "SignatureAuthorityMismatch",
+      "msg": "Signature authority mismatch"
+    },
+    {
+      "code": 6053,
+      "name": "NoPreviousInstruction",
+      "msg": "Couldn't Load Previous Instruction"
+    },
+    {
+      "code": 6054,
+      "name": "TransactionAlreadyExists",
+      "msg": "The provided transaction id has already been used to mint a NFT"
     }
   ],
   "metadata": {
-    "address": "Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g",
+    "address": "3tvCcjNW6iQHhb5muybaB1i14FcR57t9CacG7pMBMG53",
     "origin": "anchor",
     "binaryVersion": "0.27.0",
     "libVersion": "0.28.0"

@@ -2,13 +2,13 @@
 seeds = false
 
 [registry]
-url = "https://anchor.projectserum.com"
+url = "https://devnet.helius-rpc.com/?api-key=53adb904-7c5a-48ba-9807-c85a06a9b1f8"
 
 [provider]
-cluster = "devnet"
-wallet = "~/.config/solana/devnet.json"
-
+cluster = "https://devnet.helius-rpc.com/?api-key=53adb904-7c5a-48ba-9807-c85a06a9b1f8"
+wallet = "/mnt/c/Users/User/Desktop/wba/wba_week1/airdrop/wba-wallet.json"
 [workspace]
-members = [
-  "program",
-]
+members = ["program"]
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"

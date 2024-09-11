@@ -31,6 +31,7 @@ export enum GuardType {
   ProgramGate,
   Allocation,
   Token2022Payment,
+  PeerGuard,
 }
 
 export type GuardTypeArgs = GuardType;

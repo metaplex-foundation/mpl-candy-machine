@@ -11,4 +11,4 @@ wallet = "/mnt/c/Users/User/Desktop/wba/wba_week1/airdrop/wba-wallet.json"
 members = ["program"]
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 /mnt/c/Users/User/Desktop/peer-guard-fork/mpl-candy-machine-peerguard/programs/candy-guard/tests/**/*.ts"

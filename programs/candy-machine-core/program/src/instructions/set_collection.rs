@@ -40,7 +40,7 @@ pub fn set_collection(ctx: Context<SetCollection>) -> Result<()> {
     revoke_collection_authority_helper(
         revoke_accounts,
         candy_machine.key(),
-        *ctx.bumps.get("authority_pda").unwrap(),
+        ctx.bumps.authority_pda,
         collection_metadata.token_standard,
     )?;
 

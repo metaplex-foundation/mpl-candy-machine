@@ -11,11 +11,14 @@ use crate::{
 
 use super::{mint_v2::process_mint, MintAccounts, Token};
 
-pub fn mint<'info>(
-    ctx: Context<'_, '_, '_, 'info, Mint<'info>>,
+pub fn mint<'c, 'info>(
+    ctx: Context<'_, '_, 'c, 'info, Mint<'info>>,
     mint_args: Vec<u8>,
     label: Option<String>,
-) -> Result<()> {
+) -> Result<()>
+where
+    'c: 'info,
+{
     msg!("(Deprecated as of 1.0.0) Use MintV2 instead");
 
     if !matches!(ctx.accounts.candy_machine.version, AccountVersion::V1) {

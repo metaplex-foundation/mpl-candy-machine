@@ -59,11 +59,14 @@ impl Guard for AllowList {
     ///                   payer/minter key, candy guard pubkey, candy machine pubkey]`).
     ///   1. `[]` System program account.
     ///   2. `[optional]` Minter account.
-    fn instruction<'info>(
-        ctx: &Context<'_, '_, '_, 'info, Route<'info>>,
+    fn instruction<'c, 'info>(
+        ctx: &Context<'_, '_, 'c, 'info, Route<'info>>,
         route_context: RouteContext<'info>,
         data: Vec<u8>,
-    ) -> Result<()> {
+    ) -> Result<()>
+    where
+        'c: 'info,
+    {
         msg!("AllowList: validate proof instruction");
 
         let candy_guard = route_context

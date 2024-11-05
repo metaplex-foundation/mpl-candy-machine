@@ -18,7 +18,7 @@ cpi = ["no-entrypoint"]
 default = []
 
 [dependencies]
-anchor-lang = "0.29.0"
+anchor-lang = "0.30.1"
 arrayref = "0.3.6"
 mpl-candy-guard-derive = { path = "../macro", version = "0.2.0" }
 mpl-candy-machine-core = { path = "../../candy-machine-core/program", version = "3.0.0", features = ["cpi"] }

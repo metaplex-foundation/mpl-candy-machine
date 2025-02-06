@@ -232,11 +232,14 @@ pub fn derive(input: TokenStream) -> TokenStream {
                 size
             }
 
-            pub fn route<'info>(
-                ctx: Context<'_, '_, '_, 'info, crate::instructions::Route<'info>>,
+            pub fn route<'c, 'info>(
+                ctx: &Context<'_, '_, 'c, 'info, crate::instructions::Route<'info>>,
                 route_context: crate::instructions::RouteContext<'info>,
                 args: crate::instructions::RouteArgs
-            ) -> anchor_lang::Result<()> {
+            ) -> anchor_lang::Result<()>
+            where
+                'c: 'info
+            {
                 match args.guard {
                     #(#route_arm,)*
                     _ => err!(CandyGuardError::InstructionNotFound)

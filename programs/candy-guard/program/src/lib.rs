@@ -22,29 +22,38 @@ pub mod candy_guard {
     }
 
     /// Mint an NFT from a candy machine wrapped in the candy guard.
-    pub fn mint<'info>(
-        ctx: Context<'_, '_, '_, 'info, Mint<'info>>,
+    pub fn mint<'c, 'info>(
+        ctx: Context<'_, '_, 'c, 'info, Mint<'info>>,
         mint_args: Vec<u8>,
         label: Option<String>,
-    ) -> Result<()> {
+    ) -> Result<()>
+    where
+        'c: 'info,
+    {
         instructions::mint(ctx, mint_args, label)
     }
 
     /// Mint an NFT from a candy machine wrapped in the candy guard.
-    pub fn mint_v2<'info>(
-        ctx: Context<'_, '_, '_, 'info, MintV2<'info>>,
+    pub fn mint_v2<'c, 'info>(
+        ctx: Context<'_, '_, 'c, 'info, MintV2<'info>>,
         mint_args: Vec<u8>,
         label: Option<String>,
-    ) -> Result<()> {
+    ) -> Result<()>
+    where
+        'c: 'info,
+    {
         instructions::mint_v2(ctx, mint_args, label)
     }
 
     /// Route the transaction to a guard instruction.
-    pub fn route<'info>(
-        ctx: Context<'_, '_, '_, 'info, Route<'info>>,
+    pub fn route<'b, 'c, 'info>(
+        ctx: Context<'_, 'b, 'c, 'info, Route<'info>>,
         args: RouteArgs,
         label: Option<String>,
-    ) -> Result<()> {
+    ) -> Result<()>
+    where
+        'c: 'info,
+    {
         instructions::route(ctx, args, label)
     }
 

@@ -18,13 +18,13 @@ cpi = ["no-entrypoint"]
 default = []
 
 [dependencies]
-anchor-lang = "0.28.0"
+anchor-lang = "0.30.1"
 arrayref = "0.3.6"
 mpl-candy-guard-derive = { path = "../macro", version = "0.2.0" }
 mpl-candy-machine-core = { path = "../../candy-machine-core/program", version = "3.0.0", features = ["cpi"] }
 mpl-token-metadata = "3.2.1"
-solana-program = "~1.16.5"
+solana-program = "1.18.26"
 spl-associated-token-account = { version = ">= 1.1.3, < 3.0", features = ["no-entrypoint"] }
 spl-token = { version = ">= 3.5.0, < 5.0", features = ["no-entrypoint"] }
-spl-token-2022 = { version = ">= 0.6", features = ["no-entrypoint"] }
-solana-gateway = { version = "0.4.0", features = ["no-entrypoint"] }
+spl-token-2022 = { version = "3.0.0", features = ["no-entrypoint"] }
+solana-gateway = { version = "0.6.0", features = ["no-entrypoint"] }

@@ -105,11 +105,14 @@ pub trait Guard: Condition + AnchorSerialize + AnchorDeserialize {
 
     /// Executes an instruction. This function is called from the `route` instruction
     /// handler.
-    fn instruction<'info>(
-        _ctx: &Context<'_, '_, '_, 'info, Route<'info>>,
+    fn instruction<'c, 'info>(
+        _ctx: &Context<'_, '_, 'c, 'info, Route<'info>>,
         _route_context: RouteContext<'info>,
         _data: Vec<u8>,
-    ) -> Result<()> {
+    ) -> Result<()>
+    where
+        'c: 'info,
+    {
         err!(CandyGuardError::InstructionNotFound)
     }
 
@@ -156,7 +159,10 @@ pub trait Guard: Condition + AnchorSerialize + AnchorDeserialize {
         Ok(())
     }
 }
-pub struct EvaluationContext<'b, 'c, 'info> {
+pub struct EvaluationContext<'b, 'c, 'info>
+where
+    'c: 'info,
+{
     /// Accounts required to mint an NFT.
     pub(crate) accounts: MintAccounts<'b, 'c, 'info>,
 

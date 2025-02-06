@@ -49,7 +49,7 @@ pub fn set_collection_v2(ctx: Context<SetCollectionV2>) -> Result<()> {
         revoke_metadata_delegate(
             revoke_accounts,
             candy_machine.key(),
-            *ctx.bumps.get("authority_pda").unwrap(),
+            ctx.bumps.authority_pda,
         )?;
     } else {
         let collection_metadata_info = &accounts.collection_metadata;
@@ -69,7 +69,7 @@ pub fn set_collection_v2(ctx: Context<SetCollectionV2>) -> Result<()> {
         revoke_collection_authority_helper(
             revoke_accounts,
             candy_machine.key(),
-            *ctx.bumps.get("authority_pda").unwrap(),
+            ctx.bumps.authority_pda,
             collection_metadata.token_standard,
         )?;
         // bump the version of the account since we are setting a metadata delegate

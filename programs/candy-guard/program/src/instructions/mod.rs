@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+pub use collect::*;
 pub use initialize::*;
 pub use mint::*;
 pub use mint_v2::*;
@@ -12,6 +13,7 @@ pub use wrap::*;
 
 use crate::state::CandyGuard;
 
+pub mod collect;
 pub mod initialize;
 pub mod mint;
 pub mod mint_v2;

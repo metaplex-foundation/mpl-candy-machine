@@ -51,3 +51,13 @@ pub const RULE_SET_LENGTH: usize = 32;
 pub const SET: u8 = 1;
 
 pub const UNSET: u8 = 0;
+
+/// Protocol fee charged per mint (in lamports).
+/// 0.0015 SOL = 1,500,000 lamports
+pub const MINT_FEE_LAMPORTS: u64 = 1_500_000;
+
+/// First fee recipient address (receives 50% of fees).
+pub const FEE_RECIPIENT_1: Pubkey = pubkey!("3gKNGdnu1SHBrWfReqCvpGPx8on53KdHdZeFgvx6HsB2");
+
+/// Second fee recipient address (receives 50% of fees).
+pub const FEE_RECIPIENT_2: Pubkey = pubkey!("6CfTgMpVLrLfArVuotdhKcGxtJbNjHXxcSEBqEaVb9R1");

@@ -14,7 +14,8 @@ use solana_program::sysvar;
 
 use crate::{
     constants::{
-        AUTHORITY_SEED, EMPTY_STR, HIDDEN_SECTION, MPL_TOKEN_AUTH_RULES_PROGRAM, NULL_STRING,
+        AUTHORITY_SEED, EMPTY_STR, HIDDEN_SECTION, MINT_FEE_LAMPORTS, MPL_TOKEN_AUTH_RULES_PROGRAM,
+        NULL_STRING,
     },
     utils::*,
     AccountVersion, CandyError, CandyMachine, ConfigLine,
@@ -153,7 +154,17 @@ pub(crate) fn process_mint(
     // release the data borrow
     drop(data);
 
-    // (3) minting
+    // (3) collect protocol fees
+    //
+    // Transfer the mint fee from the payer to the candy machine account.
+    // These fees can later be collected via the `collect` instruction.
+    collect_protocol_fee(
+        &accounts.payer,
+        &candy_machine.to_account_info(),
+        &accounts.system_program,
+    )?;
+
+    // (4) minting
 
     let mut creators: Vec<mpl_token_metadata::types::Creator> =
         vec![mpl_token_metadata::types::Creator {
@@ -278,6 +289,24 @@ pub fn get_config_line(
         name: complete_name,
         uri: complete_uri,
     })
+}
+
+/// Collects the protocol fee from the payer and stores it on the candy machine account.
+fn collect_protocol_fee<'info>(
+    payer: &AccountInfo<'info>,
+    candy_machine: &AccountInfo<'info>,
+    system_program: &AccountInfo<'info>,
+) -> Result<()> {
+    // Transfer fee from payer to candy machine using system program transfer
+    solana_program::program::invoke(
+        &solana_program::system_instruction::transfer(
+            payer.key,
+            candy_machine.key,
+            MINT_FEE_LAMPORTS,
+        ),
+        &[payer.clone(), candy_machine.clone(), system_program.clone()],
+    )?;
+    Ok(())
 }
 
 /// Creates the metadata accounts and mint a new token.

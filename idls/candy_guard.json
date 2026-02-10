@@ -587,6 +587,43 @@
         }
       ],
       "args": []
+    },
+    {
+      "name": "collect",
+      "docs": [
+        "Collect accumulated protocol fees from the candy guard account.",
+        "",
+        "Fees are split evenly between two designated recipients. Any lamports",
+        "above the rent-exempt minimum are considered fees and can be collected.",
+        "This instruction can be called by anyone."
+      ],
+      "accounts": [
+        {
+          "name": "candyGuard",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Candy Guard account."
+          ]
+        },
+        {
+          "name": "recipient1",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "First fee recipient account."
+          ]
+        },
+        {
+          "name": "recipient2",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Second fee recipient account."
+          ]
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [

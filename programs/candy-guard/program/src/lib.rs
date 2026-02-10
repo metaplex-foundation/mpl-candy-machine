@@ -74,4 +74,13 @@ pub mod candy_guard {
     pub fn wrap(ctx: Context<Wrap>) -> Result<()> {
         instructions::wrap(ctx)
     }
+
+    /// Collect accumulated protocol fees from the candy guard account.
+    ///
+    /// Fees are split evenly between two designated recipients. Any lamports
+    /// above the rent-exempt minimum are considered fees and can be collected.
+    /// This instruction can be called by anyone.
+    pub fn collect(ctx: Context<Collect>) -> Result<()> {
+        instructions::collect(ctx)
+    }
 }

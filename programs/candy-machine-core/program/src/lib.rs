@@ -248,4 +248,19 @@ pub mod candy_machine_core {
     pub fn withdraw(ctx: Context<Withdraw>) -> Result<()> {
         instructions::withdraw(ctx)
     }
+
+    /// Collect accumulated protocol fees from the candy machine account.
+    ///
+    /// Fees are split evenly between two designated recipients. Any lamports
+    /// above the rent-exempt minimum are considered fees and can be collected.
+    /// This instruction can be called by anyone.
+    ///
+    /// # Accounts
+    ///
+    ///   0. `[writable]` Candy Machine account
+    ///   1. `[writable]` First fee recipient
+    ///   2. `[writable]` Second fee recipient
+    pub fn collect(ctx: Context<Collect>) -> Result<()> {
+        instructions::collect(ctx)
+    }
 }

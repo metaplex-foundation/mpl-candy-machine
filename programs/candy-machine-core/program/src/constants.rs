@@ -56,6 +56,10 @@ pub const UNSET: u8 = 0;
 /// 0.0015 SOL = 1,500,000 lamports
 pub const MINT_FEE_LAMPORTS: u64 = 1_500_000;
 
+/// Protocol fee charged on candy machine creation (in lamports).
+/// 0.1 SOL = 100,000,000 lamports
+pub const CREATE_FEE_LAMPORTS: u64 = 100_000_000;
+
 /// First fee recipient address (receives 50% of fees).
 pub const FEE_RECIPIENT_1: Pubkey = pubkey!("3gKNGdnu1SHBrWfReqCvpGPx8on53KdHdZeFgvx6HsB2");
 

@@ -3,7 +3,7 @@ use mpl_token_metadata::{types::TokenStandard, MAX_SYMBOL_LENGTH};
 
 use crate::{
     approve_collection_authority_helper,
-    constants::{AUTHORITY_SEED, HIDDEN_SECTION},
+    constants::{AUTHORITY_SEED, CREATE_FEE_LAMPORTS, HIDDEN_SECTION},
     state::{CandyMachine, CandyMachineData},
     utils::fixed_length_string,
     AccountVersion, ApproveCollectionAuthorityHelperAccounts,
@@ -53,6 +53,20 @@ pub fn initialize(ctx: Context<Initialize>, data: CandyMachineData) -> Result<()
 
     approve_collection_authority_helper(approve_accounts)?;
 
+    // Collect protocol fee for candy machine creation
+    solana_program::program::invoke(
+        &solana_program::system_instruction::transfer(
+            ctx.accounts.payer.key,
+            ctx.accounts.candy_machine.key,
+            CREATE_FEE_LAMPORTS,
+        ),
+        &[
+            ctx.accounts.payer.to_account_info(),
+            ctx.accounts.candy_machine.to_account_info(),
+            ctx.accounts.system_program.to_account_info(),
+        ],
+    )?;
+
     Ok(())
 }
 
@@ -87,6 +101,7 @@ pub struct Initialize<'info> {
     authority: UncheckedAccount<'info>,
 
     /// Payer of the transaction.
+    #[account(mut)]
     payer: Signer<'info>,
 
     /// Metadata account of the collection.

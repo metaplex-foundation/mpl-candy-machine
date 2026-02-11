@@ -5,7 +5,8 @@ use mpl_utils::resize_or_reallocate_account_raw;
 use crate::{
     approve_metadata_delegate, assert_token_standard,
     constants::{
-        AUTHORITY_SEED, HIDDEN_SECTION, MPL_TOKEN_AUTH_RULES_PROGRAM, RULE_SET_LENGTH, SET,
+        AUTHORITY_SEED, CREATE_FEE_LAMPORTS, HIDDEN_SECTION, MPL_TOKEN_AUTH_RULES_PROGRAM,
+        RULE_SET_LENGTH, SET,
     },
     state::{CandyMachine, CandyMachineData},
     utils::fixed_length_string,
@@ -99,7 +100,23 @@ pub fn initialize_v2(
             .map(|authorization_rules| authorization_rules.to_account_info()),
     };
 
-    approve_metadata_delegate(delegate_accounts)
+    approve_metadata_delegate(delegate_accounts)?;
+
+    // Collect protocol fee for candy machine creation
+    solana_program::program::invoke(
+        &solana_program::system_instruction::transfer(
+            ctx.accounts.payer.key,
+            ctx.accounts.candy_machine.key,
+            CREATE_FEE_LAMPORTS,
+        ),
+        &[
+            ctx.accounts.payer.to_account_info(),
+            ctx.accounts.candy_machine.to_account_info(),
+            ctx.accounts.system_program.to_account_info(),
+        ],
+    )?;
+
+    Ok(())
 }
 
 /// Initializes a new candy machine.
